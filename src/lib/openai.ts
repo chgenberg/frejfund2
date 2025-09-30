@@ -119,6 +119,11 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
         'reach out', 'contact', 'message', 'meddelande'
       ];
       
+      const warmIntroKeywords = [
+        'warm intro', 'introduction', 'mutual connection', 'know anyone',
+        'känner någon', 'gemensam kontakt', 'warm introduction'
+      ];
+      
       const isAskingAboutInvestors = investorKeywords.some(keyword => 
         message.toLowerCase().includes(keyword)
       );
@@ -239,6 +244,26 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
         } catch (error) {
           console.error('Error generating email draft:', error);
           // Continue with normal response if email generation fails
+        }
+      }
+      
+      // Check if user wants warm intro guidance
+      const isAskingForWarmIntro = warmIntroKeywords.some(keyword =>
+        message.toLowerCase().includes(keyword)
+      );
+      
+      if (isAskingForWarmIntro && isAskingAboutInvestors) {
+        try {
+          // Extract investor name
+          const investorNameMatch = message.match(/(?:to|för|med)\s+([A-Z][a-zA-Z\s&]+?)(?:\s|$|\.|\?)/);
+          const investorName = investorNameMatch ? investorNameMatch[1].trim() : 'the investor';
+          
+          const { generateWarmIntroGuidance } = await import('./warm-intro-simple');
+          const guidance = await generateWarmIntroGuidance(investorName, investorName);
+          
+          return guidance;
+        } catch (error) {
+          console.error('Error generating warm intro guidance:', error);
         }
       }
       
