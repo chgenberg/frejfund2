@@ -3,7 +3,6 @@ import { scrapeUrl, scrapeSiteShallow, scrapeSiteDeep } from '@/lib/web-scraper'
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
   try {
