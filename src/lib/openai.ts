@@ -114,7 +114,16 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
         'contact', 'kontakta', 'reach out'
       ];
       
+      const emailKeywords = [
+        'email', 'mejl', 'draft', 'write', 'skriv', 'intro', 'introduction',
+        'reach out', 'contact', 'message', 'meddelande'
+      ];
+      
       const isAskingAboutInvestors = investorKeywords.some(keyword => 
+        message.toLowerCase().includes(keyword)
+      );
+      
+      const isAskingForEmail = emailKeywords.some(keyword =>
         message.toLowerCase().includes(keyword)
       );
       
@@ -158,7 +167,8 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
                 investorResponse += `• Portfolio: ${match.investor.notableInvestments?.slice(0, 2).join(', ')}\n\n`;
               });
               
-              investorResponse += `I've saved these matches for you. Want me to draft intro emails?`;
+              investorResponse += `I've saved these matches for you. Want me to draft intro emails?\n\n`;
+              investorResponse += `💡 Just ask: "Draft email to Creandum" or "Write intro email to ${matches[0].investor.firmName}"`;
               
               return investorResponse;
             }
@@ -166,6 +176,69 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
         } catch (error) {
           console.error('Error fetching investor matches:', error);
           // Continue with normal response if matching fails
+        }
+      }
+      
+      // Check if user wants an email draft
+      if (isAskingForEmail && (isAskingAboutInvestors || message.toLowerCase().includes('draft'))) {
+        try {
+          // Extract investor name from message
+          const investorNameMatch = message.match(/(?:to|för|med)\s+([A-Z][a-zA-Z\s&]+?)(?:\s|$|\.|\?)/);
+          const investorName = investorNameMatch ? investorNameMatch[1].trim() : null;
+          
+          if (investorName && sessionId) {
+            // Find investor in saved matches or database
+            const matchesResponse = await fetch('/api/investors/match', {
+              headers: { 'x-session-id': sessionId }
+            });
+            
+            if (matchesResponse.ok) {
+              const matchesData = await matchesResponse.json();
+              const targetMatch = matchesData.matches?.find((m: any) => 
+                m.investor.firmName.toLowerCase().includes(investorName.toLowerCase()) ||
+                m.investor.name.toLowerCase().includes(investorName.toLowerCase())
+              );
+              
+              if (targetMatch) {
+                // Generate email
+                const emailResponse = await fetch('/api/investors/email', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    investorId: targetMatch.investor.id,
+                    businessInfo,
+                    emailType: 'cold_outreach'
+                  })
+                });
+                
+                if (emailResponse.ok) {
+                  const emailData = await emailResponse.json();
+                  
+                  let emailDraft = `Here's a personalized email draft for **${targetMatch.investor.firmName}**:\n\n`;
+                  emailDraft += `**Subject:** ${emailData.email.subject}\n\n`;
+                  emailDraft += `**Body:**\n${emailData.email.body}\n\n`;
+                  emailDraft += `**✨ Tips:**\n`;
+                  emailData.email.tips.forEach((tip: string) => {
+                    emailDraft += `${tip}\n`;
+                  });
+                  
+                  if (emailData.email.subjectVariations && emailData.email.subjectVariations.length > 0) {
+                    emailDraft += `\n**Alternative subject lines:**\n`;
+                    emailData.email.subjectVariations.slice(0, 3).forEach((subject: string, i: number) => {
+                      emailDraft += `${i + 1}. ${subject}\n`;
+                    });
+                  }
+                  
+                  emailDraft += `\nWant me to revise anything?`;
+                  
+                  return emailDraft;
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error generating email draft:', error);
+          // Continue with normal response if email generation fails
         }
       }
       
