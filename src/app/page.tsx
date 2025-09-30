@@ -509,85 +509,79 @@ export default function Home() {
 
 
 
-          {/* Dual Value Props */}
+          {/* Dual CTAs - Minimal */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto mb-12"
+            className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-12"
           >
             {/* For Founders */}
             <motion.div
-              whileHover={{ scale: 1.02, y: -4 }}
-              className="bg-white/90 backdrop-blur-sm border-2 border-gray-200 rounded-2xl p-8 text-left hover:border-black hover:shadow-2xl transition-all"
+              whileHover={{ y: -8 }}
+              className="group bg-white/90 backdrop-blur-sm border-2 border-gray-200 rounded-2xl p-8 text-center hover:border-black hover:shadow-2xl transition-all"
             >
-              <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center mb-4">
-                <TrendingUp className="w-6 h-6 text-white" />
+              <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <TrendingUp className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-black mb-3">For Founders</h3>
-              <p className="text-gray-700 mb-4 leading-relaxed">
-                Get matched to 91+ European VCs, draft personalized emails with AI, and share your profile to receive intro requests from interested investors.
+              <h3 className="text-2xl font-bold text-black mb-2">For Founders</h3>
+              <p className="text-gray-600 text-sm mb-6">
+                Find investors. Get intros. Raise faster.
               </p>
-              <ul className="space-y-2 text-sm text-gray-600 mb-6">
-                <li className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-black flex-shrink-0" />
-                  <span>AI matches you to perfect VCs</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-black flex-shrink-0" />
-                  <span>Auto-extract metrics from your deck</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-black flex-shrink-0" />
-                  <span>Get warm intros from VCs</span>
-                </li>
-              </ul>
+              
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleStartAnalysis}
-                className="w-full px-6 py-3 bg-black text-white rounded-full font-semibold hover:bg-gray-800 transition-all inline-flex items-center justify-center gap-2"
+                className="w-full px-8 py-4 bg-black text-white rounded-full font-bold text-lg hover:bg-gray-800 transition-all inline-flex items-center justify-center gap-2 mb-3"
               >
                 <span>Get Started Free</span>
                 <ArrowRight className="w-5 h-5" />
               </motion.button>
+              
+              <button
+                onClick={() => {
+                  setUserType('entrepreneur');
+                  setShowHowItWorks(true);
+                }}
+                className="text-sm text-gray-600 hover:text-black transition-colors"
+              >
+                How it works →
+              </button>
             </motion.div>
 
             {/* For VCs */}
             <motion.div
-              whileHover={{ scale: 1.02, y: -4 }}
-              className="bg-white/90 backdrop-blur-sm border-2 border-gray-200 rounded-2xl p-8 text-left hover:border-black hover:shadow-2xl transition-all"
+              whileHover={{ y: -8 }}
+              className="group bg-white/90 backdrop-blur-sm border-2 border-gray-200 rounded-2xl p-8 text-center hover:border-black hover:shadow-2xl transition-all"
             >
-              <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center mb-4">
-                <Users className="w-6 h-6 text-white" />
+              <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Users className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-black mb-3">For Investors</h3>
-              <p className="text-gray-700 mb-4 leading-relaxed">
-                Swipe on AI-matched, pre-screened founders. See metrics before names. Get 60%+ meeting rates. Save 15+ hours per week.
+              <h3 className="text-2xl font-bold text-black mb-2">For Investors</h3>
+              <p className="text-gray-600 text-sm mb-6">
+                Swipe qualified deals. Save 15+ hours/week.
               </p>
-              <ul className="space-y-2 text-sm text-gray-600 mb-6">
-                <li className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-black flex-shrink-0" />
-                  <span>Tinder-style qualified deal flow</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-black flex-shrink-0" />
-                  <span>AI investment memos per founder</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-black flex-shrink-0" />
-                  <span>Track ROI & performance</span>
-                </li>
-              </ul>
+              
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => router.push('/vc')}
-                className="w-full px-6 py-3 bg-gray-900 text-white rounded-full font-semibold hover:bg-black transition-all inline-flex items-center justify-center gap-2"
+                className="w-full px-8 py-4 bg-black text-white rounded-full font-bold text-lg hover:bg-gray-800 transition-all inline-flex items-center justify-center gap-2 mb-3"
               >
-                <span>Access VC Dashboard</span>
+                <span>Start Swiping</span>
                 <ArrowRight className="w-5 h-5" />
               </motion.button>
+              
+              <button
+                onClick={() => {
+                  setUserType('vc');
+                  setShowHowItWorks(true);
+                }}
+                className="text-sm text-gray-600 hover:text-black transition-colors"
+              >
+                How it works →
+              </button>
             </motion.div>
           </motion.div>
 
