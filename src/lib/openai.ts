@@ -106,14 +106,44 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
     conversationHistory: Array<{role: 'user' | 'assistant', content: string}>
   ): Promise<string> {
     try {
-      // Import coaching prompts
+      // Import coaching prompts and goal system
       const { calculateReadinessScore, getCoachingSystemPrompt } = await import('./coaching-prompts');
+      const { getCurrentMilestone } = await import('./goal-system');
       
       // Calculate readiness score
       const readiness = calculateReadinessScore(businessInfo);
       
-      // Get coaching system prompt
-      const coachingSystemPrompt = getCoachingSystemPrompt(businessInfo, readiness.score);
+      // Get user goal and roadmap from localStorage
+      let userGoal: string | undefined;
+      let currentMilestone: string | undefined;
+      
+      if (typeof window !== 'undefined') {
+        const goalId = localStorage.getItem('frejfund-goal');
+        const customGoal = localStorage.getItem('frejfund-custom-goal');
+        const roadmapStr = localStorage.getItem('frejfund-roadmap');
+        
+        if (goalId) {
+          const { GOAL_OPTIONS } = await import('./goal-system');
+          const goalOption = GOAL_OPTIONS.find(g => g.id === goalId);
+          userGoal = goalId === 'custom' ? customGoal || 'Custom goal' : goalOption?.title;
+        }
+        
+        if (roadmapStr) {
+          const roadmap = JSON.parse(roadmapStr);
+          const milestone = getCurrentMilestone(roadmap);
+          if (milestone) {
+            currentMilestone = milestone.title;
+          }
+        }
+      }
+      
+      // Get coaching system prompt with goal awareness
+      const coachingSystemPrompt = getCoachingSystemPrompt(
+        businessInfo, 
+        readiness.score,
+        userGoal,
+        currentMilestone
+      );
       
       const contextPrompt = `User Question: ${message}`;
 

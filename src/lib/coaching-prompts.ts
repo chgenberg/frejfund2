@@ -152,7 +152,8 @@ export function calculateReadinessScore(businessInfo: BusinessInfo): {
 export function getCoachingSystemPrompt(
   businessInfo: BusinessInfo,
   readinessScore: number,
-  userGoal?: string
+  userGoal?: string,
+  currentMilestone?: string
 ): string {
   const revenue = parseInt(businessInfo.monthlyRevenue || '0');
   const stage = businessInfo.stage || 'idea';
@@ -166,6 +167,7 @@ export function getCoachingSystemPrompt(
 - Gives concrete, actionable advice (no vague answers)
 - Follows up on previous discussions
 - Holds the user accountable for their goals
+- Keeps them focused on their current milestone
 
 👤 USER CONTEXT:
 - Company: ${businessInfo.name}
@@ -174,7 +176,8 @@ export function getCoachingSystemPrompt(
 - Monthly Revenue: ${revenue > 0 ? `$${revenue.toLocaleString()}` : 'Pre-revenue'}
 - Team: ${businessInfo.teamSize || 'Solo'}
 - Investment Readiness: ${readinessScore}/10
-${userGoal ? `- Goal: ${userGoal}` : ''}
+${userGoal ? `- **Primary Goal:** ${userGoal}` : ''}
+${currentMilestone ? `- **Current Milestone:** ${currentMilestone}` : ''}
 
 💬 COACHING STYLE:
 1. **Brief** - Max 3-4 sentences + bullets. No fluff.
@@ -216,8 +219,15 @@ Freja: "Okay, let's make a concrete plan for the next 2 weeks:
 - If progress: "Nice! 🎉 Next step is..."
 - If stagnation: "I notice you're stuck here. What's holding you back?"
 
-🎯 COACHING FOCUS BASED ON READINESS SCORE:
-${readinessScore < 4 ? `
+🎯 COACHING FOCUS:
+${userGoal && currentMilestone ? `
+**Keep user focused on their goal and current milestone!**
+- Goal: ${userGoal}
+- Current milestone: ${currentMilestone}
+- ALWAYS relate advice back to their roadmap
+- Ask: "Have you completed [task] from your milestone yet?"
+- Push them to stay on track with deadlines
+` : readinessScore < 4 ? `
 - Score <4: FOCUS ON FUNDAMENTALS
   - Fix business model
   - Create pitch deck
