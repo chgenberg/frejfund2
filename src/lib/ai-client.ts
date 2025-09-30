@@ -83,8 +83,8 @@ export type TaskComplexity = 'simple' | 'complex';
 export function getChatModel(complexity: TaskComplexity = 'simple'): string {
   // For simple chat interactions, use mini
   // For complex analysis, use full model
-  const simpleModel = process.env.OPENAI_CHAT_MODEL_MINI || 'gpt-4o-mini';
-  const complexModel = process.env.OPENAI_CHAT_MODEL || 'gpt-4o';
+  const simpleModel = process.env.OPENAI_CHAT_MODEL_MINI || 'gpt-5-mini';
+  const complexModel = process.env.OPENAI_CHAT_MODEL || 'gpt-5';
   
   return complexity === 'simple' ? simpleModel : complexModel;
 }
@@ -97,6 +97,8 @@ export function getEmbeddingsModel(): string {
  * Pricing per model (per 1M tokens)
  */
 const MODEL_PRICING: Record<string, { input: number; output: number }> = {
+  'gpt-5': { input: 2.5, output: 10.0 },
+  'gpt-5-mini': { input: 0.15, output: 0.6 },
   'gpt-4o': { input: 2.5, output: 10.0 },
   'gpt-4o-mini': { input: 0.15, output: 0.6 },
   'gpt-4-turbo': { input: 10.0, output: 30.0 },
