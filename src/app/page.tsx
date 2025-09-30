@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, Brain, TrendingUp, Users, FileText, Sparkles, X, ArrowRight, CheckCircle2, Upload } from 'lucide-react';
 import { BusinessInfo, Message } from '@/types/business';
@@ -9,6 +10,7 @@ import ChatInterface from '@/components/ChatInterface';
 import BusinessWizard from '@/components/BusinessWizard';
 
 export default function Home() {
+  const router = useRouter();
   const [currentView, setCurrentView] = useState<'landing' | 'wizard' | 'chat'>('landing');
   const [businessInfo, setBusinessInfo] = useState<BusinessInfo | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -18,8 +20,29 @@ export default function Home() {
     setCurrentView('wizard');
   };
 
-  const handleWizardComplete = (info: BusinessInfo) => {
+  const handleWizardComplete = async (info: BusinessInfo) => {
     setBusinessInfo(info);
+    
+    // Save to database if email provided
+    if (info.email && typeof window !== 'undefined') {
+      try {
+        const sessionId = localStorage.getItem('frejfund-session-id') || `sess-${Date.now()}`;
+        await fetch('/api/session/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: info.email,
+            sessionId,
+            businessInfo: info,
+            scrapedText: info.preScrapedText,
+            scrapedSources: info.preScrapedSources
+          })
+        });
+      } catch (error) {
+        console.error('Failed to save session:', error);
+      }
+    }
+    
     // For real users, go to onboarding. For demo, go to chat.
     if (info.demoKpiCsv) {
       setCurrentView('chat');
@@ -204,20 +227,30 @@ export default function Home() {
               </div>
               <h1 className="text-xl font-semibold text-black tracking-tight">FrejFund</h1>
             </motion.div>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setShowHowItWorks(true)}
-              className="relative px-6 py-2.5 bg-gray-700 text-white rounded-full text-sm font-medium overflow-hidden group"
-            >
-              <span className="relative z-10">How it works</span>
-              <motion.div
-                className="absolute inset-0 bg-gray-800"
-                initial={{ x: "-100%" }}
-                whileHover={{ x: 0 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              />
-            </motion.button>
+            <div className="flex items-center space-x-3">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => router.push('/login')}
+                className="px-6 py-2.5 text-gray-700 hover:text-black rounded-full text-sm font-medium transition-colors"
+              >
+                Login
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowHowItWorks(true)}
+                className="relative px-6 py-2.5 bg-gray-700 text-white rounded-full text-sm font-medium overflow-hidden group"
+              >
+                <span className="relative z-10">How it works</span>
+                <motion.div
+                  className="absolute inset-0 bg-gray-800"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: 0 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                />
+              </motion.button>
+            </div>
           </div>
         </div>
       </motion.header>
