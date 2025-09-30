@@ -260,8 +260,30 @@ export default function Home() {
 
       {/* Hero Section */}
       <motion.section 
-        className="relative min-h-screen flex items-center justify-center px-8 pt-20"
+        className="relative min-h-screen flex items-center justify-center px-8 pt-20 overflow-hidden"
       >
+        {/* Background Image - Desktop */}
+        <div className="absolute inset-0 hidden md:block">
+          <img 
+            src="/world.png" 
+            alt="" 
+            className="w-full h-full object-cover opacity-30"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/40 to-white/80" />
+        </div>
+        
+        {/* Background Image - Mobile */}
+        <div className="absolute inset-0 md:hidden">
+          <img 
+            src="/worldmobile.png" 
+            alt="" 
+            className="w-full h-full object-cover opacity-30"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/40 to-white/80" />
+        </div>
+        
+        {/* Content with higher z-index */}
+        <div className="relative z-10 w-full">
         <div className="max-w-6xl mx-auto text-center">
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
@@ -381,6 +403,7 @@ export default function Home() {
               View Demo
             </motion.button>
           </motion.div>
+        </div>
         </div>
       </motion.section>
 
