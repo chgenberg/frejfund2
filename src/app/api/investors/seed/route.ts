@@ -26,8 +26,12 @@ export async function POST(req: NextRequest) {
       message: 'Investors seeded successfully', 
       count: created.count 
     }, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error seeding investors:', error);
-    return NextResponse.json({ error: 'Failed to seed investors' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Failed to seed investors',
+      details: error.message,
+      stack: error.stack?.split('\n').slice(0, 3)
+    }, { status: 500 });
   }
 }
