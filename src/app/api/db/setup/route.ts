@@ -34,13 +34,11 @@ export async function POST(req: NextRequest) {
       );
     `);
 
-    await prisma.$executeRawUnsafe(`
-      CREATE INDEX IF NOT EXISTS "generated_documents_sessionId_idx" ON "generated_documents"("sessionId");
-      CREATE INDEX IF NOT EXISTS "generated_documents_userId_idx" ON "generated_documents"("userId");
-      CREATE INDEX IF NOT EXISTS "generated_documents_type_idx" ON "generated_documents"("type");
-      CREATE INDEX IF NOT EXISTS "generated_documents_status_idx" ON "generated_documents"("status");
-      CREATE INDEX IF NOT EXISTS "generated_documents_createdAt_idx" ON "generated_documents"("createdAt");
-    `);
+    await prisma.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "generated_documents_sessionId_idx" ON "generated_documents"("sessionId");`);
+    await prisma.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "generated_documents_userId_idx" ON "generated_documents"("userId");`);
+    await prisma.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "generated_documents_type_idx" ON "generated_documents"("type");`);
+    await prisma.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "generated_documents_status_idx" ON "generated_documents"("status");`);
+    await prisma.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "generated_documents_createdAt_idx" ON "generated_documents"("createdAt");`);
 
     console.log('✅ generated_documents table created');
 
@@ -74,11 +72,9 @@ export async function POST(req: NextRequest) {
       );
     `);
 
-    await prisma.$executeRawUnsafe(`
-      CREATE INDEX IF NOT EXISTS "investors_firmName_idx" ON "investors"("firmName");
-      CREATE INDEX IF NOT EXISTS "investors_stage_idx" ON "investors"("stage");
-      CREATE INDEX IF NOT EXISTS "investors_geographies_idx" ON "investors"("geographies");
-    `);
+    await prisma.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "investors_firmName_idx" ON "investors"("firmName");`);
+    await prisma.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "investors_stage_idx" ON "investors"("stage");`);
+    await prisma.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "investors_geographies_idx" ON "investors"("geographies");`);
 
     console.log('✅ investors table created');
 
@@ -105,12 +101,10 @@ export async function POST(req: NextRequest) {
       );
     `);
 
-    await prisma.$executeRawUnsafe(`
-      CREATE INDEX IF NOT EXISTS "investor_matches_sessionId_idx" ON "investor_matches"("sessionId");
-      CREATE INDEX IF NOT EXISTS "investor_matches_matchScore_idx" ON "investor_matches"("matchScore");
-      CREATE INDEX IF NOT EXISTS "investor_matches_status_idx" ON "investor_matches"("status");
-      CREATE UNIQUE INDEX IF NOT EXISTS "investor_matches_sessionId_investorId_key" ON "investor_matches"("sessionId", "investorId");
-    `);
+    await prisma.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "investor_matches_sessionId_idx" ON "investor_matches"("sessionId");`);
+    await prisma.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "investor_matches_matchScore_idx" ON "investor_matches"("matchScore");`);
+    await prisma.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "investor_matches_status_idx" ON "investor_matches"("status");`);
+    await prisma.$executeRawUnsafe(`CREATE UNIQUE INDEX IF NOT EXISTS "investor_matches_sessionId_investorId_key" ON "investor_matches"("sessionId", "investorId");`);
 
     await prisma.$executeRawUnsafe(`
       DO $$ BEGIN
