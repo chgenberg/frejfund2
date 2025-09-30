@@ -1,10 +1,13 @@
 import OpenAI from 'openai';
 
-let DEV_SECRETS_LOCAL: any = null;
-try {
-  // @ts-ignore
-  DEV_SECRETS_LOCAL = require('./local-secrets').DEV_SECRETS;
-} catch {}
+let DEV_SECRETS_LOCAL: unknown = null;
+if (process.env.NODE_ENV === 'development') {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const mod = require('./local-secrets');
+    DEV_SECRETS_LOCAL = (mod && mod.DEV_SECRETS) ? mod.DEV_SECRETS : null;
+  } catch {}
+}
 
 function isAzureConfigured(): boolean {
   return Boolean(process.env.AZURE_OPENAI_API_KEY && process.env.AZURE_OPENAI_ENDPOINT);
@@ -12,7 +15,7 @@ function isAzureConfigured(): boolean {
 
 export function getChatModel(): string {
   return (
-    (process.env.NODE_ENV === 'development' && DEV_SECRETS_LOCAL?.openai?.chatModel) ||
+    (process.env.NODE_ENV === 'development' && (DEV_SECRETS_LOCAL as any)?.openai?.chatModel) ||
     process.env.OPENAI_CHAT_MODEL ||
     process.env.OPENAI_MODEL ||
     'gpt-4o-mini'
@@ -21,7 +24,7 @@ export function getChatModel(): string {
 
 export function getEmbeddingsModel(): string {
   return (
-    (process.env.NODE_ENV === 'development' && DEV_SECRETS_LOCAL?.openai?.embeddingsModel) ||
+    (process.env.NODE_ENV === 'development' && (DEV_SECRETS_LOCAL as any)?.openai?.embeddingsModel) ||
     process.env.OPENAI_EMBEDDINGS_MODEL ||
     'text-embedding-3-small'
   );
@@ -43,7 +46,7 @@ export function getModelPricePerMTok(model: string): { input: number; output: nu
 }
 
 export function getOpenAIClient(): OpenAI {
-  const dev = process.env.NODE_ENV === 'development' ? DEV_SECRETS_LOCAL?.openai : null;
+  const dev = process.env.NODE_ENV === 'development' ? (DEV_SECRETS_LOCAL as any)?.openai : null;
   if (isAzureConfigured()) {
     const endpoint = (process.env.AZURE_OPENAI_ENDPOINT || '').replace(/\/$/, '');
     const deployment = process.env.AZURE_OPENAI_DEPLOYMENT || getChatModel();
