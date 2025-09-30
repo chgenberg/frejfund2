@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { scrapeWebsite } from '@/lib/web-scraper';
+import { scrapeSiteDeep } from '@/lib/web-scraper';
 import prisma from '@/lib/prisma';
-import { embedTexts } from '@/lib/vector-store';
+import { indexContextForSession } from '@/lib/vector-store';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -30,10 +30,10 @@ export async function POST(req: NextRequest) {
       try {
         console.log(`[Background Scrape] Starting for ${url}`);
         
-        // Scrape website
-        const result = await scrapeWebsite(url, { deep: true, maxPages: 5 });
+        // Scrape website (deep scrape with max 5 pages)
+        const result = await scrapeSiteDeep(url, 5, 2);
         
-        if (!result?.text) {
+        if (!result?.combinedText) {
           console.error(`[Background Scrape] No text extracted from ${url}`);
           return;
         }
@@ -59,37 +59,14 @@ export async function POST(req: NextRequest) {
           });
         }
 
-        // Chunk text into smaller pieces
-        const chunkSize = 1000;
-        const chunks: string[] = [];
-        for (let i = 0; i < result.text.length; i += chunkSize) {
-          chunks.push(result.text.substring(i, i + chunkSize));
-        }
-
-        // Generate embeddings for chunks
-        const embeddings = await embedTexts(chunks);
-
-        // Store in database
-        const documents = await Promise.all(
-          chunks.map((chunk, i) => 
-            prisma.document.create({
-              data: {
-                sessionId: session.id,
-                content: chunk,
-                embedding: embeddings[i] || null,
-                metadata: {
-                  source: 'website',
-                  url: url,
-                  chunkIndex: i,
-                  totalChunks: chunks.length,
-                  scrapedAt: new Date().toISOString()
-                }
-              }
-            })
-          )
+        // Use vector-store's indexing (handles chunking and embeddings)
+        const chunksIndexed = await indexContextForSession(
+          session.id, 
+          result.combinedText, 
+          { url }
         );
 
-        console.log(`[Background Scrape] Completed for ${url}: ${documents.length} chunks saved`);
+        console.log(`[Background Scrape] Completed for ${url}: ${chunksIndexed} chunks indexed`);
       } catch (error) {
         console.error('[Background Scrape] Error:', error);
       }
