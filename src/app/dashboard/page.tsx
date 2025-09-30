@@ -322,14 +322,15 @@ export default function Dashboard() {
                   <h2 className="text-2xl font-semibold text-black">Integrations</h2>
                   <p className="text-gray-600 mt-1">Connect your tools to give Freja more context</p>
                 </div>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors inline-flex items-center gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add Integration
-                </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => router.push('/integrations')}
+                    className="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors inline-flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Integration
+                  </motion.button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -370,7 +371,7 @@ export default function Dashboard() {
                         <motion.button
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                          onClick={() => handleConnect(integration.id)}
+                          onClick={() => router.push('/integrations')}
                           className="px-3 py-1.5 bg-black text-white rounded-lg text-xs font-medium hover:bg-gray-800 transition-colors"
                         >
                           Connect
