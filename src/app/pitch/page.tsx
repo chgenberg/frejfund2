@@ -7,6 +7,8 @@ import { FileText, Upload, TrendingUp, Users, DollarSign, Target, Brain, Chevron
 import DeckSummaryModal from '@/components/DeckSummaryModal';
 import { BusinessInfo } from '@/types/business';
 
+export const dynamic = 'force-dynamic';
+
 export default function PitchPage() {
   const router = useRouter();
   const [businessInfo, setBusinessInfo] = useState<BusinessInfo | null>(null);

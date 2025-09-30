@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 import { generateOAuthUrl } from '@/lib/oauth-config';
 
+export const dynamic = 'force-dynamic';
+
 interface Integration {
   id: string;
   name: string;

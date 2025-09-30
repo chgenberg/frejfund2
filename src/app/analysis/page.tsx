@@ -8,6 +8,8 @@ import BusinessAnalysisModal from '@/components/BusinessAnalysisModal';
 import ResultsModal from '@/components/ResultsModal';
 import { BusinessInfo, BusinessAnalysisResult } from '@/types/business';
 
+export const dynamic = 'force-dynamic';
+
 export default function AnalysisPage() {
   const router = useRouter();
   const [businessInfo, setBusinessInfo] = useState<BusinessInfo | null>(null);

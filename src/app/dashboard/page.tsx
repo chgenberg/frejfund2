@@ -10,6 +10,8 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 interface Integration {
   id: string;
   name: string;
