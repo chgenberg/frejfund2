@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET /api/vc/swipe - Get next profiles for VC to swipe
+// GET /api/vc/swipe - Get next profiles for VC to swipe (with smart matching)
 export async function GET(req: NextRequest) {
   try {
     const vcEmail = req.headers.get('x-vc-email');
@@ -107,7 +107,38 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'VC email required' }, { status: 400 });
     }
 
-    // Get all public founder sessions
+    // Use smart matching if VC has swipe history
+    const { getPersonalizedRecommendations } = await import('@/lib/smart-matching');
+    
+    try {
+      const recommendations = await getPersonalizedRecommendations(vcEmail, 20);
+      
+      if (recommendations.length > 0) {
+        // Convert to blind profiles
+        const blindProfiles = recommendations.map(rec => ({
+          id: `anon_${rec.sessionId.slice(-8)}`,
+          sessionId: rec.sessionId,
+          industry: rec.profile.industry,
+          stage: rec.profile.stage,
+          oneLiner: rec.profile.oneLiner || 'Innovative company',
+          askAmount: rec.profile.askAmount || 2000000,
+          traction: rec.profile.traction || {},
+          matchScore: rec.score,
+          aiAnalysis: rec.reasoning,
+          readinessScore: rec.profile.readinessScore || 70,
+          geography: rec.profile.geography || 'Europe'
+        }));
+
+        return NextResponse.json({ 
+          profiles: blindProfiles,
+          personalized: true 
+        });
+      }
+    } catch (error) {
+      console.log('Smart matching not available, falling back to basic matching');
+    }
+
+    // Fallback: Basic matching (if smart matching fails)
     const publicSessions = await prisma.session.findMany({
       where: {
         user: {
@@ -120,21 +151,15 @@ export async function GET(req: NextRequest) {
       take: 50
     });
 
-    // Get VCs already-swiped sessions
     const swipedSessions = await prisma.vCSwipe.findMany({
       where: { vcEmail },
       select: { sessionId: true }
     });
 
     const swipedSessionIds = new Set(swipedSessions.map(s => s.sessionId));
+    const unseenSessions = publicSessions.filter(s => !swipedSessionIds.has(s.id));
 
-    // Filter to only unswiped sessions
-    const unseenSessions = publicSessions.filter(
-      s => !swipedSessionIds.has(s.id)
-    );
-
-    // Convert to blind profiles
-    const blindProfiles = unseenSessions.map((session, index) => {
+    const blindProfiles = unseenSessions.map((session) => {
       const businessInfo = session.businessInfo as any;
       const user = session.user;
 
@@ -143,18 +168,20 @@ export async function GET(req: NextRequest) {
         sessionId: session.id,
         industry: businessInfo?.industry || user?.industry || 'Tech',
         stage: businessInfo?.stage || user?.stage || 'Seed',
-        oneLiner: user?.oneLiner || businessInfo?.oneLiner || 'Innovative company',
+        oneLiner: user?.oneLiner || 'Innovative company',
         askAmount: user?.askAmount || 2000000,
         traction: user?.traction || businessInfo?.traction || {},
-        matchScore: 85 + Math.floor(Math.random() * 15), // Simplified for now
-        aiAnalysis: `Matches your investment thesis. Strong fundamentals in ${businessInfo?.industry}.`,
+        matchScore: 85 + Math.floor(Math.random() * 15),
+        aiAnalysis: `Matches your investment thesis. Strong fundamentals.`,
         readinessScore: businessInfo?.readinessScore || 70,
-        founded: businessInfo?.founded,
         geography: businessInfo?.targetMarket || 'Europe'
       };
     });
 
-    return NextResponse.json({ profiles: blindProfiles });
+    return NextResponse.json({ 
+      profiles: blindProfiles,
+      personalized: false
+    });
   } catch (error: any) {
     console.error('Error fetching swipe profiles:', error);
     return NextResponse.json({ 
