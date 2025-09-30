@@ -439,7 +439,7 @@ export default function Home() {
 
       {/* Hero Section */}
       <motion.section 
-        className="relative min-h-screen flex items-center justify-center px-8 overflow-hidden"
+        className="relative min-h-screen flex items-center justify-center px-8 pt-24 overflow-hidden"
       >
         {/* Background Image - Desktop */}
         <div className="absolute inset-0 hidden md:block">
