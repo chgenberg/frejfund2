@@ -231,3 +231,95 @@ model GeneratedDocument {
   @@index([createdAt])
   @@map("generated_documents")
 }
+
+// Investor database
+model Investor {
+  id                String    @id @default(cuid())
+  
+  // Basic info
+  name              String
+  firmName          String?
+  type              String    // 'vc' | 'angel' | 'corporate_vc' | 'accelerator' | 'family_office'
+  
+  // Contact
+  email             String?
+  linkedIn          String?
+  twitter           String?
+  website           String?
+  
+  // Investment profile
+  stage             String[]  // ['seed', 'series_a', 'series_b', etc.]
+  industries        String[]  // ['saas', 'fintech', 'healthcare', etc.]
+  geographies       String[]  // ['nordics', 'europe', 'us', 'global']
+  checkSizeMin      Int?      // in USD
+  checkSizeMax      Int?      // in USD
+  
+  // Investment thesis
+  thesis            String?   @db.Text
+  sweetSpot         String?   @db.Text
+  
+  // Portfolio
+  portfolioCount    Int       @default(0)
+  notableInvestments String[] // Company names
+  
+  // Metrics
+  fundSize          Int?      // in USD
+  yearFounded       Int?
+  dealsPerYear      Int?
+  
+  // Metadata
+  tags              String[]  // ['b2b', 'consumer', 'deep_tech', etc.]
+  ranking           Int?      // Internal ranking/score
+  
+  // Timestamps
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  // Relations
+  matches           InvestorMatch[]
+  
+  @@index([firmName])
+  @@index([stage])
+  @@index([geographies])
+  @@map("investors")
+}
+
+// AI-generated investor matches
+model InvestorMatch {
+  id            String    @id @default(cuid())
+  sessionId     String
+  investorId    String
+  
+  // Match score
+  matchScore    Int       // 0-100
+  reasoning     String    @db.Text
+  
+  // Match factors
+  stageMatch    Int       // 0-100
+  industryMatch Int       // 0-100
+  geoMatch      Int       // 0-100
+  checkSizeMatch Int      // 0-100
+  
+  // Outreach tracking
+  status        String    @default("suggested") // 'suggested' | 'contacted' | 'meeting_scheduled' | 'passed' | 'invested'
+  notes         String?   @db.Text
+  contactedAt   DateTime?
+  respondedAt   DateTime?
+  
+  // Warm intro path
+  hasWarmIntro  Boolean   @default(false)
+  introPath     Json?     // LinkedIn connection path
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  investor      Investor  @relation(fields: [investorId], references: [id], onDelete: Cascade)
+  
+  @@unique([sessionId, investorId])
+  @@index([sessionId])
+  @@index([matchScore])
+  @@index([status])
+  @@map("investor_matches")
+}
