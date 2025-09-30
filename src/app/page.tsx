@@ -24,8 +24,11 @@ export default function Home() {
     if (info.demoKpiCsv) {
       setCurrentView('chat');
     } else {
-      // Store business info for onboarding
+      // Store business info for later use
       if (typeof window !== 'undefined') {
+        // Save to localStorage for persistence
+        localStorage.setItem('frejfund-business-info', JSON.stringify(info));
+        // Also save to sessionStorage for onboarding
         sessionStorage.setItem('businessInfo', JSON.stringify(info));
         window.location.href = '/onboarding';
       }

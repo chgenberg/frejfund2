@@ -274,6 +274,7 @@ export default function Dashboard() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                      onClick={() => router.push('/analysis')}
                     >
                       <BarChart3 className="w-5 h-5 text-gray-700 mb-2" />
                       <h3 className="text-sm font-medium text-black">Run Analysis</h3>
@@ -284,6 +285,7 @@ export default function Dashboard() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                      onClick={() => router.push('/pitch')}
                     >
                       <FileText className="w-5 h-5 text-gray-700 mb-2" />
                       <h3 className="text-sm font-medium text-black">Update Pitch</h3>
