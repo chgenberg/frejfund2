@@ -42,8 +42,12 @@ export async function POST(req: NextRequest) {
 
     console.log('✅ generated_documents table created');
 
+    // Drop investors table if it exists (to recreate with BIGINT)
+    await prisma.$executeRawUnsafe(`DROP TABLE IF EXISTS "investor_matches" CASCADE;`);
+    await prisma.$executeRawUnsafe(`DROP TABLE IF EXISTS "investors" CASCADE;`);
+
     await prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS "investors" (
+      CREATE TABLE "investors" (
         "id" TEXT NOT NULL,
         "name" TEXT NOT NULL,
         "firmName" TEXT,
@@ -79,7 +83,7 @@ export async function POST(req: NextRequest) {
     console.log('✅ investors table created');
 
     await prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS "investor_matches" (
+      CREATE TABLE "investor_matches" (
         "id" TEXT NOT NULL,
         "sessionId" TEXT NOT NULL,
         "investorId" TEXT NOT NULL,
