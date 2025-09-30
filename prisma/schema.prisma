@@ -26,6 +26,14 @@ model User {
   stage         String?
   website       String?
   
+  // Founder profile (for sharing with VCs)
+  isProfilePublic Boolean   @default(false)
+  profileSlug     String?   @unique
+  pitchDeck       String?   // URL to pitch deck
+  oneLiner        String?   // One sentence pitch
+  askAmount       Int?      // How much raising (USD)
+  traction        Json?     // Key metrics
+  
   // Relations
   sessions      Session[]
   integrations  Integration[]
@@ -322,4 +330,42 @@ model InvestorMatch {
   @@index([matchScore])
   @@index([status])
   @@map("investor_matches")
+}
+
+// Intro requests from VCs to founders
+model IntroRequest {
+  id            String    @id @default(cuid())
+  
+  // Who
+  vcEmail       String    // VC email who requested
+  vcName        String    // VC name
+  vcFirm        String    // VC firm
+  founderId     String    // User ID of founder
+  
+  // What
+  founderName   String
+  founderCompany String
+  matchScore    Int?      // Original match score
+  
+  // Status
+  status        String    @default("pending") // 'pending' | 'accepted' | 'declined' | 'intro_sent'
+  founderResponse String? @db.Text
+  
+  // Meeting
+  meetingScheduled Boolean @default(false)
+  meetingDate   DateTime?
+  
+  // Tracking
+  requestedAt   DateTime  @default(now())
+  respondedAt   DateTime?
+  introSentAt   DateTime?
+  
+  // Metadata
+  metadata      Json?     // Additional context
+  
+  @@index([founderId])
+  @@index([vcEmail])
+  @@index([status])
+  @@index([requestedAt])
+  @@map("intro_requests")
 }
