@@ -160,10 +160,10 @@ export default function Home() {
                 </div>
               </div>
               
-              <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              <div className="p-6 sm:p-8 overflow-y-auto max-h-[calc(90vh-140px)]">
                 {/* User Type Selection */}
                 {!userType ? (
-                  <div className="space-y-4">
+                  <div className="space-y-4 pt-2">
                     <p className="text-center text-gray-600 mb-6">I am a...</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <motion.button
@@ -207,15 +207,15 @@ export default function Home() {
                   </div>
                 ) : userType === 'entrepreneur' ? (
                   /* Entrepreneur Flow */
-                  <div className="space-y-6">
+                  <div className="space-y-6 pt-2">
                     <button
                       onClick={() => setUserType(null)}
-                      className="text-sm text-gray-600 hover:text-black inline-flex items-center space-x-1 mb-4"
+                      className="text-sm text-gray-600 hover:text-black inline-flex items-center space-x-1"
                     >
                       <span>← Back</span>
                     </button>
 
-                    <div className="space-y-6">
+                    <div className="space-y-5">
                       {[
                         {
                           icon: <FileText />,
@@ -287,15 +287,15 @@ export default function Home() {
                   </div>
                 ) : (
                   /* VC Flow */
-                  <div className="space-y-6">
+                  <div className="space-y-6 pt-2">
                     <button
                       onClick={() => setUserType(null)}
-                      className="text-sm text-gray-600 hover:text-black inline-flex items-center space-x-1 mb-4"
+                      className="text-sm text-gray-600 hover:text-black inline-flex items-center space-x-1"
                     >
                       <span>← Back</span>
                     </button>
 
-                    <div className="space-y-6">
+                    <div className="space-y-5">
                       {[
                         {
                           icon: <Target />,
@@ -405,7 +405,7 @@ export default function Home() {
                 <img 
                   src="/FREJFUND-logo.png" 
                   alt="FrejFund" 
-                  className="h-10 w-auto"
+                  className="h-12 sm:h-14 w-auto"
                 />
               </div>
             </motion.div>
