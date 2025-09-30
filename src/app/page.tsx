@@ -558,10 +558,10 @@ export default function Home() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => router.push('/vc')}
+                onClick={() => router.push('/vc/onboarding')}
                 className="w-full px-8 py-4 bg-black text-white rounded-full font-bold text-lg hover:bg-gray-800 transition-all inline-flex items-center justify-center gap-2 mb-3"
               >
-                <span>Start Swiping</span>
+                <span>Get Started</span>
                 <ArrowRight className="w-5 h-5" />
               </motion.button>
               
