@@ -333,11 +333,11 @@ export default function Dashboard() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
-                      onClick={() => setActiveSection('integrations')}
+                      onClick={() => router.push('/documents')}
                     >
-                      <Link2 className="w-5 h-5 text-gray-700 mb-2" />
-                      <h3 className="text-sm font-medium text-black">Add Integration</h3>
-                      <p className="text-xs text-gray-500">Connect more data</p>
+                      <FileText className="w-5 h-5 text-gray-700 mb-2" />
+                      <h3 className="text-sm font-medium text-black">Documents</h3>
+                      <p className="text-xs text-gray-500">All materials</p>
                     </motion.button>
                   </div>
                 </div>
