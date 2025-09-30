@@ -2,14 +2,13 @@ import OpenAI from 'openai';
 import { BusinessInfo, BusinessAnalysisResult } from '@/types/business';
 import { getOpenAIClient, getChatModel } from '@/lib/ai-client';
 
-const openai = getOpenAIClient();
-
 async function chatWithFallback(args: { messages: { role: 'system' | 'user' | 'assistant'; content: string }[]; temperature: number; maxTokens?: number }): Promise<string> {
   const model = getChatModel();
   const isGpt5 = model.startsWith('gpt-5');
   try {
+    const client = getOpenAIClient();
     console.log('[DEBUG] Attempting Chat Completions with model:', model);
-    const resp = await openai.chat.completions.create({
+    const resp = await client.chat.completions.create({
       model,
       messages: args.messages,
       ...(isGpt5 ? {} : { temperature: args.temperature }),
@@ -22,7 +21,8 @@ async function chatWithFallback(args: { messages: { role: 'system' | 'user' | 'a
     // Fallback to Responses API (compatible with GPT‑5 rollout)
     try {
       console.log('[DEBUG] Attempting Responses API with model:', model);
-      const r = await (openai as any).responses.create({
+      const client2 = getOpenAIClient();
+      const r = await (client2 as any).responses.create({
         model,
         input: args.messages.map((m) => `${m.role.toUpperCase()}: ${m.content}`).join('\n\n'),
         ...(isGpt5 ? {} : { temperature: args.temperature })

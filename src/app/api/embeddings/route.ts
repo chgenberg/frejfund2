@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
 import { chunkText } from '@/lib/text-chunker';
 import { getOpenAIClient, getEmbeddingsModel } from '@/lib/ai-client';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-
-const openai = getOpenAIClient();
 
 function isOpenAIConfigured(): boolean {
   return Boolean(process.env.OPENAI_API_KEY || process.env.AZURE_OPENAI_API_KEY);
@@ -56,7 +53,8 @@ export async function POST(req: NextRequest) {
       let embeddings: number[][] = [];
       try {
         if (!isOpenAIConfigured()) throw new Error('No OpenAI key');
-        const resp = await openai.embeddings.create({
+        const client = getOpenAIClient();
+        const resp = await client.embeddings.create({
           model: getEmbeddingsModel(),
           input: batch.map((b) => b.text)
         });
