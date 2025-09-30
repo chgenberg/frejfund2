@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Bot, User, TrendingUp, FileText, Brain, Sparkles, BarChart3, ThumbsUp, ThumbsDown, BookOpen, MoreVertical, Info, Lightbulb, X, HelpCircle } from 'lucide-react';
+import { Send, Bot, User, TrendingUp, FileText, Brain, Sparkles, BarChart3, ThumbsUp, ThumbsDown, BookOpen, MoreVertical, Info, Lightbulb, X, HelpCircle, Bell } from 'lucide-react';
 import { BusinessInfo, Message, BusinessAnalysisResult } from '@/types/business';
 import { getChatModel, TaskComplexity } from '@/lib/ai-client';
 import BusinessAnalysisModal from './BusinessAnalysisModal';
@@ -62,6 +62,8 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   const [tips, setTips] = useState<Array<{ title: string; why?: string; action?: string; priority?: string }>>([]);
   const [showTips, setShowTips] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [prefetchedContext, setPrefetchedContext] = useState<string | null>(null);
   const [dailyCompass, setDailyCompass] = useState<{ insights: string[]; risks: string[]; actions: string[]; citations?: Array<{label:string; snippet:string}> } | null>(null);
   const [showCompass, setShowCompass] = useState(true);
@@ -144,7 +146,27 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
     })();
     
     setIsLoadingHistory(false);
+    
+    // Load notifications
+    loadNotifications();
   }, [sessionId, setMessages]);
+
+  const loadNotifications = async () => {
+    try {
+      const response = await fetch('/api/notifications', {
+        headers: {
+          'x-session-id': sessionId
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setNotifications(data.notifications || []);
+      }
+    } catch (error) {
+      console.error('Failed to load notifications:', error);
+    }
+  };
 
   const showWelcomeMessage = async () => {
     // Calculate readiness score and generate coaching welcome
@@ -847,6 +869,100 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-black rounded-full text-white text-[9px] flex items-center justify-center">{tips.length}</span>
             )}
           </button>
+          <div className="relative">
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors relative"
+              title="Notifications"
+            >
+              <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600" />
+              {notifications.length > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-white text-[10px] flex items-center justify-center font-bold">
+                  {notifications.length}
+                </span>
+              )}
+            </button>
+            {showNotifications && (
+              <div className="absolute right-0 top-10 w-80 bg-white border border-gray-200 rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto">
+                <div className="p-3 border-b border-gray-100">
+                  <h3 className="font-semibold text-black">VC Interest</h3>
+                </div>
+                {notifications.length === 0 ? (
+                  <div className="p-6 text-center text-sm text-gray-500">
+                    No new notifications
+                  </div>
+                ) : (
+                  <div className="divide-y divide-gray-100">
+                    {notifications.map((notif) => (
+                      <div key={notif.id} className="p-4 hover:bg-gray-50">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <div className="text-sm font-semibold text-black mb-1">
+                              🎉 {notif.vcFirm} is interested!
+                            </div>
+                            <div className="text-xs text-gray-600 mb-3">
+                              {notif.message}
+                            </div>
+                          </div>
+                          {notif.matchScore && (
+                            <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs font-bold">
+                              {notif.matchScore}%
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={async () => {
+                              try {
+                                await fetch('/api/notifications/respond', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    requestId: notif.id,
+                                    response: 'accept',
+                                    message: 'Yes, I\'d love to connect!'
+                                  })
+                                });
+                                loadNotifications();
+                                setShowNotifications(false);
+                                addMessage(`Great news! I've accepted the intro request from ${notif.vcFirm}. They'll be in touch soon!`, 'agent');
+                              } catch (error) {
+                                console.error('Error accepting intro:', error);
+                              }
+                            }}
+                            className="flex-1 px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-medium hover:bg-green-600 transition-colors"
+                          >
+                            Accept Intro
+                          </button>
+                          <button
+                            onClick={async () => {
+                              try {
+                                await fetch('/api/notifications/respond', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    requestId: notif.id,
+                                    response: 'decline',
+                                    message: 'Not interested right now'
+                                  })
+                                });
+                                loadNotifications();
+                              } catch (error) {
+                                console.error('Error declining intro:', error);
+                              }
+                            }}
+                            className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200 transition-colors"
+                          >
+                            Decline
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
           <button
             onClick={() => setShowHelpModal(true)}
             className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
