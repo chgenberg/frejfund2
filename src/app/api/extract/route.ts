@@ -12,9 +12,12 @@ export async function POST(req: NextRequest) {
     }
 
     const form = await req.formData();
-    const files: File[] = [];
-    for (const [key, value] of form.entries()) {
-      if (value instanceof File) files.push(value);
+    const files: any[] = [];
+    const hasFileGlobal = typeof File !== 'undefined';
+    for (const [, value] of form.entries()) {
+      // In Node 18, global File may be undefined; accept any Blob-like entry
+      const looksLikeFile = hasFileGlobal ? (value instanceof File) : (value && typeof (value as any).arrayBuffer === 'function');
+      if (looksLikeFile) files.push(value);
     }
 
     if (files.length === 0) {
