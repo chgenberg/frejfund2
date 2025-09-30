@@ -106,22 +106,23 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-16">
             <div className="flex items-center space-x-4">
               <motion.div 
                 className="flex items-center space-x-3 cursor-pointer"
                 whileHover={{ scale: 1.02 }}
                 onClick={() => router.push('/')}
               >
-                <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-white" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-black rounded-xl flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <h1 className="text-xl font-semibold text-black">FrejFund Dashboard</h1>
+                <h1 className="text-base sm:text-xl font-semibold text-black hidden sm:block">FrejFund Dashboard</h1>
+                <h1 className="text-base font-semibold text-black sm:hidden">Dashboard</h1>
               </motion.div>
             </div>
             
-            <nav className="flex items-center space-x-6">
+            <nav className="hidden sm:flex items-center space-x-6">
               <button
                 onClick={() => setActiveSection('overview')}
                 className={`text-sm font-medium transition-colors ${
@@ -159,8 +160,42 @@ export default function Dashboard() {
         </div>
       </header>
 
+      {/* Mobile Navigation */}
+      <nav className="sm:hidden bg-white border-b border-gray-200 px-3 py-2 flex space-x-2 overflow-x-auto">
+        <button
+          onClick={() => setActiveSection('overview')}
+          className={`text-sm font-medium whitespace-nowrap px-3 py-1.5 rounded-lg transition-colors ${
+            activeSection === 'overview' ? 'bg-black text-white' : 'text-gray-600'
+          }`}
+        >
+          Overview
+        </button>
+        <button
+          onClick={() => setActiveSection('integrations')}
+          className={`text-sm font-medium whitespace-nowrap px-3 py-1.5 rounded-lg transition-colors ${
+            activeSection === 'integrations' ? 'bg-black text-white' : 'text-gray-600'
+          }`}
+        >
+          Integrations
+        </button>
+        <button
+          onClick={() => setActiveSection('settings')}
+          className={`text-sm font-medium whitespace-nowrap px-3 py-1.5 rounded-lg transition-colors ${
+            activeSection === 'settings' ? 'bg-black text-white' : 'text-gray-600'
+          }`}
+        >
+          Settings
+        </button>
+        <button
+          onClick={() => router.push('/chat')}
+          className="text-sm font-medium whitespace-nowrap px-3 py-1.5 bg-gray-900 text-white rounded-lg"
+        >
+          Open Chat
+        </button>
+      </nav>
+
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         <AnimatePresence mode="wait">
           {activeSection === 'overview' && (
             <motion.div
@@ -172,14 +207,14 @@ export default function Dashboard() {
               className="space-y-6"
             >
               {/* Metrics Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm"
+                  className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-sm"
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <div className="p-2 bg-gray-100 rounded-lg">
-                      <TrendingUp className="w-5 h-5 text-gray-700" />
+                    <div className="p-1.5 sm:p-2 bg-gray-100 rounded-lg">
+                      <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
                     </div>
                     <span className="text-2xl font-bold text-black">{metrics.investmentReadiness}%</span>
                   </div>
@@ -189,7 +224,7 @@ export default function Dashboard() {
 
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm"
+                  className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-sm"
                 >
                   <div className="flex items-center justify-between mb-4">
                     <div className="p-2 bg-gray-100 rounded-lg">
@@ -203,7 +238,7 @@ export default function Dashboard() {
 
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm"
+                  className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-sm"
                 >
                   <div className="flex items-center justify-between mb-4">
                     <div className="p-2 bg-gray-100 rounded-lg">
@@ -217,7 +252,7 @@ export default function Dashboard() {
 
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm"
+                  className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-sm"
                 >
                   <div className="flex items-center justify-between mb-4">
                     <div className="p-2 bg-gray-100 rounded-lg">
@@ -340,7 +375,7 @@ export default function Dashboard() {
                   <motion.div
                     key={integration.id}
                     whileHover={{ scale: 1.01 }}
-                    className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm"
+                    className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-sm"
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center space-x-3">

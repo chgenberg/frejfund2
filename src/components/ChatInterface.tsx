@@ -802,19 +802,19 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       <motion.header 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between"
+        className="bg-white border-b border-gray-200 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between"
       >
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-3">
           <motion.div 
-            className="w-10 h-10 bg-black rounded-xl flex items-center justify-center cursor-pointer"
+            className="w-8 h-8 sm:w-10 sm:h-10 bg-black rounded-xl flex items-center justify-center cursor-pointer"
             whileHover={{ scale: 1.05 }}
             onClick={() => window.location.href = '/dashboard'}
           >
-            <Sparkles className="w-6 h-6 text-white" />
+            <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
           </motion.div>
           <div>
-            <h1 className="text-lg font-bold text-black">FrejFund Business Advisor</h1>
-            <p className="text-sm text-gray-600">Investment Intelligence for {businessInfo.name}</p>
+            <h1 className="text-sm sm:text-lg font-bold text-black">FrejFund</h1>
+            <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">Investment Intelligence for {businessInfo.name}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -923,13 +923,13 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                 </div>
               )}
               
-              <div className={`max-w-2xl ${message.sender === 'user' ? 'order-1' : ''}`}>
+              <div className={`max-w-xl sm:max-w-2xl ${message.sender === 'user' ? 'order-1' : ''}`}>
                 <motion.div
                   initial={{ scale: 0.95, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   whileHover={{ scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  className={`px-5 py-3.5 group relative overflow-hidden ${
+                  className={`px-3 sm:px-5 py-2.5 sm:py-3.5 group relative overflow-hidden ${
                     message.sender === 'user'
                       ? 'bg-gray-800 text-white rounded-2xl rounded-br-md shadow-lg'
                       : message.type === 'analysis'
@@ -1323,7 +1323,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
 
       {/* Input */}
       <motion.div 
-        className="px-6 py-4 bg-white backdrop-blur-xl border-t border-gray-100 relative z-[60]"
+        className="px-3 sm:px-6 py-3 sm:py-4 bg-white backdrop-blur-xl border-t border-gray-100 relative z-[60]"
         initial={{ y: 100 }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -1357,14 +1357,14 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder={placeholderQuestions[currentPlaceholderIndex]}
-              className="relative w-full px-5 py-3.5 pr-14 bg-gray-50 border border-gray-200 rounded-full focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all text-black placeholder-gray-400 text-[15px] z-10"
+              className="relative w-full px-4 sm:px-5 py-2.5 sm:py-3.5 pr-12 sm:pr-14 bg-gray-50 border border-gray-200 rounded-full focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all text-black placeholder-gray-400 text-sm sm:text-[15px] z-10"
             />
               {isTyping ? (
             <motion.button
               whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => abortRef.current?.abort()}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center hover:bg-gray-300 transition-all"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center hover:bg-gray-300 transition-all"
                 >
                   <X className="w-4 h-4" />
                 </motion.button>
@@ -1374,7 +1374,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               whileTap={{ scale: 0.9 }}
               onClick={handleSendMessage}
                   disabled={!inputValue.trim()}
-                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all ${
                     inputValue.trim() 
                       ? 'bg-black text-white hover:bg-gray-800' 
                       : 'bg-gray-100 text-gray-400 cursor-not-allowed'
