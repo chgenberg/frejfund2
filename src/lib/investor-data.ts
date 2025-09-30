@@ -1,6 +1,6 @@
 // Swedish & European Venture Capital Database
-// Auto-generated from Sweden_vc.docx
-// Last updated: 2025-09-30T19:53:42.995Z
+// Auto-generated and translated to English
+// Last updated: 2025-09-30T19:56:13.797Z
 // Total investors: 91
 
 export const INVESTOR_SEED_DATA = [
@@ -22,9 +22,6 @@ export const INVESTOR_SEED_DATA = [
     "notableInvestments": [
       "Baserad",
       "Stockholm",
-      "Serie",
-      "Portföljen",
-      "Spotify",
       "Klarna"
     ],
     "tags": [
@@ -119,8 +116,6 @@ export const INVESTOR_SEED_DATA = [
       "nordics"
     ],
     "notableInvestments": [
-      "Norden",
-      "Drivs",
       "Deltar"
     ],
     "tags": [
@@ -242,7 +237,7 @@ export const INVESTOR_SEED_DATA = [
     ],
     "ranking": 82,
     "fundSize": 1000000,
-    "thesis": "Stockholmsbaserad såddfond. Investerar i pre-seed och seed (ibland upp till A-rundor). Är branschagnostisk men med tydlig förkärlek för mjukvarudrivna bolag[13][14]. Typisk initialinvestering kring $1 mn. Backas av framstående nordiska tech-profiler.",
+    "thesis": "Stockholm-based seed fund. invests i pre-seed and seed (ibland upp to A-rundor). is sector-agnostic ma with tydlig forkislek for software-driven companies. typical initial investment around $1 mn. Backas by framståade nordiska tech-profiler.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -269,7 +264,7 @@ export const INVESTOR_SEED_DATA = [
       "sweden"
     ],
     "ranking": 81,
-    "thesis": "Venturefond i Stockholm som stöttar erfarna entreprenörer. Investerar från accelerator- och seedstadiet upp till Serie A[16]. Uequity bygger värdefulla bolag tillsammans med grundare – fonden leds av ett nätverk av tidigare framgångsrika företagare[17].",
+    "thesis": "Vaturefund i Stockholm that supports experienced atrepraörer. invests from accelerator- and seedstadiet upp to Serie A. Uequity builds visdefulla companies tosammans with founders – funda led by a network by previous successful foretagare.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -354,7 +349,7 @@ export const INVESTOR_SEED_DATA = [
       "sweden"
     ],
     "ranking": 78,
-    "thesis": "Göteborgsbaserad inkubator och såddinvestor kopplad till Chalmers tekniska högskola. Rankas som Nordens bästa universitetsinkubator[22]. Investerar i deep tech och tech-startups sprungna ur forskning och innovation. Tillhandahåller även affärsutvecklingsstöd via inkubatorprogram.",
+    "thesis": "Göteborgsbaserad inkubator and såddinvestor kopplad to Chalmers tekniska högskola. Rankas that Nordas bästa universitetsinkubator. invests i deep tech and tech-startups sprungna ur forskning and innovation. tohandahåller äva affissutvecklingsstöd via inkubatorprogram.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -445,7 +440,7 @@ export const INVESTOR_SEED_DATA = [
       "sweden"
     ],
     "ranking": 74,
-    "thesis": "Investerar pre-seed-kapital i de allra tidigaste danska startup-bolagen. Har backing av danska staten och privata LPs. Typisk initialinvestering ~€50–300k för att hjälpa bolag från idéstadium till första traction. Bredd inom ICT, fintech, sustaintech m.m.",
+    "thesis": "invests pre-seed-capital i de allra tidigaste danska startup-companiesa. Har backing by danska stata and privata LPs. typical initial investment ~€50–300k for att hjälpa companies from idéstadium to forsta traction. Bredd inom ICT, fintech, sustaintech m.m.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -469,12 +464,9 @@ export const INVESTOR_SEED_DATA = [
       "nordics"
     ],
     "notableInvestments": [
-      "Köpenhamn",
       "Saa",
-      "Investerar",
       "Europa",
       "Grundat",
-      "Internet Ventures Scandinavia",
       "Northcap"
     ],
     "tags": [
@@ -510,7 +502,7 @@ export const INVESTOR_SEED_DATA = [
     ],
     "ranking": 71,
     "fundSize": 3300000000,
-    "thesis": "Oslo-baserad tillväxtinvestor (growth equity) med rötter i Norden. Förvaltar ~€3 mdr över flera fonder[25]. Investerar i tech-bolag i tillväxtfas inom bl.a. mjukvara, e-handel och hållbarhet. Tar ofta betydande minoritetsposter och hjälper bolag växa organiskt eller via förvärv.",
+    "thesis": "Oslo-baserad toväxtinvestor (growth equity) with rötter i Norda. forvaltar ~€3 mdr över flera funder. invests i tech-companies i toväxtfas inom bl.a. mjukvara, e-handel and hållbarhet. Tar ofta betydande minoritetsposter and hjälper companies växa organiskt eller via forvisv.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -538,7 +530,7 @@ export const INVESTOR_SEED_DATA = [
       "sweden"
     ],
     "ranking": 70,
-    "thesis": "Tidigfas-VC baserad i Oslo. Investerar i norska tech-startups i seed/A-fas, ofta inom ICT, SaaS och deep tech. Förvaltar flera mindre fonder (~NOK 500 mn totalt). Kända investeringar: Unacast, Kahoot. Samarbetar gärna med internationella VC:er för att hjälpa norska bolag ut i världen.",
+    "thesis": "Tidigfas-VC baserad i Oslo. invests i norska tech-startups i seed/A-fas, ofta inom ICT, SaaS and deep tech. forvaltar flera mindre funder (~NOK 500 mn totalt). Kända investeringar: Unacast, Kahoot. Samarbetar gisna with internationella VC:er for att hjälpa norska companies ut i vislda.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -565,7 +557,7 @@ export const INVESTOR_SEED_DATA = [
       "sweden"
     ],
     "ranking": 69,
-    "thesis": "Norges statliga riskkapitalfond (Trondheim/Oslo). Investerar från tidig till sen tillväxtfas i lovande norska företag inom bl.a. tech, industri och havsbruk. Förvaltar ~NOK 4 mdr. Co-investerar alltid med privata aktörer, driver ej egna affärer.",
+    "thesis": "Norges statliga riskcapitalfund (Trondheim/Oslo). invests from tidig to sa toväxtfas i lovande norska foretag inom bl.a. tech, industri and hbysbruk. forvaltar ~NOK 4 mdr. Co-invests alltid with privata aktörer, driver ej egna affiser.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -654,7 +646,7 @@ export const INVESTOR_SEED_DATA = [
     ],
     "ranking": 65,
     "fundSize": 253000000,
-    "thesis": "Ledande finsk VC (~€230 mn i basfond)[26]. Investerar från tidig seed upp till expansion. Gillar djärva satsningar på deep tech och “domains many don’t feel comfortable with”[27] – har kapacitet att följa med från första investering till tillväxt. Kontor i Helsingfors och Stockholm[28].",
+    "thesis": "Ledande finsk VC (~€230 mn i basfund). invests from tidig seed upp to expansion. Gillar djisva satsningar på deep tech and “domains many don’t feel comfortable with” – har kapacitet att följa with from forsta investering to toväxt. Kontor i Helsingfors and Stockholm.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -737,10 +729,6 @@ export const INVESTOR_SEED_DATA = [
     "notableInvestments": [
       "London",
       "Skype",
-      "Niklas Zennström",
-      "Investerar",
-      "Series",
-      "Förvaltar",
       "Europa",
       "Portfölj",
       "Klarna",
@@ -779,7 +767,7 @@ export const INVESTOR_SEED_DATA = [
       "sweden"
     ],
     "ranking": 60,
-    "thesis": "Internationell topp-VC med rötter i Europa (grundad i Genève, HQ i London). Investerar brett från seed till growth i techbolag i både Europa och USA. Förvaltar $bn+ och har stöttat 100+ unicorns. Kända investeringar: Adyen, Roblox, Deliveroo.",
+    "thesis": "Internationell topp-VC with rötter i Europa (grundad i Gaève, HQ i London). invests bra from seed to growth i techcompanies i både Europa and USA. forvaltar $bn+ and har stöttat 100+ unicorns. Kända investeringar: Adya, Roblox, Deliveroo.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -802,16 +790,10 @@ export const INVESTOR_SEED_DATA = [
       "nordics"
     ],
     "notableInvestments": [
-      "Amerikansk",
       "London",
-      "Investerar",
-      "Series",
       "Europa",
-      "Israel",
-      "Fond",
       "Portfölj",
-      "Facebook",
-      "Spotify"
+      "Facebook"
     ],
     "tags": [
       "sweden"
@@ -844,8 +826,6 @@ export const INVESTOR_SEED_DATA = [
     "notableInvestments": [
       "London",
       "Europa",
-      "Investerar",
-      "Series",
       "Portfölj",
       "Revolut",
       "Depop",
@@ -882,10 +862,8 @@ export const INVESTOR_SEED_DATA = [
     "notableInvestments": [
       "Europas",
       "London",
-      "Investerar",
       "Portfölj",
       "Transfer",
-      "Wise",
       "Path",
       "Revolut",
       "Seedcamp"
@@ -894,7 +872,7 @@ export const INVESTOR_SEED_DATA = [
       "sweden"
     ],
     "ranking": 57,
-    "thesis": "Europas ledande pre-seed/seed-fond baserad i London. Investerar litet belopp tidigt (typiskt $100–250k) i hundratals startups och hjälper dem nå nästa nivå. Portfölj: TransferWise, UiPath, Revolut (alla unicorns som började hos Seedcamp). Har ett brett nätverk för vidare finansiering.",
+    "thesis": "Europas ledande pre-seed/seed-fund baserad i London. invests litet belopp tidigt (typicalt $100–250k) i hundratals startups and hjälper dem nå nästa nivå. Portfölj: TransferWise, UiPath, Revolut (alla unicorns that började hos Seedcamp). Har a bra network for vidare finansiering.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 9,
@@ -922,8 +900,6 @@ export const INVESTOR_SEED_DATA = [
     ],
     "notableInvestments": [
       "London",
-      "Investerar",
-      "Serie",
       "Europa",
       "Fokus",
       "Kan",
@@ -960,13 +936,9 @@ export const INVESTOR_SEED_DATA = [
     "notableInvestments": [
       "Europas",
       "London",
-      "Investerar",
-      "Serie",
       "Portfölj",
       "Graphcore",
-      "Revolut",
-      "Trustpilot",
-      "Molten"
+      "Revolut"
     ],
     "tags": [
       "sweden"
@@ -1002,7 +974,7 @@ export const INVESTOR_SEED_DATA = [
     ],
     "ranking": 54,
     "fundSize": 1000000000,
-    "thesis": "London- och SF-baserad VC specialiserad på B2B software och fintech. Investerar i Series A och B (rundanivå $5–20 mn) i Europa. Har ~$1 mdr under förvaltning. Kända investeringar: iZettle, Tink, Collibra.",
+    "thesis": "London- and SF-baserad VC specialiserad på B2B software and fintech. invests i Series A and B (rundanivå $5–20 mn) i Europa. Har ~$1 mdr under forvaltning. Kända investeringar: iZale, Tink, Collibra.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -1031,7 +1003,7 @@ export const INVESTOR_SEED_DATA = [
     "ranking": 53,
     "fundSize": 1100000000,
     "yearFounded": 1996,
-    "thesis": "Ursprungligen nordisk men numera London-headquartered VC[40]. Förvaltar 10 fonder (~€1 mdr) och har gjort 150+ investeringar sedan start 1996. Investerar tvärs alla faser – från seed till pre-IPO – i techbolag som Klarna, Spotify, Trustpilot[41][42]. Kontor i London, Stockholm, NYC, Oslo.",
+    "thesis": "Ursprungliga nordisk ma numera London-headquartered VC. forvaltar 10 funder (~€1 mdr) and har gjort 150+ investeringar sedan start 1996. invests tviss alla faser – from seed to pre-IPO – i techcompanies that Klarna, Spotify, Trustpilot. Kontor i London, Stockholm, NYC, Oslo.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -1056,12 +1028,9 @@ export const INVESTOR_SEED_DATA = [
     "notableInvestments": [
       "London",
       "Saa",
-      "Series",
       "Grundad",
       "Message",
       "Labs",
-      "Förvaltar",
-      "Investerar",
       "Europa",
       "Portfölj"
     ],
@@ -1096,12 +1065,9 @@ export const INVESTOR_SEED_DATA = [
       "nordics"
     ],
     "notableInvestments": [
-      "Tidigfas",
       "London",
-      "Investerar",
       "Europa",
       "Portfölj",
-      "Five",
       "Paddle",
       "Saa"
     ],
@@ -1110,7 +1076,7 @@ export const INVESTOR_SEED_DATA = [
     ],
     "ranking": 51,
     "fundSize": 100000000,
-    "thesis": "Tidigfas-fond i London (~$100 mn) som tillämpar ”equal carry”-modell (delar vinsten med grundarna). Investerar i seed-rundor i UK/Europa över olika sektorer (fintech, deeptech, konsument). Portfölj: Five (autonoma bilar), Paddle (SaaS) m.fl.",
+    "thesis": "Tidigfas-fund i London (~$100 mn) that toämpar ”equal carry”-modell (delar vinsta with grundarna). invests i seed-rundor i UK/Europa över olika sektorer (fintech, deeptech, konsumat). Portfölj: Five (autonoma bilar), Paddle (SaaS) m.fl.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 8,
@@ -1165,13 +1131,9 @@ export const INVESTOR_SEED_DATA = [
     "notableInvestments": [
       "London",
       "Saa",
-      "Investerar",
-      "Serie",
       "Europa",
       "Portfölj",
-      "Farfetch",
-      "Deliveroo",
-      "Mejuri"
+      "Farfetch"
     ],
     "tags": [
       "sweden"
@@ -1206,14 +1168,12 @@ export const INVESTOR_SEED_DATA = [
     "notableInvestments": [
       "Veteran",
       "Hermann Hauser",
-      "Investerar",
       "Hanterar",
       "Portfölj",
       "Solo",
       "Learn",
       "Fore",
-      "Scout",
-      "Fokusområden"
+      "Scout"
     ],
     "tags": [
       "sweden"
@@ -1250,7 +1210,7 @@ export const INVESTOR_SEED_DATA = [
       "sweden"
     ],
     "ranking": 47,
-    "thesis": "Framstående seed-fond i London (grundad av Saul & Robin Klein). LocalGlobe investerar i pre-seed/seed i UK och Europa (Spotify, Zoopla som tidiga case). Dess systerfond Latitude gör större följdinvesteringar i tillväxtfas. Tillsammans täcker de från försådd till serie C.",
+    "thesis": "Framståade seed-fund i London (grundad by Saul & Robin Klein). LocalGlobe invests i pre-seed/seed i UK and Europa (Spotify, Zoopla that tidiga case). Dess systerfund Latitude gör större följdinvesteringar i toväxtfas. tosammans täcker de from forsådd to serie C.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -1274,10 +1234,7 @@ export const INVESTOR_SEED_DATA = [
     ],
     "notableInvestments": [
       "Growth",
-      "Series",
       "Spunnet",
-      "Highland Capital",
-      "Investerar",
       "Portfölj",
       "Wolt",
       "Transfer",
@@ -1316,7 +1273,7 @@ export const INVESTOR_SEED_DATA = [
     ],
     "ranking": 45,
     "fundSize": 4400000000,
-    "thesis": "Ledande europeisk growth-investor (PE/VC hybrid) med bas i London. Investerar i senare skeden (Series C och uppåt) i tech-driven sektorer: bl.a. internetkonsumt, fintech, mjukvara, hälsa. Fond IV €4 mdr. Kända deals: Just Eat, Marqeta, Trustpilot.",
+    "thesis": "Ledande europeisk growth-investor (PE/VC hybrid) with bas i London. invests i saare skeda (Series C and uppåt) i tech-driva sektorer: bl.a. internetkonsumt, fintech, mjukvara, hälsa. fund IV €4 mdr. Kända deals: Just Eat, Marqeta, Trustpilot.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -1339,12 +1296,8 @@ export const INVESTOR_SEED_DATA = [
       "nordics"
     ],
     "notableInvestments": [
-      "Tidigfas",
       "London",
-      "Köpenhamn",
-      "Investerar",
       "Europa",
-      "Typiskt",
       "Hjälper",
       "Exempel",
       "Depop"
@@ -1408,12 +1361,8 @@ export const INVESTOR_SEED_DATA = [
     ],
     "notableInvestments": [
       "London",
-      "Series",
       "Europa",
       "Grundad",
-      "Ophelia Brown",
-      "Fond",
-      "Investerar",
       "Portfölj",
       "Moon",
       "Pay"
@@ -1449,15 +1398,9 @@ export const INVESTOR_SEED_DATA = [
     ],
     "notableInvestments": [
       "Tysklands",
-      "Investerar",
-      "Digital West",
       "Health",
-      "Uni",
-      "Förvaltar",
       "Portfölj",
-      "Path",
-      "Berlin",
-      "Istanbul"
+      "Path"
     ],
     "tags": [
       "sweden"
@@ -1465,7 +1408,7 @@ export const INVESTOR_SEED_DATA = [
     "ranking": 40,
     "fundSize": 1100000000,
     "yearFounded": 1997,
-    "thesis": "En av Tysklands äldsta VC-firmor (grundad 1997). Investerar över alla faser – från startup till tillväxt – med flera fonder (Digital West, Health, UNI-X för Uni-spinoffs, m.fl.). Förvaltar >€1 mdr. Portfölj: 7 IPO och 30+ exits[47] (bl.a. N26, UiPath). Har kontor i Berlin, München, Istanbul.",
+    "thesis": "a by Tysklands äldsta VC-firmor (grundad 1997). invests över alla faser – from startup to toväxt – with flera funder (Digital West, Health, UNI-X for Uni-spinoffs, m.fl.). forvaltar >€1 mdr. Portfölj: 7 IPO and 30+ exits (bl.a. N26, UiPath). Har kontor i Berlin, Müncha, Istanbul.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 10,
@@ -1495,7 +1438,7 @@ export const INVESTOR_SEED_DATA = [
     "ranking": 39,
     "fundSize": 1100000000,
     "yearFounded": 2000,
-    "thesis": "Ledande München-baserad VC (tidigare Holtzbrinck). Förvaltar >€1 mdr över 8 fonder[48]. Investerar i konsumtions- och enterprise-tech globalt, över flera faser (från seed till growth). Har stöttat >185 startups sedan 2000 (t.ex. Zalando, Delivery Hero, Flixbus).",
+    "thesis": "Ledande Müncha-baserad VC (previous Holtzbrinck). forvaltar >€1 mdr över 8 funder. invests i konsumtions- and aterprise-tech globalt, över flera faser (from seed to growth). Har stöttat >185 startups sedan 2000 (t.ex. Zalando, Delivery Hero, Flixbus).",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -1518,20 +1461,16 @@ export const INVESTOR_SEED_DATA = [
       "nordics"
     ],
     "notableInvestments": [
-      "Berlin",
       "Zalando",
-      "Investerar",
       "Portfölj",
       "Auto",
-      "Flixbus",
-      "Infarm",
       "Teamet"
     ],
     "tags": [
       "sweden"
     ],
     "ranking": 38,
-    "thesis": "Berlin-baserad seed-fond (grundad av ex-Zalando folk). Investerar tidigt (~€0.2–2 mn) i europeiska tech-startups, ofta som ledande investerare. Portfölj: Auto1, Flixbus, Infarm m.fl. Teamet har själva entreprenörsbakgrund och erbjuder plattformstöd åt grundarna[49].",
+    "thesis": "Berlin-baserad seed-fund (grundad by ex-Zalando folk). invests tidigt (~€0.2–2 mn) i europeiska tech-startups, ofta that ledande investse. Portfölj: Auto1, Flixbus, Infarm m.fl. Teamet har själva atrepraörsbakgrund and erbjuder plattformstöd åt grundarna.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 8,
@@ -1555,11 +1494,8 @@ export const INVESTOR_SEED_DATA = [
       "nordics"
     ],
     "notableInvestments": [
-      "Berlinbaserad",
       "Saa",
-      "Investerar",
       "Europa",
-      "Zendesk",
       "Revolut",
       "Saa",
       "Europa"
@@ -1590,12 +1526,7 @@ export const INVESTOR_SEED_DATA = [
       "sweden",
       "nordics"
     ],
-    "notableInvestments": [
-      "Berlin",
-      "Investerar",
-      "Serie",
-      "Fond"
-    ],
+    "notableInvestments": [],
     "tags": [
       "sweden"
     ],
@@ -1687,22 +1618,16 @@ export const INVESTOR_SEED_DATA = [
       "nordics"
     ],
     "notableInvestments": [
-      "Berlin",
-      "Rocket Internet",
-      "Investerar",
       "Europa",
-      "Nordamerika",
-      "Asien",
       "Känd",
       "Portfölj",
-      "Facebook",
-      "Linked"
+      "Facebook"
     ],
     "tags": [
       "sweden"
     ],
     "ranking": 33,
-    "thesis": "En global VC-fond med stark närvaro i Berlin (kopplad till Rocket Internet). Investerar från pre-seed till serie C i en mängd internet- och teknologibolag världen över (mycket aktiv i Europa, Nordamerika, Asien). Känd för snabb beslutsförmåga och stor deal-flow. Portfölj: Facebook (tidigt), LinkedIn, Lazada m.fl.",
+    "thesis": "a global VC-fund with stark nisvaro i Berlin (kopplad to Rocket Internet). invests from pre-seed to serie C i a mängd internet- and teknologicompanies vislda över (mycket aktiv i Europa, Nordamerika, Asia). Känd for snabb beslutsformåga and stor deal-flow. Portfölj: Facebook (tidigt), LinkedIn, Lazada m.fl.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 10,
@@ -1731,7 +1656,7 @@ export const INVESTOR_SEED_DATA = [
     "ranking": 32,
     "fundSize": 330000,
     "yearFounded": 2005,
-    "thesis": "Tysklands mest aktiva seed-investerare (offentligt-privat). Bas i Bonn. Investerar såddkapital (typiskt €0.3 mn initialt) i nybildade tech-startups inom industri, digital, life science m.m. Har stöttat 600+ bolag sedan 2005. Tillhandahåller även rådgivning via sitt nätverk av industripartners.",
+    "thesis": "Tysklands mest aktiva seed-investse (offatligt-privat). Bas i Bonn. invests såddcapital (typicalt €0.3 mn initialt) i nybildade tech-startups inom industri, digital, life science m.m. Har stöttat 600+ companies sedan 2005. tohandahåller äva rådgivning via sitt network by industripartners.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -1755,12 +1680,8 @@ export const INVESTOR_SEED_DATA = [
     ],
     "notableInvestments": [
       "Köln",
-      "Berlin",
-      "Series",
-      "Investerar",
       "Saa",
       "Delar",
-      "Mont Media",
       "Portfölj",
       "Staffbase",
       "Lean"
@@ -1799,7 +1720,7 @@ export const INVESTOR_SEED_DATA = [
       "sweden"
     ],
     "ranking": 29,
-    "thesis": "Stort internationellt VC-hus med Paris som ena nav (även SF, Dakar, Berlin). Investerar i internet- & tech-startups på seed, venture och growth[53]. Sektorer: allt från enterprise software och deep tech till marketplaces och media. Hanterar fonder globalt (inkl. en Afrikafond).",
+    "thesis": "Stort internationellt VC-hus with Paris that aa nby (äva SF, Dakar, Berlin). invests i internet- & tech-startups på seed, venture and growth. Sektorer: allt from aterprise software and deep tech to marketplaces and withia. Hanterar funder globalt (inkl. a Afrikafund).",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -1823,14 +1744,8 @@ export const INVESTOR_SEED_DATA = [
       "nordics"
     ],
     "notableInvestments": [
-      "Paris",
-      "Alven Capital",
       "Femte",
-      "Driver",
-      "Alven Magazine",
-      "Portfölj",
-      "Dataiku",
-      "Algolia"
+      "Portfölj"
     ],
     "tags": [
       "sweden"
@@ -1865,7 +1780,7 @@ export const INVESTOR_SEED_DATA = [
     ],
     "ranking": 27,
     "fundSize": 8800000000,
-    "thesis": "Stor Paris-baserad investerare som erbjuder riskkapital i flera faser. Har ~€8 mdr under förvaltning och har finansierat 4000+ europeiska företag[56]. Numera integrerad i Eurazeo. Deras venture-team investerar direkt i unga innovativa bolag med hög tillväxtpotential, både tech och life science.",
+    "thesis": "Stor Paris-baserad investse that erbjuder riskcapital i flera faser. Har ~€8 mdr under forvaltning and har finansierat 4000+ europeiska foretag. Numera integrerad i Eurazeo. Deras venture-team invests direkt i unga innovativa companies with hög toväxtpotatial, både tech and life science.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -1891,15 +1806,8 @@ export const INVESTOR_SEED_DATA = [
       "nordics"
     ],
     "notableInvestments": [
-      "Paris",
-      "Serie",
       "Kontor",
-      "Paris",
-      "Helsinki",
-      "Shanghai",
-      "Portfölj",
-      "Vestiaire Collective",
-      "Withings"
+      "Portfölj"
     ],
     "tags": [
       "sweden"
@@ -1933,7 +1841,7 @@ export const INVESTOR_SEED_DATA = [
     ],
     "ranking": 25,
     "fundSize": 187000000,
-    "thesis": "Parisbaserad VC som kallar sig ett \"venture capital mutant\" – de kombinerar investerare, community-builders, plattformspecialister mm i sitt team[58]. Förvaltar ~€170 mn. Investerar i tidig fas (seed/A) i uppstartsföretag med europeiskt ursprung men global ambition.",
+    "thesis": "Parisbaserad VC that kallar sig a \"venture capital mutant\" – de kombinerar investse, community-builders, plattformspecialister mm i sitt team. forvaltar ~€170 mn. invests i tidig fas (seed/A) i uppstartsforetag with europeiskt ursprung ma global ambition.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -1986,14 +1894,10 @@ export const INVESTOR_SEED_DATA = [
       "nordics"
     ],
     "notableInvestments": [
-      "Paris",
       "Hanterar",
       "Orange",
-      "Investerar",
       "Saa",
       "Portfölj",
-      "Criteo",
-      "Mirakl",
       "Ledger"
     ],
     "tags": [
@@ -2001,7 +1905,7 @@ export const INVESTOR_SEED_DATA = [
     ],
     "ranking": 23,
     "fundSize": 550000000,
-    "thesis": "VC i Paris som specialiserat sig på deep tech & B2B tech i tidiga faser. Hanterar ~€500 mn i olika fonder, inkl. en fond med Orange. Investerar i forskningsnära projekt (spinoffs) såväl som digitala SaaS. Portfölj: Criteo (IPO), Mirakl, Ledger.",
+    "thesis": "VC i Paris that specialiserat sig på deep tech & B2B tech i tidiga faser. Hanterar ~€500 mn i olika funder, inkl. a fund with Orange. invests i forskningsnisa projekt (spinoffs) såväl that digitala SaaS. Portfölj: Criteo (IPO), Mirakl, Ledger.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 9,
@@ -2028,12 +1932,8 @@ export const INVESTOR_SEED_DATA = [
     ],
     "notableInvestments": [
       "Fransk",
-      "Paris",
       "Europa",
-      "Förvaltar",
       "Erbjuder",
-      "Serena Platform",
-      "Investerar",
       "Saa"
     ],
     "tags": [
@@ -2130,13 +2030,8 @@ export const INVESTOR_SEED_DATA = [
       "Amsterdam",
       "Stockholm",
       "Saa",
-      "Fond",
-      "Drivs",
       "Nederländerna",
-      "Norden",
-      "Exempelportfölj",
-      "Creative Fabrica",
-      "Trengo"
+      "Exempelportfölj"
     ],
     "tags": [
       "sweden"
@@ -2144,7 +2039,7 @@ export const INVESTOR_SEED_DATA = [
     "ranking": 18,
     "fundSize": 72600000,
     "yearFounded": 2021,
-    "thesis": "Amsterdam- och Stockholm-baserad VC som investerar tidigt (pre-seed/seed) i plattformar, marknadsplatser och SaaS. Fond III €66 mn (2021). Drivs av entreprenörer; investerar mycket i Nederländerna, Norden och DACH. Exempelportfölj: Creative Fabrica, Trengo, Dott.",
+    "thesis": "Amsterdam- and Stockholm-baserad VC that invests tidigt (pre-seed/seed) i plattformar, marknadsplatser and SaaS. fund III €66 mn (2021). Drivs by atrepraörer; invests mycket i Nederländerna, Norda and DACH. Exempelportfölj: Creative Fabrica, Trago, Dott.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 10,
@@ -2173,7 +2068,7 @@ export const INVESTOR_SEED_DATA = [
     ],
     "ranking": 17,
     "fundSize": 550000000,
-    "thesis": "Amsterdam-baserad investerare (backad av pensionfond APG). Investerar i tidig tillväxtfas (Series A/B) i två spår: digital tech (fintech, mjukvara, AI) och hälsoteknik. Fondstorlek ~€500 mn. Långsiktig horizon (ingen hård exits-tidsram).",
+    "thesis": "Amsterdam-baserad investse (backad by pasionfund APG). invests i tidig toväxtfas (Series A/B) i två spår: digital tech (fintech, mjukvara, AI) and hälsoteknik. fundstorlek ~€500 mn. Långsiktig horizon (inga hård exits-tidsram).",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -2201,10 +2096,7 @@ export const INVESTOR_SEED_DATA = [
       "Amsterdam",
       "London",
       "Fokus",
-      "Investerar",
-      "Series",
       "Europa",
-      "Sydostasien",
       "Portfölj",
       "Goodlord",
       "Accounts"
@@ -2240,7 +2132,7 @@ export const INVESTOR_SEED_DATA = [
       "sweden"
     ],
     "ranking": 14,
-    "thesis": "Pan-europeisk VC grundad av Klaus Hommels. Har kontor i Zürich, Berlin, London m.fl. Investerar i tidig & tillväxtfas inom internet/teknik som kan skala globalt[62]. Kända investeringar: Skype, Spotify, Facebook (tidigt)[63], och senare t.ex. Revolut, Airbnb.",
+    "thesis": "Pan-europeisk VC grundad by Klaus Hommels. Har kontor i Zürich, Berlin, London m.fl. invests i tidig & toväxtfas inom internet/teknik that kan skala globalt. Kända investeringar: Skype, Spotify, Facebook (tidigt), and saare t.ex. Revolut, Airbnb.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -2264,10 +2156,7 @@ export const INVESTOR_SEED_DATA = [
     ],
     "notableInvestments": [
       "Fokus",
-      "Förvaltar",
-      "Portfölj",
-      "Inkitt",
-      "Juni"
+      "Portfölj"
     ],
     "tags": [
       "sweden"
@@ -2300,11 +2189,8 @@ export const INVESTOR_SEED_DATA = [
       "Stor",
       "Barcelona",
       "London",
-      "Investerar",
       "Saa",
-      "Serie",
       "Hanterar",
-      "Gillar",
       "Portfölj",
       "Holded"
     ],
@@ -2313,7 +2199,7 @@ export const INVESTOR_SEED_DATA = [
     ],
     "ranking": 11,
     "fundSize": 605000000,
-    "thesis": "Stor paneuropeisk VC med rötter i Barcelona (kontor även i London, München). Investerar i B2B software/SaaS från seed till Serie B. Hanterar €550 mn över flera fonder. Gillar “capital-efficient” affärsmodeller med global potential. Portfölj: Holded, Onna, zenloop m.fl.",
+    "thesis": "Stor paneuropeisk VC with rötter i Barcelona (kontor äva i London, Müncha). invests i B2B software/SaaS from seed to Serie B. Hanterar €550 mn över flera funder. Gillar “capital-efficiat” affissmodeller with global potatial. Portfölj: Holded, Onna, zaloop m.fl.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 10,
@@ -2339,15 +2225,8 @@ export const INVESTOR_SEED_DATA = [
       "nordics"
     ],
     "notableInvestments": [
-      "Madrid",
-      "Serie",
-      "Spanien",
-      "Latinamerika",
-      "Förvaltar",
       "Portfölj",
-      "Cabify",
       "Glovo",
-      "Mexico",
       "Klar"
     ],
     "tags": [
@@ -2379,14 +2258,8 @@ export const INVESTOR_SEED_DATA = [
       "nordics"
     ],
     "notableInvestments": [
-      "Madrid",
-      "Investerar",
-      "Första",
-      "Fond",
       "Portfölj",
-      "Factorial",
-      "Cobee",
-      "Pulpomatic"
+      "Cobee"
     ],
     "tags": [
       "sweden"
@@ -2394,7 +2267,7 @@ export const INVESTOR_SEED_DATA = [
     "ranking": 9,
     "fundSize": 55000000,
     "yearFounded": 2016,
-    "thesis": "Madrid-baserad VC som “lever och arbetar för entreprenörer”[67]. Investerar i tidig fas (från pre-seed till A) i spanska startups. Första fonden €50 mn 2016, nu Fond III €150 mn. Portfölj: Factorial, Cobee, Pulpomatic m.fl.",
+    "thesis": "Madrid-baserad VC that “lever and arbetar for atrepraörer”. invests i tidig fas (from pre-seed to A) i spanska startups. forsta funda €50 mn 2016, nu fund III €150 mn. Portfölj: Factorial, Cobee, Pulpomatic m.fl.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 8,
@@ -2474,20 +2347,14 @@ export const INVESTOR_SEED_DATA = [
       "nordics"
     ],
     "notableInvestments": [
-      "Belgisk",
-      "Antwerpen",
-      "Gent",
-      "Investerar",
-      "Deliveroo",
       "Showpad",
-      "London",
-      "Istanbul"
+      "London"
     ],
     "tags": [
       "sweden"
     ],
     "ranking": 5,
-    "thesis": "Belgisk VC (Antwerpen/Gent) med globalt perspektiv. Investerar i tidig tillväxtfas i teknologibolag, ofta med koppling till nya marknader. Har investerat i ca 50 bolag (bl.a. Deliveroo, Showpad) och gjort 10+ exits. Har även kontor i London och Istanbul.",
+    "thesis": "Belgisk VC (Antwerpa/Gat) with globalt perspektiv. invests i tidig toväxtfas i teknologicompanies, ofta with koppling to nya marknader. Har investerat i ca 50 companies (bl.a. Deliveroo, Showpad) and gjort 10+ exits. Har äva kontor i London and Istanbul.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 8,
@@ -2571,7 +2438,7 @@ export const INVESTOR_SEED_DATA = [
     ],
     "ranking": 1,
     "fundSize": 750000000,
-    "thesis": "Tidigfas-VC baserad i Luxemburg men med global räckvidd. Har ~$750 mn under management. Investerar i internet/tech-startups tidigt och är kända för några spektakulära hits (bl.a. tidig investerare i Skype, Wix, WalkMe)[73]. Går in i seed/A och följer med i tillväxt om bolaget tar fart.",
+    "thesis": "Tidigfas-VC baserad i Luxemburg ma with global räckvidd. Har ~$750 mn under managemat. invests i internet/tech-startups tidigt and is kända for några spektakulisa hits (bl.a. tidig investse i Skype, Wix, WalkMe). Går in i seed/A and följer with i toväxt om companieset tar fart.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -2601,7 +2468,7 @@ export const INVESTOR_SEED_DATA = [
     ],
     "ranking": 0,
     "fundSize": 187000000,
-    "thesis": "VC baserad i Luxemburg (med team i Madrid) som investerar i B2B deeptech – särskilt inom dataanalys, cybersäkerhet, enterprise software. Förvaltar tre fonder ~€170 mn. Uppdrag: backa företag med överlägsen ingenjörskonst och innovation som kan revolutionera sin industri[75].",
+    "thesis": "VC baserad i Luxemburg (with team i Madrid) that invests i B2B deeptech – sisskilt inom dataanalys, cybersäkerhet, aterprise software. forvaltar tre funder ~€170 mn. Uppdrag: backa foretag with överlägsa ingajörskonst and innovation that kan revolutionera sin industri.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -2625,23 +2492,15 @@ export const INVESTOR_SEED_DATA = [
       "nordics"
     ],
     "notableInvestments": [
-      "Mil",
-      "Investerar",
-      "Serie",
-      "Förvaltar",
       "Stöds",
-      "Azimut",
-      "Portfölj",
-      "Milkman",
-      "Musixmatch",
-      "Tannico"
+      "Portfölj"
     ],
     "tags": [
       "sweden"
     ],
     "ranking": -2,
     "fundSize": 132000000,
-    "thesis": "Milánobaserad VC specialiserad på digital teknologi och e-handel. Investerar i tidiga skeden (främst Serie A) i italienska scale-ups. Förvaltar två fonder (~€120 mn). Stöds av Azimut. Portfölj: Milkman, Musixmatch, Tannico m.fl.",
+    "thesis": "Milánobaserad VC specialiserad på digital teknologi and e-handel. invests i tidiga skeda (främst Serie A) i italiaska scale-ups. forvaltar två funder (~€120 mn). Stöds by Azimut. Portfölj: Milkman, Musixmatch, Tannico m.fl.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 10,
@@ -2666,10 +2525,7 @@ export const INVESTOR_SEED_DATA = [
       "nordics"
     ],
     "notableInvestments": [
-      "Milano",
-      "Serie",
       "Hanterar",
-      "Investerar",
       "Portfölj",
       "Moneyfarm",
       "Face",
@@ -2681,7 +2537,7 @@ export const INVESTOR_SEED_DATA = [
     "ranking": -3,
     "fundSize": 220000000,
     "yearFounded": 2013,
-    "thesis": "VC i Milano (grundad 2013) som investerar i tidig tillväxtfas (från seed till Serie B) i italienska tech-bolag. Hanterar €200 mn+. Investerar inom digital underhållning, fintech, enterprise software, mobilitet m.m. Portfölj: Moneyfarm, FaceIT, Boohoo.",
+    "thesis": "VC i Milano (grundad 2013) that invests i tidig toväxtfas (from seed to Serie B) i italiaska tech-companies. Hanterar €200 mn+. invests inom digital underhållning, fintech, aterprise software, mobilitet m.m. Portfölj: Moneyfarm, FaceIT, Boohoo.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 8,
@@ -2705,10 +2561,7 @@ export const INVESTOR_SEED_DATA = [
       "sweden",
       "nordics"
     ],
-    "notableInvestments": [
-      "Wiens",
-      "Investerar"
-    ],
+    "notableInvestments": [],
     "tags": [
       "sweden"
     ],
@@ -2742,7 +2595,7 @@ export const INVESTOR_SEED_DATA = [
     ],
     "ranking": -6,
     "fundSize": 77000000,
-    "thesis": "Offentligt stödd VC-fond baserad i Wien. Investerar i tidig fas i österrikiska startups – 26 bolag finansierade hittills, 6 exits[79]. Fondstorlek ~€70 mn. Fonden saminvesterar alltid med privata investerare och strävar efter att hjälpa bolag till hållbar tillväxt.",
+    "thesis": "Offatligt stödd VC-fund baserad i Wia. invests i tidig fas i österrikiska startups – 26 companies finansierade hittos, 6 exits. fundstorlek ~€70 mn. funda saminvests alltid with privata investse and strävar efter att hjälpa companies to hållbar toväxt.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -2857,7 +2710,7 @@ export const INVESTOR_SEED_DATA = [
     ],
     "ranking": -13,
     "fundSize": 77000000,
-    "thesis": "Estnisk VC (Tallinn) som investerar i late seed och Serie A rundor i europeiska deep tech-bolag. Första fonden €70 mn (backad av Skype-grundarnas investeringsbolag m.fl.) Investerar i tech med kundtraction och global ambition[84].",
+    "thesis": "Estnisk VC (Tallinn) that invests i late seed and Serie A rundor i europeiska deep tech-companies. forsta funda €70 mn (backad by Skype-grundarnas investeringscompanies m.fl.) invests i tech with kundtraction and global ambition.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -2914,7 +2767,7 @@ export const INVESTOR_SEED_DATA = [
     ],
     "ranking": -16,
     "fundSize": 880000000,
-    "thesis": "Warszawa-baserad tech-investor med både VC- och PE-fonder (~€800 mn AUM). Investerar i senare skeden (Series B och framåt) i Central- och Nordeuropeiska bolag inom e-handel, fintech, SaaS m.fl. Offentlig på polska börsen.",
+    "thesis": "Warszawa-baserad tech-investor with både VC- and PE-funder (~€800 mn AUM). invests i saare skeda (Series B and framåt) i Catral- and Nordeuropeiska companies inom e-handel, fintech, SaaS m.fl. Offatlig på polska börsa.",
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
