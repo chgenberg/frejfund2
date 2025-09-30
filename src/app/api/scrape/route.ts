@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import '@/lib/polyfills';
 import { scrapeUrl, scrapeSiteShallow, scrapeSiteDeep } from '@/lib/web-scraper';
 
 export const runtime = 'nodejs';
