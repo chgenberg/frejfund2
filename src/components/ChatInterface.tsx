@@ -858,7 +858,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                     message.sender === 'user'
                       ? 'bg-black text-white rounded-2xl rounded-br-md'
                       : message.type === 'analysis'
-                      ? 'bg-gradient-to-br from-gray-50 to-gray-100 text-black rounded-2xl rounded-bl-md shadow-sm'
+                      ? 'bg-gray-50 text-black rounded-2xl rounded-bl-md shadow-sm'
                       : 'bg-white text-black rounded-2xl rounded-bl-md shadow-sm ring-1 ring-gray-100'
                   }`}
                 >
@@ -975,7 +975,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
             <motion.div className="relative">
               {/* Animated glow effect */}
               <motion.div
-                className="absolute -inset-1 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-400 rounded-full blur-md"
+                className="absolute -inset-1 bg-gray-400 rounded-full blur-md"
                 animate={{ 
                   scale: [1, 1.2, 1],
                   opacity: [0.5, 0.8, 0.5],
@@ -984,7 +984,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                 transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
               />
               <motion.div 
-                className="relative w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg"
+                className="relative w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center shadow-lg"
                 animate={{ scale: [1, 1.05, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
@@ -1011,7 +1011,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                       className="relative"
                     >
                       <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full blur-sm"
+                        className="absolute inset-0 bg-gray-400 rounded-full blur-sm"
                         animate={{ 
                           scale: [0, 2, 0],
                           opacity: [0, 0.5, 0]
@@ -1034,7 +1034,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                           delay,
                           ease: "easeInOut"
                         }}
-                        className="relative w-2.5 h-2.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
+                        className="relative w-2.5 h-2.5 bg-gray-600 rounded-full"
                       />
                     </motion.div>
                   ))}
@@ -1062,7 +1062,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
 
       {/* Right panel: Proactive tips */}
       {showTips && (
-        <div className="absolute right-4 top-20 bottom-20 w-80 bg-white border border-gray-200 rounded-xl shadow p-4 overflow-y-auto z-50">
+        <div className="fixed right-4 top-20 bottom-20 w-80 bg-white border border-gray-200 rounded-xl shadow p-4 overflow-y-auto z-30">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm font-semibold text-black">Proactive tips</div>
             <button onClick={() => setShowTips(false)} className="text-xs text-gray-600 hover:text-black">Close</button>
@@ -1137,7 +1137,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ type: "spring", stiffness: 200, damping: 20 }}
-            className="absolute bottom-28 left-0 right-0 px-6 pointer-events-none z-40"
+            className="absolute bottom-32 left-0 right-0 px-6 pointer-events-none z-20"
           >
             <div className="max-w-5xl mx-auto">
               <motion.p 
@@ -1226,7 +1226,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
 
       {/* Input */}
       <motion.div 
-        className="px-6 py-4 bg-white backdrop-blur-xl border-t border-gray-100 relative z-50"
+        className="px-6 py-4 bg-white backdrop-blur-xl border-t border-gray-100 relative z-[60]"
         initial={{ y: 100 }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -1241,7 +1241,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               {/* Pulsing glow effect when ready */}
               {!isTyping && (
                 <motion.div
-                  className="absolute -inset-0.5 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 rounded-full blur opacity-30"
+                  className="absolute -inset-0.5 bg-gray-400 rounded-full blur opacity-20"
                   animate={{ 
                     scale: [1, 1.02, 1],
                     opacity: [0.2, 0.4, 0.2]
@@ -1260,7 +1260,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder={placeholderQuestions[currentPlaceholderIndex]}
-                className="w-full px-5 py-3.5 pr-14 bg-gray-50 border border-gray-200 rounded-full focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all text-black placeholder-gray-400 text-[15px]"
+              className="relative w-full px-5 py-3.5 pr-14 bg-gray-50 border border-gray-200 rounded-full focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all text-black placeholder-gray-400 text-[15px] z-10"
             />
               {isTyping ? (
             <motion.button
