@@ -369,3 +369,38 @@ model IntroRequest {
   @@index([requestedAt])
   @@map("intro_requests")
 }
+
+// VC swipes (Tinder-style matching)
+model VCSwipe {
+  id            String    @id @default(cuid())
+  
+  // Who swiped
+  vcEmail       String
+  vcFirm        String
+  
+  // What they swiped on
+  founderId     String
+  sessionId     String    // Founder's session
+  
+  // Swipe action
+  action        String    // 'like' | 'pass' | 'super_like'
+  
+  // Match state
+  isRevealed    Boolean   @default(false)
+  revealedAt    DateTime?
+  
+  // Metadata (what VC saw when swiping)
+  anonymousData Json      // The blind profile data
+  matchScore    Int?
+  aiReasoning   String?   @db.Text
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  
+  @@unique([vcEmail, founderId])
+  @@index([vcEmail])
+  @@index([founderId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("vc_swipes")
+}

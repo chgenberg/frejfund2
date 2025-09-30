@@ -34,10 +34,25 @@ export default function VCDashboard() {
 
   const handleLogin = () => {
     if (vcEmail && vcFirm) {
+      localStorage.setItem('vc-email', vcEmail);
+      localStorage.setItem('vc-firm', vcFirm);
       setIsAuthenticated(true);
       loadLeads();
     }
   };
+
+  useEffect(() => {
+    // Check if already logged in
+    const savedEmail = localStorage.getItem('vc-email');
+    const savedFirm = localStorage.getItem('vc-firm');
+    
+    if (savedEmail && savedFirm) {
+      setVcEmail(savedEmail);
+      setVcFirm(savedFirm);
+      setIsAuthenticated(true);
+      loadLeads();
+    }
+  }, []);
 
   const loadLeads = async () => {
     setLoading(true);
@@ -163,10 +178,19 @@ export default function VCDashboard() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="text-right">
+              <div className="text-right mr-4">
                 <div className="text-sm font-medium text-black">{filteredLeads.length} Matches</div>
                 <div className="text-xs text-gray-500">Updated daily</div>
               </div>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => window.location.href = '/vc/swipe'}
+                className="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors inline-flex items-center space-x-2"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Start Swiping</span>
+              </motion.button>
             </div>
           </div>
         </div>
