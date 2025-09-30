@@ -251,8 +251,8 @@ model Investor {
   stage             String[]  // ['seed', 'series_a', 'series_b', etc.]
   industries        String[]  // ['saas', 'fintech', 'healthcare', etc.]
   geographies       String[]  // ['nordics', 'europe', 'us', 'global']
-  checkSizeMin      Int?      // in USD
-  checkSizeMax      Int?      // in USD
+  checkSizeMin      BigInt?   // in USD
+  checkSizeMax      BigInt?   // in USD
   
   // Investment thesis
   thesis            String?   @db.Text
@@ -263,7 +263,7 @@ model Investor {
   notableInvestments String[] // Company names
   
   // Metrics
-  fundSize          Int?      // in USD
+  fundSize          BigInt?   // in USD
   yearFounded       Int?
   dealsPerYear      Int?
   
