@@ -10,8 +10,15 @@ const nextConfig = {
     // Skip type checking in production builds; CI can run tsc separately.
     ignoreBuildErrors: true,
   },
+  // Ensure server-side environment variables are available
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
+  },
 };
 
 export default nextConfig;
 
 
+// Force rebuild Tue Sep 30 03:35:14 CEST 2025
