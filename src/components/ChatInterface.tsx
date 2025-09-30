@@ -31,7 +31,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   const [showDataMenu, setShowDataMenu] = useState(false);
   const [showInfoPopup, setShowInfoPopup] = useState(false);
   const [insightCard, setInsightCard] = useState<{text: string; type: 'success' | 'warning' | 'info'} | null>(null);
-  const [showEvidence, setShowEvidence] = useState(false);
+  const [showEvidence, setShowEvidence] = useState<Record<string, boolean>>({});
   const [pendingFeedback, setPendingFeedback] = useState<{ messageId: string; rating: 'up' | 'down' | null } | null>(null);
   const [feedbackReason, setFeedbackReason] = useState('');
   const [feedbackMissing, setFeedbackMissing] = useState('');
@@ -937,7 +937,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                 >
                   {/* Subtle gradient overlay on hover */}
                   <motion.div
-                    className="absolute inset-0 bg-gradient-to-br from-transparent to-black/5 opacity-0"
+                    className="absolute inset-0 bg-gradient-to-br from-transparent to-black/5 opacity-0 pointer-events-none"
                     whileHover={{ opacity: 1 }}
                     transition={{ duration: 0.3 }}
                   />
@@ -959,33 +959,42 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   <p className="text-sm leading-relaxed">{message.content}</p>
                   )}
                   {message.sender === 'agent' && (
-                    <div className="mt-2 flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="relative z-10 mt-2 flex items-center space-x-2 opacity-70 group-hover:opacity-100 transition-opacity">
                       <button
-                        onClick={() => setShowEvidence((v) => !v)}
-                        className="text-xs text-gray-600 hover:text-black inline-flex items-center"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowEvidence(prev => ({ ...prev, [message.id]: !prev[message.id] }));
+                        }}
+                        className="text-xs text-gray-600 hover:text-black inline-flex items-center cursor-pointer"
                         title="Toggle evidence"
                       >
                         <BookOpen className="w-3 h-3 mr-1" /> Sources
                       </button>
                       <span className="text-gray-300">|</span>
                       <button
-                        onClick={() => setPendingFeedback({ messageId: message.id, rating: 'up' })}
-                        className="text-xs text-gray-600 hover:text-black inline-flex items-center"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPendingFeedback({ messageId: message.id, rating: 'up' });
+                        }}
+                        className="text-xs text-gray-600 hover:text-black inline-flex items-center cursor-pointer"
                         title="Helpful"
                       >
                         <ThumbsUp className="w-3 h-3" />
                       </button>
                       <button
-                        onClick={() => setPendingFeedback({ messageId: message.id, rating: 'down' })}
-                        className="text-xs text-gray-600 hover:text-black inline-flex items-center"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPendingFeedback({ messageId: message.id, rating: 'down' });
+                        }}
+                        className="text-xs text-gray-600 hover:text-black inline-flex items-center cursor-pointer"
                         title="Needs work"
                       >
                         <ThumbsDown className="w-3 h-3" />
                       </button>
                     </div>
                   )}
-                  {showEvidence && message.evidence && message.evidence.length > 0 && (
-                    <div className="mt-2 p-2 bg-gray-50 border border-gray-200 rounded">
+                  {showEvidence[message.id] && message.evidence && message.evidence.length > 0 && (
+                    <div className="relative z-10 mt-2 p-2 bg-white border border-gray-300 rounded shadow-sm">
                       {message.evidence.map((e, i) => (
                         <div key={i} className="text-xs text-gray-600">
                           <span className="font-medium">{e.source}:</span> {e.snippet}
