@@ -1,0 +1,68 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { aiAnalyzer } from '@/lib/openai';
+import { BusinessInfo } from '@/types/business';
+import { indexContextForSession, retrieveTopK } from '@/lib/vector-store';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+export async function POST(request: NextRequest) {
+  try {
+    const { message, businessInfo, conversationHistory, docContext, sessionId } = await request.json();
+
+    if (!message || !businessInfo) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    // Index provided docContext into session store (once per call ok for now)
+    if (sessionId && docContext) {
+      try { await indexContextForSession(sessionId, docContext, { url: (businessInfo as BusinessInfo)?.website }); } catch {}
+    }
+
+    // Retrieve top-k context for the question
+    let retrieved = [] as { text: string; url?: string }[];
+    if (sessionId) {
+      try {
+        const top = await retrieveTopK(sessionId, message, 3);
+        retrieved = top.map(t => ({ text: t.text, url: t.url }));
+      } catch {}
+    }
+
+    const contextBlock = [
+      docContext ? `User-provided context:\n${docContext}` : '',
+      retrieved.length ? `Retrieved context (top matches):\n${retrieved.map((r,i)=>`[${i+1}] ${r.text}`).join('\n\n')}` : ''
+    ].filter(Boolean).join('\n\n');
+
+    const withDocMessage = contextBlock
+      ? `${message}\n\nUse the following context if helpful. Cite matches as [1], [2], etc.:\n${contextBlock}`
+      : message;
+
+    const response = await aiAnalyzer.generateChatResponse(
+      withDocMessage,
+      businessInfo as BusinessInfo,
+      (Array.isArray(conversationHistory) ? (conversationHistory as any[]).filter((m:any)=> m?.type !== 'summary') : [])
+    );
+
+    // Build sources metadata for UI
+    const sources = retrieved.map((r, i) => ({
+      id: i + 1,
+      url: r.url,
+      snippet: r.text.slice(0, 200)
+    }));
+
+    return NextResponse.json({ response, sources });
+  } catch (error) {
+    console.error('Chat API Error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET() {
+  return NextResponse.json({ status: 'Chat API is running' });
+}

@@ -1,0 +1,1432 @@
+'use client';
+
+import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Send, Bot, User, TrendingUp, FileText, Brain, Sparkles, BarChart3, ThumbsUp, ThumbsDown, BookOpen, MoreVertical, Info, Lightbulb, X } from 'lucide-react';
+import { BusinessInfo, Message, BusinessAnalysisResult } from '@/types/business';
+import { getChatModel } from '@/lib/ai-client';
+import BusinessAnalysisModal from './BusinessAnalysisModal';
+import ResultsModal from './ResultsModal';
+import EmailIngestModal from './EmailIngestModal';
+import KpiUploadModal from './KpiUploadModal';
+import DeckSummaryModal from './DeckSummaryModal';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+
+interface ChatInterfaceProps {
+  businessInfo: BusinessInfo;
+  messages: Message[];
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+}
+
+export default function ChatInterface({ businessInfo, messages, setMessages }: ChatInterfaceProps) {
+  const [inputValue, setInputValue] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [showResultsModal, setShowResultsModal] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<BusinessAnalysisResult | null>(null);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [showKpiModal, setShowKpiModal] = useState(false);
+  const [showDeckModal, setShowDeckModal] = useState(false);
+  const [showDataMenu, setShowDataMenu] = useState(false);
+  const [showInfoPopup, setShowInfoPopup] = useState(false);
+  const [insightCard, setInsightCard] = useState<{text: string; type: 'success' | 'warning' | 'info'} | null>(null);
+  const [showEvidence, setShowEvidence] = useState(false);
+  const [pendingFeedback, setPendingFeedback] = useState<{ messageId: string; rating: 'up' | 'down' | null } | null>(null);
+  const [feedbackReason, setFeedbackReason] = useState('');
+  const [feedbackMissing, setFeedbackMissing] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [sessionId] = useState<string>(() => {
+    // Try to restore session from localStorage
+    const savedSession = typeof window !== 'undefined' ? localStorage.getItem('frejfund-session-id') : null;
+    const savedTimestamp = typeof window !== 'undefined' ? localStorage.getItem('frejfund-session-timestamp') : null;
+    const now = Date.now();
+    
+    // Use existing session if less than 24 hours old
+    if (savedSession && savedTimestamp && (now - parseInt(savedTimestamp)) < 24 * 60 * 60 * 1000) {
+      return savedSession;
+    }
+    
+    // Create new session
+    const newSession = `sess-${Math.random().toString(36).slice(2)}-${now}`;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('frejfund-session-id', newSession);
+      localStorage.setItem('frejfund-session-timestamp', now.toString());
+    }
+    return newSession;
+  });
+  const abortRef = useRef<AbortController | null>(null);
+  const [tips, setTips] = useState<Array<{ title: string; why?: string; action?: string; priority?: string }>>([]);
+  const [showTips, setShowTips] = useState(false);
+  const [prefetchedContext, setPrefetchedContext] = useState<string | null>(null);
+  const [dailyCompass, setDailyCompass] = useState<{ insights: string[]; risks: string[]; actions: string[]; citations?: Array<{label:string; snippet:string}> } | null>(null);
+  const [showCompass, setShowCompass] = useState(true);
+  const [loadingCompass, setLoadingCompass] = useState(false);
+  const [syncingInbox, setSyncingInbox] = useState(false);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  // Fetch proactive tips on chat start
+  const initializedRef = useRef(false);
+
+  useEffect(() => {
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+    
+    // Add varied welcome message with Freja personality
+    const hour = new Date().getHours();
+    let greeting = '';
+    let emoji = '';
+    
+    if (hour < 12) {
+      greeting = 'Good morning';
+      emoji = '☀️';
+    } else if (hour < 17) {
+      greeting = 'Good afternoon';
+      emoji = '🌤️';
+    } else if (hour < 21) {
+      greeting = 'Good evening';
+      emoji = '🌆';
+    } else {
+      greeting = 'Working late';
+      emoji = '🌙';
+    }
+    
+    const welcomeVariants = [
+      `${greeting} ${businessInfo.name || 'there'}! ${emoji}\n\nI'm Freja, your AI business advisor. I've been analyzing ${businessInfo.company || 'your company'}'s data and I'm excited to help you unlock new growth opportunities.\n\nWhat's on your mind today?`,
+      `${greeting} ${businessInfo.name || 'there'}! ${emoji}\n\nFreja here - your dedicated business growth partner. I see you're building something special with ${businessInfo.company || 'your business'}.\n\nHow can I help accelerate your success today?`,
+      `Hey ${businessInfo.name || 'there'}! ${emoji}\n\nI'm Freja, and I'm here to be your strategic thinking partner. Based on what I know about ${businessInfo.company || 'your venture'}, there's so much potential to explore.\n\nWhat challenge should we tackle first?`
+    ];
+    
+    const welcomeMessage: Message = {
+      id: `msg-welcome-${Date.now()}`,
+      content: welcomeVariants[Math.floor(Math.random() * welcomeVariants.length)],
+      sender: 'agent',
+      timestamp: new Date(),
+      type: 'text'
+    };
+    setMessages([welcomeMessage]);
+    
+    (async () => {
+      try {
+        // Prefetch uploaded files (PDF, DOCX, XLSX, CSV, TXT) → text
+        let mergedContext: string | null = businessInfo.preScrapedText ? String(businessInfo.preScrapedText) : null;
+        try {
+          const files = (businessInfo as any).uploadedFiles as File[] | undefined;
+          if (files && files.length > 0) {
+            const formData = new FormData();
+            files.slice(0, 5).forEach((f, idx) => formData.append(`file_${idx}`, f, f.name));
+            const res = await fetch('/api/extract', { method: 'POST', body: formData });
+            if (res.ok) {
+              const { documents } = await res.json();
+              const combined = (documents || []).map((d: { text: string }) => d.text).join('\n\n');
+              const merged = `${combined}\n\n${mergedContext || ''}`.trim();
+              mergedContext = merged ? merged.slice(0, 200000) : null;
+            }
+          }
+        } catch {}
+        if (mergedContext) setPrefetchedContext(mergedContext);
+
+        // Fetch proactive tips
+        const res = await fetch('/api/proactive', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId, businessInfo })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.tips)) setTips(data.tips);
+        }
+
+        // Prefetch a first Daily Compass (non-blocking)
+        try {
+          const dcRes = await fetch('/api/cron/daily', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId })
+          });
+          if (dcRes.ok) {
+            const dc = await dcRes.json();
+            if (dc && (Array.isArray(dc.insights) || Array.isArray(dc.risks) || Array.isArray(dc.actions))) {
+              setDailyCompass({ insights: dc.insights || [], risks: dc.risks || [], actions: dc.actions || [], citations: dc.citations });
+              setShowCompass(true);
+            }
+          }
+        } catch {}
+        // Fetch one-shot summary to seed context (include prefetched docs). Keep it hidden.
+        const summaryRes = await fetch('/api/summary', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            businessInfo,
+            websiteText: mergedContext || businessInfo.preScrapedText,
+            emails: [],
+            kpiPreview: null
+          })
+        });
+         if (summaryRes.ok) { try { await summaryRes.json(); } catch {} }
+      } catch {}
+    })();
+  }, []);
+
+  const runDailyCompassNow = async () => {
+    setLoadingCompass(true);
+    try {
+      const res = await fetch('/api/cron/daily', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId }) });
+      if (res.ok) {
+        const dc = await res.json();
+        setDailyCompass({ insights: dc.insights || [], risks: dc.risks || [], actions: dc.actions || [], citations: dc.citations });
+        setShowCompass(true);
+      }
+    } catch {}
+    setLoadingCompass(false);
+  };
+
+  const syncInboxNow = async () => {
+    if (syncingInbox) return;
+    setSyncingInbox(true);
+    try {
+      const res = await fetch(`/api/email/sync?sessionId=${encodeURIComponent(sessionId)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId })
+      });
+      let indexedEmails = 0; let indexedChunks = 0;
+      if (res.ok) {
+        const data = await res.json().catch(() => ({}));
+        indexedEmails = Number(data?.result?.indexedEmails || 0);
+        indexedChunks = Number(data?.result?.indexedChunks || 0);
+        setInsightCard({ text: `New email analyzed: ${indexedEmails} email(s), ${indexedChunks} chunks`, type: 'success' });
+        setTimeout(() => setInsightCard(null), 3500);
+      }
+      // Refresh tips
+      try {
+        const tipsRes = await fetch('/api/proactive', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ sessionId, businessInfo }) });
+        if (tipsRes.ok) { const d = await tipsRes.json(); if (Array.isArray(d.tips)) setTips(d.tips); setShowTips(true); }
+      } catch {}
+      // Refresh Daily Compass (with citations)
+      try {
+        const dcRes = await fetch('/api/cron/daily', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ sessionId }) });
+        if (dcRes.ok) { const dc = await dcRes.json(); setDailyCompass({ insights: dc.insights || [], risks: dc.risks || [], actions: dc.actions || [], citations: dc.citations }); setShowCompass(true); }
+      } catch {}
+    } catch (e) {
+      console.error('Sync inbox failed', e);
+    }
+    setSyncingInbox(false);
+  };
+
+  const addMessage = (content: string, sender: 'user' | 'agent', type: 'text' | 'analysis' | 'summary' = 'text') => {
+    const newMessage: Message = {
+      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      content,
+      sender,
+      timestamp: new Date(),
+      type
+    };
+    setMessages(prev => [...prev, newMessage]);
+  };
+
+  // Try to parse structured JSON from an agent message
+  const parseStructured = (content: string): any | null => {
+    try {
+      const match = content.match(/\{[\s\S]*\}/);
+      if (!match) return null;
+      const obj = JSON.parse(match[0]);
+      return obj && typeof obj === 'object' ? obj : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const StructuredRenderer = ({ data }: { data: any }) => {
+    const hasKpis = Array.isArray(data?.kpis);
+    const hasPlan = Array.isArray(data?.plan);
+    const hasSummary = typeof data?.summary === 'string';
+    if (!hasKpis && !hasPlan && !hasSummary) return null;
+    return (
+      <div className="mt-2 space-y-3">
+        {hasSummary && (
+          <div className="text-sm text-gray-800 leading-relaxed">{data.summary}</div>
+        )}
+        {hasKpis && (
+          <div className="overflow-x-auto">
+            <div className="flex justify-end mb-2 gap-2">
+              <button
+                className="text-xs border border-gray-300 rounded px-2 py-1 hover:bg-gray-50"
+                onClick={() => {
+                  try {
+                    const rows = [['KPI','Definition','Target'], ...data.kpis.map((k: any) => [k.name, k.definition, k.target])];
+                    const csv = rows.map(r => r.map((x) => '"'+String(x??'').replace(/"/g,'""')+'"').join(',')).join('\n');
+                    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url; a.download = 'kpis.csv'; a.click(); URL.revokeObjectURL(url);
+                  } catch {}
+                }}
+              >Export CSV</button>
+              <button
+                className="text-xs border border-gray-300 rounded px-2 py-1 hover:bg-gray-50"
+                onClick={() => {
+                  try {
+                    const blob = new Blob([JSON.stringify({ kpis: data.kpis }, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url; a.download = 'kpis.json'; a.click(); URL.revokeObjectURL(url);
+                  } catch {}
+                }}
+              >Export JSON</button>
+            </div>
+            <table className="w-full text-xs text-left border border-gray-200 rounded-lg overflow-hidden">
+              <thead className="bg-gray-100 text-gray-700">
+                <tr>
+                  <th className="px-3 py-2 border-b">KPI</th>
+                  <th className="px-3 py-2 border-b">Definition</th>
+                  <th className="px-3 py-2 border-b">Target</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.kpis.map((k: any, i: number) => (
+                  <tr key={i} className="odd:bg-white even:bg-gray-50">
+                    <td className="px-3 py-2 border-b align-top text-gray-900">{k.name}</td>
+                    <td className="px-3 py-2 border-b text-gray-700">{k.definition}</td>
+                    <td className="px-3 py-2 border-b text-gray-700 whitespace-nowrap">{k.target}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        {hasPlan && (
+          <div className="text-xs text-gray-800">
+            <div className="font-semibold mb-1">90-day plan</div>
+            <ol className="list-decimal ml-4 space-y-1">
+              {data.plan.map((p: any, i: number) => (
+                <li key={i}>
+                  <span className="font-medium">{p.title || p.step}</span>
+                  {p.owner && <span className="text-gray-600"> • Owner: {p.owner}</span>}
+                  {p.timeline && <span className="text-gray-600"> • Timeline: {p.timeline}</span>}
+                  {Array.isArray(p.actions) && p.actions.length > 0 && (
+                    <ul className="list-disc ml-5 text-gray-700">
+                      {p.actions.map((a: string, j: number) => <li key={j}>{a}</li>)}
+                    </ul>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Ensure readable markdown even if the model forgets formatting
+  const formatAsMarkdown = (raw: string): string => {
+    try {
+      let text = String(raw || '').trim();
+      if (!text) return text;
+
+      // First, clean up any existing asterisks mess
+      text = text.replace(/\*{3,}/g, '**'); // Replace 3+ asterisks with just 2
+      text = text.replace(/\[(\d+)\]\*/g, '[$1]'); // Fix reference asterisks like [1]*
+      text = text.replace(/\*\[(\d+)\]/g, '[$1]'); // Fix *[1] to [1]
+      
+      // Add line breaks after sentences for better readability
+      text = text.replace(/\.\s+([A-Z])/g, '.\n\n$1');
+      text = text.replace(/;\s+([A-Z])/g, ';\n\n$1');
+      
+      // Format specific patterns
+      text = text.replace(/(Current traction:)/gi, '\n\n**$1**');
+      text = text.replace(/(Quick thought:)/gi, '\n\n**$1**');
+      text = text.replace(/(Weeks \d+-\d+:)/g, '\n\n**$1**');
+      text = text.replace(/(Quick q's:)/gi, '\n\n**$1**');
+      
+      // Clean up line breaks
+      text = text.replace(/^\n+/, '').replace(/\n{3,}/g, '\n\n').trim();
+
+      return text;
+    } catch {
+      return raw;
+    }
+  };
+
+  const simulateTyping = async (message: string) => {
+    setIsTyping(true);
+    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+    setIsTyping(false);
+    addMessage(message, 'agent');
+  };
+
+  const getAIResponse = async (userMessage: string) => {
+    setIsTyping(true);
+    const startTs = Date.now();
+    
+    try {
+      const conversationHistory = messages
+        .filter(m => m.type !== 'summary')
+        .slice(-6)
+        .map(msg => ({
+        role: msg.sender === 'user' ? 'user' as const : 'assistant' as const,
+        content: msg.content
+      }));
+
+      // Attach short context from extracted docs if available in businessInfo
+      let docContext: string | undefined = businessInfo.preScrapedText || undefined;
+      let scrapedSources: Array<{ url?: string; snippet?: string }> = businessInfo.preScrapedSources || [];
+      try {
+        const files = (businessInfo as any).uploadedFiles as File[] | undefined;
+        if (files && files.length > 0) {
+          const formData = new FormData();
+          files.slice(0, 3).forEach((f, idx) => formData.append(`file_${idx}`, f, f.name));
+          const res = await fetch('/api/extract', { method: 'POST', body: formData });
+          if (res.ok) {
+            const { documents } = await res.json();
+            const combined = (documents || []).map((d: { text: string }) => d.text).join('\n\n');
+            const merged = `${combined}\n\n${docContext || ''}`.trim();
+            docContext = merged.slice(0, 8000);
+          }
+        }
+
+        // Scrape website content in background if website provided and no extracted context yet
+        if (!docContext && businessInfo.website) {
+          try {
+            const scrapeRes = await fetch('/api/scrape', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ url: businessInfo.website })
+            });
+            if (scrapeRes.ok) {
+              const { result, sources } = await scrapeRes.json();
+              if (result?.text) {
+                const merged = `${result.text}\n\n${docContext || ''}`.trim();
+                docContext = String(merged).slice(0, 8000);
+              }
+              if (Array.isArray(sources)) scrapedSources = sources;
+            }
+          } catch {}
+        }
+      } catch {}
+
+      // Try streaming endpoint first
+      try {
+        abortRef.current?.abort();
+        abortRef.current = new AbortController();
+        const resp = await fetch('/api/chat/stream', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: userMessage, businessInfo, conversationHistory, docContext, sessionId }),
+          signal: abortRef.current.signal
+        });
+        if (!resp.ok || !resp.body) throw new Error('stream failed');
+
+        const reader = resp.body.getReader();
+        const decoder = new TextDecoder();
+        let acc = '';
+        const newMsgId = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        setMessages(prev => [...prev, { id: newMsgId, content: '', sender: 'agent', timestamp: new Date(), metrics: {} }]);
+
+        let timedOut = false;
+        const timer = setTimeout(() => { timedOut = true; abortRef.current?.abort(); }, 30000);
+        try {
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value);
+            acc += chunk;
+            // Detect sources sentinel
+            const sentinelIdx = acc.indexOf('<<<SOURCES:');
+            if (sentinelIdx >= 0) {
+              const before = acc.slice(0, sentinelIdx);
+              const after = acc.slice(sentinelIdx);
+              const endIdx = after.indexOf('>>>');
+              if (endIdx >= 0) {
+                const jsonStr = after.slice('<<<SOURCES:'.length, endIdx);
+                try {
+                  const sources = JSON.parse(jsonStr);
+                  const evidence = Array.isArray(sources) ? sources.map((s: any) => ({ source: 'website' as const, snippet: String(s.snippet || '').slice(0, 200), url: s.url })) : undefined;
+                  const latencyMs = Date.now() - startTs;
+                  const tokensEstimate = Math.ceil((before.length + (acc.length)) / 4);
+                  const price = { input: Number(process.env.MODEL_PRICE_INPUT_PER_MTOK || 0), output: Number(process.env.MODEL_PRICE_OUTPUT_PER_MTOK || 0) };
+                  const mtok = tokensEstimate / 1_000_000;
+                  const costUsdEstimate = (price.output || 0) * mtok;
+                  const finalContent = `${before.trim()}`.trim();
+                  const mergedEvidence = (evidence && evidence.length ? evidence : (scrapedSources.length ? scrapedSources.map((s) => ({ source: 'website' as const, snippet: String(s.snippet || '').slice(0, 200), url: s.url })) : undefined));
+                  setMessages(prev => prev.map(m => m.id === newMsgId ? { ...m, content: finalContent, evidence: mergedEvidence, metrics: { latencyMs, tokensEstimate, costUsdEstimate } } : m));
+                } catch {
+                  const latencyMs = Date.now() - startTs;
+                  const tokensEstimate = Math.ceil((before.length + (acc.length)) / 4);
+                  const price = { input: Number(process.env.MODEL_PRICE_INPUT_PER_MTOK || 0), output: Number(process.env.MODEL_PRICE_OUTPUT_PER_MTOK || 0) };
+                  const mtok = tokensEstimate / 1_000_000;
+                  const costUsdEstimate = (price.output || 0) * mtok;
+                  const finalContent = `${before.trim()}`.trim();
+                  const mergedEvidence = (scrapedSources.length ? scrapedSources.map((s) => ({ source: 'website' as const, snippet: String(s.snippet || '').slice(0, 200), url: s.url })) : undefined);
+                  setMessages(prev => prev.map(m => m.id === newMsgId ? { ...m, content: finalContent, evidence: mergedEvidence, metrics: { latencyMs, tokensEstimate, costUsdEstimate } } : m));
+                }
+                acc = '';
+              }
+            } else {
+              setMessages(prev => prev.map(m => m.id === newMsgId ? { ...m, content: (m.content + chunk).trimStart() } : m));
+            }
+          }
+        } finally {
+          clearTimeout(timer);
+        }
+      } catch (streamErr) {
+        // Fallback to non-streaming
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: userMessage,
+          businessInfo,
+          conversationHistory,
+            docContext,
+            sessionId
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('AI API failed');
+      }
+
+      const data = await response.json();
+        // Optionally attach simple evidence: if we scraped, include a tiny snippet reference
+        const apiSources = (data.sources && Array.isArray(data.sources) && data.sources.length) ? data.sources : scrapedSources;
+        const evidence = (apiSources && apiSources.length)
+          ? apiSources.map((s: any) => ({ source: 'website' as const, snippet: String(s.snippet || '').slice(0, 200), url: s.url }))
+          : (docContext ? [{ source: 'website' as const, snippet: String(docContext).slice(0, 200) }] : undefined);
+        const newMsgId = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        const latencyMs = Date.now() - startTs;
+        const tokensEstimate = Math.ceil((data.response.length) / 4);
+        const model = getChatModel();
+        const price = { input: Number(process.env.MODEL_PRICE_INPUT_PER_MTOK || 0), output: Number(process.env.MODEL_PRICE_OUTPUT_PER_MTOK || 0) };
+        const mtok = tokensEstimate / 1_000_000;
+        const costUsdEstimate = (price.output || 0) * mtok;
+        setMessages(prev => [...prev, { id: newMsgId, content: `${data.response}`.trim(), sender: 'agent', timestamp: new Date(), evidence, metrics: { latencyMs, tokensEstimate, costUsdEstimate } }]);
+      }
+      setIsTyping(false);
+    } catch (error) {
+      console.error('AI Response failed:', error);
+      setIsTyping(false);
+      // Fallback to local responses
+      await simulateTyping(getFallbackResponse(userMessage));
+    }
+  };
+
+  const getFallbackResponse = (userMessage: string): string => {
+    const lowerMessage = userMessage.toLowerCase();
+    
+    if (lowerMessage.includes('competitor') || lowerMessage.includes('competition')) {
+      return `Based on your ${businessInfo.industry} business in the ${businessInfo.targetMarket} market, I can help you analyze your competitive landscape. Let me gather some insights about your main competitors and differentiation strategies.`;
+    } else if (lowerMessage.includes('funding') || lowerMessage.includes('investment')) {
+      const fundingAdvice = businessInfo.stage === 'idea' 
+        ? 'As an idea-stage startup, focus on pre-seed funding from angels. Target €100K-500K to validate your concept and build an MVP.'
+        : businessInfo.stage === 'mvp'
+        ? 'With an MVP, you\'re ready for seed funding. Look for €500K-2M to prove product-market fit and gain initial traction.'
+        : 'Given your current stage, consider Series A funding to scale your go-to-market strategy and expand your team.';
+      return fundingAdvice;
+    } else if (lowerMessage.includes('team') || lowerMessage.includes('hiring')) {
+      const teamAdvice = businessInfo.teamSize === '1' 
+        ? 'As a solo founder, consider bringing on a co-founder with complementary skills. Look for someone with domain expertise in sales, marketing, or technical development depending on your background.'
+        : `With a team of ${businessInfo.teamSize}, focus on scaling key roles. For ${businessInfo.industry} companies, typically sales and engineering are critical hires at your stage.`;
+      return teamAdvice;
+    } else {
+      const responses = [
+        `That's a great question about your ${businessInfo.industry} startup. Let me think about how this applies to your ${businessInfo.stage} stage business...`,
+        `Interesting point! For a ${businessInfo.businessModel} company targeting ${businessInfo.targetMarket}, I'd recommend...`,
+        `Based on your business context, here's what I think about that...`
+      ];
+      return responses[Math.floor(Math.random() * responses.length)];
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!inputValue.trim()) return;
+
+    const userMessage = inputValue.trim();
+    addMessage(userMessage, 'user');
+    setInputValue('');
+
+    // Handle analysis requests specially
+    if (userMessage.toLowerCase().includes('analysis') || userMessage.toLowerCase().includes('analyze')) {
+      await simulateTyping('Perfect! I\'ll run a comprehensive business analysis for you. This will take a few minutes as I analyze your business model, market opportunity, team capabilities, and generate personalized insights.');
+      
+      setTimeout(() => {
+        setShowAnalysisModal(true);
+      }, 1000);
+    } else {
+      // Use AI for all other responses
+      await getAIResponse(userMessage);
+    }
+  };
+
+  const handleAnalysisComplete = (result: BusinessAnalysisResult) => {
+    setShowAnalysisModal(false);
+    setAnalysisResult(result);
+    
+    addMessage(
+      `Analysis complete! I've evaluated your ${businessInfo.industry} business across 10 key dimensions with ${result.accuracy}% accuracy. Your overall investment readiness score is ${result.scores.overallScore}/100. Here are my key insights and recommendations.`,
+      'agent',
+      'analysis'
+    );
+
+    setTimeout(() => {
+      setShowResultsModal(true);
+    }, 1000);
+  };
+
+  // Rotating question suggestions based on business context
+  const getContextualQuestions = () => {
+    const baseQuestions = [
+      "What should my next milestone be in the next 90 days?",
+      "How can I improve my pitch to investors?",
+      "What are the biggest risks for my business right now?",
+      "How should I price my product or service?",
+      "What metrics should I be tracking at my stage?",
+      "How can I differentiate from my competitors?",
+      "What's my ideal customer acquisition strategy?",
+      "When should I start fundraising?",
+      "How can I validate my market demand?",
+      "What team members should I hire next?"
+    ];
+
+    const stageSpecificQuestions = {
+      'idea': [
+        "How do I validate my business idea with potential customers?",
+        "What's the minimum viable product I should build first?",
+        "How much money do I need to get started?",
+        "Should I find a co-founder or go solo?",
+        "What legal structure should I choose for my startup?"
+      ],
+      'mvp': [
+        "How do I get my first 100 customers?",
+        "What features should I prioritize in my next version?",
+        "How do I know if I have product-market fit?",
+        "When should I start charging customers?",
+        "How can I improve my user onboarding?"
+      ],
+      'early-revenue': [
+        "How can I scale my customer acquisition?",
+        "What's my path to profitability?",
+        "How do I improve my unit economics?",
+        "When should I expand to new markets?",
+        "How can I reduce customer churn?"
+      ],
+      'scaling': [
+        "How do I prepare for Series A funding?",
+        "What's my international expansion strategy?",
+        "How can I build a scalable sales process?",
+        "What operational systems do I need?",
+        "How do I maintain company culture while growing?"
+      ]
+    };
+
+    const industrySpecificQuestions = {
+      'SaaS': [
+        "How can I improve my SaaS metrics (CAC, LTV, churn)?",
+        "What's the best pricing model for my SaaS product?",
+        "How do I build a scalable customer success program?"
+      ],
+      'E-commerce': [
+        "How can I improve my conversion rate and AOV?",
+        "What's the best customer acquisition strategy for e-commerce?",
+        "How do I optimize my inventory management?"
+      ],
+      'Fintech': [
+        "What regulatory requirements do I need to consider?",
+        "How do I build trust with financial service customers?",
+        "What's my path to financial licenses?"
+      ]
+    };
+
+    // Combine questions based on context
+    let allQuestions = [...baseQuestions];
+    
+    if (stageSpecificQuestions[businessInfo.stage]) {
+      allQuestions = [...allQuestions, ...stageSpecificQuestions[businessInfo.stage]];
+    }
+    
+    if (industrySpecificQuestions[businessInfo.industry]) {
+      allQuestions = [...allQuestions, ...industrySpecificQuestions[businessInfo.industry]];
+    }
+
+    return allQuestions;
+  };
+
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [rotatingQuestions] = useState(getContextualQuestions());
+  const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
+
+  // Shorter placeholders for input field
+  const placeholderQuestions = [
+    "Ask anything...",
+    "What should I focus on next?",
+    "How do I grow faster?",
+    "Am I ready to fundraise?",
+    "What metrics matter most?",
+    "How can I reduce churn?",
+    "Should I hire?",
+    "Improve my pitch?"
+  ];
+
+  // Rotate questions every 4 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentQuestionIndex(prev => (prev + 1) % rotatingQuestions.length);
+      setCurrentPlaceholderIndex(prev => (prev + 1) % placeholderQuestions.length);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [rotatingQuestions.length, placeholderQuestions.length]);
+
+  const quickActions = [
+    {
+      icon: Brain,
+      label: 'Full Analysis',
+      action: () => {
+        addMessage('Please run a comprehensive business analysis', 'user');
+        handleSendMessage();
+      }
+    },
+    {
+      icon: TrendingUp,
+      label: 'Market Analysis',
+      action: () => {
+        addMessage('Analyze my market opportunity and competition', 'user');
+        handleSendMessage();
+      }
+    },
+    {
+      icon: FileText,
+      label: 'Pitch Review',
+      action: () => {
+        addMessage('Help me improve my pitch deck and presentation', 'user');
+        handleSendMessage();
+      }
+    },
+    {
+      icon: BarChart3,
+      label: 'Funding Strategy',
+      action: () => {
+        addMessage('What\'s the best funding strategy for my stage?', 'user');
+        handleSendMessage();
+      }
+    }
+  ];
+
+  return (
+    <div className="h-screen bg-white flex flex-col">
+      {/* Header */}
+      <motion.header 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between"
+      >
+        <div className="flex items-center space-x-3">
+          <motion.div 
+            className="w-10 h-10 bg-black rounded-xl flex items-center justify-center cursor-pointer"
+            whileHover={{ scale: 1.05 }}
+            onClick={() => window.location.href = '/dashboard'}
+          >
+            <Sparkles className="w-6 h-6 text-white" />
+          </motion.div>
+          <div>
+            <h1 className="text-lg font-bold text-black">FrejFund Business Advisor</h1>
+            <p className="text-sm text-gray-600">Investment Intelligence for {businessInfo.name}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <button
+              onClick={() => setShowInfoPopup((v) => !v)}
+              className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
+              title="Company info"
+            >
+              <Info className="w-3.5 h-3.5 text-gray-600" />
+            </button>
+            {showInfoPopup && (
+              <div className="absolute right-0 top-9 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-3 text-xs">
+                <div className="font-semibold text-black mb-1">{businessInfo.name}</div>
+                <div className="text-gray-600">{businessInfo.industry} • {businessInfo.stage} stage</div>
+                <div className="text-gray-600">Targeting {businessInfo.targetMarket}</div>
+                <div className="text-gray-600 mt-1">{businessInfo.businessModel}</div>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={() => setShowTips((v) => !v)}
+            className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors relative"
+            title="Proactive tips"
+          >
+            <Lightbulb className="w-3.5 h-3.5 text-gray-600" />
+            {tips.length > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-black rounded-full text-white text-[9px] flex items-center justify-center">{tips.length}</span>
+            )}
+          </button>
+          <div className="relative">
+            <button
+              onClick={() => setShowDataMenu((v) => !v)}
+              className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
+              title="Data & tools"
+            >
+              <MoreVertical className="w-3.5 h-3.5 text-gray-600" />
+            </button>
+            {showDataMenu && (
+              <div className="absolute right-0 top-9 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                <button onClick={async ()=>{ setShowDataMenu(false); await syncInboxNow(); }} className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors disabled:opacity-50" disabled={syncingInbox}>
+                  {syncingInbox ? 'Syncing Inbox…' : 'Sync Inbox now'}
+                </button>
+                <button onClick={()=>{setShowEmailModal(true); setShowDataMenu(false);}} className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors">Add single email…</button>
+                <button onClick={()=>{setShowKpiModal(true); setShowDataMenu(false);}} className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors">KPI CSV</button>
+                <button onClick={()=>{setShowDeckModal(true); setShowDataMenu(false);}} className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors">Pitch Deck</button>
+              </div>
+            )}
+          </div>
+        </div>
+      </motion.header>
+
+      {/* Pinned Daily Compass */}
+      {showCompass && dailyCompass && (
+        <div className="px-6 pt-4">
+          <div className="max-w-4xl mx-auto mb-4 border border-gray-200 rounded-2xl bg-white shadow-sm">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+              <div className="text-sm font-semibold text-black">Daily Compass</div>
+              <div className="flex items-center gap-2">
+                <button onClick={runDailyCompassNow} disabled={loadingCompass} className={`px-3 py-1.5 text-xs rounded-lg ${loadingCompass ? 'bg-gray-200 text-gray-500' : 'bg-black text-white hover:bg-gray-800'} transition-colors`}>
+                  {loadingCompass ? 'Updating…' : 'Run now'}
+                </button>
+                <button onClick={() => setShowCompass(false)} className="px-3 py-1.5 text-xs text-gray-600 hover:text-black">Dismiss</button>
+              </div>
+            </div>
+            <div className="grid md:grid-cols-3 gap-4 p-4">
+              <div>
+                <div className="text-xs font-semibold text-gray-700 mb-2">Insights</div>
+                <ul className="space-y-1 list-disc ml-4 text-sm text-gray-800">
+                  {(dailyCompass.insights || []).slice(0,3).map((t, i) => <li key={`ins-${i}`}>{t}</li>)}
+                </ul>
+              </div>
+              <div>
+                <div className="text-xs font-semibold text-gray-700 mb-2">Risks</div>
+                <ul className="space-y-1 list-disc ml-4 text-sm text-gray-800">
+                  {(dailyCompass.risks || []).slice(0,3).map((t, i) => <li key={`risk-${i}`}>{t}</li>)}
+                </ul>
+              </div>
+              <div>
+                <div className="text-xs font-semibold text-gray-700 mb-2">Actions</div>
+                <ul className="space-y-1 list-disc ml-4 text-sm text-gray-800">
+                  {(dailyCompass.actions || []).slice(0,3).map((t, i) => <li key={`act-${i}`}>{t}</li>)}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+        <AnimatePresence>
+          {messages.map((message) => (
+            <motion.div
+              key={message.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className={`flex items-start space-x-3 ${
+                message.sender === 'user' ? 'justify-end' : 'justify-start'
+              }`}
+            >
+              {message.sender === 'agent' && (
+                <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center flex-shrink-0">
+                  <Bot className="w-4 h-4 text-white" />
+                </div>
+              )}
+              
+              <div className={`max-w-2xl ${message.sender === 'user' ? 'order-1' : ''}`}>
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  className={`px-5 py-3.5 group relative overflow-hidden ${
+                    message.sender === 'user'
+                      ? 'bg-black text-white rounded-2xl rounded-br-md'
+                      : message.type === 'analysis'
+                      ? 'bg-gradient-to-br from-gray-50 to-gray-100 text-black rounded-2xl rounded-bl-md shadow-sm'
+                      : 'bg-white text-black rounded-2xl rounded-bl-md shadow-sm ring-1 ring-gray-100'
+                  }`}
+                >
+                  {/* Subtle gradient overlay on hover */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-br from-transparent to-black/5 opacity-0"
+                    whileHover={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                  {message.sender === 'agent' && parseStructured(message.content) ? (
+                    <StructuredRenderer data={parseStructured(message.content)} />
+                  ) : message.sender === 'agent' ? (
+                    <div className="text-sm leading-relaxed prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-black prose-headings:mt-3 prose-headings:mb-2 prose-h2:text-sm prose-h3:text-sm prose-strong:text-black prose-strong:font-semibold prose-p:text-gray-800 prose-p:my-3 prose-p:leading-relaxed prose-li:text-gray-800 prose-li:my-1 prose-ul:my-3 prose-ol:my-3 prose-ul:space-y-1 prose-ol:space-y-1 whitespace-pre-wrap">
+                      <ReactMarkdown 
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          p: ({children}) => <p className="mb-4">{children}</p>,
+                          strong: ({children}) => <strong className="font-semibold text-black">{children}</strong>,
+                        }}
+                      >
+                        {formatAsMarkdown(message.content)}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                  <p className="text-sm leading-relaxed">{message.content}</p>
+                  )}
+                  {message.sender === 'agent' && (
+                    <div className="mt-2 flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => setShowEvidence((v) => !v)}
+                        className="text-xs text-gray-600 hover:text-black inline-flex items-center"
+                        title="Toggle evidence"
+                      >
+                        <BookOpen className="w-3 h-3 mr-1" /> Sources
+                      </button>
+                      <span className="text-gray-300">|</span>
+                      <button
+                        onClick={() => setPendingFeedback({ messageId: message.id, rating: 'up' })}
+                        className="text-xs text-gray-600 hover:text-black inline-flex items-center"
+                        title="Helpful"
+                      >
+                        <ThumbsUp className="w-3 h-3" />
+                      </button>
+                      <button
+                        onClick={() => setPendingFeedback({ messageId: message.id, rating: 'down' })}
+                        className="text-xs text-gray-600 hover:text-black inline-flex items-center"
+                        title="Needs work"
+                      >
+                        <ThumbsDown className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
+                  {showEvidence && message.evidence && message.evidence.length > 0 && (
+                    <div className="mt-2 p-2 bg-gray-50 border border-gray-200 rounded">
+                      {message.evidence.map((e, i) => (
+                        <div key={i} className="text-xs text-gray-600">
+                          <span className="font-medium">{e.source}:</span> {e.snippet}
+                          {e.url && (
+                            <>
+                              {' '}
+                              <a href={e.url} target="_blank" rel="noreferrer" className="underline text-gray-700 hover:text-black">[link]</a>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {message.type === 'analysis' && (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setShowResultsModal(true)}
+                      className="mt-3 inline-flex items-center px-3 py-1 bg-black text-white rounded-lg text-xs font-medium hover:bg-gray-800 transition-colors"
+                    >
+                      View Full Results
+                      <TrendingUp className="w-3 h-3 ml-1" />
+                    </motion.button>
+                  )}
+                </motion.div>
+                <div className="mt-1 text-xs text-gray-500 px-1">
+                  {new Date(message.timestamp).toLocaleTimeString([], { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                  })}
+                  {message.metrics && (
+                    <>
+                      {' '}
+                      · {message.metrics.latencyMs ? `${Math.round(message.metrics.latencyMs)}ms` : ''}
+                      {message.metrics.tokensEstimate ? ` · ~${message.metrics.tokensEstimate} tok` : ''}
+                      {typeof message.metrics.costUsdEstimate === 'number' ? ` · ~$${message.metrics.costUsdEstimate.toFixed(4)}` : ''}
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {message.sender === 'user' && (
+                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+                  <User className="w-4 h-4 text-gray-600" />
+                </div>
+              )}
+            </motion.div>
+          ))}
+        </AnimatePresence>
+
+        {/* Typing Indicator */}
+        <AnimatePresence>
+          {isTyping && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="flex items-start space-x-3"
+            >
+            <motion.div className="relative">
+              {/* Animated glow effect */}
+              <motion.div
+                className="absolute -inset-1 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-400 rounded-full blur-md"
+                animate={{ 
+                  scale: [1, 1.2, 1],
+                  opacity: [0.5, 0.8, 0.5],
+                  rotate: [0, 180, 360]
+                }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              />
+              <motion.div 
+                className="relative w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg"
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <Bot className="w-5 h-5 text-white" />
+              </motion.div>
+            </motion.div>
+            
+            <motion.div
+              className="bg-white border border-gray-100 px-6 py-3.5 rounded-2xl shadow-sm backdrop-blur-sm"
+              animate={{ 
+                boxShadow: [
+                  "0 1px 3px rgba(0,0,0,0.1)",
+                  "0 10px 20px rgba(0,0,0,0.1)",
+                  "0 1px 3px rgba(0,0,0,0.1)"
+                ]
+              }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <div className="flex items-center space-x-3">
+                <div className="flex space-x-1">
+                  {[0, 0.15, 0.3].map((delay, i) => (
+                    <motion.div
+                      key={i}
+                      className="relative"
+                    >
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full blur-sm"
+                        animate={{ 
+                          scale: [0, 2, 0],
+                          opacity: [0, 0.5, 0]
+                        }}
+                        transition={{ 
+                          duration: 1.5, 
+                          repeat: Infinity, 
+                          delay,
+                          ease: "easeOut"
+                        }}
+                      />
+                      <motion.div
+                        animate={{ 
+                          y: [0, -10, 0],
+                          scale: [1, 1.2, 1]
+                        }}
+                        transition={{ 
+                          duration: 1.5, 
+                          repeat: Infinity, 
+                          delay,
+                          ease: "easeInOut"
+                        }}
+                        className="relative w-2.5 h-2.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+                <motion.span 
+                  className="text-gray-600 text-sm font-medium flex items-center gap-1"
+                  animate={{ opacity: [0.6, 1, 0.6] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  <motion.span
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                    className="inline-block"
+                  >
+                    {['🔍', '📊', '💡', '✨'][Math.floor(Date.now() / 2000) % 4]}
+                  </motion.span>
+                  {[
+                    "Analyzing your business model...",
+                    "Searching for growth opportunities...",
+                    "Finding industry insights...",
+                    "Preparing personalized advice..."
+                  ][Math.floor(Date.now() / 2000) % 4]}
+                </motion.span>
+              </div>
+            </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Right panel: Proactive tips */}
+      {showTips && (
+        <div className="absolute right-4 top-20 bottom-20 w-80 bg-white border border-gray-200 rounded-xl shadow p-4 overflow-y-auto">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm font-semibold text-black">Proactive tips</div>
+            <button onClick={() => setShowTips(false)} className="text-xs text-gray-600 hover:text-black">Close</button>
+          </div>
+          {tips.length === 0 ? (
+            <div className="text-xs text-gray-500">No tips yet.</div>
+          ) : (
+            <div className="space-y-3">
+              {tips.map((t, i) => (
+                <div key={i} className="border border-gray-200 rounded-lg p-3">
+                  <div className="text-xs text-gray-500 mb-1">{t.priority?.toUpperCase() || 'MEDIUM'}</div>
+                  <div className="text-sm font-medium text-black">{t.title}</div>
+                  {t.why && <div className="text-xs text-gray-700 mt-1">Why: {t.why}</div>}
+                  {t.action && <div className="text-xs text-gray-700 mt-1">Action: {t.action}</div>}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Insight Card */}
+      <AnimatePresence>
+        {insightCard && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 300 }}
+            className="absolute top-20 left-1/2 transform -translate-x-1/2 z-50"
+          >
+            <motion.div 
+              className={`px-6 py-4 rounded-2xl shadow-lg backdrop-blur-md flex items-center gap-3 ${
+                insightCard.type === 'success' ? 'bg-green-50 border-2 border-green-200' :
+                insightCard.type === 'warning' ? 'bg-yellow-50 border-2 border-yellow-200' :
+                'bg-blue-50 border-2 border-blue-200'
+              }`}
+              animate={{ 
+                scale: [1, 1.02, 1],
+              }}
+              transition={{ 
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              <motion.span
+                animate={{ rotate: 360 }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                className="text-2xl"
+              >
+                {insightCard.type === 'success' ? '✨' : 
+                 insightCard.type === 'warning' ? '⚡' : '💡'}
+              </motion.span>
+              <span className={`font-medium ${
+                insightCard.type === 'success' ? 'text-green-800' :
+                insightCard.type === 'warning' ? 'text-yellow-800' :
+                'text-blue-800'
+              }`}>
+                {insightCard.text}
+              </span>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating Question Suggestions */}
+      <AnimatePresence>
+        {messages.length <= 2 && !isTyping && (
+            <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+            className="absolute bottom-28 left-0 right-0 px-6 pointer-events-none z-30"
+          >
+            <div className="max-w-5xl mx-auto">
+              <motion.p 
+                className="text-center text-sm text-gray-500 mb-3 font-medium"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+              >
+                Quick questions to get started:
+              </motion.p>
+              <motion.div className="flex gap-3 justify-center overflow-x-auto pb-2">
+                {(() => {
+                  // Context-based suggestions
+                  const lastMessage = messages[messages.length - 1]?.content.toLowerCase() || '';
+                  let suggestions = [];
+                  
+                  if (lastMessage.includes('growth') || lastMessage.includes('revenue')) {
+                    suggestions = [
+                      "What's my best growth channel?",
+                      "How do I scale customer acquisition?",
+                      "Show me pricing strategies",
+                      "Analyze my unit economics"
+                    ];
+                  } else if (lastMessage.includes('funding') || lastMessage.includes('invest')) {
+                    suggestions = [
+                      "Am I ready to fundraise?",
+                      "What's my valuation range?",
+                      "Create investor pitch",
+                      "Find potential investors"
+                    ];
+                  } else if (lastMessage.includes('team') || lastMessage.includes('hire')) {
+                    suggestions = [
+                      "Who should I hire next?",
+                      "Build compensation plan",
+                      "Create org structure",
+                      "Find advisors"
+                    ];
+                  } else {
+                    suggestions = [
+                      "How do I grow faster?",
+                      "Create a 90-day plan",
+                      "What's my biggest risk?",
+                      "When should I fundraise?"
+                    ];
+                  }
+                  
+                  return suggestions;
+                })().map((question, index) => (
+                  <motion.button
+                    key={question}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ 
+                      delay: index * 0.05,
+                      type: "spring",
+                      stiffness: 300
+                    }}
+                    whileHover={{ 
+                      scale: 1.05, 
+                      y: -3,
+                      boxShadow: "0 10px 20px rgba(0,0,0,0.1)"
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      setInputValue(question);
+                      inputRef.current?.focus();
+                      
+                      // Show insight when question is selected
+                      setInsightCard({
+                        text: "Great question! Let me analyze this for you...",
+                        type: 'info'
+                      });
+                      setTimeout(() => setInsightCard(null), 3000);
+                    }}
+                    className="px-6 py-3 bg-white border-2 border-gray-200 rounded-full text-sm font-medium text-gray-800 hover:text-black hover:border-black hover:bg-gray-50 transition-all pointer-events-auto shadow-sm whitespace-nowrap"
+                  >
+                    {question}
+                </motion.button>
+              ))}
+              </motion.div>
+          </div>
+        </motion.div>
+      )}
+      </AnimatePresence>
+
+      {/* Input */}
+      <motion.div 
+        className="px-6 py-4 bg-white/80 backdrop-blur-xl border-t border-gray-100 relative z-40"
+        initial={{ y: 100 }}
+        animate={{ y: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      >
+        <div className="max-w-3xl mx-auto">
+        <div className="flex items-center space-x-3">
+            <motion.div 
+              className="flex-1 relative"
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 400 }}
+            >
+              {/* Pulsing glow effect when ready */}
+              {!isTyping && (
+                <motion.div
+                  className="absolute -inset-0.5 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 rounded-full blur opacity-30"
+                  animate={{ 
+                    scale: [1, 1.02, 1],
+                    opacity: [0.2, 0.4, 0.2]
+                  }}
+                  transition={{ 
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                />
+              )}
+            <input
+              ref={inputRef}
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              placeholder={placeholderQuestions[currentPlaceholderIndex]}
+                className="w-full px-5 py-3.5 pr-14 bg-gray-50 border border-gray-200 rounded-full focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all text-black placeholder-gray-400 text-[15px]"
+            />
+              {isTyping ? (
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => abortRef.current?.abort()}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center hover:bg-gray-300 transition-all"
+                >
+                  <X className="w-4 h-4" />
+                </motion.button>
+              ) : (
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 15 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handleSendMessage}
+                  disabled={!inputValue.trim()}
+                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                    inputValue.trim() 
+                      ? 'bg-black text-white hover:bg-gray-800' 
+                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  <Send className="w-4 h-4 ml-0.5" />
+            </motion.button>
+              )}
+            </motion.div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Analysis Modal */}
+      <AnimatePresence>
+        {showAnalysisModal && (
+          <BusinessAnalysisModal
+            businessInfo={businessInfo}
+            onComplete={handleAnalysisComplete}
+            onClose={() => setShowAnalysisModal(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Results Modal */}
+      {/* Email Ingest Modal */}
+      <AnimatePresence>
+        {showEmailModal && (
+          <EmailIngestModal sessionId={sessionId} onClose={() => setShowEmailModal(false)} onIngest={async (email)=>{
+            try {
+              const summaryRes = await fetch('/api/summary', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ businessInfo, websiteText: businessInfo.preScrapedText, emails: [email], kpiPreview: null })
+              });
+              if (summaryRes.ok) {
+                const s = await summaryRes.json();
+                const note = `New email ingested. Updated context: ${s.summary}`;
+                addMessage(note, 'agent');
+                const tipsRes = await fetch('/api/proactive', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ sessionId, businessInfo }) });
+                if (tipsRes.ok){ const d = await tipsRes.json(); if (Array.isArray(d.tips)) setTips(d.tips); }
+              }
+            } catch {}
+          }} />
+        )}
+      </AnimatePresence>
+      {/* KPI Upload Modal */}
+      <AnimatePresence>
+        {showKpiModal && (
+          <KpiUploadModal onClose={() => setShowKpiModal(false)} initialCsv={businessInfo.demoKpiCsv} />
+        )}
+      </AnimatePresence>
+      {/* Deck Summary Modal */}
+      <AnimatePresence>
+        {showDeckModal && (
+          <DeckSummaryModal businessInfo={businessInfo} onClose={() => setShowDeckModal(false)} />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showResultsModal && analysisResult && (
+          <ResultsModal
+            result={analysisResult}
+            businessInfo={businessInfo}
+            onClose={() => setShowResultsModal(false)}
+          />
+        )}
+      </AnimatePresence>
+      {/* Feedback Modal */}
+      <AnimatePresence>
+        {pendingFeedback && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/30 flex items-center justify-center p-4"
+          >
+            <div className="bg-white rounded-xl p-6 w-full max-w-md border border-gray-200">
+              <h3 className="text-lg font-semibold text-black mb-2">Feedback</h3>
+              <p className="text-sm text-gray-600 mb-4">Varför?
+              </p>
+              <textarea
+                value={feedbackReason}
+                onChange={(e) => setFeedbackReason(e.target.value)}
+                placeholder="Vad var bra/mindre bra?"
+                className="w-full border border-gray-300 rounded-lg p-2 text-sm text-black mb-3"
+                rows={3}
+              />
+              <p className="text-sm text-gray-600 mb-2">Vad saknades?</p>
+              <input
+                value={feedbackMissing}
+                onChange={(e) => setFeedbackMissing(e.target.value)}
+                placeholder="Ex. fler siffror, exempel, tydligare plan"
+                className="w-full border border-gray-300 rounded-lg p-2 text-sm text-black mb-4"
+              />
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => {
+                    setPendingFeedback(null);
+                    setFeedbackReason('');
+                    setFeedbackMissing('');
+                  }}
+                  className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
+                >
+                  Avbryt
+                </button>
+                <button
+                  onClick={async () => {
+                    try {
+                      await fetch('/api/feedback', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          messageId: pendingFeedback.messageId,
+                          sessionId,
+                          rating: pendingFeedback.rating === 'up' ? 'up' : 'down',
+                          reason: feedbackReason || undefined,
+                          missing: feedbackMissing || undefined
+                        })
+                      });
+                    } catch {}
+                    setPendingFeedback(null);
+                    setFeedbackReason('');
+                    setFeedbackMissing('');
+                    addMessage('Tack för din feedback! Vi använder den för att förbättra svaren.', 'agent');
+                    // Auto-regenerate on thumbs down with constraints
+                    if (pendingFeedback.rating === 'down') {
+                      const constraints: string[] = [];
+                      if (feedbackMissing) constraints.push(`Please add: ${feedbackMissing}.`);
+                      if (feedbackReason) constraints.push(`Consider this critique: ${feedbackReason}.`);
+                      const regenPrompt = `Regenerate the previous answer with these constraints. Be concise, cite sources as [1], [2] if applicable. ${constraints.join(' ')}`.trim();
+                      addMessage(regenPrompt, 'user');
+                      await getAIResponse(regenPrompt);
+                    }
+                  }}
+                  className="px-4 py-2 text-sm bg-black text-white rounded-lg hover:bg-gray-800"
+                >
+                  Skicka
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
