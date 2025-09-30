@@ -189,3 +189,45 @@ model Feedback {
   @@index([createdAt])
   @@map("feedback")
 }
+
+// Auto-generated documents (pitch decks, one-pagers, etc.)
+model GeneratedDocument {
+  id            String    @id @default(cuid())
+  sessionId     String
+  userId        String?
+  
+  // Document info
+  type          String    // 'pitch_deck' | 'one_pager' | 'investor_update' | 'financial_model' | 'due_diligence' | 'email_template'
+  title         String
+  description   String?   @db.Text
+  
+  // Status
+  status        String    @default("draft") // 'ready' | 'draft' | 'generating' | 'outdated'
+  version       String?   // e.g., "v3.2"
+  
+  // Content
+  content       Json?     // Structured content (slides, sections, etc.)
+  fileUrl       String?   // URL to generated PDF/PPTX
+  shareUrl      String?   // Public sharing URL
+  
+  // Analytics
+  viewCount     Int       @default(0)
+  shareCount    Int       @default(0)
+  avgViewTime   Int?      // in seconds
+  
+  // Metadata
+  metadata      Json?     // Additional data (colors, branding, etc.)
+  generatedBy   String?   // AI model used
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  publishedAt   DateTime?
+  
+  @@index([sessionId])
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+  @@map("generated_documents")
+}

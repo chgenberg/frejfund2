@@ -40,65 +40,86 @@ export default function DocumentsPage() {
   const loadDocuments = async () => {
     setLoading(true);
     
-    // Mock data for now - will connect to API later
-    const mockDocs: Document[] = [
-      {
-        id: '1',
-        type: 'pitch_deck',
-        title: 'Pitch Deck',
-        description: 'Latest investor pitch presentation',
-        status: 'ready',
-        lastUpdated: new Date().toISOString(),
-        version: 'v3.2',
-        metrics: {
-          views: 127,
-          avgTime: '12 min',
-          shares: 8
-        }
-      },
-      {
-        id: '2',
-        type: 'one_pager',
-        title: 'One-Pager',
-        description: 'Executive summary for quick investor review',
-        status: 'ready',
-        lastUpdated: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        version: 'v2.1',
-        metrics: {
-          views: 43,
-          shares: 5
-        }
-      },
-      {
-        id: '3',
-        type: 'investor_update',
-        title: 'Monthly Investor Update',
-        description: 'March 2025 update',
-        status: 'draft',
-        lastUpdated: new Date().toISOString(),
-        version: 'Draft'
-      },
-      {
-        id: '4',
-        type: 'financial_model',
-        title: 'Financial Projections',
-        description: '3-year forecast with scenarios',
-        status: 'ready',
-        lastUpdated: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        version: 'v1.5'
-      },
-      {
-        id: '5',
-        type: 'due_diligence',
-        title: 'Due Diligence Room',
-        description: '24 documents ready for investor review',
-        status: 'ready',
-        lastUpdated: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+    try {
+      const sessionId = localStorage.getItem('sessionId');
+      if (!sessionId) {
+        console.warn('No session ID found');
+        setLoading(false);
+        return;
       }
-    ];
 
-    setDocuments(mockDocs);
-    setLoading(false);
+      const response = await fetch('/api/documents', {
+        headers: {
+          'x-session-id': sessionId
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        
+        // If no documents exist, seed with sample documents
+        if (data.documents.length === 0) {
+          await fetch('/api/documents/seed', {
+            method: 'POST',
+            headers: {
+              'x-session-id': sessionId
+            }
+          });
+          
+          // Reload documents after seeding
+          const reloadResponse = await fetch('/api/documents', {
+            headers: {
+              'x-session-id': sessionId
+            }
+          });
+          
+          if (reloadResponse.ok) {
+            const reloadData = await reloadResponse.json();
+            const formattedDocs: Document[] = reloadData.documents.map((doc: any) => ({
+              id: doc.id,
+              type: doc.type,
+              title: doc.title,
+              description: doc.description || '',
+              status: doc.status,
+              lastUpdated: doc.updatedAt,
+              version: doc.version,
+              metrics: {
+                views: doc.viewCount,
+                avgTime: doc.avgViewTime ? `${Math.floor(doc.avgViewTime / 60)} min` : undefined,
+                shares: doc.shareCount
+              },
+              url: doc.fileUrl
+            }));
+            
+            setDocuments(formattedDocs);
+          }
+        } else {
+          const formattedDocs: Document[] = data.documents.map((doc: any) => ({
+            id: doc.id,
+            type: doc.type,
+            title: doc.title,
+            description: doc.description || '',
+            status: doc.status,
+            lastUpdated: doc.updatedAt,
+            version: doc.version,
+            metrics: {
+              views: doc.viewCount,
+              avgTime: doc.avgViewTime ? `${Math.floor(doc.avgViewTime / 60)} min` : undefined,
+              shares: doc.shareCount
+            },
+            url: doc.fileUrl
+          }));
+          
+          setDocuments(formattedDocs);
+        }
+      } else {
+        console.error('Failed to fetch documents');
+      }
+    } catch (error) {
+      console.error('Error loading documents:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getDocumentIcon = (type: Document['type']) => {
