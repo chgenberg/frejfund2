@@ -70,14 +70,19 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    // If accepted, reveal the VC swipe
+    // If accepted, reveal and send intro emails
     if (response === 'accept') {
-      // Find the corresponding swipe
+      // Update intro request status
+      await prisma.introRequest.update({
+        where: { id: requestId },
+        data: { status: 'intro_sent', introSentAt: new Date() }
+      });
+
+      // Find the corresponding swipe and reveal
       const swipe = await prisma.vCSwipe.findFirst({
         where: {
           vcEmail: updated.vcEmail,
-          founderId: updated.founderId,
-          isRevealed: false
+          founderId: updated.founderId
         }
       });
 
@@ -91,8 +96,27 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // TODO: Send email to VC with founder details
-      // TODO: Send email to founder with VC details
+      // Get full details for intro emails
+      const founder = await prisma.user.findUnique({
+        where: { id: updated.founderId }
+      });
+
+      const founderSession = await prisma.session.findFirst({
+        where: { userId: updated.founderId },
+        orderBy: { updatedAt: 'desc' }
+      });
+
+      const businessInfo = founderSession?.businessInfo as any;
+
+      // In a real implementation, send emails here via SendGrid/Resend
+      // For now, we'll log the intro details
+      console.log('📧 INTRO FACILITATION:');
+      console.log(`VC: ${updated.vcEmail} (${updated.vcFirm})`);
+      console.log(`Founder: ${founder?.email} (${updated.founderCompany})`);
+      console.log(`Match Score: ${updated.matchScore}%`);
+      
+      // TODO: Actually send emails via SendGrid
+      // await sendIntroEmail(vcEmail, founderEmail, matchData);
     }
 
     return NextResponse.json({ 

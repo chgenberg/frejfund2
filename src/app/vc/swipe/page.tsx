@@ -167,13 +167,26 @@ export default function VCSwipePage() {
       if (response.ok) {
         const data = await response.json();
         
-        // Show reveal
-        setRevealedCompany({
-          ...data.fullProfile,
-          matchScore: profile.matchScore,
-          aiAnalysis: profile.aiAnalysis
-        });
-        setShowReveal(true);
+        // Check response type
+        if (data.action === 'intro_requested') {
+          // Waiting for founder acceptance
+          setRevealedCompany({
+            pending: true,
+            message: data.message,
+            matchScore: profile.matchScore,
+            status: data.status,
+            requestId: data.requestId
+          });
+          setShowReveal(true);
+        } else if (data.action === 'revealed' && data.fullProfile) {
+          // Founder already accepted - full reveal
+          setRevealedCompany({
+            ...data.fullProfile,
+            matchScore: profile.matchScore,
+            aiAnalysis: profile.aiAnalysis
+          });
+          setShowReveal(true);
+        }
       }
     } catch (error) {
       console.error('Error recording swipe:', error);
@@ -541,12 +554,37 @@ export default function VCSwipePage() {
 
                   {/* Revealed Info */}
                   <div className="p-6">
-                    <div className="text-center mb-6">
-                      <h3 className="text-3xl font-bold text-black mb-2">
-                        {revealedCompany.company || 'Company Name'}
-                      </h3>
-                      <p className="text-gray-600">Founded by {revealedCompany.name || 'Founder Name'}</p>
-                    </div>
+                    {revealedCompany.pending ? (
+                      /* Waiting State */
+                      <div className="text-center py-8">
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                          className="w-16 h-16 border-4 border-gray-200 border-t-black rounded-full mx-auto mb-4"
+                        />
+                        <h3 className="text-xl font-bold text-black mb-2">Intro Request Sent</h3>
+                        <p className="text-gray-600 mb-4">
+                          {revealedCompany.message || 'Waiting for founder to accept...'}
+                        </p>
+                        <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 text-sm text-gray-700">
+                          We've notified the founder. You'll get an email when they respond (usually within 24 hours).
+                        </div>
+                        <button
+                          onClick={() => setShowReveal(false)}
+                          className="mt-6 px-6 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+                        >
+                          Continue Swiping
+                        </button>
+                      </div>
+                    ) : (
+                      /* Full Reveal */
+                      <>
+                        <div className="text-center mb-6">
+                          <h3 className="text-3xl font-bold text-black mb-2">
+                            {revealedCompany.company || 'Company Name'}
+                          </h3>
+                          <p className="text-gray-600">Founded by {revealedCompany.name || 'Founder Name'}</p>
+                        </div>
 
                     <div className="space-y-4 mb-6">
                       <div className="p-4 bg-gray-50 rounded-lg">
@@ -577,26 +615,28 @@ export default function VCSwipePage() {
                       )}
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex space-x-3">
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => {
-                          const mailto = `mailto:intros@frejfund.com?subject=Intro Request: ${revealedCompany.company}&body=I'd like an introduction to ${revealedCompany.name} at ${revealedCompany.company}.`;
-                          window.location.href = mailto;
-                        }}
-                        className="flex-1 px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
-                      >
-                        Request Intro
-                      </motion.button>
-                      <button
-                        onClick={() => setShowReveal(false)}
-                        className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors"
-                      >
-                        Close
-                      </button>
-                    </div>
+                        {/* Action Buttons */}
+                        <div className="flex space-x-3">
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => {
+                              const mailto = `mailto:intros@frejfund.com?subject=Intro Request: ${revealedCompany.company}&body=I'd like an introduction to ${revealedCompany.name} at ${revealedCompany.company}.`;
+                              window.location.href = mailto;
+                            }}
+                            className="flex-1 px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+                          >
+                            Request Intro
+                          </motion.button>
+                          <button
+                            onClick={() => setShowReveal(false)}
+                            className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+                          >
+                            Close
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </motion.div>

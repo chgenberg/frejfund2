@@ -36,8 +36,17 @@ export default function VCDashboard() {
     if (vcEmail && vcFirm) {
       localStorage.setItem('vc-email', vcEmail);
       localStorage.setItem('vc-firm', vcFirm);
-      setIsAuthenticated(true);
-      loadLeads();
+      
+      // Check if onboarding completed
+      const hasPreferences = localStorage.getItem('vc-preferences');
+      
+      if (!hasPreferences) {
+        // First time - go to onboarding
+        router.push('/vc/onboarding');
+      } else {
+        setIsAuthenticated(true);
+        loadLeads();
+      }
     }
   };
 

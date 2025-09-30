@@ -43,19 +43,10 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    // If like or super_like, reveal full profile
+    // If like or super_like, create intro request (but DON'T reveal yet)
     if (action === 'like' || action === 'super_like') {
-      // Update swipe to mark as revealed
-      await prisma.vCSwipe.update({
-        where: { id: swipe.id },
-        data: {
-          isRevealed: true,
-          revealedAt: new Date()
-        }
-      });
-
-      // Create intro request
-      await prisma.introRequest.create({
+      // Create intro request (pending founder acceptance)
+      const introRequest = await prisma.introRequest.create({
         data: {
           vcEmail,
           vcName: vcEmail.split('@')[0],
@@ -68,19 +59,16 @@ export async function POST(req: NextRequest) {
         }
       });
 
-      // Return full profile
+      // TODO: Send email notification to founder
+      // For now, they'll see it in-app notification bell
+
+      // Return "waiting" status (NOT revealed yet)
       return NextResponse.json({
         success: true,
-        action: 'revealed',
-        fullProfile: {
-          name: user?.name,
-          email: user?.email,
-          company: user?.company || businessInfo?.name,
-          website: user?.website || businessInfo?.website,
-          industry: businessInfo?.industry,
-          stage: businessInfo?.stage,
-          profileUrl: user?.profileSlug ? `/founder/${user.profileSlug}` : null
-        }
+        action: 'intro_requested',
+        message: `Intro request sent to ${businessInfo?.name || 'the founder'}. You'll be notified when they respond.`,
+        status: 'pending',
+        requestId: introRequest.id
       });
     }
 
