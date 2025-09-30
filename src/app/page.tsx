@@ -493,41 +493,103 @@ export default function Home() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
-            className="text-3xl md:text-4xl lg:text-5xl font-semibold text-black mb-6 leading-[1.1] tracking-tight"
+            className="text-4xl md:text-5xl lg:text-6xl font-bold text-black mb-4 leading-[1.1] tracking-tight"
           >
-              <motion.span
-                animate={{ 
-                  scale: [1, 1.02, 1],
-                  opacity: [0.9, 1, 0.9]
-                }}
-                transition={{ 
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="inline-block"
-              >
-                BUILD THE FUTURE.
-              </motion.span>
-              <br />
-              <motion.span 
-                className="text-transparent bg-clip-text bg-gradient-to-r from-gray-600 to-gray-900 inline-block"
-                animate={{ 
-                  scale: [1, 1.03, 1],
-                  opacity: [0.8, 1, 0.8]
-                }}
-                transition={{ 
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: 0.3
-                }}
-              >
-                WE'LL HELP YOU FUND IT.
-              </motion.span>
+            Where Founders Meet Investors
           </motion.h1>
 
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto"
+          >
+            AI-powered matching platform connecting ambitious founders with the right VCs
+          </motion.p>
 
+
+
+          {/* Dual Value Props */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto mb-12"
+          >
+            {/* For Founders */}
+            <motion.div
+              whileHover={{ scale: 1.02, y: -4 }}
+              className="bg-white/90 backdrop-blur-sm border-2 border-gray-200 rounded-2xl p-8 text-left hover:border-black hover:shadow-2xl transition-all"
+            >
+              <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center mb-4">
+                <TrendingUp className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-black mb-3">For Founders</h3>
+              <p className="text-gray-700 mb-4 leading-relaxed">
+                Get matched to 91+ European VCs, draft personalized emails with AI, and share your profile to receive intro requests from interested investors.
+              </p>
+              <ul className="space-y-2 text-sm text-gray-600 mb-6">
+                <li className="flex items-center space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-black flex-shrink-0" />
+                  <span>AI matches you to perfect VCs</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-black flex-shrink-0" />
+                  <span>Auto-extract metrics from your deck</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-black flex-shrink-0" />
+                  <span>Get warm intros from VCs</span>
+                </li>
+              </ul>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleStartAnalysis}
+                className="w-full px-6 py-3 bg-black text-white rounded-full font-semibold hover:bg-gray-800 transition-all inline-flex items-center justify-center gap-2"
+              >
+                <span>Get Started Free</span>
+                <ArrowRight className="w-5 h-5" />
+              </motion.button>
+            </motion.div>
+
+            {/* For VCs */}
+            <motion.div
+              whileHover={{ scale: 1.02, y: -4 }}
+              className="bg-white/90 backdrop-blur-sm border-2 border-gray-200 rounded-2xl p-8 text-left hover:border-black hover:shadow-2xl transition-all"
+            >
+              <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center mb-4">
+                <Users className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-black mb-3">For Investors</h3>
+              <p className="text-gray-700 mb-4 leading-relaxed">
+                Swipe on AI-matched, pre-screened founders. See metrics before names. Get 60%+ meeting rates. Save 15+ hours per week.
+              </p>
+              <ul className="space-y-2 text-sm text-gray-600 mb-6">
+                <li className="flex items-center space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-black flex-shrink-0" />
+                  <span>Tinder-style qualified deal flow</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-black flex-shrink-0" />
+                  <span>AI investment memos per founder</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-black flex-shrink-0" />
+                  <span>Track ROI & performance</span>
+                </li>
+              </ul>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => router.push('/vc')}
+                className="w-full px-6 py-3 bg-gray-900 text-white rounded-full font-semibold hover:bg-black transition-all inline-flex items-center justify-center gap-2"
+              >
+                <span>Access VC Dashboard</span>
+                <ArrowRight className="w-5 h-5" />
+              </motion.button>
+            </motion.div>
+          </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -535,23 +597,6 @@ export default function Home() {
             transition={{ delay: 0.6 }}
             className="flex flex-col gap-3 justify-center items-center"
           >
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleStartAnalysis}
-              className="group relative px-12 py-5 bg-black text-white rounded-full text-xl font-semibold overflow-hidden shadow-2xl hover:shadow-3xl transition-all"
-            >
-              <span className="relative z-10 flex items-center gap-3">
-                Get Started
-                <motion.span
-                  animate={{ x: [0, 8, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                  className="text-2xl"
-                >
-                  →
-                </motion.span>
-              </span>
-            </motion.button>
             
             <motion.button
               whileHover={{ scale: 1.02 }}
