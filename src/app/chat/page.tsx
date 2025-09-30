@@ -5,6 +5,10 @@ import { useRouter } from 'next/navigation';
 import ChatInterface from '@/components/ChatInterface';
 import { BusinessInfo } from '@/types/business';
 
+// Disable prerendering; this page depends on client-only storage/session
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default function ChatPage() {
   const router = useRouter();
   const [businessInfo, setBusinessInfo] = useState<BusinessInfo | null>(null);
