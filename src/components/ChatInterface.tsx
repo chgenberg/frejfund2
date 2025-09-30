@@ -1218,7 +1218,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ type: "spring", stiffness: 200, damping: 20 }}
-            className="absolute bottom-32 left-0 right-0 px-6 pointer-events-none z-20"
+            className="absolute bottom-36 left-0 right-0 px-6 pointer-events-none z-10"
           >
             <div className="max-w-5xl mx-auto">
               <motion.p 
