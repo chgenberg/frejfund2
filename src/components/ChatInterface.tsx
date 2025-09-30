@@ -22,6 +22,7 @@ interface ChatInterfaceProps {
 export default function ChatInterface({ businessInfo, messages, setMessages }: ChatInterfaceProps) {
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const [showResultsModal, setShowResultsModal] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<BusinessAnalysisResult | null>(null);
@@ -139,6 +140,8 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       // If no history, show welcome message
       showWelcomeMessage();
     })();
+    
+    setIsLoadingHistory(false);
   }, [sessionId, setMessages]);
 
   const showWelcomeMessage = async () => {
@@ -780,6 +783,18 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       }
     }
   ];
+
+  // Show loading state while fetching message history
+  if (isLoadingHistory) {
+    return (
+      <div className="h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-gray-200 border-t-black rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your conversation...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen bg-white flex flex-col">

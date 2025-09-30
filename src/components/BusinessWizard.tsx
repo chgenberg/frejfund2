@@ -75,8 +75,38 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
     return () => clearTimeout(t);
   }, [businessInfo.website]);
 
+  const [uploadError, setUploadError] = useState<string>('');
+  
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
+    setUploadError('');
+    
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    const MAX_TOTAL_SIZE = 50 * 1024 * 1024; // 50MB
+    const MAX_FILES = 10;
+    
+    // Check file count
+    if (uploadedFiles.length + files.length > MAX_FILES) {
+      setUploadError(`Maximum ${MAX_FILES} files allowed`);
+      return;
+    }
+    
+    // Check individual file sizes
+    for (const file of files) {
+      if (file.size > MAX_FILE_SIZE) {
+        setUploadError(`File "${file.name}" is too large. Max size: 10MB`);
+        return;
+      }
+    }
+    
+    // Check total size
+    const currentTotal = uploadedFiles.reduce((sum, f) => sum + f.size, 0);
+    const newTotal = files.reduce((sum, f) => sum + f.size, 0);
+    if (currentTotal + newTotal > MAX_TOTAL_SIZE) {
+      setUploadError('Total upload size would exceed 50MB limit');
+      return;
+    }
+    
     setUploadedFiles(prev => [...prev, ...files]);
   };
 
@@ -387,6 +417,12 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
                 id="file-upload"
               />
             </motion.div>
+
+            {uploadError && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+                {uploadError}
+              </div>
+            )}
 
             {uploadedFiles.length > 0 && (
               <div className="mt-4 space-y-2">
