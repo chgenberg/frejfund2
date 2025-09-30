@@ -392,7 +392,7 @@ export default function Home() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100"
+        className="fixed top-0 left-0 right-0 z-50"
       >
         <div className="container mx-auto px-8 py-4">
           <div className="flex items-center justify-between">
@@ -439,7 +439,7 @@ export default function Home() {
 
       {/* Hero Section */}
       <motion.section 
-        className="relative min-h-screen flex items-center justify-center px-8 pt-20 overflow-hidden"
+        className="relative min-h-screen flex items-center justify-center px-8 overflow-hidden"
       >
         {/* Background Image - Desktop */}
         <div className="absolute inset-0 hidden md:block">
