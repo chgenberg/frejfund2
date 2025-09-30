@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Bot, User, TrendingUp, FileText, Brain, Sparkles, BarChart3, ThumbsUp, ThumbsDown, BookOpen, MoreVertical, Info, Lightbulb, X } from 'lucide-react';
 import { BusinessInfo, Message, BusinessAnalysisResult } from '@/types/business';
-import { getChatModel } from '@/lib/ai-client';
+import { getChatModel, TaskComplexity } from '@/lib/ai-client';
 import BusinessAnalysisModal from './BusinessAnalysisModal';
 import ResultsModal from './ResultsModal';
 import EmailIngestModal from './EmailIngestModal';
@@ -86,7 +86,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
           tokens: message.metrics?.tokensEstimate,
           latencyMs: message.metrics?.latencyMs,
           cost: message.metrics?.costUsdEstimate,
-          model: getChatModel()
+          model: getChatModel('simple')
         })
       });
     } catch (error) {
@@ -562,8 +562,9 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         const newMsgId = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         const latencyMs = Date.now() - startTs;
         const tokensEstimate = Math.ceil((data.response.length) / 4);
-        const model = getChatModel();
-        const price = { input: Number(process.env.MODEL_PRICE_INPUT_PER_MTOK || 0), output: Number(process.env.MODEL_PRICE_OUTPUT_PER_MTOK || 0) };
+        const model = getChatModel('simple'); // Regular chat uses mini model
+        const { getModelPricing } = await import('@/lib/ai-client');
+        const price = getModelPricing(model);
         const mtok = tokensEstimate / 1_000_000;
         const costUsdEstimate = (price.output || 0) * mtok;
         const newMessage: Message = { id: newMsgId, content: `${data.response}`.trim(), sender: 'agent', timestamp: new Date(), evidence, metrics: { latencyMs, tokensEstimate, costUsdEstimate }, type: 'text' };

@@ -1,9 +1,9 @@
 import OpenAI from 'openai';
 import { BusinessInfo, BusinessAnalysisResult } from '@/types/business';
-import { getOpenAIClient, getChatModel } from '@/lib/ai-client';
+import { getOpenAIClient, getChatModel, TaskComplexity } from '@/lib/ai-client';
 
-async function chatWithFallback(args: { messages: { role: 'system' | 'user' | 'assistant'; content: string }[]; temperature: number; maxTokens?: number }): Promise<string> {
-  const model = getChatModel();
+async function chatWithFallback(args: { messages: { role: 'system' | 'user' | 'assistant'; content: string }[]; temperature: number; maxTokens?: number; complexity?: TaskComplexity }): Promise<string> {
+  const model = getChatModel(args.complexity || 'simple');
   const isGpt5 = model.startsWith('gpt-5');
   try {
     const client = getOpenAIClient();
@@ -153,7 +153,8 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
           ...conversationHistory,
           { role: 'user', content: contextPrompt }
         ],
-        temperature: 0.7
+        temperature: 0.7,
+        complexity: 'simple' // Use mini model for regular chat
       });
 
       // Force proper formatting if GPT didn't follow instructions
@@ -210,7 +211,8 @@ Format as JSON with clear structure.`;
           { role: 'system', content: this.systemPrompt },
           { role: 'user', content: analysisPrompt }
         ],
-        temperature: 0.3
+        temperature: 0.3,
+        complexity: 'complex' // Use full model for deep business analysis
       });
       if (!content) throw new Error('No response from OpenAI');
 
