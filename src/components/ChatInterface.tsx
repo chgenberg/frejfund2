@@ -1112,18 +1112,6 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                     </motion.div>
                   ))}
                 </div>
-                <motion.span 
-                  className="text-gray-600 text-sm font-medium flex items-center"
-                  animate={{ opacity: [0.6, 1, 0.6] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                >
-                  {[
-                    "Analyzing your business model...",
-                    "Searching for growth opportunities...",
-                    "Finding industry insights...",
-                    "Preparing personalized advice..."
-                  ][Math.floor(Date.now() / 2000) % 4]}
-                </motion.span>
               </div>
             </motion.div>
             </motion.div>
