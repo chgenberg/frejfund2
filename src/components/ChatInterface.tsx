@@ -73,6 +73,40 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
     scrollToBottom();
   }, [messages]);
 
+  // Save message to database
+  const saveMessageToDb = async (message: Message) => {
+    try {
+      await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          role: message.sender,
+          content: message.content,
+          tokens: message.metrics?.tokensEstimate,
+          latencyMs: message.metrics?.latencyMs,
+          cost: message.metrics?.costUsdEstimate,
+          model: getChatModel()
+        })
+      });
+    } catch (error) {
+      console.error('Failed to save message:', error);
+    }
+  };
+
+  // Update message in state and save to database
+  const updateMessageWithMetrics = (messageId: string, updates: Partial<Message>) => {
+    setMessages(prev => {
+      const updated = prev.map(m => m.id === messageId ? { ...m, ...updates } : m);
+      // Find and save the updated message
+      const updatedMessage = updated.find(m => m.id === messageId);
+      if (updatedMessage) {
+        saveMessageToDb(updatedMessage);
+      }
+      return updated;
+    });
+  };
+
   // Fetch proactive tips on chat start
   const initializedRef = useRef(false);
 
@@ -80,6 +114,34 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
     if (initializedRef.current) return;
     initializedRef.current = true;
     
+    // Load messages from database first
+    (async () => {
+      try {
+        const res = await fetch(`/api/messages?sessionId=${encodeURIComponent(sessionId)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.messages && data.messages.length > 0) {
+            setMessages(data.messages.map((m: any) => ({
+              id: m.id,
+              content: m.content,
+              sender: m.role === 'user' ? 'user' : 'agent',
+              timestamp: new Date(m.timestamp),
+              type: 'text',
+              metrics: m.metrics
+            })));
+            return; // Don't show welcome message if we have history
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load message history:', error);
+      }
+      
+      // If no history, show welcome message
+      showWelcomeMessage();
+    })();
+  }, [sessionId, setMessages]);
+
+  const showWelcomeMessage = () => {
     // Add varied welcome message with Freja personality
     const hour = new Date().getHours();
     let greeting = '';
@@ -113,6 +175,9 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       type: 'text'
     };
     setMessages([welcomeMessage]);
+    
+    // Save welcome message to database
+    saveMessageToDb(welcomeMessage);
     
     (async () => {
       try {
@@ -230,6 +295,9 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       type
     };
     setMessages(prev => [...prev, newMessage]);
+    
+    // Save to database
+    saveMessageToDb(newMessage);
   };
 
   // Try to parse structured JSON from an agent message
@@ -456,7 +524,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   const costUsdEstimate = (price.output || 0) * mtok;
                   const finalContent = `${before.trim()}`.trim();
                   const mergedEvidence = (evidence && evidence.length ? evidence : (scrapedSources.length ? scrapedSources.map((s) => ({ source: 'website' as const, snippet: String(s.snippet || '').slice(0, 200), url: s.url })) : undefined));
-                  setMessages(prev => prev.map(m => m.id === newMsgId ? { ...m, content: finalContent, evidence: mergedEvidence, metrics: { latencyMs, tokensEstimate, costUsdEstimate } } : m));
+                  updateMessageWithMetrics(newMsgId, { content: finalContent, evidence: mergedEvidence, metrics: { latencyMs, tokensEstimate, costUsdEstimate } });
                 } catch {
                   const latencyMs = Date.now() - startTs;
                   const tokensEstimate = Math.ceil((before.length + (acc.length)) / 4);
@@ -465,7 +533,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   const costUsdEstimate = (price.output || 0) * mtok;
                   const finalContent = `${before.trim()}`.trim();
                   const mergedEvidence = (scrapedSources.length ? scrapedSources.map((s) => ({ source: 'website' as const, snippet: String(s.snippet || '').slice(0, 200), url: s.url })) : undefined);
-                  setMessages(prev => prev.map(m => m.id === newMsgId ? { ...m, content: finalContent, evidence: mergedEvidence, metrics: { latencyMs, tokensEstimate, costUsdEstimate } } : m));
+                  updateMessageWithMetrics(newMsgId, { content: finalContent, evidence: mergedEvidence, metrics: { latencyMs, tokensEstimate, costUsdEstimate } });
                 }
                 acc = '';
               }
@@ -509,7 +577,9 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         const price = { input: Number(process.env.MODEL_PRICE_INPUT_PER_MTOK || 0), output: Number(process.env.MODEL_PRICE_OUTPUT_PER_MTOK || 0) };
         const mtok = tokensEstimate / 1_000_000;
         const costUsdEstimate = (price.output || 0) * mtok;
-        setMessages(prev => [...prev, { id: newMsgId, content: `${data.response}`.trim(), sender: 'agent', timestamp: new Date(), evidence, metrics: { latencyMs, tokensEstimate, costUsdEstimate } }]);
+        const newMessage: Message = { id: newMsgId, content: `${data.response}`.trim(), sender: 'agent', timestamp: new Date(), evidence, metrics: { latencyMs, tokensEstimate, costUsdEstimate }, type: 'text' };
+        setMessages(prev => [...prev, newMessage]);
+        saveMessageToDb(newMessage);
       }
       setIsTyping(false);
     } catch (error) {
