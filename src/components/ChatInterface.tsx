@@ -1040,17 +1040,10 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   ))}
                 </div>
                 <motion.span 
-                  className="text-gray-600 text-sm font-medium flex items-center gap-1"
+                  className="text-gray-600 text-sm font-medium flex items-center"
                   animate={{ opacity: [0.6, 1, 0.6] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
                 >
-                  <motion.span
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                    className="inline-block"
-                  >
-                    {['🔍', '📊', '💡', '✨'][Math.floor(Date.now() / 2000) % 4]}
-                  </motion.span>
                   {[
                     "Analyzing your business model...",
                     "Searching for growth opportunities...",
