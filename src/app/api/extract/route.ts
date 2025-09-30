@@ -54,6 +54,11 @@ export async function POST(req: NextRequest) {
 
     const extracted = await extractMany(files);
     
+    // Extract metrics from the content
+    const { extractMetricsFromText } = await import('@/lib/metric-extractor');
+    const allText = extracted.map(e => e.text).join('\n\n');
+    const metrics = await extractMetricsFromText(allText);
+    
     // Save to database (non-blocking)
     const sessionId = req.headers.get('x-session-id');
     if (sessionId) {
@@ -87,7 +92,11 @@ export async function POST(req: NextRequest) {
       })();
     }
     
-    return NextResponse.json({ documents: extracted });
+    return NextResponse.json({ 
+      documents: extracted,
+      metrics,
+      hasMetrics: metrics.confidence > 50
+    });
   } catch (error) {
     console.error('Extract API Error:', error);
     return NextResponse.json({ error: 'Failed to extract documents' }, { status: 500 });
