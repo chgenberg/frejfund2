@@ -1,9 +1,36 @@
-// Swedish & European Venture Capital Database
 // Auto-generated from Sweden_vc.docx
-// Last updated: 2025-09-30T19:53:42.995Z
-// Total investors: 91
+// Generated: 2025-09-30T19:51:39.306Z
+// Total investors: 112
 
-export const INVESTOR_SEED_DATA = [
+export const SWEDEN_VC_DATA = [
+  {
+    "id": "sweden-vc-1",
+    "name": "Sverige (Sweden)",
+    "firmName": "Sverige (Sweden)",
+    "type": "vc",
+    "stage": [
+      "seed",
+      "series_a"
+    ],
+    "industries": [
+      "saas"
+    ],
+    "geographies": [
+      "sweden",
+      "nordics"
+    ],
+    "notableInvestments": [],
+    "tags": [
+      "sweden"
+    ],
+    "ranking": 90,
+    "checkSizeMin": 500000,
+    "checkSizeMax": 5000000,
+    "portfolioCount": 20,
+    "dealsPerYear": 5,
+    "thesis": "Swedish venture capital firm investing in saas companies",
+    "sweetSpot": "seed stage saas companies"
+  },
   {
     "id": "sweden-vc-2",
     "name": "Creandum",
@@ -362,6 +389,34 @@ export const INVESTOR_SEED_DATA = [
     "sweetSpot": "seed stage deep_tech companies"
   },
   {
+    "id": "sweden-vc-14",
+    "name": "Danmark (Denmark)",
+    "firmName": "Danmark (Denmark)",
+    "type": "vc",
+    "stage": [
+      "seed",
+      "series_a"
+    ],
+    "industries": [
+      "saas"
+    ],
+    "geographies": [
+      "sweden",
+      "nordics"
+    ],
+    "notableInvestments": [],
+    "tags": [
+      "sweden"
+    ],
+    "ranking": 77,
+    "checkSizeMin": 500000,
+    "checkSizeMax": 5000000,
+    "portfolioCount": 20,
+    "dealsPerYear": 5,
+    "thesis": "Swedish venture capital firm investing in saas companies",
+    "sweetSpot": "seed stage saas companies"
+  },
+  {
     "id": "sweden-vc-15",
     "name": "Heartcore Capital (f.d. Sunstone)",
     "firmName": "Heartcore Capital (f.d. Sunstone)",
@@ -490,6 +545,34 @@ export const INVESTOR_SEED_DATA = [
     "sweetSpot": "seed stage saas companies"
   },
   {
+    "id": "sweden-vc-19",
+    "name": "Norge (Norway)",
+    "firmName": "Norge (Norway)",
+    "type": "vc",
+    "stage": [
+      "seed",
+      "series_a"
+    ],
+    "industries": [
+      "saas"
+    ],
+    "geographies": [
+      "sweden",
+      "nordics"
+    ],
+    "notableInvestments": [],
+    "tags": [
+      "sweden"
+    ],
+    "ranking": 72,
+    "checkSizeMin": 500000,
+    "checkSizeMax": 5000000,
+    "portfolioCount": 20,
+    "dealsPerYear": 5,
+    "thesis": "Swedish venture capital firm investing in saas companies",
+    "sweetSpot": "seed stage saas companies"
+  },
+  {
     "id": "sweden-vc-20",
     "name": "Verdane",
     "firmName": "Verdane",
@@ -599,6 +682,34 @@ export const INVESTOR_SEED_DATA = [
     "dealsPerYear": 5,
     "thesis": "Swedish venture capital firm investing in fintech companies",
     "sweetSpot": "seed stage fintech companies"
+  },
+  {
+    "id": "sweden-vc-24",
+    "name": "Finland",
+    "firmName": "Finland",
+    "type": "vc",
+    "stage": [
+      "seed",
+      "series_a"
+    ],
+    "industries": [
+      "saas"
+    ],
+    "geographies": [
+      "sweden",
+      "nordics"
+    ],
+    "notableInvestments": [],
+    "tags": [
+      "sweden"
+    ],
+    "ranking": 67,
+    "checkSizeMin": 500000,
+    "checkSizeMax": 5000000,
+    "portfolioCount": 20,
+    "dealsPerYear": 5,
+    "thesis": "Swedish venture capital firm investing in saas companies",
+    "sweetSpot": "seed stage saas companies"
   },
   {
     "id": "sweden-vc-25",
@@ -717,6 +828,34 @@ export const INVESTOR_SEED_DATA = [
     "dealsPerYear": 5,
     "thesis": "Swedish venture capital firm investing in saas companies",
     "sweetSpot": "pre_seed stage saas companies"
+  },
+  {
+    "id": "sweden-vc-29",
+    "name": "Storbritannien (United Kingdom)",
+    "firmName": "Storbritannien (United Kingdom)",
+    "type": "vc",
+    "stage": [
+      "seed",
+      "series_a"
+    ],
+    "industries": [
+      "saas"
+    ],
+    "geographies": [
+      "sweden",
+      "nordics"
+    ],
+    "notableInvestments": [],
+    "tags": [
+      "sweden"
+    ],
+    "ranking": 62,
+    "checkSizeMin": 500000,
+    "checkSizeMax": 5000000,
+    "portfolioCount": 20,
+    "dealsPerYear": 5,
+    "thesis": "Swedish venture capital firm investing in saas companies",
+    "sweetSpot": "seed stage saas companies"
   },
   {
     "id": "sweden-vc-30",
@@ -1433,6 +1572,34 @@ export const INVESTOR_SEED_DATA = [
     "sweetSpot": "seed stage fintech companies"
   },
   {
+    "id": "sweden-vc-50",
+    "name": "Tyskland (Germany)",
+    "firmName": "Tyskland (Germany)",
+    "type": "vc",
+    "stage": [
+      "seed",
+      "series_a"
+    ],
+    "industries": [
+      "saas"
+    ],
+    "geographies": [
+      "sweden",
+      "nordics"
+    ],
+    "notableInvestments": [],
+    "tags": [
+      "sweden"
+    ],
+    "ranking": 41,
+    "checkSizeMin": 500000,
+    "checkSizeMax": 5000000,
+    "portfolioCount": 20,
+    "dealsPerYear": 5,
+    "thesis": "Swedish venture capital firm investing in saas companies",
+    "sweetSpot": "seed stage saas companies"
+  },
+  {
     "id": "sweden-vc-51",
     "name": "Earlybird Venture Capital",
     "firmName": "Earlybird Venture Capital",
@@ -1777,6 +1944,34 @@ export const INVESTOR_SEED_DATA = [
     "sweetSpot": "seed stage saas companies"
   },
   {
+    "id": "sweden-vc-61",
+    "name": "Frankrike (France)",
+    "firmName": "Frankrike (France)",
+    "type": "vc",
+    "stage": [
+      "seed",
+      "series_a"
+    ],
+    "industries": [
+      "saas"
+    ],
+    "geographies": [
+      "sweden",
+      "nordics"
+    ],
+    "notableInvestments": [],
+    "tags": [
+      "sweden"
+    ],
+    "ranking": 30,
+    "checkSizeMin": 500000,
+    "checkSizeMax": 5000000,
+    "portfolioCount": 20,
+    "dealsPerYear": 5,
+    "thesis": "Swedish venture capital firm investing in saas companies",
+    "sweetSpot": "seed stage saas companies"
+  },
+  {
     "id": "sweden-vc-62",
     "name": "Partech",
     "firmName": "Partech",
@@ -2081,6 +2276,34 @@ export const INVESTOR_SEED_DATA = [
     "sweetSpot": "seed stage saas companies"
   },
   {
+    "id": "sweden-vc-71",
+    "name": "Nederländerna (Netherlands)",
+    "firmName": "Nederländerna (Netherlands)",
+    "type": "vc",
+    "stage": [
+      "seed",
+      "series_a"
+    ],
+    "industries": [
+      "saas"
+    ],
+    "geographies": [
+      "sweden",
+      "nordics"
+    ],
+    "notableInvestments": [],
+    "tags": [
+      "sweden"
+    ],
+    "ranking": 20,
+    "checkSizeMin": 500000,
+    "checkSizeMax": 5000000,
+    "portfolioCount": 20,
+    "dealsPerYear": 5,
+    "thesis": "Swedish venture capital firm investing in saas companies",
+    "sweetSpot": "seed stage saas companies"
+  },
+  {
     "id": "sweden-vc-72",
     "name": "Prime Ventures",
     "firmName": "Prime Ventures",
@@ -2221,6 +2444,34 @@ export const INVESTOR_SEED_DATA = [
     "sweetSpot": "seed stage fintech companies"
   },
   {
+    "id": "sweden-vc-76",
+    "name": "Schweiz (Switzerland)",
+    "firmName": "Schweiz (Switzerland)",
+    "type": "vc",
+    "stage": [
+      "seed",
+      "series_a"
+    ],
+    "industries": [
+      "saas"
+    ],
+    "geographies": [
+      "sweden",
+      "nordics"
+    ],
+    "notableInvestments": [],
+    "tags": [
+      "sweden"
+    ],
+    "ranking": 15,
+    "checkSizeMin": 500000,
+    "checkSizeMax": 5000000,
+    "portfolioCount": 20,
+    "dealsPerYear": 5,
+    "thesis": "Swedish venture capital firm investing in saas companies",
+    "sweetSpot": "seed stage saas companies"
+  },
+  {
     "id": "sweden-vc-77",
     "name": "Lakestar",
     "firmName": "Lakestar",
@@ -2280,6 +2531,34 @@ export const INVESTOR_SEED_DATA = [
     "dealsPerYear": 5,
     "thesis": "Swedish venture capital firm investing in life_science companies",
     "sweetSpot": "seed stage life_science companies"
+  },
+  {
+    "id": "sweden-vc-79",
+    "name": "Spanien (Spain)",
+    "firmName": "Spanien (Spain)",
+    "type": "vc",
+    "stage": [
+      "seed",
+      "series_a"
+    ],
+    "industries": [
+      "saas"
+    ],
+    "geographies": [
+      "sweden",
+      "nordics"
+    ],
+    "notableInvestments": [],
+    "tags": [
+      "sweden"
+    ],
+    "ranking": 12,
+    "checkSizeMin": 500000,
+    "checkSizeMax": 5000000,
+    "portfolioCount": 20,
+    "dealsPerYear": 5,
+    "thesis": "Swedish venture capital firm investing in saas companies",
+    "sweetSpot": "seed stage saas companies"
   },
   {
     "id": "sweden-vc-80",
@@ -2459,6 +2738,34 @@ export const INVESTOR_SEED_DATA = [
     "sweetSpot": "seed stage life_science companies"
   },
   {
+    "id": "sweden-vc-85",
+    "name": "Belgien (Belgium)",
+    "firmName": "Belgien (Belgium)",
+    "type": "vc",
+    "stage": [
+      "seed",
+      "series_a"
+    ],
+    "industries": [
+      "saas"
+    ],
+    "geographies": [
+      "sweden",
+      "nordics"
+    ],
+    "notableInvestments": [],
+    "tags": [
+      "sweden"
+    ],
+    "ranking": 6,
+    "checkSizeMin": 500000,
+    "checkSizeMax": 5000000,
+    "portfolioCount": 20,
+    "dealsPerYear": 5,
+    "thesis": "Swedish venture capital firm investing in saas companies",
+    "sweetSpot": "seed stage saas companies"
+  },
+  {
     "id": "sweden-vc-86",
     "name": "Hummingbird Ventures",
     "firmName": "Hummingbird Ventures",
@@ -2550,6 +2857,34 @@ export const INVESTOR_SEED_DATA = [
     "sweetSpot": "growth stage saas companies"
   },
   {
+    "id": "sweden-vc-89",
+    "name": "Luxemburg",
+    "firmName": "Luxemburg",
+    "type": "vc",
+    "stage": [
+      "seed",
+      "series_a"
+    ],
+    "industries": [
+      "saas"
+    ],
+    "geographies": [
+      "sweden",
+      "nordics"
+    ],
+    "notableInvestments": [],
+    "tags": [
+      "sweden"
+    ],
+    "ranking": 2,
+    "checkSizeMin": 500000,
+    "checkSizeMax": 5000000,
+    "portfolioCount": 20,
+    "dealsPerYear": 5,
+    "thesis": "Swedish venture capital firm investing in saas companies",
+    "sweetSpot": "seed stage saas companies"
+  },
+  {
     "id": "sweden-vc-90",
     "name": "Mangrove Capital Partners",
     "firmName": "Mangrove Capital Partners",
@@ -2606,6 +2941,34 @@ export const INVESTOR_SEED_DATA = [
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
     "dealsPerYear": 5,
+    "sweetSpot": "seed stage saas companies"
+  },
+  {
+    "id": "sweden-vc-92",
+    "name": "Italien",
+    "firmName": "Italien",
+    "type": "vc",
+    "stage": [
+      "seed",
+      "series_a"
+    ],
+    "industries": [
+      "saas"
+    ],
+    "geographies": [
+      "sweden",
+      "nordics"
+    ],
+    "notableInvestments": [],
+    "tags": [
+      "sweden"
+    ],
+    "ranking": -1,
+    "checkSizeMin": 500000,
+    "checkSizeMax": 5000000,
+    "portfolioCount": 20,
+    "dealsPerYear": 5,
+    "thesis": "Swedish venture capital firm investing in saas companies",
     "sweetSpot": "seed stage saas companies"
   },
   {
@@ -2689,6 +3052,34 @@ export const INVESTOR_SEED_DATA = [
     "sweetSpot": "seed stage saas companies"
   },
   {
+    "id": "sweden-vc-95",
+    "name": "Österrike (Austria)",
+    "firmName": "Österrike (Austria)",
+    "type": "vc",
+    "stage": [
+      "seed",
+      "series_a"
+    ],
+    "industries": [
+      "saas"
+    ],
+    "geographies": [
+      "sweden",
+      "nordics"
+    ],
+    "notableInvestments": [],
+    "tags": [
+      "sweden"
+    ],
+    "ranking": -4,
+    "checkSizeMin": 500000,
+    "checkSizeMax": 5000000,
+    "portfolioCount": 20,
+    "dealsPerYear": 5,
+    "thesis": "Swedish venture capital firm investing in saas companies",
+    "sweetSpot": "seed stage saas companies"
+  },
+  {
     "id": "sweden-vc-96",
     "name": "Speedinvest",
     "firmName": "Speedinvest",
@@ -2750,6 +3141,34 @@ export const INVESTOR_SEED_DATA = [
     "sweetSpot": "growth stage sustainability companies"
   },
   {
+    "id": "sweden-vc-98",
+    "name": "Irland (Ireland)",
+    "firmName": "Irland (Ireland)",
+    "type": "vc",
+    "stage": [
+      "seed",
+      "series_a"
+    ],
+    "industries": [
+      "saas"
+    ],
+    "geographies": [
+      "sweden",
+      "nordics"
+    ],
+    "notableInvestments": [],
+    "tags": [
+      "sweden"
+    ],
+    "ranking": -7,
+    "checkSizeMin": 500000,
+    "checkSizeMax": 5000000,
+    "portfolioCount": 20,
+    "dealsPerYear": 5,
+    "thesis": "Swedish venture capital firm investing in saas companies",
+    "sweetSpot": "seed stage saas companies"
+  },
+  {
     "id": "sweden-vc-99",
     "name": "Frontline Ventures",
     "firmName": "Frontline Ventures",
@@ -2809,6 +3228,34 @@ export const INVESTOR_SEED_DATA = [
     "sweetSpot": "seed stage saas companies"
   },
   {
+    "id": "sweden-vc-101",
+    "name": "Tjeckien (Czech Republic)",
+    "firmName": "Tjeckien (Czech Republic)",
+    "type": "vc",
+    "stage": [
+      "seed",
+      "series_a"
+    ],
+    "industries": [
+      "saas"
+    ],
+    "geographies": [
+      "sweden",
+      "nordics"
+    ],
+    "notableInvestments": [],
+    "tags": [
+      "sweden"
+    ],
+    "ranking": -10,
+    "checkSizeMin": 500000,
+    "checkSizeMax": 5000000,
+    "portfolioCount": 20,
+    "dealsPerYear": 5,
+    "thesis": "Swedish venture capital firm investing in saas companies",
+    "sweetSpot": "seed stage saas companies"
+  },
+  {
     "id": "sweden-vc-102",
     "name": "Credo Ventures",
     "firmName": "Credo Ventures",
@@ -2829,6 +3276,34 @@ export const INVESTOR_SEED_DATA = [
     ],
     "ranking": -11,
     "fundSize": 6600000,
+    "checkSizeMin": 500000,
+    "checkSizeMax": 5000000,
+    "portfolioCount": 20,
+    "dealsPerYear": 5,
+    "thesis": "Swedish venture capital firm investing in saas companies",
+    "sweetSpot": "seed stage saas companies"
+  },
+  {
+    "id": "sweden-vc-103",
+    "name": "Estland",
+    "firmName": "Estland",
+    "type": "vc",
+    "stage": [
+      "seed",
+      "series_a"
+    ],
+    "industries": [
+      "saas"
+    ],
+    "geographies": [
+      "sweden",
+      "nordics"
+    ],
+    "notableInvestments": [],
+    "tags": [
+      "sweden"
+    ],
+    "ranking": -12,
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -2863,6 +3338,34 @@ export const INVESTOR_SEED_DATA = [
     "portfolioCount": 20,
     "dealsPerYear": 5,
     "sweetSpot": "seed stage deep_tech companies"
+  },
+  {
+    "id": "sweden-vc-105",
+    "name": "Polen",
+    "firmName": "Polen",
+    "type": "vc",
+    "stage": [
+      "seed",
+      "series_a"
+    ],
+    "industries": [
+      "saas"
+    ],
+    "geographies": [
+      "sweden",
+      "nordics"
+    ],
+    "notableInvestments": [],
+    "tags": [
+      "sweden"
+    ],
+    "ranking": -14,
+    "checkSizeMin": 500000,
+    "checkSizeMax": 5000000,
+    "portfolioCount": 20,
+    "dealsPerYear": 5,
+    "thesis": "Swedish venture capital firm investing in saas companies",
+    "sweetSpot": "seed stage saas companies"
   },
   {
     "id": "sweden-vc-106",
@@ -2922,6 +3425,34 @@ export const INVESTOR_SEED_DATA = [
     "sweetSpot": "seed stage saas companies"
   },
   {
+    "id": "sweden-vc-108",
+    "name": "Portugal",
+    "firmName": "Portugal",
+    "type": "vc",
+    "stage": [
+      "seed",
+      "series_a"
+    ],
+    "industries": [
+      "saas"
+    ],
+    "geographies": [
+      "sweden",
+      "nordics"
+    ],
+    "notableInvestments": [],
+    "tags": [
+      "sweden"
+    ],
+    "ranking": -17,
+    "checkSizeMin": 500000,
+    "checkSizeMax": 5000000,
+    "portfolioCount": 20,
+    "dealsPerYear": 5,
+    "thesis": "Swedish venture capital firm investing in saas companies",
+    "sweetSpot": "seed stage saas companies"
+  },
+  {
     "id": "sweden-vc-109",
     "name": "Indico Capital Partners",
     "firmName": "Indico Capital Partners",
@@ -2946,6 +3477,62 @@ export const INVESTOR_SEED_DATA = [
     "ranking": -18,
     "fundSize": 59400000,
     "yearFounded": 2019,
+    "checkSizeMin": 500000,
+    "checkSizeMax": 5000000,
+    "portfolioCount": 20,
+    "dealsPerYear": 5,
+    "thesis": "Swedish venture capital firm investing in saas companies",
+    "sweetSpot": "seed stage saas companies"
+  },
+  {
+    "id": "sweden-vc-110",
+    "name": "Turkiet",
+    "firmName": "Turkiet",
+    "type": "vc",
+    "stage": [
+      "seed",
+      "series_a"
+    ],
+    "industries": [
+      "saas"
+    ],
+    "geographies": [
+      "sweden",
+      "nordics"
+    ],
+    "notableInvestments": [],
+    "tags": [
+      "sweden"
+    ],
+    "ranking": -19,
+    "checkSizeMin": 500000,
+    "checkSizeMax": 5000000,
+    "portfolioCount": 20,
+    "dealsPerYear": 5,
+    "thesis": "Swedish venture capital firm investing in saas companies",
+    "sweetSpot": "seed stage saas companies"
+  },
+  {
+    "id": "sweden-vc-111",
+    "name": "Bulgarien",
+    "firmName": "Bulgarien",
+    "type": "vc",
+    "stage": [
+      "seed",
+      "series_a"
+    ],
+    "industries": [
+      "saas"
+    ],
+    "geographies": [
+      "sweden",
+      "nordics"
+    ],
+    "notableInvestments": [],
+    "tags": [
+      "sweden"
+    ],
+    "ranking": -20,
     "checkSizeMin": 500000,
     "checkSizeMax": 5000000,
     "portfolioCount": 20,
@@ -2987,14 +3574,4 @@ export const INVESTOR_SEED_DATA = [
   }
 ];
 
-export const getInvestorsByStage = (stage: string) => {
-  return INVESTOR_SEED_DATA.filter(inv => inv.stage.includes(stage));
-};
-
-export const getInvestorsByIndustry = (industry: string) => {
-  return INVESTOR_SEED_DATA.filter(inv => inv.industries.includes(industry));
-};
-
-export const getInvestorsByGeography = (geo: string) => {
-  return INVESTOR_SEED_DATA.filter(inv => inv.geographies.includes(geo));
-};
+export const SWEDEN_VC_COUNT = 112;
