@@ -997,7 +997,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   {/* Suggested Next Steps for agent messages */}
                   {message.sender === 'agent' && messages.indexOf(message) === messages.length - 1 && (
                     <div className="relative z-10 mt-3 pt-3 border-t border-gray-200">
-                      <p className="text-xs text-gray-500 mb-2">💡 Nästa steg:</p>
+                      <p className="text-xs text-gray-500 mb-2">💡 Next steps:</p>
                       <div className="flex flex-wrap gap-2">
                         {(() => {
                           const { calculateReadinessScore, generateNextStepSuggestions } = require('@/lib/coaching-prompts');
