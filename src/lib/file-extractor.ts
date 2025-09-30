@@ -42,7 +42,9 @@ function bufferToString(buf: ArrayBuffer): string {
   }
 }
 
-export async function extractFromFile(file: File): Promise<ExtractedDoc> {
+type MinimalFile = { name: string; type: string; arrayBuffer: () => Promise<ArrayBuffer> };
+
+export async function extractFromFile(file: MinimalFile): Promise<ExtractedDoc> {
   const arrayBuffer = await file.arrayBuffer();
   const mime = file.type as SupportedMime;
   const name = file.name;
@@ -111,7 +113,7 @@ export async function extractFromFile(file: File): Promise<ExtractedDoc> {
   return { filename: name, mimeType: mime, text: bufferToString(arrayBuffer) };
 }
 
-export async function extractMany(files: File[]): Promise<ExtractedDoc[]> {
+export async function extractMany(files: MinimalFile[]): Promise<ExtractedDoc[]> {
   const results: ExtractedDoc[] = [];
   for (const f of files) {
     try {

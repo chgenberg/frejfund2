@@ -121,15 +121,19 @@ async function indexEmailIntoSession(sessionId: string, parsed: ParsedMail): Pro
 
   // Parse attachments to extracted text
   try {
-    const files: File[] = [];
+    const files: Array<{ name: string; type: string; arrayBuffer: () => Promise<ArrayBuffer> }> = [];
     for (const att of parsed.attachments || []) {
       if (!att.content || !att.filename) continue;
       const type = att.contentType || 'application/octet-stream';
-      const file = new File([att.content as Buffer], att.filename, { type });
-      files.push(file);
+      const buf: Buffer = Buffer.isBuffer(att.content) ? (att.content as Buffer) : Buffer.from(att.content as any);
+      files.push({
+        name: att.filename,
+        type,
+        arrayBuffer: async () => buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength)
+      });
     }
     if (files.length) {
-      const docs = await extractMany(files);
+      const docs = await extractMany(files as unknown as File[]);
       const attText = docs.map((d) => `Attachment: ${d.filename}\n${d.text || ''}`).join('\n\n');
       if (attText) lines.push(attText);
     }
