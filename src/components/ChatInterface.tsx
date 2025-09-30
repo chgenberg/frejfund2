@@ -11,6 +11,7 @@ import EmailIngestModal from './EmailIngestModal';
 import KpiUploadModal from './KpiUploadModal';
 import DeckSummaryModal from './DeckSummaryModal';
 import HelpModal from './HelpModal';
+import MatchChat from './MatchChat';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -64,6 +65,8 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showMatchChat, setShowMatchChat] = useState(false);
+  const [activeMatchChat, setActiveMatchChat] = useState<any>(null);
   const [prefetchedContext, setPrefetchedContext] = useState<string | null>(null);
   const [dailyCompass, setDailyCompass] = useState<{ insights: string[]; risks: string[]; actions: string[]; citations?: Array<{label:string; snippet:string}> } | null>(null);
   const [showCompass, setShowCompass] = useState(true);
@@ -911,50 +914,69 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                           )}
                         </div>
                         <div className="flex space-x-2">
-                          <button
-                            onClick={async () => {
-                              try {
-                                await fetch('/api/notifications/respond', {
-                                  method: 'POST',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({
-                                    requestId: notif.id,
-                                    response: 'accept',
-                                    message: 'Yes, I\'d love to connect!'
-                                  })
+                          {notif.status === 'pending' ? (
+                            <>
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    await fetch('/api/notifications/respond', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({
+                                        requestId: notif.id,
+                                        response: 'accept',
+                                        message: 'Yes, I\'d love to connect!'
+                                      })
+                                    });
+                                    loadNotifications();
+                                    setShowNotifications(false);
+                                    addMessage(`Great news! I've accepted the intro request from ${notif.vcFirm}. You can now message them directly!`, 'agent');
+                                  } catch (error) {
+                                    console.error('Error accepting intro:', error);
+                                  }
+                                }}
+                                className="flex-1 px-3 py-1.5 bg-black text-white rounded-lg text-xs font-medium hover:bg-gray-800 transition-colors"
+                              >
+                                Accept
+                              </button>
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    await fetch('/api/notifications/respond', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({
+                                        requestId: notif.id,
+                                        response: 'decline',
+                                        message: 'Not interested right now'
+                                      })
+                                    });
+                                    loadNotifications();
+                                  } catch (error) {
+                                    console.error('Error declining intro:', error);
+                                  }
+                                }}
+                                className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200 transition-colors"
+                              >
+                                Decline
+                              </button>
+                            </>
+                          ) : notif.status === 'accepted' ? (
+                            <button
+                              onClick={() => {
+                                setActiveMatchChat({
+                                  introRequestId: notif.id,
+                                  vcName: notif.vcName,
+                                  vcFirm: notif.vcFirm
                                 });
-                                loadNotifications();
+                                setShowMatchChat(true);
                                 setShowNotifications(false);
-                                addMessage(`Great news! I've accepted the intro request from ${notif.vcFirm}. They'll be in touch soon!`, 'agent');
-                              } catch (error) {
-                                console.error('Error accepting intro:', error);
-                              }
-                            }}
-                            className="flex-1 px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-medium hover:bg-green-600 transition-colors"
-                          >
-                            Accept Intro
-                          </button>
-                          <button
-                            onClick={async () => {
-                              try {
-                                await fetch('/api/notifications/respond', {
-                                  method: 'POST',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({
-                                    requestId: notif.id,
-                                    response: 'decline',
-                                    message: 'Not interested right now'
-                                  })
-                                });
-                                loadNotifications();
-                              } catch (error) {
-                                console.error('Error declining intro:', error);
-                              }
-                            }}
-                            className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200 transition-colors"
-                          >
-                            Decline
-                          </button>
+                              }}
+                              className="flex-1 px-3 py-1.5 bg-black text-white rounded-lg text-xs font-medium hover:bg-gray-800 transition-colors"
+                            >
+                              💬 Message
+                            </button>
+                          ) : null}
                         </div>
                       </div>
                     ))}
@@ -1645,6 +1667,17 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
 
       {/* Help Modal */}
       <HelpModal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} />
+
+      {/* Match Chat */}
+      {showMatchChat && activeMatchChat && (
+        <MatchChat
+          introRequestId={activeMatchChat.introRequestId}
+          userEmail={businessInfo.email || ''}
+          userType="founder"
+          matchName={`${activeMatchChat.vcName} (${activeMatchChat.vcFirm})`}
+          onClose={() => setShowMatchChat(false)}
+        />
+      )}
     </div>
   );
 }

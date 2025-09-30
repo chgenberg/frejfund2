@@ -404,3 +404,30 @@ model VCSwipe {
   @@index([createdAt])
   @@map("vc_swipes")
 }
+
+// Messages between matched VC and Founder
+model MatchMessage {
+  id            String    @id @default(cuid())
+  
+  // Match reference (from IntroRequest)
+  introRequestId String
+  
+  // Who sent it
+  senderType    String    // 'vc' | 'founder'
+  senderEmail   String
+  
+  // Message
+  content       String    @db.Text
+  
+  // Read status
+  isRead        Boolean   @default(false)
+  readAt        DateTime?
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  
+  @@index([introRequestId])
+  @@index([senderEmail])
+  @@index([createdAt])
+  @@map("match_messages")
+}
