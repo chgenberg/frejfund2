@@ -39,8 +39,6 @@ export async function POST(request: NextRequest) {
     const withDocMessage = contextBlock
       ? `${message}\n\nUse the following context if helpful. Cite matches as [1], [2], etc.:\n${contextBlock}`
       : message;
-
-    const sessionId = req.headers.get('x-session-id') || undefined;
     
     const response = await aiAnalyzer.generateChatResponse(
       withDocMessage,
