@@ -178,7 +178,10 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
     
     // Save welcome message to database
     saveMessageToDb(welcomeMessage);
-    
+  };
+
+  useEffect(() => {
+    // Initial data loading in background
     (async () => {
       try {
         // Prefetch uploaded files (PDF, DOCX, XLSX, CSV, TXT) → text
@@ -212,7 +215,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
 
         // Prefetch a first Daily Compass (non-blocking)
         try {
-          const dcRes = await fetch('/api/cron/daily', {
+          const dcRes = await fetch('/api/cron/daily?ui=1', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ sessionId })
@@ -238,7 +241,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
          if (summaryRes.ok) { try { await summaryRes.json(); } catch {} }
       } catch {}
     })();
-  }, []);
+  }, [businessInfo, sessionId]);
 
   const runDailyCompassNow = async () => {
     setLoadingCompass(true);
