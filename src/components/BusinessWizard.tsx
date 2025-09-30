@@ -452,12 +452,12 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
                 {isDragging ? '✨ Drop your files here!' : 'Drag & drop files here or click to browse'}
               </p>
               <p className="text-sm text-gray-500">
-                PDF, Word, Excel, or text files • Max 10MB per file
+                PDF, Word, Excel, PowerPoint, Images • Max 10MB per file
               </p>
               <input
                 type="file"
                 multiple
-                accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.rtf,.png,.jpg,.jpeg"
                 onChange={handleFileUpload}
                 className="hidden"
                 id="file-upload"
