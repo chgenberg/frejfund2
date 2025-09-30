@@ -1069,7 +1069,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
 
       {/* Right panel: Proactive tips */}
       {showTips && (
-        <div className="absolute right-4 top-20 bottom-20 w-80 bg-white border border-gray-200 rounded-xl shadow p-4 overflow-y-auto">
+        <div className="absolute right-4 top-20 bottom-20 w-80 bg-white border border-gray-200 rounded-xl shadow p-4 overflow-y-auto z-50">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm font-semibold text-black">Proactive tips</div>
             <button onClick={() => setShowTips(false)} className="text-xs text-gray-600 hover:text-black">Close</button>
@@ -1144,7 +1144,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ type: "spring", stiffness: 200, damping: 20 }}
-            className="absolute bottom-28 left-0 right-0 px-6 pointer-events-none z-30"
+            className="absolute bottom-28 left-0 right-0 px-6 pointer-events-none z-40"
           >
             <div className="max-w-5xl mx-auto">
               <motion.p 
@@ -1233,7 +1233,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
 
       {/* Input */}
       <motion.div 
-        className="px-6 py-4 bg-white/80 backdrop-blur-xl border-t border-gray-100 relative z-40"
+        className="px-6 py-4 bg-white backdrop-blur-xl border-t border-gray-100 relative z-50"
         initial={{ y: 100 }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
