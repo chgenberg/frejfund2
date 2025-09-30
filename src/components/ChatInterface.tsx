@@ -916,8 +916,8 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               }`}
             >
               {message.sender === 'agent' && (
-                <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-4 h-4 text-white" />
+                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Bot className="w-4 h-4 text-gray-700" />
                 </div>
               )}
               
@@ -929,10 +929,10 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
                   className={`px-5 py-3.5 group relative overflow-hidden ${
                     message.sender === 'user'
-                      ? 'bg-black text-white rounded-2xl rounded-br-md'
+                      ? 'bg-gray-800 text-white rounded-2xl rounded-br-md shadow-lg'
                       : message.type === 'analysis'
-                      ? 'bg-gray-50 text-black rounded-2xl rounded-bl-md shadow-sm'
-                      : 'bg-white text-black rounded-2xl rounded-bl-md shadow-sm ring-1 ring-gray-100'
+                      ? 'bg-gray-100 text-gray-900 rounded-2xl rounded-bl-md shadow-sm border border-gray-200'
+                      : 'bg-gray-50 text-gray-900 rounded-2xl rounded-bl-md shadow-sm border border-gray-200'
                   }`}
                 >
                   {/* Subtle gradient overlay on hover */}
@@ -1028,8 +1028,8 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               </div>
 
               {message.sender === 'user' && (
-                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
-                  <User className="w-4 h-4 text-gray-600" />
+                <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0">
+                  <User className="w-4 h-4 text-white" />
                 </div>
               )}
             </motion.div>
@@ -1057,16 +1057,16 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                 transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
               />
               <motion.div 
-                className="relative w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center shadow-lg"
+                className="relative w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center shadow-lg"
                 animate={{ scale: [1, 1.05, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                <Bot className="w-5 h-5 text-white" />
+                <Bot className="w-5 h-5 text-gray-700" />
               </motion.div>
             </motion.div>
             
             <motion.div
-              className="bg-white border border-gray-100 px-6 py-3.5 rounded-2xl shadow-sm backdrop-blur-sm"
+              className="bg-gray-50 border border-gray-200 px-6 py-3.5 rounded-2xl shadow-sm backdrop-blur-sm"
               animate={{ 
                 boxShadow: [
                   "0 1px 3px rgba(0,0,0,0.1)",
