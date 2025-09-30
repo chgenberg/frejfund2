@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, Brain, TrendingUp, Users, FileText, Sparkles, X, ArrowRight, CheckCircle2, Upload } from 'lucide-react';
