@@ -183,6 +183,124 @@ export async function extractFromFile(file: MinimalFile): Promise<ExtractedDoc> 
     }
   }
 
+  // Keynote (.key) - Apple's presentation format
+  if (name.endsWith('.key')) {
+    try {
+      const JSZip = (await import('jszip')).default;
+      const zip = await JSZip.loadAsync(arrayBuffer);
+      
+      // Keynote stores content in index.apxl or presentation.apxl
+      const indexFile = zip.files['index.apxl'] || zip.files['presentation.apxl'];
+      
+      if (indexFile) {
+        const content = await indexFile.async('text');
+        // Extract text from XML/JSON structure
+        const textMatches = content.match(/>([^<]+)</g);
+        if (textMatches) {
+          const text = textMatches
+            .map(m => m.replace(/^>/, '').replace(/<$/, ''))
+            .filter(t => t.trim().length > 0 && !t.match(/^[\d.]+$/))
+            .join(' ');
+          return { filename: name, mimeType: mime, text };
+        }
+      }
+      
+      // Fallback: Try to extract from any text files in the package
+      let allText = '';
+      for (const fileName in zip.files) {
+        if (fileName.endsWith('.xml') || fileName.endsWith('.json')) {
+          const content = await zip.files[fileName].async('text');
+          const textMatches = content.match(/>([^<]+)</g);
+          if (textMatches) {
+            const extracted = textMatches
+              .map(m => m.replace(/^>/, '').replace(/<$/, ''))
+              .filter(t => t.trim().length > 0)
+              .join(' ');
+            allText += extracted + ' ';
+          }
+        }
+      }
+      
+      return { 
+        filename: name, 
+        mimeType: mime, 
+        text: allText.trim(),
+        meta: { format: 'keynote' }
+      };
+    } catch (e) {
+      console.error('Keynote extraction failed:', e);
+      return { filename: name, mimeType: mime, text: '' };
+    }
+  }
+
+  // Pages (.pages) - Apple's word processor
+  if (name.endsWith('.pages')) {
+    try {
+      const JSZip = (await import('jszip')).default;
+      const zip = await JSZip.loadAsync(arrayBuffer);
+      
+      // Pages stores content in index.xml or similar
+      let allText = '';
+      for (const fileName in zip.files) {
+        if (fileName.endsWith('.xml')) {
+          const content = await zip.files[fileName].async('text');
+          const textMatches = content.match(/>([^<]+)</g);
+          if (textMatches) {
+            const extracted = textMatches
+              .map(m => m.replace(/^>/, '').replace(/<$/, ''))
+              .filter(t => t.trim().length > 0)
+              .join(' ');
+            allText += extracted + ' ';
+          }
+        }
+      }
+      
+      return { 
+        filename: name, 
+        mimeType: mime, 
+        text: allText.trim(),
+        meta: { format: 'pages' }
+      };
+    } catch (e) {
+      console.error('Pages extraction failed:', e);
+      return { filename: name, mimeType: mime, text: '' };
+    }
+  }
+
+  // Numbers (.numbers) - Apple's spreadsheet
+  if (name.endsWith('.numbers')) {
+    try {
+      const JSZip = (await import('jszip')).default;
+      const zip = await JSZip.loadAsync(arrayBuffer);
+      
+      let allText = '';
+      for (const fileName in zip.files) {
+        if (fileName.endsWith('.xml') || fileName.endsWith('.iwa')) {
+          const content = await zip.files[fileName].async('text');
+          // Extract numbers and text
+          const matches = content.match(/[>"]([^<"]+)[<"]/g);
+          if (matches) {
+            const extracted = matches
+              .map(m => m.replace(/[>"<]/g, ''))
+              .filter(t => t.trim().length > 0)
+              .join(' ');
+            allText += extracted + ' ';
+          }
+        }
+      }
+      
+      return { 
+        filename: name, 
+        mimeType: mime, 
+        text: allText.trim(),
+        meta: { format: 'numbers' }
+      };
+    } catch (e) {
+      console.error('Numbers extraction failed:', e);
+      return { filename: name, mimeType: mime, text: '' };
+    }
+  }
+
   // Images (PNG, JPG, JPEG) - Use OCR
   if (
     mime.startsWith('image/') ||
