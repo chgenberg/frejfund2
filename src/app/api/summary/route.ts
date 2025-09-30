@@ -51,7 +51,13 @@ KPIs (optional):\n${kpiPreview ? JSON.stringify(kpiPreview).slice(0,800) : ''}
 
 Focus on: investment readiness, growth levers, numeric targets for 90 days, and one high-leverage question.`;
 
-    let content = await summarizeWithFallback(input);
+    const hasKey = Boolean(process.env.OPENAI_API_KEY || process.env.AZURE_OPENAI_API_KEY);
+    let content = '';
+    if (!hasKey) {
+      const fallback = { summary: `${businessInfo.name} in ${businessInfo.industry} at ${businessInfo.stage} stage.`, recommendations: ["Prioritize 90‑day plan", "Talk to 10 customers", "Define pricing"], questions: ["What is your next milestone?", "Who is your ICP?", "What is your pricing?"] };
+      return NextResponse.json(fallback);
+    }
+    content = await summarizeWithFallback(input);
     let json: any;
     try { json = JSON.parse((content || '{}').match(/\{[\s\S]*\}/)?.[0] || '{}'); } catch { json = {}; }
     if (!json.summary) {

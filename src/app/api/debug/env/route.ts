@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   }
 
   const keys = {
-    OPENAI_API_KEY: Boolean(process.env.OPENAI_API_KEY),
+    OPENAI_API_KEY: Boolean((process.env.OPENAI_API_KEY || process.env.OPENAI_KEY || process.env.OPENAI_TOKEN || '').trim()),
     OPENAI_CHAT_MODEL: process.env.OPENAI_CHAT_MODEL || null,
     OPENAI_BASE_URL: Boolean(process.env.OPENAI_BASE_URL || process.env.OPENAI_API_BASE),
     OPENAI_PROJECT: Boolean(process.env.OPENAI_PROJECT),

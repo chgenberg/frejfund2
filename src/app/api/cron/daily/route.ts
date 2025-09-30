@@ -38,13 +38,23 @@ export async function POST(req: NextRequest) {
       ...topForActions.map((t, i) => `[A${i + 1}] ${t.text}`)
     ].join('\n\n');
 
-    const client = getOpenAIClient();
     const model = getChatModel();
+    const hasKey = Boolean(process.env.OPENAI_API_KEY || process.env.AZURE_OPENAI_API_KEY);
+    let content = '';
+    if (!hasKey) {
+      const fallback = {
+        insights: topForInsights.slice(0,3).map(t => t.text).concat(['New email analyzed']).slice(0,3),
+        risks: topForRisks.slice(0,3).map(t => t.text).concat(['Pipeline slip risk']).slice(0,3),
+        actions: topForActions.slice(0,3).map(t => t.text).concat(['Follow up with warm leads']).slice(0,3),
+        citations: []
+      } as const;
+      return NextResponse.json(fallback);
+    }
+    const client = getOpenAIClient();
     const prompt = `You are Freja, generating a short Daily Compass. Return STRICT JSON only with shape {"insights":[""],"risks":[""],"actions":[""],"citations":[{"label":"","snippet":""}]}. Keep each array length 3. Use concise phrases.
 
 Context (with labels):\n${context}`;
 
-    let content = '';
     const isGpt5 = model.startsWith('gpt-5');
     try {
       const r = await client.chat.completions.create({

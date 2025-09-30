@@ -45,6 +45,11 @@ export function getModelPricePerMTok(model: string): { input: number; output: nu
   return table[model] || fallback;
 }
 
+function resolveOpenAIKey(): string | undefined {
+  const raw = (process.env.OPENAI_API_KEY || process.env.OPENAI_KEY || process.env.OPENAI_TOKEN || '').trim();
+  return raw || undefined;
+}
+
 export function getOpenAIClient(): OpenAI {
   const dev = process.env.NODE_ENV === 'development' ? (DEV_SECRETS_LOCAL as any)?.openai : null;
   if (isAzureConfigured()) {
@@ -63,7 +68,7 @@ export function getOpenAIClient(): OpenAI {
 
   // Standard OpenAI or OpenAI-compatible (e.g., proxy) configuration
   return new OpenAI({
-    apiKey: dev?.apiKey || process.env.OPENAI_API_KEY,
+    apiKey: dev?.apiKey || resolveOpenAIKey(),
     baseURL: dev?.baseURL || process.env.OPENAI_BASE_URL || process.env.OPENAI_API_BASE,
     organization: process.env.OPENAI_ORG,
     project: dev?.project || process.env.OPENAI_PROJECT
