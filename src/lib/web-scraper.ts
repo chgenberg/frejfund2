@@ -1,6 +1,4 @@
-import { JSDOM } from 'jsdom';
 import * as cheerio from 'cheerio';
-import { Readability } from '@mozilla/readability';
 
 export interface ScrapeResult {
   url: string;
@@ -53,6 +51,11 @@ export async function fetchHtml(url: string, timeoutMs = 12000): Promise<string>
 
 export async function extractMainContentWithReadability(url: string, html: string): Promise<ScrapeResult | null> {
   try {
+    // Lazy-require to avoid bundler resolving at build time
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { JSDOM } = require('jsdom');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { Readability } = require('@mozilla/readability');
     const dom = new JSDOM(html, { url });
     const reader = new Readability(dom.window.document);
     const article = reader.parse();
