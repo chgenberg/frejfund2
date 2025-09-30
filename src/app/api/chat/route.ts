@@ -40,10 +40,13 @@ export async function POST(request: NextRequest) {
       ? `${message}\n\nUse the following context if helpful. Cite matches as [1], [2], etc.:\n${contextBlock}`
       : message;
 
+    const sessionId = req.headers.get('x-session-id') || undefined;
+    
     const response = await aiAnalyzer.generateChatResponse(
       withDocMessage,
       businessInfo as BusinessInfo,
-      (Array.isArray(conversationHistory) ? (conversationHistory as any[]).filter((m:any)=> m?.type !== 'summary') : [])
+      (Array.isArray(conversationHistory) ? (conversationHistory as any[]).filter((m:any)=> m?.type !== 'summary') : []),
+      sessionId
     );
 
     // Build sources metadata for UI

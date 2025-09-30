@@ -103,9 +103,72 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
   async generateChatResponse(
     message: string,
     businessInfo: BusinessInfo,
-    conversationHistory: Array<{role: 'user' | 'assistant', content: string}>
+    conversationHistory: Array<{role: 'user' | 'assistant', content: string}>,
+    sessionId?: string
   ): Promise<string> {
     try {
+      // Check if user is asking about investors
+      const investorKeywords = [
+        'investor', 'investerare', 'vc', 'venture capital',
+        'pitch', 'funding', 'finansiering', 'raise', 'söka kapital',
+        'contact', 'kontakta', 'reach out'
+      ];
+      
+      const isAskingAboutInvestors = investorKeywords.some(keyword => 
+        message.toLowerCase().includes(keyword)
+      );
+      
+      // If asking about investors and we have a session, trigger matching
+      if (isAskingAboutInvestors && sessionId) {
+        try {
+          const response = await fetch('/api/investors/match', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-session-id': sessionId
+            },
+            body: JSON.stringify({ 
+              businessInfo: {
+                name: businessInfo.name,
+                industry: businessInfo.industry,
+                stage: businessInfo.stage,
+                targetMarket: businessInfo.targetMarket,
+                businessModel: businessInfo.businessModel
+              },
+              limit: 5
+            })
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            const matches = data.matches || [];
+            
+            if (matches.length > 0) {
+              // Format investor recommendations
+              let investorResponse = `Based on your profile (${businessInfo.industry}, ${businessInfo.stage} stage), here are your **top investor matches**:\n\n`;
+              
+              matches.slice(0, 3).forEach((match: any, idx: number) => {
+                const checkRange = match.investor.checkSizeMin && match.investor.checkSizeMax
+                  ? `$${(match.investor.checkSizeMin / 1000000).toFixed(1)}M-$${(match.investor.checkSizeMax / 1000000).toFixed(1)}M`
+                  : 'varies';
+                
+                investorResponse += `**${idx + 1}. ${match.investor.firmName || match.investor.name}** (${match.matchScore}% match)\n`;
+                investorResponse += `${match.reasoning}\n`;
+                investorResponse += `• Check size: ${checkRange}\n`;
+                investorResponse += `• Portfolio: ${match.investor.notableInvestments?.slice(0, 2).join(', ')}\n\n`;
+              });
+              
+              investorResponse += `I've saved these matches for you. Want me to draft intro emails?`;
+              
+              return investorResponse;
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching investor matches:', error);
+          // Continue with normal response if matching fails
+        }
+      }
+      
       // Import coaching prompts and goal system
       const { calculateReadinessScore, getCoachingSystemPrompt } = await import('./coaching-prompts');
       const { getCurrentMilestone } = await import('./goal-system');
