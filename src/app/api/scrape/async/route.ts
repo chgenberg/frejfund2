@@ -1,8 +1,8 @@
+import '@/lib/polyfills'; // Ensure File exists BEFORE other imports evaluate
 import { NextRequest, NextResponse } from 'next/server';
 import { scrapeSiteDeep } from '@/lib/web-scraper';
 import prisma from '@/lib/prisma';
 import { indexContextForSession } from '@/lib/vector-store';
-import '@/lib/polyfills'; // File polyfill for Node.js
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
