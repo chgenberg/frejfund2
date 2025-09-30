@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
+// Disable prerendering globally to avoid Turbopack prerender errors on client-heavy pages
+export const dynamic = 'force-dynamic';
+
 const inter = Inter({ 
   subsets: ["latin"],
   variable: "--font-inter"
