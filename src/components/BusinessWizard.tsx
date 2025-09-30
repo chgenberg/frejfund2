@@ -76,9 +76,9 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
   }, [businessInfo.website]);
 
   const [uploadError, setUploadError] = useState<string>('');
+  const [isDragging, setIsDragging] = useState(false);
   
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
+  const validateAndAddFiles = (files: File[]) => {
     setUploadError('');
     
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -108,6 +108,37 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
     }
     
     setUploadedFiles(prev => [...prev, ...files]);
+  };
+  
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    validateAndAddFiles(files);
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    validateAndAddFiles(files);
   };
 
   const removeFile = (index: number) => {
@@ -396,17 +427,32 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
             
             <motion.div 
               whileHover={{ scale: 1.01 }}
-              className="bg-gray-50 rounded-2xl p-8 text-center hover:bg-gray-100 transition-all cursor-pointer"
+              onDragEnter={handleDragEnter}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`rounded-2xl p-8 text-center transition-all cursor-pointer border-2 border-dashed ${
+                isDragging 
+                  ? 'border-black bg-gray-200 scale-105' 
+                  : 'border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400'
+              }`}
               onClick={() => document.getElementById('file-upload')?.click()}
             >
-              <div className="w-16 h-16 bg-white rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-sm">
-                <Upload className="w-8 h-8 text-gray-600" strokeWidth={1.5} />
-              </div>
-              <p className="text-gray-700 font-medium mb-2">
-                Drop files here or click to browse
+              <motion.div 
+                animate={isDragging ? { 
+                  y: [-5, 5, -5],
+                  rotate: [0, 5, -5, 0]
+                } : {}}
+                transition={{ duration: 0.6, repeat: isDragging ? Infinity : 0 }}
+                className="w-16 h-16 bg-white rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-sm"
+              >
+                <Upload className={`w-8 h-8 transition-colors ${isDragging ? 'text-black' : 'text-gray-600'}`} strokeWidth={1.5} />
+              </motion.div>
+              <p className={`font-medium mb-2 transition-colors ${isDragging ? 'text-black text-lg' : 'text-gray-700'}`}>
+                {isDragging ? '✨ Drop your files here!' : 'Drag & drop files here or click to browse'}
               </p>
               <p className="text-sm text-gray-500">
-                PDF, Word, Excel, or text files up to 10MB
+                PDF, Word, Excel, or text files • Max 10MB per file
               </p>
               <input
                 type="file"
