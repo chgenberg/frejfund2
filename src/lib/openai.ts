@@ -157,10 +157,10 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
         complexity: 'simple' // Use mini model for regular chat
       });
 
-      // Force proper formatting if GPT didn't follow instructions
-      if (text && !text.includes('\n\n')) {
-        // Add line breaks after sentences if missing
-        text = text.replace(/([.!?])\s+([A-Z])/g, '$1\n\n$2');
+      // Clean up excessive line breaks
+      if (text) {
+        // Remove triple+ line breaks, keep max double
+        text = text.replace(/\n{3,}/g, '\n\n');
         // Ensure headers are bold
         text = text.replace(/^([A-Z][^:]+):\s*/gm, '**$1:** ');
         text = text.replace(/\n([A-Z][^:]+):\s*/g, '\n**$1:** ');
