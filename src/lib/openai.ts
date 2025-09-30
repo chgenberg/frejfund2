@@ -106,42 +106,20 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
     conversationHistory: Array<{role: 'user' | 'assistant', content: string}>
   ): Promise<string> {
     try {
-      const contextPrompt = `Business Context:
-- Company: ${businessInfo.name}
-- Stage: ${businessInfo.stage}
-- Industry: ${businessInfo.industry}
-- Target Market: ${businessInfo.targetMarket}
-- Business Model: ${businessInfo.businessModel}
-- Monthly Revenue: ${businessInfo.monthlyRevenue}
-- Team Size: ${businessInfo.teamSize}
-${businessInfo.website ? `- Website: ${businessInfo.website}` : ''}
-
-User Question: ${message}
-
-Answer as the FrejFund Business Advisor—warm, direct, coach-to-founder. 
-
-CRITICAL FORMATTING:
-- **ALWAYS USE MARKDOWN**: Bold headers with **Header Text**, bullet lists with -
-- **MANDATORY LINE BREAKS**: Add TWO line breaks (\n\n) between EVERY paragraph
-- **MANDATORY BOLD**: Any text before a colon should be **bold:**
-- Keep responses under 800 characters (5-6 sentences)
-- End with 1-2 clear questions
-
-Example format:
-Hey! Great question about growth.
-
-First, I'd focus on your ICP. You mentioned SMBs—**narrow it down:** which vertical performs best?
-
-**Quick wins:**
-- Double down on ServiceTitan users
-- Launch targeted Google Ads
-- Create 2 case studies this week
-
-**One question:** What's your current CAC and close rate from demos?`;
+      // Import coaching prompts
+      const { calculateReadinessScore, getCoachingSystemPrompt } = await import('./coaching-prompts');
+      
+      // Calculate readiness score
+      const readiness = calculateReadinessScore(businessInfo);
+      
+      // Get coaching system prompt
+      const coachingSystemPrompt = getCoachingSystemPrompt(businessInfo, readiness.score);
+      
+      const contextPrompt = `User Question: ${message}`;
 
       let text = await chatWithFallback({
         messages: [
-          { role: 'system', content: this.systemPrompt },
+          { role: 'system', content: coachingSystemPrompt },
           ...conversationHistory,
           { role: 'user', content: contextPrompt }
         ],

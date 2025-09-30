@@ -141,40 +141,26 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
     })();
   }, [sessionId, setMessages]);
 
-  const showWelcomeMessage = () => {
-    // Add varied welcome message with Freja personality
-    const hour = new Date().getHours();
-    let greeting = '';
-    let emoji = '';
-    
-    if (hour < 12) {
-      greeting = 'Good morning';
-      emoji = '☀️';
-    } else if (hour < 17) {
-      greeting = 'Good afternoon';
-      emoji = '🌤️';
-    } else if (hour < 21) {
-      greeting = 'Good evening';
-      emoji = '🌆';
-    } else {
-      greeting = 'Working late';
-      emoji = '🌙';
-    }
-    
-    const welcomeVariants = [
-      `${greeting} ${businessInfo.name || 'there'}! ${emoji}\n\nI'm Freja, your AI business advisor. I've been analyzing ${businessInfo.company || 'your company'}'s data and I'm excited to help you unlock new growth opportunities.\n\nWhat's on your mind today?`,
-      `${greeting} ${businessInfo.name || 'there'}! ${emoji}\n\nFreja here - your dedicated business growth partner. I see you're building something special with ${businessInfo.company || 'your business'}.\n\nHow can I help accelerate your success today?`,
-      `Hey ${businessInfo.name || 'there'}! ${emoji}\n\nI'm Freja, and I'm here to be your strategic thinking partner. Based on what I know about ${businessInfo.company || 'your venture'}, there's so much potential to explore.\n\nWhat challenge should we tackle first?`
-    ];
+  const showWelcomeMessage = async () => {
+    // Calculate readiness score and generate coaching welcome
+    const { calculateReadinessScore, getWelcomeMessage } = await import('@/lib/coaching-prompts');
+    const readiness = calculateReadinessScore(businessInfo);
+    const welcomeContent = getWelcomeMessage(businessInfo, readiness);
     
     const welcomeMessage: Message = {
       id: `msg-welcome-${Date.now()}`,
-      content: welcomeVariants[Math.floor(Math.random() * welcomeVariants.length)],
+      content: welcomeContent,
       sender: 'agent',
       timestamp: new Date(),
       type: 'text'
     };
     setMessages([welcomeMessage]);
+    
+    // Save welcome message and readiness score to localStorage for session
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('frejfund-readiness-score', readiness.score.toString());
+      localStorage.setItem('frejfund-readiness-breakdown', JSON.stringify(readiness.breakdown));
+    }
     
     // Save welcome message to database
     saveMessageToDb(welcomeMessage);
@@ -1006,6 +992,31 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                           )}
                         </div>
                       ))}
+                    </div>
+                  )}
+                  {/* Suggested Next Steps for agent messages */}
+                  {message.sender === 'agent' && messages.indexOf(message) === messages.length - 1 && (
+                    <div className="relative z-10 mt-3 pt-3 border-t border-gray-200">
+                      <p className="text-xs text-gray-500 mb-2">💡 Nästa steg:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {(() => {
+                          const { calculateReadinessScore, generateNextStepSuggestions } = require('@/lib/coaching-prompts');
+                          const readiness = calculateReadinessScore(businessInfo);
+                          const suggestions = generateNextStepSuggestions(businessInfo, readiness.score);
+                          return suggestions.map((suggestion: string, idx: number) => (
+                            <button
+                              key={idx}
+                              onClick={() => {
+                                setInputValue(suggestion.replace(/^[📊💡🎤💰📧🔍📋💼📈🎯]\s*/, ''));
+                                inputRef.current?.focus();
+                              }}
+                              className="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors"
+                            >
+                              {suggestion}
+                            </button>
+                          ));
+                        })()}
+                      </div>
                     </div>
                   )}
                   {message.type === 'analysis' && (
