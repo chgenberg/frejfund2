@@ -323,7 +323,7 @@ I've analyzed ${name} and I see potential!
 This means we have some fundamental things to fix before you're ready for investors. But don't panic - we'll take it step by step.
 
 **Your top 3 focus areas:**
-${nextSteps.map((step, i) => `${i + 1}. ${step}`).join('\n')}
+${nextSteps.map((step, i) => `${i + 1}. ${step}`).join('\n\n')}
 
 Want to start with one of these, or do you have another question?`;
   }
@@ -338,7 +338,7 @@ I've analyzed ${name} - you're on the right track!
 You have the foundation in place, now it's about polishing and preparing for fundraising.
 
 **Next steps to reach 8+:**
-${nextSteps.map((step, i) => `${i + 1}. ${step}`).join('\n')}
+${nextSteps.map((step, i) => `${i + 1}. ${step}`).join('\n\n')}
 
 What do you want to start with?`;
   }
@@ -352,7 +352,7 @@ I've analyzed ${name} - impressive! 🎉
 You're ready to start talking to investors. Let's create a concrete plan to find the right VCs and close your round.
 
 **Focus areas now:**
-${nextSteps.map((step, i) => `${i + 1}. ${step}`).join('\n')}
+${nextSteps.map((step, i) => `${i + 1}. ${step}`).join('\n\n')}
 
 What's your first goal?`;
 }
