@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, Brain, TrendingUp, Users, FileText, Sparkles, X, ArrowRight, CheckCircle2, Upload } from 'lucide-react';
+import { MessageCircle, Brain, TrendingUp, Users, FileText, Sparkles, X, ArrowRight, CheckCircle2, Upload, Target } from 'lucide-react';
 import { BusinessInfo, Message } from '@/types/business';
 import { demoCompany, demoWebsiteText, demoEmails, demoKpiCsv } from '@/lib/demo-case';
 import ChatInterface from '@/components/ChatInterface';
@@ -160,7 +160,7 @@ export default function Home() {
                 </div>
               </div>
               
-              <div className="p-6 overflow-y-auto max-h-[calc(90vh-100px)]">
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
                 {/* User Type Selection */}
                 {!userType ? (
                   <div className="space-y-4">
@@ -402,16 +402,12 @@ export default function Home() {
               transition={{ type: "spring", stiffness: 400 }}
             >
               <div className="relative">
-                <div className="w-11 h-11 bg-black rounded-2xl flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-white" />
-                </div>
-                <motion.div
-                  className="absolute inset-0 w-11 h-11 bg-black rounded-2xl"
-                  animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                <img 
+                  src="/FREJFUND-logo.png" 
+                  alt="FrejFund" 
+                  className="h-10 w-auto"
                 />
               </div>
-              <h1 className="text-xl font-semibold text-black tracking-tight">FrejFund</h1>
             </motion.div>
             <div className="flex items-center space-x-3">
               <motion.button
