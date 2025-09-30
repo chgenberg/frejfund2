@@ -493,19 +493,11 @@ export default function Home() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-bold text-black mb-4 leading-[1.1] tracking-tight"
+            className="text-4xl md:text-5xl lg:text-6xl font-bold text-black mb-12 leading-[1.2] tracking-tight max-w-4xl mx-auto"
           >
-            Where Founders Meet Investors
+            Your idea. Their belief.{' '}
+            <span className="text-gray-600">One match away.</span>
           </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto"
-          >
-            AI-powered matching platform connecting ambitious founders with the right VCs
-          </motion.p>
 
 
 
