@@ -9,6 +9,10 @@ import { demoCompany, demoWebsiteText, demoEmails, demoKpiCsv } from '@/lib/demo
 import ChatInterface from '@/components/ChatInterface';
 import BusinessWizard from '@/components/BusinessWizard';
 
+// Disable prerendering; this page depends on client-only state/localStorage and async flows
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default function Home() {
   const router = useRouter();
   const [currentView, setCurrentView] = useState<'landing' | 'wizard' | 'chat'>('landing');
