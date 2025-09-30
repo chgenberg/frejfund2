@@ -13,38 +13,6 @@ function isAzureConfigured(): boolean {
   return Boolean(process.env.AZURE_OPENAI_API_KEY && process.env.AZURE_OPENAI_ENDPOINT);
 }
 
-export function getChatModel(): string {
-  return (
-    (process.env.NODE_ENV === 'development' && (DEV_SECRETS_LOCAL as any)?.openai?.chatModel) ||
-    process.env.OPENAI_CHAT_MODEL ||
-    process.env.OPENAI_MODEL ||
-    'gpt-4o-mini'
-  );
-}
-
-export function getEmbeddingsModel(): string {
-  return (
-    (process.env.NODE_ENV === 'development' && (DEV_SECRETS_LOCAL as any)?.openai?.embeddingsModel) ||
-    process.env.OPENAI_EMBEDDINGS_MODEL ||
-    'text-embedding-3-small'
-  );
-}
-
-export function getModelPricePerMTok(model: string): { input: number; output: number } {
-  // USD per 1M tokens (rough estimates, override via env if needed)
-  const fallback = {
-    input: Number(process.env.MODEL_PRICE_INPUT_PER_MTOK || 3),
-    output: Number(process.env.MODEL_PRICE_OUTPUT_PER_MTOK || 15)
-  };
-  const table: Record<string, { input: number; output: number }> = {
-    'gpt-5': { input: 5, output: 15 },
-    'gpt-5-mini': { input: 1, output: 3 },
-    'gpt-4o': { input: 5, output: 15 },
-    'gpt-4o-mini': { input: 0.5, output: 1.5 }
-  };
-  return table[model] || fallback;
-}
-
 function resolveOpenAIKey(): string | undefined {
   const raw = (process.env.OPENAI_API_KEY || process.env.OPENAI_KEY || process.env.OPENAI_TOKEN || '').trim();
   return raw || undefined;
