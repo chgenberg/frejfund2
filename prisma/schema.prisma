@@ -1,0 +1,191 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // extensions = [pgvector(map: "vector")]  // Disabled for now - Railway doesn't support pgvector yet
+}
+
+// User/Account management
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Business info
+  company       String?
+  industry      String?
+  stage         String?
+  website       String?
+  
+  // Relations
+  sessions      Session[]
+  integrations  Integration[]
+  insights      Insight[]
+  
+  @@map("users")
+}
+
+// Session management (chat sessions)
+model Session {
+  id            String    @id @default(cuid())
+  userId        String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastActivity  DateTime  @default(now())
+  
+  // Business context
+  businessInfo  Json?     // Store BusinessInfo type as JSON
+  
+  // Relations
+  user          User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages      Message[]
+  documents     Document[]
+  
+  @@index([userId])
+  @@map("sessions")
+}
+
+// Chat messages
+model Message {
+  id            String    @id @default(cuid())
+  sessionId     String
+  role          String    // 'user' | 'assistant' | 'system'
+  content       String    @db.Text
+  createdAt     DateTime  @default(now())
+  
+  // Metadata
+  tokens        Int?
+  latencyMs     Int?
+  cost          Float?
+  model         String?
+  
+  // Relations
+  session       Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  @@index([sessionId])
+  @@index([createdAt])
+  @@map("messages")
+}
+
+// OAuth integrations (Gmail, Calendar, Stripe, etc)
+model Integration {
+  id              String    @id @default(cuid())
+  userId          String
+  provider        String    // 'gmail' | 'calendar' | 'stripe' | 'hubspot' | 'slack'
+  status          String    @default("disconnected") // 'connected' | 'disconnected' | 'error'
+  
+  // OAuth tokens (encrypted)
+  accessToken     String?   @db.Text
+  refreshToken    String?   @db.Text
+  tokenExpiresAt  DateTime?
+  
+  // Metadata
+  scopes          String[]
+  accountId       String?   // External account ID
+  accountEmail    String?
+  
+  // Sync tracking
+  lastSyncAt      DateTime?
+  lastSyncStatus  String?   // 'success' | 'error'
+  syncedItemsCount Int      @default(0)
+  
+  // Timestamps
+  connectedAt     DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, provider])
+  @@index([userId])
+  @@index([provider])
+  @@map("integrations")
+}
+
+// Vector embeddings for RAG
+model Document {
+  id            String    @id @default(cuid())
+  sessionId     String
+  
+  // Content
+  content       String    @db.Text
+  metadata      Json?     // source, type, filename, etc
+  
+  // Vector embedding (will use JSON for now, migrate to pgvector later)
+  // embedding     Unsupported("vector(1536)")?
+  embedding     Json?     // Store as JSON array for now
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  session       Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  @@index([sessionId])
+  @@map("documents")
+}
+
+// Daily insights and compass
+model Insight {
+  id            String    @id @default(cuid())
+  userId        String
+  type          String    // 'daily_compass' | 'risk' | 'opportunity' | 'metric'
+  
+  // Content
+  title         String
+  description   String    @db.Text
+  priority      String?   // 'high' | 'medium' | 'low'
+  category      String?   // 'revenue' | 'pipeline' | 'team' | 'product'
+  
+  // Metadata
+  data          Json?     // Additional structured data
+  citations     Json?     // Source references
+  
+  // Status
+  status        String    @default("active") // 'active' | 'dismissed' | 'completed'
+  dismissedAt   DateTime?
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("insights")
+}
+
+// Feedback for AI responses
+model Feedback {
+  id            String    @id @default(cuid())
+  messageId     String?   // Can be null for general feedback
+  sessionId     String?
+  
+  // Feedback data
+  rating        String    // 'up' | 'down'
+  reason        String?   @db.Text
+  missing       String?   @db.Text
+  
+  // Metadata
+  userAgent     String?
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  
+  @@index([messageId])
+  @@index([createdAt])
+  @@map("feedback")
+}
