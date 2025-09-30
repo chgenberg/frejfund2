@@ -270,9 +270,19 @@ export default function VCSwipePage() {
               <div className="bg-white rounded-2xl border-2 border-gray-200 shadow-xl h-full overflow-y-auto">
                 {/* Match Score Badge */}
                 <div className="absolute top-4 right-4 z-10">
-                  <div className="px-3 py-1.5 bg-green-500 text-white rounded-full text-sm font-bold shadow-lg">
+                  <motion.div
+                    animate={{ 
+                      scale: [1, 1.05, 1],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    className="px-3 py-1.5 bg-black text-white rounded-full text-sm font-bold shadow-lg border-2 border-white"
+                  >
                     {currentProfile.matchScore}% Match
-                  </div>
+                  </motion.div>
                 </div>
 
                 <div className="p-6 sm:p-8">
@@ -358,59 +368,117 @@ export default function VCSwipePage() {
                   </div>
 
                   {/* AI Analysis */}
-                  <div className="mb-6 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
+                  <motion.div
+                    whileHover={{ 
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                      scale: 1.01
+                    }}
+                    transition={{ duration: 0.2 }}
+                    className="mb-6 p-4 bg-gray-100 rounded-xl border border-gray-200"
+                  >
                     <div className="flex items-center space-x-2 mb-2">
-                      <Sparkles className="w-4 h-4 text-gray-700" />
-                      <h3 className="text-sm font-semibold text-gray-700">AI Analysis</h3>
+                      <motion.div
+                        animate={{ rotate: [0, 10, -10, 0] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                      >
+                        <Sparkles className="w-4 h-4 text-black" />
+                      </motion.div>
+                      <h3 className="text-sm font-semibold text-black">AI Analysis</h3>
                     </div>
-                    <p className="text-sm text-gray-800 leading-relaxed">
+                    <p className="text-sm text-gray-700 leading-relaxed">
                       {currentProfile.aiAnalysis}
                     </p>
-                  </div>
+                  </motion.div>
 
                   {/* Readiness Score */}
-                  <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-xl">
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    className="flex items-center justify-between p-4 bg-gray-900 border-2 border-gray-800 rounded-xl"
+                  >
                     <div>
-                      <div className="text-sm font-semibold text-green-900">Investment Readiness</div>
-                      <div className="text-xs text-green-700">Above average for {currentProfile.stage}</div>
+                      <div className="text-sm font-semibold text-white">Investment Readiness</div>
+                      <div className="text-xs text-gray-400">Above average for {currentProfile.stage}</div>
                     </div>
-                    <div className="w-14 h-14 rounded-full border-4 border-green-500 flex items-center justify-center">
-                      <span className="text-xl font-bold text-green-700">{currentProfile.readinessScore}</span>
-                    </div>
-                  </div>
+                    <motion.div
+                      animate={{ 
+                        rotate: [0, 5, -5, 0],
+                        scale: [1, 1.05, 1]
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                      className="w-14 h-14 rounded-full border-4 border-white flex items-center justify-center bg-black"
+                    >
+                      <span className="text-xl font-bold text-white">{currentProfile.readinessScore}</span>
+                    </motion.div>
+                  </motion.div>
                 </div>
 
                 {/* Action Buttons */}
                 <div className="sticky bottom-0 bg-white border-t border-gray-200 p-6">
                   <div className="flex items-center justify-center space-x-4">
                     <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
+                      whileHover={{ scale: 1.15, rotate: -10 }}
+                      whileTap={{ scale: 0.85 }}
                       onClick={() => handleSwipe('left', currentProfile)}
-                      className="w-16 h-16 bg-white border-2 border-gray-300 rounded-full flex items-center justify-center hover:border-red-400 hover:bg-red-50 transition-colors shadow-lg"
+                      className="w-16 h-16 bg-white border-3 border-gray-300 rounded-full flex items-center justify-center hover:border-black hover:bg-gray-50 transition-all shadow-lg"
                     >
-                      <X className="w-7 h-7 text-gray-600 hover:text-red-500" />
+                      <motion.div
+                        whileHover={{ rotate: 180 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <X className="w-7 h-7 text-gray-700" />
+                      </motion.div>
                     </motion.button>
 
                     <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
+                      whileHover={{ scale: 1.15 }}
+                      whileTap={{ scale: 0.85 }}
                       onClick={() => handleSwipe('right', currentProfile)}
-                      className="w-20 h-20 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center hover:from-green-600 hover:to-green-700 transition-all shadow-xl"
+                      className="w-20 h-20 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-all shadow-2xl relative overflow-hidden"
                     >
-                      <Heart className="w-8 h-8 text-white fill-current" />
+                      <motion.div
+                        className="absolute inset-0 bg-white opacity-0"
+                        whileHover={{ opacity: 0.1 }}
+                        transition={{ duration: 0.3 }}
+                      />
+                      <motion.div
+                        animate={{ 
+                          scale: [1, 1.2, 1]
+                        }}
+                        transition={{
+                          duration: 1.5,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                      >
+                        <Heart className="w-8 h-8 text-white fill-current relative z-10" />
+                      </motion.div>
                     </motion.button>
 
                     <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
+                      whileHover={{ scale: 1.15, rotate: 10 }}
+                      whileTap={{ scale: 0.85 }}
                       onClick={() => {
                         // Super like
                         handleSwipe('right', currentProfile);
                       }}
-                      className="w-16 h-16 bg-white border-2 border-blue-400 rounded-full flex items-center justify-center hover:bg-blue-50 transition-colors shadow-lg"
+                      className="w-16 h-16 bg-white border-3 border-gray-900 rounded-full flex items-center justify-center hover:bg-gray-900 transition-all shadow-lg group"
                     >
-                      <Star className="w-6 h-6 text-blue-500 fill-current" />
+                      <motion.div
+                        animate={{ 
+                          rotate: [0, 20, -20, 0]
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                      >
+                        <Star className="w-6 h-6 text-gray-900 group-hover:text-white fill-current transition-colors" />
+                      </motion.div>
                     </motion.button>
                   </div>
                   <div className="text-center mt-3 text-xs text-gray-500">
@@ -442,17 +510,33 @@ export default function VCSwipePage() {
               >
                 <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
                   {/* Reveal Header */}
-                  <div className="bg-gradient-to-r from-green-500 to-green-600 p-8 text-white text-center">
+                  <div className="bg-black p-8 text-white text-center relative overflow-hidden">
+                    {/* Animated background particles */}
+                    <motion.div
+                      className="absolute inset-0 opacity-10"
+                      animate={{
+                        backgroundPosition: ['0% 0%', '100% 100%'],
+                      }}
+                      transition={{
+                        duration: 20,
+                        repeat: Infinity,
+                        repeatType: "reverse"
+                      }}
+                      style={{
+                        backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+                        backgroundSize: '50px 50px'
+                      }}
+                    />
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      transition={{ delay: 0.2, type: "spring" }}
-                      className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4"
+                      transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                      className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 relative z-10"
                     >
-                      <Heart className="w-10 h-10 text-green-500 fill-current" />
+                      <Heart className="w-10 h-10 text-black fill-current" />
                     </motion.div>
-                    <h2 className="text-2xl font-bold mb-2">It's a Match!</h2>
-                    <p className="text-green-100">You can now see full company details</p>
+                    <h2 className="text-2xl font-bold mb-2 relative z-10">It's a Match!</h2>
+                    <p className="text-gray-300 relative z-10">You can now see full company details</p>
                   </div>
 
                   {/* Revealed Info */}

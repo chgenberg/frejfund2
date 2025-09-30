@@ -139,26 +139,56 @@ export default function VCAnalyticsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-8 text-white mb-8"
+          whileHover={{ scale: 1.01 }}
+          className="bg-black rounded-xl p-8 text-white mb-8 relative overflow-hidden border-2 border-gray-800"
         >
+          {/* Subtle animated background */}
+          <motion.div
+            className="absolute inset-0 opacity-5"
+            animate={{
+              x: [0, 100, 0],
+              y: [0, 50, 0]
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+            style={{
+              backgroundImage: 'radial-gradient(circle, white 2px, transparent 2px)',
+              backgroundSize: '40px 40px'
+            }}
+          />
           <div className="flex items-start justify-between">
             <div>
               <div className="flex items-center space-x-2 mb-2">
                 <DollarSign className="w-6 h-6" />
                 <h2 className="text-2xl font-bold">Value Generated</h2>
               </div>
-              <p className="text-green-100 mb-4">
+              <p className="text-gray-400 mb-4 relative z-10">
                 Estimated time saved based on manual screening
               </p>
-              <div className="text-5xl font-bold mb-2">{analytics.efficiency.valueSaved}</div>
-              <div className="text-sm text-green-100">
+              <motion.div 
+                className="text-5xl font-bold mb-2 relative z-10"
+                animate={{ 
+                  scale: [1, 1.05, 1]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                {analytics.efficiency.valueSaved}
+              </motion.div>
+              <div className="text-sm text-gray-400 relative z-10">
                 {analytics.efficiency.timeSavedHours} hours @ $500/hour partner time
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-sm text-green-100 mb-1">Avg screening time</div>
+            <div className="text-right relative z-10">
+              <div className="text-sm text-gray-400 mb-1">Avg screening time</div>
               <div className="text-2xl font-bold">{analytics.efficiency.avgSwipeTime}</div>
-              <div className="text-xs text-green-200">vs {analytics.efficiency.vsManualScreening} manually</div>
+              <div className="text-xs text-gray-500">vs {analytics.efficiency.vsManualScreening} manually</div>
             </div>
           </div>
         </motion.div>
@@ -318,15 +348,30 @@ export default function VCAnalyticsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white"
+          whileHover={{ scale: 1.01 }}
+          className="bg-gray-900 rounded-xl p-6 text-white border-2 border-gray-800 relative overflow-hidden"
         >
+          {/* Animated corner accent */}
+          <motion.div
+            className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full"
+            animate={{
+              scale: [1, 1.2, 1],
+              x: [0, 10, 0],
+              y: [0, -10, 0]
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
           <div className="flex items-start space-x-4">
             <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
               <Zap className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold mb-2">AI Insights</h3>
-              <ul className="space-y-1 text-sm text-blue-100">
+              <h3 className="font-semibold mb-2 relative z-10">AI Insights</h3>
+              <ul className="space-y-1 text-sm text-gray-300 relative z-10">
                 <li>• You're {analytics.benchmarks.yourLikeRate > analytics.benchmarks.avgLikeRate ? 'more selective' : 'less selective'} than average VCs</li>
                 <li>• Your acceptance rate is {analytics.benchmarks.yourAcceptanceRate}% ({analytics.benchmarks.yourAcceptanceRate > analytics.benchmarks.avgAcceptanceRate ? 'above' : 'below'} average)</li>
                 <li>• FrejFund saves you ~{Math.round(analytics.efficiency.timeSavedHours / 4)} hours per week</li>
