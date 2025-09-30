@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ChevronLeft, Upload, X, FileText, Globe, Linkedin, ChevronDown } from 'lucide-react';
 import { BusinessInfo } from '@/types/business';
+import { normalizeUrl, isValidUrl } from '@/lib/url-utils';
 
 interface BusinessWizardProps {
   onComplete: (businessInfo: BusinessInfo) => void;
@@ -39,27 +40,37 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
   ];
 
   const handleInputChange = (field: string, value: string) => {
+    // Auto-normalize URLs
+    if (field === 'website' && value) {
+      value = normalizeUrl(value);
+    }
     setBusinessInfo(prev => ({ ...prev, [field]: value }));
   };
 
   // Background scrape when website is filled (debounced)
   useEffect(() => {
     const url = businessInfo.website;
-    if (!url || !/^https?:\/\//i.test(url)) return;
+    if (!url || !isValidUrl(url)) return;
+    
+    const sessionId = localStorage.getItem('frejfund-session-id') || `sess-${Date.now()}`;
+    localStorage.setItem('frejfund-session-id', sessionId);
+    
     const t = setTimeout(async () => {
       try {
         setIsScraping(true);
-        const res = await fetch('/api/scrape', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url })
+        // Start async scraping (returns immediately, processes in background)
+        await fetch('/api/scrape/async', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ url, sessionId }) 
         });
-        if (res.ok) {
-          const { result, sources } = await res.json();
-          setBusinessInfo(prev => ({ ...prev, preScrapedText: String(result?.text || '').slice(0, 200000), preScrapedSources: sources || [] }));
-        }
-      } catch {}
-      finally { setIsScraping(false); }
+        console.log(`Background scraping started for ${url}`);
+        // User can continue immediately!
+      } catch (error) {
+        console.error('Failed to start background scraping:', error);
+      } finally { 
+        setIsScraping(false); 
+      }
     }, 600);
     return () => clearTimeout(t);
   }, [businessInfo.website]);
@@ -160,10 +171,10 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
               Company Website
             </label>
             <input
-              type="url"
+              type="text"
               value={businessInfo.website || ''}
               onChange={(e) => handleInputChange('website', e.target.value)}
-              placeholder="https://yourcompany.com"
+              placeholder="yourcompany.com (http:// auto-added)"
               className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all text-black placeholder-gray-400"
             />
           </div>
