@@ -74,8 +74,10 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
           ((businessInfo as any).uploadedFiles as File[]).forEach((f, idx) => {
             formData.append(`file_${idx}`, f, f.name);
           });
+          const sessionId = localStorage.getItem('frejfund-session-id') || '';
           const extractRes = await fetch('/api/extract', {
             method: 'POST',
+            headers: { 'x-session-id': sessionId },
             body: formData
           });
           if (extractRes.ok) {

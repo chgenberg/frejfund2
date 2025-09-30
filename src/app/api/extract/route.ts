@@ -25,6 +25,40 @@ export async function POST(req: NextRequest) {
     }
 
     const extracted = await extractMany(files);
+    
+    // Save to database (non-blocking)
+    const sessionId = req.headers.get('x-session-id');
+    if (sessionId) {
+      (async () => {
+        try {
+          const prisma = (await import('@/lib/prisma')).default;
+          await prisma.session.upsert({
+            where: { id: sessionId },
+            update: {},
+            create: { id: sessionId }
+          });
+          
+          for (const doc of extracted) {
+            await prisma.document.create({
+              data: {
+                sessionId,
+                content: doc.text || '',
+                metadata: {
+                  source: 'upload',
+                  filename: doc.filename,
+                  fileType: doc.fileType,
+                  uploadedAt: new Date().toISOString()
+                }
+              }
+            });
+          }
+          console.log(`Saved ${extracted.length} uploaded files to database`);
+        } catch (e) {
+          console.error('Failed to save uploaded files:', e);
+        }
+      })();
+    }
+    
     return NextResponse.json({ documents: extracted });
   } catch (error) {
     console.error('Extract API Error:', error);

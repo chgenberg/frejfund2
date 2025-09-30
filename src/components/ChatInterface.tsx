@@ -191,7 +191,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
           if (files && files.length > 0) {
             const formData = new FormData();
             files.slice(0, 5).forEach((f, idx) => formData.append(`file_${idx}`, f, f.name));
-            const res = await fetch('/api/extract', { method: 'POST', body: formData });
+            const res = await fetch('/api/extract', { method: 'POST', headers: { 'x-session-id': sessionId }, body: formData });
             if (res.ok) {
               const { documents } = await res.json();
               const combined = (documents || []).map((d: { text: string }) => d.text).join('\n\n');
@@ -454,7 +454,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         if (files && files.length > 0) {
           const formData = new FormData();
           files.slice(0, 3).forEach((f, idx) => formData.append(`file_${idx}`, f, f.name));
-          const res = await fetch('/api/extract', { method: 'POST', body: formData });
+          const res = await fetch('/api/extract', { method: 'POST', headers: { 'x-session-id': sessionId }, body: formData });
           if (res.ok) {
             const { documents } = await res.json();
             const combined = (documents || []).map((d: { text: string }) => d.text).join('\n\n');

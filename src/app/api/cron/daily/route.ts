@@ -84,6 +84,47 @@ Context (with labels):\n${context}`;
       actions: Array.isArray(json.actions) ? json.actions.slice(0,3) : [],
       citations: Array.isArray(json.citations) ? json.citations.slice(0,3) : []
     };
+    
+    // Save insights to database (non-blocking)
+    (async () => {
+      try {
+        const prisma = (await import('@/lib/prisma')).default;
+        const session = await prisma.session.findUnique({ where: { id: sId }, include: { user: true } });
+        if (session?.userId) {
+          await prisma.insight.createMany({
+            data: [
+              ...safe.insights.map(i => ({
+                userId: session.userId!,
+                type: 'daily_insight',
+                title: String(i).substring(0, 100),
+                description: String(i),
+                category: 'growth',
+                priority: 'medium'
+              })),
+              ...safe.risks.map(r => ({
+                userId: session.userId!,
+                type: 'risk',
+                title: String(r).substring(0, 100),
+                description: String(r),
+                category: 'risk',
+                priority: 'high'
+              })),
+              ...safe.actions.map(a => ({
+                userId: session.userId!,
+                type: 'action',
+                title: String(a).substring(0, 100),
+                description: String(a),
+                category: 'action',
+                priority: 'high'
+              }))
+            ]
+          });
+        }
+      } catch (e) {
+        console.error('Failed to save insights:', e);
+      }
+    })();
+    
     return NextResponse.json(safe);
   } catch (e) {
     console.error('Daily Cron Error:', e);
