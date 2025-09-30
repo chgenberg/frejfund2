@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Bot, User, TrendingUp, FileText, Brain, Sparkles, BarChart3, ThumbsUp, ThumbsDown, BookOpen, MoreVertical, Info, Lightbulb, X } from 'lucide-react';
+import { Send, Bot, User, TrendingUp, FileText, Brain, Sparkles, BarChart3, ThumbsUp, ThumbsDown, BookOpen, MoreVertical, Info, Lightbulb, X, HelpCircle } from 'lucide-react';
 import { BusinessInfo, Message, BusinessAnalysisResult } from '@/types/business';
 import { getChatModel, TaskComplexity } from '@/lib/ai-client';
 import BusinessAnalysisModal from './BusinessAnalysisModal';
@@ -10,6 +10,7 @@ import ResultsModal from './ResultsModal';
 import EmailIngestModal from './EmailIngestModal';
 import KpiUploadModal from './KpiUploadModal';
 import DeckSummaryModal from './DeckSummaryModal';
+import HelpModal from './HelpModal';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -60,6 +61,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   const abortRef = useRef<AbortController | null>(null);
   const [tips, setTips] = useState<Array<{ title: string; why?: string; action?: string; priority?: string }>>([]);
   const [showTips, setShowTips] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
   const [prefetchedContext, setPrefetchedContext] = useState<string | null>(null);
   const [dailyCompass, setDailyCompass] = useState<{ insights: string[]; risks: string[]; actions: string[]; citations?: Array<{label:string; snippet:string}> } | null>(null);
   const [showCompass, setShowCompass] = useState(true);
@@ -845,13 +847,20 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-black rounded-full text-white text-[9px] flex items-center justify-center">{tips.length}</span>
             )}
           </button>
+          <button
+            onClick={() => setShowHelpModal(true)}
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
+            title="What can Freja help with?"
+          >
+            <HelpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600" />
+          </button>
           <div className="relative">
             <button
               onClick={() => setShowDataMenu((v) => !v)}
-              className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
+              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
               title="Data & tools"
             >
-              <MoreVertical className="w-3.5 h-3.5 text-gray-600" />
+              <MoreVertical className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600" />
             </button>
             {showDataMenu && (
               <div className="absolute right-0 top-9 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
@@ -1517,6 +1526,9 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Help Modal */}
+      <HelpModal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} />
     </div>
   );
 }
