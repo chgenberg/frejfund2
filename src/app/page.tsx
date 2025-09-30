@@ -123,7 +123,7 @@ export default function Home() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
+              className="bg-white rounded-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
@@ -160,7 +160,7 @@ export default function Home() {
                 </div>
               </div>
               
-              <div className="p-6 sm:p-8 overflow-y-auto max-h-[calc(90vh-140px)]">
+              <div className="p-6 overflow-y-auto max-h-[calc(85vh-100px)]">
                 {/* User Type Selection */}
                 {!userType ? (
                   <div className="space-y-4 pt-2">
@@ -215,37 +215,37 @@ export default function Home() {
                       <span>← Back</span>
                     </button>
 
-                    <div className="space-y-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {[
                         {
                           icon: <FileText />,
-                          title: "1. Share Your Story",
-                          description: "Quick 2-minute form about your company, stage, and goals. No fluff, just the essentials."
+                          title: "Share Your Story",
+                          description: "2-minute form about your company"
                         },
                         {
                           icon: <Upload />,
-                          title: "2. Drop Your Documents",
-                          description: "Drag & drop pitch deck, financials, or screenshots. We support 15+ formats (Keynote, PowerPoint, Excel, images with OCR)."
-                        },
-                        {
-                          icon: <Brain />,
-                          title: "3. AI Extracts Your Metrics",
-                          description: "Our AI reads your documents and automatically finds MRR, growth rate, customers, team size, etc. You just confirm."
+                          title: "Drop Documents",
+                          description: "15+ formats supported with AI extraction"
                         },
                         {
                           icon: <Users />,
-                          title: "4. Get Matched to 91+ VCs",
-                          description: "AI matches you to perfect investors based on stage, industry, and geography. See top 5 matches instantly."
+                          title: "Get Matched to 91+ VCs",
+                          description: "AI finds perfect investors for you"
                         },
                         {
                           icon: <MessageCircle />,
-                          title: "5. Draft Personalized Emails",
-                          description: "Ask Freja: 'Draft email to Creandum' and get investor-specific outreach in seconds. Includes warm intro guidance."
+                          title: "Draft Emails",
+                          description: "Personalized outreach in seconds"
                         },
                         {
                           icon: <CheckCircle2 />,
-                          title: "6. Share Profile with VCs",
-                          description: "VCs swipe on blind profiles (no name shown). When they're interested, you get notified and can accept the intro."
+                          title: "Share Profile",
+                          description: "VCs swipe, you get intro requests"
+                        },
+                        {
+                          icon: <Brain />,
+                          title: "AI Coaching",
+                          description: "Daily guidance to close your round"
                         }
                       ].map((step, index) => (
                         <motion.div
