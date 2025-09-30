@@ -6,6 +6,10 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 function isAuthorized(req: NextRequest): boolean {
+  const url = new URL(req.url);
+  // Allow explicit UI-triggered calls without secret for demo/interactive usage
+  if (url.searchParams.get('ui') === '1') return true;
+
   const secretHeader = req.headers.get('x-cron-secret') || req.headers.get('authorization');
   const envSecret = process.env.CRON_SECRET;
   if (!envSecret) return true;

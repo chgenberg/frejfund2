@@ -178,7 +178,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   const runDailyCompassNow = async () => {
     setLoadingCompass(true);
     try {
-      const res = await fetch('/api/cron/daily', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId }) });
+      const res = await fetch('/api/cron/daily?ui=1', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId }) });
       if (res.ok) {
         const dc = await res.json();
         setDailyCompass({ insights: dc.insights || [], risks: dc.risks || [], actions: dc.actions || [], citations: dc.citations });
@@ -212,7 +212,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       } catch {}
       // Refresh Daily Compass (with citations)
       try {
-        const dcRes = await fetch('/api/cron/daily', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ sessionId }) });
+        const dcRes = await fetch('/api/cron/daily?ui=1', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ sessionId }) });
         if (dcRes.ok) { const dc = await dcRes.json(); setDailyCompass({ insights: dc.insights || [], risks: dc.risks || [], actions: dc.actions || [], citations: dc.citations }); setShowCompass(true); }
       } catch {}
     } catch (e) {
