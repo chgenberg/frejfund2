@@ -67,6 +67,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMatchChat, setShowMatchChat] = useState(false);
   const [activeMatchChat, setActiveMatchChat] = useState<any>(null);
+  const [showQuickQuestions, setShowQuickQuestions] = useState(false);
   const [prefetchedContext, setPrefetchedContext] = useState<string | null>(null);
   const [dailyCompass, setDailyCompass] = useState<{ insights: string[]; risks: string[]; actions: string[]; citations?: Array<{label:string; snippet:string}> } | null>(null);
   const [showCompass, setShowCompass] = useState(true);
@@ -446,18 +447,14 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       text = text.replace(/\[(\d+)\]\*/g, '[$1]'); // Fix reference asterisks like [1]*
       text = text.replace(/\*\[(\d+)\]/g, '[$1]'); // Fix *[1] to [1]
       
-      // Add line breaks after sentences for better readability
-      text = text.replace(/\.\s+([A-Z])/g, '.\n\n$1');
-      text = text.replace(/;\s+([A-Z])/g, ';\n\n$1');
+      // Don't add excessive line breaks - keep text more compact
+      // Only add breaks for major sections
+      text = text.replace(/(Next steps:)/gi, '\n**$1**');
+      text = text.replace(/(Key insights:)/gi, '\n**$1**');
+      text = text.replace(/(Recommendations:)/gi, '\n**$1**');
       
-      // Format specific patterns
-      text = text.replace(/(Current traction:)/gi, '\n\n**$1**');
-      text = text.replace(/(Quick thought:)/gi, '\n\n**$1**');
-      text = text.replace(/(Weeks \d+-\d+:)/g, '\n\n**$1**');
-      text = text.replace(/(Quick q's:)/gi, '\n\n**$1**');
-      
-      // Clean up line breaks
-      text = text.replace(/^\n+/, '').replace(/\n{3,}/g, '\n\n').trim();
+      // Clean up excessive line breaks
+      text = text.replace(/^\n+/, '').replace(/\n{4,}/g, '\n\n').trim();
 
       return text;
     } catch {
@@ -1088,25 +1085,30 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               }`}
             >
               {message.sender === 'agent' && (
-                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-4 h-4 text-gray-700" />
-                </div>
+                <motion.div 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                  className="w-8 h-8 bg-gradient-to-br from-black to-gray-800 rounded-full flex items-center justify-center flex-shrink-0 shadow-md"
+                >
+                  <Sparkles className="w-4 h-4 text-white" />
+                </motion.div>
               )}
               
               <div className={`max-w-xl sm:max-w-2xl ${message.sender === 'user' ? 'order-1' : ''}`}>
-                <motion.div
-                  initial={{ scale: 0.95, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  className={`px-3 sm:px-5 py-2.5 sm:py-3.5 group relative overflow-hidden ${
-                    message.sender === 'user'
-                      ? 'bg-gray-800 text-white rounded-2xl rounded-br-md shadow-lg'
-                      : message.type === 'analysis'
-                      ? 'bg-gray-100 text-gray-900 rounded-2xl rounded-bl-md shadow-sm border border-gray-200'
-                      : 'bg-gray-50 text-gray-900 rounded-2xl rounded-bl-md shadow-sm border border-gray-200'
-                  }`}
-                >
+                  <motion.div
+                    initial={{ scale: 0.95, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    whileHover={{ scale: 1.01 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    className={`px-3 sm:px-5 py-2.5 sm:py-3.5 group relative overflow-hidden ${
+                      message.sender === 'user'
+                        ? 'bg-gradient-to-br from-gray-800 to-gray-900 text-white rounded-2xl rounded-br-md shadow-lg'
+                        : message.type === 'analysis'
+                        ? 'bg-gradient-to-br from-purple-50 to-pink-50 text-gray-900 rounded-2xl rounded-bl-md shadow-sm border border-purple-200'
+                        : 'bg-white text-gray-900 rounded-2xl rounded-bl-md shadow-sm border border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
                   {/* Subtle gradient overlay on hover */}
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-br from-transparent to-black/5 opacity-0 pointer-events-none"
@@ -1252,22 +1254,29 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               className="flex items-start space-x-3"
             >
             <motion.div className="relative">
-              {/* Animated glow effect */}
+              {/* Animated pulse rings */}
               <motion.div
-                className="absolute -inset-1 bg-gray-400 rounded-full blur-md"
+                className="absolute inset-0 bg-black rounded-full"
                 animate={{ 
-                  scale: [1, 1.2, 1],
-                  opacity: [0.5, 0.8, 0.5],
-                  rotate: [0, 180, 360]
+                  scale: [1, 1.5, 2],
+                  opacity: [0.4, 0.2, 0]
                 }}
-                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+              />
+              <motion.div
+                className="absolute inset-0 bg-black rounded-full"
+                animate={{ 
+                  scale: [1, 1.5, 2],
+                  opacity: [0.4, 0.2, 0]
+                }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeOut", delay: 0.5 }}
               />
               <motion.div 
-                className="relative w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center shadow-lg"
+                className="relative w-10 h-10 bg-black rounded-full flex items-center justify-center shadow-lg"
                 animate={{ scale: [1, 1.05, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                <Bot className="w-5 h-5 text-gray-700" />
+                <Bot className="w-5 h-5 text-white" />
               </motion.div>
             </motion.div>
             
@@ -1396,28 +1405,58 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         )}
       </AnimatePresence>
 
-      {/* Floating Question Suggestions */}
+      {/* Floating Quick Questions Button */}
       <AnimatePresence>
-        {messages.length <= 2 && !isTyping && (
-            <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ type: "spring", stiffness: 200, damping: 20 }}
-            className="absolute bottom-36 left-0 right-0 px-6 pointer-events-none z-10"
+        {!showQuickQuestions && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowQuickQuestions(true)}
+            className="fixed bottom-24 right-6 w-14 h-14 bg-black text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-800 transition-colors z-40"
           >
-            <div className="max-w-5xl mx-auto">
-              <motion.p 
-                className="text-center text-sm text-gray-500 mb-3 font-medium"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                Quick questions to get started:
-              </motion.p>
-              <motion.div className="flex gap-3 justify-center overflow-x-auto pb-2">
+            <motion.span
+              animate={{ rotate: [0, 15, -15, 0] }}
+              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+              className="text-2xl"
+            >
+              ?
+            </motion.span>
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* Quick Questions Popover */}
+      <AnimatePresence>
+        {showQuickQuestions && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-30"
+              onClick={() => setShowQuickQuestions(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, x: 100 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.8, x: 100 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className="fixed bottom-24 right-6 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 p-6 z-40"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-black">Quick Questions</h3>
+                <button
+                  onClick={() => setShowQuickQuestions(false)}
+                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              <div className="space-y-2">
                 {(() => {
-                  // Context-based suggestions
                   const lastMessage = messages[messages.length - 1]?.content.toLowerCase() || '';
                   let suggestions = [];
                   
@@ -1447,7 +1486,9 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                       "How do I grow faster?",
                       "Create a 90-day plan",
                       "What's my biggest risk?",
-                      "When should I fundraise?"
+                      "When should I fundraise?",
+                      "Help me with my pitch deck",
+                      "What metrics should I track?"
                     ];
                   }
                   
@@ -1455,40 +1496,35 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                 })().map((question, index) => (
                   <motion.button
                     key={question}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    transition={{ 
-                      delay: index * 0.05,
-                      type: "spring",
-                      stiffness: 300
-                    }}
-                    whileHover={{ 
-                      scale: 1.05, 
-                      y: -3,
-                      boxShadow: "0 10px 20px rgba(0,0,0,0.1)"
-                    }}
-                    whileTap={{ scale: 0.95 }}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    whileHover={{ x: 4, backgroundColor: "#f9fafb" }}
                     onClick={() => {
                       setInputValue(question);
                       inputRef.current?.focus();
+                      setShowQuickQuestions(false);
                       
-                      // Show insight when question is selected
                       setInsightCard({
                         text: "Great question! Let me analyze this for you...",
                         type: 'info'
                       });
                       setTimeout(() => setInsightCard(null), 3000);
                     }}
-                    className="px-6 py-3 bg-white border-2 border-gray-200 rounded-full text-sm font-medium text-gray-800 hover:text-black hover:border-black hover:bg-gray-50 transition-all pointer-events-auto shadow-sm whitespace-nowrap"
+                    className="w-full text-left px-4 py-3 rounded-lg text-sm text-gray-700 hover:text-black transition-all"
                   >
                     {question}
-                </motion.button>
-              ))}
-              </motion.div>
-          </div>
-        </motion.div>
-      )}
+                  </motion.button>
+                ))}
+              </div>
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <p className="text-xs text-gray-500 text-center">
+                  Click any question to ask Freja
+                </p>
+              </div>
+            </motion.div>
+          </>
+        )}
       </AnimatePresence>
 
       {/* Input */}
