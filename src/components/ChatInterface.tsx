@@ -164,11 +164,34 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
 
       if (response.ok) {
         const data = await response.json();
-        setNotifications(data.notifications || []);
+        const apiNotifs = data.notifications || [];
+        if (apiNotifs.length > 0) {
+          setNotifications(apiNotifs);
+          return;
+        }
       }
     } catch (error) {
       console.error('Failed to load notifications:', error);
     }
+
+    // Demo fallback notifications (no login required)
+    try {
+      const isDemo = Boolean((businessInfo as any).demoKpiCsv);
+      if (isDemo) {
+        setNotifications([
+          {
+            id: `demo-intro-${Date.now()}`,
+            type: 'intro_request',
+            vcName: 'Alex',
+            vcFirm: 'Demo Capital',
+            vcEmail: 'demo@vc.com',
+            matchScore: 92,
+            requestedAt: new Date().toISOString(),
+            message: 'Demo Capital is interested in meeting you!'
+          }
+        ]);
+      }
+    } catch {}
   };
 
   const showWelcomeMessage = async () => {

@@ -152,40 +152,49 @@ export default function VCSwipePage() {
     const vcFirm = localStorage.getItem('vc-firm') || 'Demo VC';
 
     try {
-      const response = await fetch('/api/vc/swipe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          vcEmail,
-          vcFirm,
-          sessionId: profile.sessionId,
-          action: 'like',
-          anonymousData: profile
-        })
-      });
+      const isDemoVc = (vcEmail || '').includes('demo@');
+      if (isDemoVc) {
+        // Simulate immediate intro request without backend
+        setRevealedCompany({
+          pending: true,
+          message: `Intro request sent to the founder. You'll be notified when they respond.`,
+          matchScore: profile.matchScore,
+          status: 'pending',
+          requestId: `demo-${Date.now()}`
+        });
+        setShowReveal(true);
+      } else {
+        const response = await fetch('/api/vc/swipe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            vcEmail,
+            vcFirm,
+            sessionId: profile.sessionId,
+            action: 'like',
+            anonymousData: profile
+          })
+        });
 
-      if (response.ok) {
-        const data = await response.json();
-        
-        // Check response type
-        if (data.action === 'intro_requested') {
-          // Waiting for founder acceptance
-          setRevealedCompany({
-            pending: true,
-            message: data.message,
-            matchScore: profile.matchScore,
-            status: data.status,
-            requestId: data.requestId
-          });
-          setShowReveal(true);
-        } else if (data.action === 'revealed' && data.fullProfile) {
-          // Founder already accepted - full reveal
-          setRevealedCompany({
-            ...data.fullProfile,
-            matchScore: profile.matchScore,
-            aiAnalysis: profile.aiAnalysis
-          });
-          setShowReveal(true);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.action === 'intro_requested') {
+            setRevealedCompany({
+              pending: true,
+              message: data.message,
+              matchScore: profile.matchScore,
+              status: data.status,
+              requestId: data.requestId
+            });
+            setShowReveal(true);
+          } else if (data.action === 'revealed' && data.fullProfile) {
+            setRevealedCompany({
+              ...data.fullProfile,
+              matchScore: profile.matchScore,
+              aiAnalysis: profile.aiAnalysis
+            });
+            setShowReveal(true);
+          }
         }
       }
     } catch (error) {

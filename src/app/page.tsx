@@ -589,36 +589,53 @@ export default function Home() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="flex flex-col gap-3 justify-center items-center"
+            className="flex flex-col md:flex-row gap-3 justify-center items-center"
           >
-            
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => {
-              const info: BusinessInfo = {
-                name: demoCompany.name,
-                email: demoCompany.email,
-                website: demoCompany.website,
-                linkedinProfiles: '',
-                stage: 'early-revenue',
-                industry: 'SaaS',
-                targetMarket: 'SMBs',
-                businessModel: 'B2B Subscription',
-                monthlyRevenue: '18000',
-                teamSize: '6-10',
-                uploadedFiles: [],
-                preScrapedText: demoWebsiteText,
-                preScrapedSources: [{ url: demoCompany.website, snippet: demoWebsiteText.slice(0,200) }],
-                demoKpiCsv: demoKpiCsv
-              };
-              setBusinessInfo(info);
-              setCurrentView('chat');
-              // Welcome message is now handled in ChatInterface
+                const info: BusinessInfo = {
+                  name: demoCompany.name,
+                  email: demoCompany.email,
+                  website: demoCompany.website,
+                  linkedinProfiles: '',
+                  stage: 'early-revenue',
+                  industry: 'SaaS',
+                  targetMarket: 'SMBs',
+                  businessModel: 'B2B Subscription',
+                  monthlyRevenue: '18000',
+                  teamSize: '6-10',
+                  uploadedFiles: [],
+                  preScrapedText: demoWebsiteText,
+                  preScrapedSources: [{ url: demoCompany.website, snippet: demoWebsiteText.slice(0,200) }],
+                  demoKpiCsv: demoKpiCsv
+                };
+                setBusinessInfo(info);
+                setCurrentView('chat');
               }}
               className="px-8 py-3 text-gray-600 rounded-full text-base font-medium hover:text-black hover:bg-gray-50 transition-all"
             >
-              View Demo
+              Founder Demo
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => {
+                try {
+                  localStorage.setItem('vc-email', 'demo@vc.com');
+                  localStorage.setItem('vc-firm', 'Demo Capital');
+                  // Seed basic preferences so onboarding is skipped
+                  if (!localStorage.getItem('vc-preferences')) {
+                    localStorage.setItem('vc-preferences', JSON.stringify({ stages: ['Seed','Series A'], industries: ['SaaS','Fintech'], regions: ['Nordics','Europe'], checkSizeMin: 250000, checkSizeMax: 3000000 }));
+                  }
+                } catch {}
+                window.location.href = '/vc/swipe';
+              }}
+              className="px-8 py-3 text-gray-600 rounded-full text-base font-medium hover:text-black hover:bg-gray-50 transition-all"
+            >
+              VC Demo
             </motion.button>
           </motion.div>
         </div>
