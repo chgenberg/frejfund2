@@ -12,6 +12,7 @@ import KpiUploadModal from './KpiUploadModal';
 import DeckSummaryModal from './DeckSummaryModal';
 import HelpModal from './HelpModal';
 import MatchChat from './MatchChat';
+import IntelligentSearchModal from './IntelligentSearchModal';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -68,6 +69,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   const [showMatchChat, setShowMatchChat] = useState(false);
   const [activeMatchChat, setActiveMatchChat] = useState<any>(null);
   const [showQuickQuestions, setShowQuickQuestions] = useState(false);
+  const [showIntelligentSearch, setShowIntelligentSearch] = useState(false);
   const [prefetchedContext, setPrefetchedContext] = useState<string | null>(null);
   const [dailyCompass, setDailyCompass] = useState<{ insights: string[]; risks: string[]; actions: string[]; citations?: Array<{label:string; snippet:string}> } | null>(null);
   const [showCompass, setShowCompass] = useState(true);
@@ -1465,26 +1467,26 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                       "What's my best growth channel?",
                       "How do I scale customer acquisition?",
                       "Show me pricing strategies",
-                      "Analyze my unit economics"
+                      "Start intelligent search"
                     ];
                   } else if (lastMessage.includes('funding') || lastMessage.includes('invest')) {
                     suggestions = [
                       "Am I ready to fundraise?",
                       "What's my valuation range?",
                       "Create investor pitch",
-                      "Find potential investors"
+                      "Start intelligent search"
                     ];
                   } else if (lastMessage.includes('team') || lastMessage.includes('hire')) {
                     suggestions = [
                       "Who should I hire next?",
                       "Build compensation plan",
                       "Create org structure",
-                      "Find advisors"
+                      "Start intelligent search"
                     ];
                   } else {
                     suggestions = [
                       "How do I grow faster?",
-                      "Create a 90-day plan",
+                      "Start intelligent search",
                       "What's my biggest risk?",
                       "When should I fundraise?",
                       "Help me with my pitch deck",
@@ -1501,15 +1503,20 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                     transition={{ delay: index * 0.05 }}
                     whileHover={{ x: 4, backgroundColor: "#f9fafb" }}
                     onClick={() => {
-                      setInputValue(question);
-                      inputRef.current?.focus();
-                      setShowQuickQuestions(false);
-                      
-                      setInsightCard({
-                        text: "Great question! Let me analyze this for you...",
-                        type: 'info'
-                      });
-                      setTimeout(() => setInsightCard(null), 3000);
+                      if (question.toLowerCase().includes('intelligent search')) {
+                        setShowIntelligentSearch(true);
+                        setShowQuickQuestions(false);
+                      } else {
+                        setInputValue(question);
+                        inputRef.current?.focus();
+                        setShowQuickQuestions(false);
+                        
+                        setInsightCard({
+                          text: "Great question! Let me analyze this for you...",
+                          type: 'info'
+                        });
+                        setTimeout(() => setInsightCard(null), 3000);
+                      }
                     }}
                     className="w-full text-left px-4 py-3 rounded-lg text-sm text-gray-700 hover:text-black transition-all"
                   >
@@ -1737,6 +1744,33 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
           onClose={() => setShowMatchChat(false)}
         />
       )}
+
+      {/* Intelligent Search Modal */}
+      <AnimatePresence>
+        {showIntelligentSearch && (
+          <IntelligentSearchModal
+            businessInfo={businessInfo}
+            onComplete={(analysis, conversationState) => {
+              setShowIntelligentSearch(false);
+              
+              // Add the analysis to chat
+              addMessage(
+                `I've completed an intelligent discovery session with you! Here's my comprehensive analysis:\n\n${analysis}`,
+                'agent',
+                'analysis'
+              );
+              
+              // Show success notification
+              setInsightCard({
+                text: `Discovery complete! Gathered ${conversationState.knownFacts.length} key insights with ${conversationState.confidenceScore}% confidence.`,
+                type: 'success'
+              });
+              setTimeout(() => setInsightCard(null), 4000);
+            }}
+            onClose={() => setShowIntelligentSearch(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
