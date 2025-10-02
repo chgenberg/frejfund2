@@ -38,9 +38,15 @@ const FIXED_QUESTIONS: Record<string, string> = {
 };
 
 export class IntelligentSearchEngine {
-  private openai = getOpenAIClient();
   private maxQuestions = 10;
   private fixedQuestionCount = 5;
+  
+  /**
+   * Get OpenAI client (lazy initialization to avoid build-time errors)
+   */
+  private getClient() {
+    return getOpenAIClient();
+  }
   
   /**
    * Initialize a new intelligent search conversation
@@ -150,7 +156,7 @@ Generate a single, highly targeted question that would help us understand:
 
 Respond with ONLY the question text (no preamble, no "Question:", just the question).`;
 
-      const response = await this.openai.chat.completions.create({
+      const response = await this.getClient().chat.completions.create({
         model: getChatModel('simple'),
         messages: [
           { role: 'system', content: 'You are an expert business advisor conducting investor due diligence.' },
@@ -274,7 +280,7 @@ Answer: ${answer}
 Respond with a JSON array of strings, each being one concise fact.
 Example: ["They have 50 paying customers", "Monthly revenue is $10k", "Growing 20% MoM"]`;
 
-      const response = await this.openai.chat.completions.create({
+      const response = await this.getClient().chat.completions.create({
         model: getChatModel('simple'),
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.3,
@@ -336,7 +342,7 @@ Provide:
 Keep it concise but insightful. Use **bold** for key points.`;
 
     try {
-      const response = await this.openai.chat.completions.create({
+      const response = await this.getClient().chat.completions.create({
         model: getChatModel('simple'),
         messages: [
           { role: 'system', content: 'You are a world-class business analyst preparing an investment memo.' },
