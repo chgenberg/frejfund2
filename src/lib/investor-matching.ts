@@ -1,5 +1,5 @@
 import prisma from './prisma';
-import { getChatModel } from './ai-client';
+import { getOpenAIClient, getChatModel } from './ai-client';
 
 interface BusinessProfile {
   name: string;
@@ -126,9 +126,9 @@ Match scores:
 Be specific and actionable. Mention their portfolio companies if relevant.`;
 
   try {
-    const openai = getChatModel('simple');
+    const openai = getOpenAIClient();
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: getChatModel('simple'),
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 150,
       temperature: 0.7

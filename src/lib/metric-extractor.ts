@@ -1,4 +1,4 @@
-import { getChatModel } from './ai-client';
+import { getOpenAIClient, getChatModel } from './ai-client';
 
 interface ExtractedMetrics {
   mrr?: string;
@@ -61,9 +61,9 @@ Return ONLY valid JSON (no markdown):
 If you can't find a metric, set it to null. Set confidence based on how clear the metrics are.`;
 
   try {
-    const openai = getChatModel('simple');
+    const openai = getOpenAIClient();
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: getChatModel('simple'),
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.1, // Low temp for accuracy
       response_format: { type: 'json_object' }

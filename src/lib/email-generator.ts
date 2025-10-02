@@ -1,4 +1,4 @@
-import { getChatModel } from './ai-client';
+import { getOpenAIClient, getChatModel } from './ai-client';
 import { BusinessInfo } from '@/types/business';
 
 interface EmailContext {
@@ -113,9 +113,9 @@ Return ONLY the email.`;
   }
   
   try {
-    const openai = getChatModel('simple');
+    const openai = getOpenAIClient();
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: getChatModel('simple'),
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.7,
       max_tokens: 500
@@ -206,9 +206,9 @@ Requirements:
 Return only the 5 subject lines, one per line.`;
 
   try {
-    const openai = getChatModel('simple');
+    const openai = getOpenAIClient();
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: getChatModel('simple'),
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.8,
       max_tokens: 200

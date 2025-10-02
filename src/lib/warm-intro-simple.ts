@@ -8,7 +8,7 @@
  * 4. Generate perfect intro request messages
  */
 
-import { getChatModel } from './ai-client';
+import { getOpenAIClient, getChatModel } from './ai-client';
 import prisma from './prisma';
 
 interface UserConnection {
@@ -160,9 +160,9 @@ Forwardable blurb:
 Return formatted output.`;
 
   try {
-    const openai = getChatModel('simple');
+    const openai = getOpenAIClient();
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: getChatModel('simple'),
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.7,
       max_tokens: 400
