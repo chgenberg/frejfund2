@@ -75,6 +75,8 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   const [showCompass, setShowCompass] = useState(true);
   const [loadingCompass, setLoadingCompass] = useState(false);
   const [syncingInbox, setSyncingInbox] = useState(false);
+  // Thin top progress bar while "thinking"
+  const [thinkingProgress, setThinkingProgress] = useState(0);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -83,6 +85,27 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Animate a subtle loading bar during AI thinking
+  useEffect(() => {
+    let interval: any;
+    let timeoutDone: any;
+    if (isTyping) {
+      setThinkingProgress(0);
+      interval = setInterval(() => {
+        setThinkingProgress((p) => {
+          if (p >= 90) return 90; // cap until completion
+          const delta = p < 50 ? 5 : p < 75 ? 3 : 1;
+          return Math.min(p + delta, 90);
+        });
+      }, 120);
+    } else {
+      // Finish and reset
+      setThinkingProgress((p) => (p > 0 ? 100 : 0));
+      timeoutDone = setTimeout(() => setThinkingProgress(0), 400);
+    }
+    return () => { if (interval) clearInterval(interval); if (timeoutDone) clearTimeout(timeoutDone); };
+  }, [isTyping]);
 
   // Save message to database
   const saveMessageToDb = async (message: Message) => {
@@ -1035,6 +1058,16 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
           </div>
         </div>
       </motion.header>
+
+      {/* Thinking progress bar */}
+      <div className="h-1 w-full bg-gray-100">
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${thinkingProgress}%` }}
+          transition={{ duration: 0.15 }}
+          className={`h-full ${thinkingProgress > 0 ? 'bg-black' : 'bg-transparent'}`}
+        />
+      </div>
 
       {/* Pinned Daily Compass */}
       {showCompass && dailyCompass && (

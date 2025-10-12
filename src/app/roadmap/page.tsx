@@ -21,8 +21,25 @@ export default function RoadmapPage() {
       return;
     }
 
-    const rm = JSON.parse(stored) as UserRoadmap;
-    setRoadmap(rm);
+    const raw = JSON.parse(stored) as any;
+    // Hydrate dates from JSON strings
+    const hydrated: UserRoadmap = {
+      ...raw,
+      startDate: raw?.startDate ? new Date(raw.startDate) : new Date(),
+      targetDate: raw?.targetDate ? new Date(raw.targetDate) : new Date(),
+      milestones: Array.isArray(raw?.milestones)
+        ? raw.milestones.map((m: any) => ({
+            ...m,
+            tasks: Array.isArray(m?.tasks)
+              ? m.tasks.map((t: any) => ({
+                  ...t,
+                  dueDate: t?.dueDate ? new Date(t.dueDate) : undefined
+                }))
+              : []
+          }))
+        : []
+    };
+    setRoadmap(hydrated);
 
     // Auto-expand first incomplete milestone
     const current = getCurrentMilestone(rm);
@@ -47,7 +64,8 @@ export default function RoadmapPage() {
   }
 
   const progress = calculateRoadmapProgress(roadmap);
-  const weeksRemaining = Math.ceil((roadmap.targetDate.getTime() - Date.now()) / (7 * 24 * 60 * 60 * 1000));
+  const targetMs = roadmap.targetDate instanceof Date ? roadmap.targetDate.getTime() : new Date(roadmap.targetDate as unknown as string).getTime();
+  const weeksRemaining = Math.ceil((targetMs - Date.now()) / (7 * 24 * 60 * 60 * 1000));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">

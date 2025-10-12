@@ -10,13 +10,13 @@ export const dynamic = 'force-dynamic';
  */
 export async function POST(req: NextRequest) {
   try {
-    const { 
-      email, 
-      sessionId, 
-      businessInfo, 
-      scrapedText,
-      scrapedSources 
-    } = await req.json();
+    const payload = await req.json();
+    const email = payload?.email;
+    const sessionId = payload?.sessionId;
+    const scrapedText = payload?.scrapedText;
+    const scrapedSources = payload?.scrapedSources;
+    // Accept optional goal/roadmap fields but do not persist unknown types blindly
+    const businessInfo = payload?.businessInfo ?? {};
 
     if (!email || !sessionId) {
       return NextResponse.json({ 
