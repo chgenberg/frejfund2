@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { ssePublish } from '@/lib/sse-bus';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,6 +65,9 @@ export async function POST(req: NextRequest) {
         content
       }
     });
+
+    // Broadcast over SSE to both parties
+    ssePublish(introRequestId, 'message', { message });
 
     return NextResponse.json({ message }, { status: 201 });
   } catch (error: any) {

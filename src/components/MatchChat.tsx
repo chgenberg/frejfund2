@@ -29,8 +29,31 @@ export default function MatchChat({ introRequestId, userEmail, userType, matchNa
 
   useEffect(() => {
     loadMessages();
-    const interval = setInterval(loadMessages, 3000); // Poll every 3 seconds
-    return () => clearInterval(interval);
+    // Subscribe via SSE
+    const subId = Math.random().toString(36).slice(2);
+    const es = new EventSource(`/api/messages/match/stream?introRequestId=${introRequestId}&subId=${subId}`);
+    es.onmessage = (ev) => {
+      try {
+        const parsed = JSON.parse(ev.data);
+        if (parsed?.message) {
+          setMessages((prev) => {
+            const exists = prev.some((m) => m.id === parsed.message.id);
+            return exists ? prev : [...prev, parsed.message];
+          });
+        }
+        if (parsed?.count) {
+          // read receipt event -> refetch or ignore for now
+        }
+      } catch {}
+    };
+    es.addEventListener('message', () => {});
+    es.addEventListener('read_receipt', () => {});
+    es.onerror = () => {
+      // Fallback silently; SSE may not work in some environments
+    };
+    return () => {
+      try { es.close(); } catch {}
+    };
   }, [introRequestId]);
 
   useEffect(() => {
@@ -77,12 +100,22 @@ export default function MatchChat({ introRequestId, userEmail, userType, matchNa
           content: inputValue
         })
       });
-
-      loadMessages(); // Refresh to get real message
     } catch (error) {
       console.error('Error sending message:', error);
     }
   };
+
+  // Mark messages as read when opened or updated
+  useEffect(() => {
+    const unreadFromOther = messages.some(m => !m.isRead && m.senderEmail !== userEmail);
+    if (unreadFromOther) {
+      fetch('/api/messages/match/read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ introRequestId, readerEmail: userEmail })
+      }).catch(()=>{});
+    }
+  }, [messages, introRequestId, userEmail]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
