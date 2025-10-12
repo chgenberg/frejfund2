@@ -375,6 +375,15 @@ export default function VCSwipePage() {
                     </div>
                   </div>
 
+                  {/* Fit Badges */}
+                  {currentProfile.explain && (
+                    <div className="mb-6 flex flex-wrap gap-2">
+                      <span className="px-2 py-1 rounded-full border text-xs bg-gray-50 border-gray-200 text-gray-800">Readiness {currentProfile.explain.readiness}/100</span>
+                      <span className="px-2 py-1 rounded-full border text-xs bg-gray-50 border-gray-200 text-gray-800">KPI {currentProfile.explain.kpis.composite}/100</span>
+                      <span className="px-2 py-1 rounded-full border text-xs bg-gray-50 border-gray-200 text-gray-800">Affinity ×{Number((currentProfile.explain.affinity?.industry||1)*(currentProfile.explain.affinity?.stage||1)*(currentProfile.explain.affinity?.geography||1)).toFixed(2)}</span>
+                    </div>
+                  )}
+
                   {/* Traction */}
                   <div className="mb-6">
                     <h3 className="text-sm font-semibold text-gray-700 uppercase mb-3">Traction</h3>
@@ -443,8 +452,21 @@ export default function VCSwipePage() {
                       <div className="mt-3 text-xs text-gray-700 grid grid-cols-2 gap-2">
                         <div className="p-2 bg-white rounded border border-gray-200">
                           <div className="font-semibold mb-1">KPI Breakdown</div>
-                          <div>Composite: {currentProfile.explain.kpis.composite}/100</div>
-                          <div className="text-[11px] text-gray-600">MRR {currentProfile.explain.kpis.mrrScore} • Growth {currentProfile.explain.kpis.growthScore} • Users {currentProfile.explain.kpis.usersScore} • Team {currentProfile.explain.kpis.teamScore}</div>
+                          <div className="mb-1">Composite: {currentProfile.explain.kpis.composite}/100</div>
+                          {/* KPI Bars */}
+                          {[
+                            ['MRR', currentProfile.explain.kpis.mrrScore],
+                            ['Growth', currentProfile.explain.kpis.growthScore],
+                            ['Users', currentProfile.explain.kpis.usersScore],
+                            ['Team', currentProfile.explain.kpis.teamScore]
+                          ].map(([label, val]) => (
+                            <div key={label as string} className="mb-1">
+                              <div className="flex justify-between text-[11px] text-gray-600"><span>{label as string}</span><span>{val as number}/100</span></div>
+                              <div className="w-full h-1.5 bg-gray-200 rounded">
+                                <div className="h-1.5 bg-black rounded" style={{ width: `${val as number}%` }} />
+                              </div>
+                            </div>
+                          ))}
                         </div>
                         <div className="p-2 bg-white rounded border border-gray-200">
                           <div className="font-semibold mb-1">Why this match</div>
@@ -590,6 +612,11 @@ export default function VCSwipePage() {
                       </motion.div>
                     </motion.button>
                   </div>
+                  {currentProfile.explain?.whyNot && currentProfile.explain.whyNot.length>0 && (
+                    <div className="mt-4 text-center">
+                      <span className="text-[11px] text-gray-500">Förbättringsförslag: {currentProfile.explain.whyNot.slice(0,2).join('; ')}</span>
+                    </div>
+                  )}
                   <div className="text-center mt-3 text-xs text-gray-500">
                     Swipe or tap: ❌ Pass • ❤️ Interested • ⭐ Super Like
                   </div>
