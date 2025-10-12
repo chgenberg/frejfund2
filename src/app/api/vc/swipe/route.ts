@@ -126,6 +126,9 @@ export async function GET(req: NextRequest) {
       console.log('Smart matching not available, falling back to basic matching');
     }
 
+    // Load VC preferences if available
+    const prefs = await prisma.vCPreference.findUnique({ where: { vcEmail } });
+
     // Fallback: Basic matching (if smart matching fails)
     const publicSessions = await prisma.session.findMany({
       where: {
@@ -145,7 +148,29 @@ export async function GET(req: NextRequest) {
     });
 
     const swipedSessionIds = new Set(swipedSessions.map(s => s.sessionId));
-    const unseenSessions = publicSessions.filter(s => !swipedSessionIds.has(s.id));
+    let unseenSessions = publicSessions.filter(s => !swipedSessionIds.has(s.id));
+
+    // Apply VC preferences filtering if present
+    if (prefs) {
+      unseenSessions = unseenSessions.filter((s) => {
+        const bi = s.businessInfo as any;
+        const user = s.user as any;
+        const stage = String(bi?.stage || user?.stage || '').toLowerCase();
+        const industry = String(bi?.industry || user?.industry || '').toLowerCase();
+        const geo = String(bi?.targetMarket || 'europe').toLowerCase();
+        const ask = Number(user?.askAmount || 0);
+
+        const stageOk = prefs.stages.length === 0 || prefs.stages.some(st => stage.includes(st));
+        const industryOk = prefs.industries.length === 0 || prefs.industries.some(ind => industry.includes(ind));
+        const geoOk = prefs.geographies.length === 0 || prefs.geographies.some(g => geo.includes(g));
+        const checkOk = (!prefs.checkSizeMin && !prefs.checkSizeMax) || (
+          (!prefs.checkSizeMin || (ask >= Number(prefs.checkSizeMin))) &&
+          (!prefs.checkSizeMax || (ask <= Number(prefs.checkSizeMax)))
+        );
+
+        return stageOk && industryOk && geoOk && checkOk;
+      });
+    }
 
     const blindProfiles = unseenSessions.map((session) => {
       const businessInfo = session.businessInfo as any;
@@ -160,7 +185,7 @@ export async function GET(req: NextRequest) {
         askAmount: user?.askAmount || 2000000,
         traction: user?.traction || businessInfo?.traction || {},
         matchScore: 85 + Math.floor(Math.random() * 15),
-        aiAnalysis: `Matches your investment thesis. Strong fundamentals.`,
+        aiAnalysis: prefs?.dealCriteria ? `Matches your criteria: ${prefs.dealCriteria}` : `Matches your investment thesis. Strong fundamentals.`,
         readinessScore: businessInfo?.readinessScore || 70,
         geography: businessInfo?.targetMarket || 'Europe'
       };

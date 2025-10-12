@@ -431,3 +431,27 @@ model MatchMessage {
   @@index([createdAt])
   @@map("match_messages")
 }
+
+// VC investment preferences
+model VCPreference {
+  id            String    @id @default(cuid())
+
+  // VC identity
+  vcEmail       String    @unique
+  vcFirm        String?
+
+  // Preferences
+  stages        String[]  // ['pre_seed','seed','series_a','series_b','growth']
+  industries    String[]  // ['saas','fintech','health tech','marketplace','deep_tech','consumer']
+  geographies   String[]  // ['nordics','europe','us','global']
+  checkSizeMin  BigInt?
+  checkSizeMax  BigInt?
+  dealCriteria  String?   @db.Text
+
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([vcEmail])
+  @@map("vc_preferences")
+}
