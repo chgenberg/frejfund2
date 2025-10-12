@@ -42,7 +42,7 @@ export default function RoadmapPage() {
     setRoadmap(hydrated);
 
     // Auto-expand first incomplete milestone
-    const current = getCurrentMilestone(rm);
+    const current = getCurrentMilestone(hydrated);
     if (current) {
       setExpandedMilestone(current.id);
     }
