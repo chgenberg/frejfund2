@@ -203,6 +203,15 @@ export default function VCDashboard() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={() => window.location.href = '/vc/preferences'}
+                className="px-4 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors inline-flex items-center space-x-2"
+              >
+                <Filter className="w-4 h-4" />
+                <span>Preferences</span>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => window.location.href = '/vc/swipe'}
                 className="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors inline-flex items-center space-x-2"
               >

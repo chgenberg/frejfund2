@@ -38,10 +38,10 @@ export default function VCSwipePage() {
   const [revealedCompany, setRevealedCompany] = useState<any>(null);
 
   useEffect(() => {
-    loadProfiles();
+    ensurePreferencesThenLoad();
   }, []);
 
-  const loadProfiles = async () => {
+  const ensurePreferencesThenLoad = async () => {
     const vcEmail = localStorage.getItem('vc-email');
     
     if (!vcEmail) {
@@ -49,6 +49,26 @@ export default function VCSwipePage() {
       window.location.href = '/vc';
       return;
     }
+
+    // Require preferences
+    try {
+      const prefRes = await fetch('/api/vc/preferences', {
+        headers: { 'x-vc-email': vcEmail }
+      });
+      if (prefRes.ok) {
+        const data = await prefRes.json();
+        if (!data.preferences) {
+          window.location.href = '/vc/preferences';
+          return;
+        }
+      }
+    } catch {}
+
+    await loadProfiles();
+  };
+
+  const loadProfiles = async () => {
+    const vcEmail = localStorage.getItem('vc-email');
 
     try {
       const response = await fetch('/api/vc/swipe', {
