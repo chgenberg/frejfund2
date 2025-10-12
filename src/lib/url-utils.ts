@@ -15,30 +15,22 @@ export function normalizeUrl(input: string): string {
   if (url.startsWith('http://') || url.startsWith('https://')) {
     return url;
   }
-  
-  // Remove www. prefix temporarily
-  const hasWww = url.startsWith('www.');
-  if (hasWww) {
-    url = url.substring(4);
+  // Decide if input looks like a domain (requires a dot and TLD)
+  const hasWww = url.toLowerCase().startsWith('www.');
+  const candidateHost = hasWww ? url.substring(4) : url;
+  const looksLikeDomain = /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(candidateHost);
+  if (!looksLikeDomain) {
+    // Keep raw input while typing (avoid turning "www." into "https://www.")
+    return input;
   }
-  
-  // Add https:// prefix (default to secure)
-  url = 'https://' + (hasWww ? 'www.' : '') + url;
-  
-  // Validate URL format
+
+  // Add https:// prefix (default secure) and revalidate
+  const normalized = 'https://' + (hasWww ? 'www.' : '') + candidateHost;
   try {
-    new URL(url);
-    return url;
+    new URL(normalized);
+    return normalized;
   } catch {
-    // If invalid, try adding www.
-    try {
-      url = 'https://www.' + input.trim();
-      new URL(url);
-      return url;
-    } catch {
-      // Return original if still invalid
-      return input;
-    }
+    return input;
   }
 }
 

@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
         console.log(`[Background Scrape] Starting for ${url}`);
         
         // Scrape website (deep scrape but constrained)
-        const maxPages = Math.min(5, Number(process.env.SCRAPE_MAX_PAGES || 5));
+        const maxPages = Math.min(4, Number(process.env.SCRAPE_MAX_PAGES || 4));
         const result = await scrapeSiteDeep(url, maxPages, 1);
         
         if (!result?.combinedText) {
@@ -62,11 +62,9 @@ export async function POST(req: NextRequest) {
         }
 
         // Use vector-store's indexing (handles chunking and embeddings)
-        const chunksIndexed = await indexContextForSession(
-          session.id, 
-          result.combinedText, 
-          { url }
-        );
+        // Bound size fed into indexer to reduce memory
+        const boundedText = String(result.combinedText || '').slice(0, 120_000);
+        const chunksIndexed = await indexContextForSession(session.id, boundedText, { url });
 
         console.log(`[Background Scrape] Completed for ${url}: ${chunksIndexed} chunks indexed`);
       } catch (error) {

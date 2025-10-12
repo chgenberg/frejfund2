@@ -49,29 +49,29 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
 
   // Background scrape when website is filled (debounced)
   useEffect(() => {
-    const url = businessInfo.website;
-    if (!url || !isValidUrl(url)) return;
-    
+    const url = businessInfo.website || '';
+    // Only trigger when we have a full domain with TLD and a valid URL
+    const looksComplete = /\.[a-z]{2,}$/i.test(url);
+    if (!url || !looksComplete || !isValidUrl(url)) return;
+
     const sessionId = localStorage.getItem('frejfund-session-id') || `sess-${Date.now()}`;
     localStorage.setItem('frejfund-session-id', sessionId);
-    
+
     const t = setTimeout(async () => {
       try {
         setIsScraping(true);
-        // Start async scraping (returns immediately, processes in background)
         await fetch('/api/scrape/async', { 
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' }, 
           body: JSON.stringify({ url, sessionId }) 
         });
         console.log(`Background scraping started for ${url}`);
-        // User can continue immediately!
       } catch (error) {
         console.error('Failed to start background scraping:', error);
       } finally { 
         setIsScraping(false); 
       }
-    }, 600);
+    }, 1500);
     return () => clearTimeout(t);
   }, [businessInfo.website]);
 
