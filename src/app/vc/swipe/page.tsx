@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { 
   Heart, X, Star, TrendingUp, DollarSign, Users,
-  Calendar, Target, Sparkles, ChevronLeft, Eye
+  Calendar, Target, Sparkles, ChevronLeft, Eye, Info
 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -44,6 +44,7 @@ export default function VCSwipePage() {
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [showReveal, setShowReveal] = useState(false);
   const [revealedCompany, setRevealedCompany] = useState<any>(null);
+  const [showExplain, setShowExplain] = useState(false);
 
   useEffect(() => {
     ensurePreferencesThenLoad();
@@ -459,6 +460,43 @@ export default function VCSwipePage() {
                         )}
                       </div>
                     )}
+
+                    {/* Expandable: Why this match */}
+                    <div className="mt-3">
+                      <button
+                        onClick={() => setShowExplain(v=>!v)}
+                        className="inline-flex items-center text-xs text-gray-700 hover:text-black"
+                      >
+                        <Info className="w-3.5 h-3.5 mr-1" /> {showExplain ? 'Dölj motivering' : 'Varför denna match?'}
+                      </button>
+                      <AnimatePresence>
+                        {showExplain && currentProfile.explain && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 6 }}
+                            className="mt-2 text-xs text-gray-800 space-y-1"
+                          >
+                            <div>• Högst bidrag: {(() => {
+                              const e = currentProfile.explain!;
+                              const entries = [
+                                ['MRR', e.kpis.mrrScore],
+                                ['Tillväxt', e.kpis.growthScore],
+                                ['Användare', e.kpis.usersScore],
+                                ['Team', e.kpis.teamScore],
+                                ['Readiness', e.readiness]
+                              ];
+                              const top = entries.sort((a,b)=>Number(b[1])-Number(a[1]))[0];
+                              return `${top[0]} (${top[1]}/100)`;
+                            })()}</div>
+                            <div>• Affinitet (ditt beteende): ×{Number((currentProfile.explain.affinity?.industry||1)*(currentProfile.explain.affinity?.stage||1)*(currentProfile.explain.affinity?.geography||1)).toFixed(2)}</div>
+                            {currentProfile.explain.whyNot?.length>0 && (
+                              <div>• Risker: {currentProfile.explain.whyNot.slice(0,2).join('; ')}</div>
+                            )}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </motion.div>
 
                   {/* Readiness Score */}

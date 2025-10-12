@@ -102,7 +102,7 @@ export default function VCPreferencesPage() {
         </section>
 
         <section>
-          <div className="text-sm font-semibold text-black mb-2">Stages</div>
+          <div className="text-sm font-semibold text-black mb-2">Stages <span className="text-xs text-gray-500">(välj 1–3)</span></div>
           <div className="flex flex-wrap gap-2">
             {STAGES.map(s => (
               <button key={s} onClick={()=>toggle(stages, s, setStages)} className={`px-3 py-1.5 rounded-full border ${stages.includes(s)?'bg-black text-white border-black':'bg-white text-gray-700 border-gray-300 hover:border-black'}`}>{s}</button>
@@ -111,7 +111,7 @@ export default function VCPreferencesPage() {
         </section>
 
         <section>
-          <div className="text-sm font-semibold text-black mb-2">Industries</div>
+          <div className="text-sm font-semibold text-black mb-2">Industries <span className="text-xs text-gray-500">(max 5)</span></div>
           <div className="flex flex-wrap gap-2">
             {INDUSTRIES.map(s => (
               <button key={s} onClick={()=>toggle(industries, s, setIndustries)} className={`px-3 py-1.5 rounded-full border ${industries.includes(s)?'bg-black text-white border-black':'bg-white text-gray-700 border-gray-300 hover:border-black'}`}>{s}</button>
@@ -120,7 +120,7 @@ export default function VCPreferencesPage() {
         </section>
 
         <section>
-          <div className="text-sm font-semibold text-black mb-2">Geography</div>
+          <div className="text-sm font-semibold text-black mb-2">Geography <span className="text-xs text-gray-500">(dit fokus)</span></div>
           <div className="flex flex-wrap gap-2">
             {GEOS.map(s => (
               <button key={s} onClick={()=>toggle(geographies, s, setGeographies)} className={`px-3 py-1.5 rounded-full border ${geographies.includes(s)?'bg-black text-white border-black':'bg-white text-gray-700 border-gray-300 hover:border-black'}`}>{s}</button>
@@ -130,18 +130,19 @@ export default function VCPreferencesPage() {
 
         <section className="grid md:grid-cols-2 gap-6">
           <div>
-            <label className="text-sm text-gray-600">Check size min (USD)</label>
+            <label className="text-sm text-gray-600">Check size min (USD) <span className="text-xs text-gray-400">(t.ex. 250000)</span></label>
             <input type="number" value={checkMin} onChange={e=>setCheckMin(e.target.value === '' ? '' : Number(e.target.value))} className="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="250000" />
           </div>
           <div>
-            <label className="text-sm text-gray-600">Check size max (USD)</label>
+            <label className="text-sm text-gray-600">Check size max (USD) <span className="text-xs text-gray-400">(t.ex. 2000000)</span></label>
             <input type="number" value={checkMax} onChange={e=>setCheckMax(e.target.value === '' ? '' : Number(e.target.value))} className="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="2000000" />
           </div>
         </section>
 
         <section>
           <label className="text-sm text-gray-600">Deal criteria</label>
-          <textarea value={dealCriteria} onChange={e=>setDealCriteria(e.target.value)} rows={4} className="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="Team, traction, vertical, etc." />
+          <textarea value={dealCriteria} onChange={e=>setDealCriteria(e.target.value)} rows={4} className="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="Kort uppställning: team, traction, vertical, go-to-market…" />
+          <div className="text-[11px] text-gray-500 mt-1">Tips: Ju tydligare kriterier desto bättre matchning (ex: “B2B SaaS, seed–A, EU, >$50k MRR, sales-led”).</div>
         </section>
 
         <div className="flex items-center justify-between">
