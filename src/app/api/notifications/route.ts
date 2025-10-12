@@ -108,15 +108,27 @@ export async function POST(req: NextRequest) {
 
       const businessInfo = founderSession?.businessInfo as any;
 
-      // In a real implementation, send emails here via SendGrid/Resend
-      // For now, we'll log the intro details
-      console.log('📧 INTRO FACILITATION:');
-      console.log(`VC: ${updated.vcEmail} (${updated.vcFirm})`);
-      console.log(`Founder: ${founder?.email} (${updated.founderCompany})`);
-      console.log(`Match Score: ${updated.matchScore}%`);
-      
-      // TODO: Actually send emails via SendGrid
-      // await sendIntroEmail(vcEmail, founderEmail, matchData);
+      // Send email notifications (VC and Founder)
+      try {
+        const { sendEmail } = await import('@/lib/mailer');
+        const founderEmail = founder?.email || '';
+        if (founderEmail) {
+          await sendEmail({
+            to: founderEmail,
+            subject: `Introförfrågan från ${updated.vcFirm}`,
+            text: `Hej! ${updated.vcFirm} vill gärna boka ett möte med dig. Match score: ${updated.matchScore}%. Svara i FrejFund för att komma vidare.`,
+          });
+        }
+        if (updated.vcEmail) {
+          await sendEmail({
+            to: updated.vcEmail,
+            subject: `Intro accepterad: ${updated.founderCompany}`,
+            text: `Toppen! Grundaren har accepterat intro. Du kan nu chatta direkt i FrejFund och föreslå mötestider.`,
+          });
+        }
+      } catch (e) {
+        console.warn('Email send failed (non-fatal):', e);
+      }
     }
 
     return NextResponse.json({ 
