@@ -489,7 +489,7 @@ export default function VCSwipePage() {
                         onClick={() => setShowExplain(v=>!v)}
                         className="inline-flex items-center text-xs text-gray-700 hover:text-black"
                       >
-                        <Info className="w-3.5 h-3.5 mr-1" /> {showExplain ? 'Dölj motivering' : 'Varför denna match?'}
+                        <Info className="w-3.5 h-3.5 mr-1" /> {showExplain ? 'Hide explanation' : 'Why this match?'}
                       </button>
                       <AnimatePresence>
                         {showExplain && currentProfile.explain && (
@@ -499,12 +499,12 @@ export default function VCSwipePage() {
                             exit={{ opacity: 0, y: 6 }}
                             className="mt-2 text-xs text-gray-800 space-y-1"
                           >
-                            <div>• Högst bidrag: {(() => {
+                            <div>• Top driver: {(() => {
                               const e = currentProfile.explain!;
                               const entries = [
                                 ['MRR', e.kpis.mrrScore],
-                                ['Tillväxt', e.kpis.growthScore],
-                                ['Användare', e.kpis.usersScore],
+                                ['Growth', e.kpis.growthScore],
+                                ['Users', e.kpis.usersScore],
                                 ['Team', e.kpis.teamScore],
                                 ['Readiness', e.readiness]
                               ];
@@ -614,7 +614,7 @@ export default function VCSwipePage() {
                   </div>
                   {currentProfile.explain?.whyNot && currentProfile.explain.whyNot.length>0 && (
                     <div className="mt-4 text-center">
-                      <span className="text-[11px] text-gray-500">Förbättringsförslag: {currentProfile.explain.whyNot.slice(0,2).join('; ')}</span>
+                      <span className="text-[11px] text-gray-500">Improvement suggestions: {currentProfile.explain.whyNot.slice(0,2).join('; ')}</span>
                     </div>
                   )}
                   <div className="text-center mt-3 text-xs text-gray-500">

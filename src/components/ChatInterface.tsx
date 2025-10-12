@@ -1665,20 +1665,19 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
           >
             <div className="bg-white rounded-xl p-6 w-full max-w-md border border-gray-200">
               <h3 className="text-lg font-semibold text-black mb-2">Feedback</h3>
-              <p className="text-sm text-gray-600 mb-4">Varför?
-              </p>
+              <p className="text-sm text-gray-600 mb-4">Why?</p>
               <textarea
                 value={feedbackReason}
                 onChange={(e) => setFeedbackReason(e.target.value)}
-                placeholder="Vad var bra/mindre bra?"
+                placeholder="What was good or missing?"
                 className="w-full border border-gray-300 rounded-lg p-2 text-sm text-black mb-3"
                 rows={3}
               />
-              <p className="text-sm text-gray-600 mb-2">Vad saknades?</p>
+              <p className="text-sm text-gray-600 mb-2">What was missing?</p>
               <input
                 value={feedbackMissing}
                 onChange={(e) => setFeedbackMissing(e.target.value)}
-                placeholder="Ex. fler siffror, exempel, tydligare plan"
+                placeholder="E.g. more numbers, examples, clearer plan"
                 className="w-full border border-gray-300 rounded-lg p-2 text-sm text-black mb-4"
               />
               <div className="flex justify-end space-x-2">
@@ -1690,7 +1689,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   }}
                   className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
                 >
-                  Avbryt
+                  Cancel
                 </button>
                 <button
                   onClick={async () => {
@@ -1710,7 +1709,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                     setPendingFeedback(null);
                     setFeedbackReason('');
                     setFeedbackMissing('');
-                    addMessage('Tack för din feedback! Vi använder den för att förbättra svaren.', 'agent');
+                    addMessage('Thanks for your feedback! We use it to improve responses.', 'agent');
                     // Auto-regenerate on thumbs down with constraints
                     if (pendingFeedback.rating === 'down') {
                       const constraints: string[] = [];
@@ -1723,7 +1722,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   }}
                   className="px-4 py-2 text-sm bg-black text-white rounded-lg hover:bg-gray-800"
                 >
-                  Skicka
+                  Send
                 </button>
               </div>
             </div>

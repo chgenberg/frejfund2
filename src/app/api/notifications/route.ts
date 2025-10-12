@@ -115,15 +115,15 @@ export async function POST(req: NextRequest) {
         if (founderEmail) {
           await sendEmail({
             to: founderEmail,
-            subject: `Introförfrågan från ${updated.vcFirm}`,
-            text: `Hej! ${updated.vcFirm} vill gärna boka ett möte med dig. Match score: ${updated.matchScore}%. Svara i FrejFund för att komma vidare.`,
+            subject: `Intro request from ${updated.vcFirm}`,
+            text: `Hi! ${updated.vcFirm} wants to meet you. Match score: ${updated.matchScore}%. Reply in FrejFund to proceed.`,
           });
         }
         if (updated.vcEmail) {
           await sendEmail({
             to: updated.vcEmail,
-            subject: `Intro accepterad: ${updated.founderCompany}`,
-            text: `Toppen! Grundaren har accepterat intro. Du kan nu chatta direkt i FrejFund och föreslå mötestider.`,
+            subject: `Intro accepted: ${updated.founderCompany}`,
+            text: `Great! The founder accepted the intro. You can now chat directly in FrejFund and propose meeting times.`,
           });
         }
       } catch (e) {
