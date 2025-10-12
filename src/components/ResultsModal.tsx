@@ -50,6 +50,35 @@ export default function ResultsModal({ result, businessInfo, onClose }: ResultsM
     }
   };
 
+  // Derive founder-facing improvement suggestions from weaker score areas
+  const getImprovementSuggestions = (): string[] => {
+    const s = result.scores;
+    const suggestions: Array<{ area: string; score: number; text: string }> = [];
+    if (typeof s.problemSolutionFit === 'number' && s.problemSolutionFit < 70) {
+      suggestions.push({ area: 'Problem-Solution Fit', score: s.problemSolutionFit, text: 'Tighten ICP and refine the pain → solution story. Add 3 concrete use-cases and before/after metrics.' });
+    }
+    if (typeof s.marketTiming === 'number' && s.marketTiming < 70) {
+      suggestions.push({ area: 'Market & Timing', score: s.marketTiming, text: 'Show demand signals: waitlist size, inbound rate, pilot requests. Add trend data and “why now”.' });
+    }
+    if (typeof s.competitiveMoat === 'number' && s.competitiveMoat < 70) {
+      suggestions.push({ area: 'Competitive Moat', score: s.competitiveMoat, text: 'Strengthen moat via data assets, distribution partnerships, switching costs or IP. Add a clear moat slide.' });
+    }
+    if (typeof s.businessModel === 'number' && s.businessModel < 70) {
+      suggestions.push({ area: 'Business Model', score: s.businessModel, text: 'Clarify unit economics: target CAC/LTV, payback, pricing tiers. Add 12–18m monetization plan.' });
+    }
+    if (typeof s.teamExecution === 'number' && s.teamExecution < 70) {
+      suggestions.push({ area: 'Team Execution', score: s.teamExecution, text: 'Close key gaps (e.g., sales/ops). Add advisors with credibility and list shipped milestones last 90 days.' });
+    }
+    if (typeof s.traction === 'number' && s.traction < 70) {
+      suggestions.push({ area: 'Traction', score: s.traction, text: 'Prioritize proof: 3 pilots, first $10k MRR, or 10 paying logos. Add retention or usage graphs.' });
+    }
+    if (typeof s.financialHealth === 'number' && s.financialHealth < 70) {
+      suggestions.push({ area: 'Financial Health', score: s.financialHealth, text: 'Show runway, planned burn, and use of funds tied to milestones. Include contingency plan.' });
+    }
+    // Sort by lowest score first and return top 3
+    return suggestions.sort((a, b) => a.score - b.score).slice(0, 3).map(sug => `${sug.text}`);
+  };
+
   const renderOverview = () => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -183,6 +212,27 @@ export default function ResultsModal({ result, businessInfo, onClose }: ResultsM
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
+      {/* How to improve your score */}
+      {(() => {
+        const improvements = getImprovementSuggestions();
+        if (improvements.length === 0) return null;
+        return (
+          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+            <div className="mb-4 text-center">
+              <h3 className="text-lg font-semibold text-gray-900">How to improve your score</h3>
+              <p className="text-sm text-gray-600">High-impact, low-regret actions to move the needle</p>
+            </div>
+            <ul className="space-y-2">
+              {improvements.map((tip, i) => (
+                <li key={i} className="flex items-start space-x-2 text-sm text-gray-700">
+                  <ChevronRight className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                  <span>{tip}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })()}
       <div className="text-center mb-6">
         <h3 className="text-xl font-bold text-gray-900 mb-2">Actionable Insights</h3>
         <p className="text-gray-600">Personalized recommendations to improve your investment readiness</p>
