@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { INVESTOR_SEED_DATA } from '@/lib/investor-data';
+import { INVESTOR_SEED_DATA_EN as INVESTOR_SEED_DATA } from '@/lib/investor-data';
 
 export const dynamic = 'force-dynamic';
 

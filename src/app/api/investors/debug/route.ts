@@ -13,10 +13,10 @@ export async function GET(req: NextRequest) {
     let importError = null;
     
     try {
-      const { INVESTOR_SEED_DATA } = await import('@/lib/investor-data');
+      const { INVESTOR_SEED_DATA_EN } = await import('@/lib/investor-data');
       dataImported = true;
-      dataCount = INVESTOR_SEED_DATA.length;
-      sampleInvestor = INVESTOR_SEED_DATA[0];
+      dataCount = INVESTOR_SEED_DATA_EN.length;
+      sampleInvestor = INVESTOR_SEED_DATA_EN[0];
     } catch (e: any) {
       importError = e.message;
     }
