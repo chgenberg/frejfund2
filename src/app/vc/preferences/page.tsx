@@ -142,7 +142,7 @@ export default function VCPreferencesPage() {
         <section>
           <label className="text-sm text-gray-600">Deal criteria</label>
           <textarea value={dealCriteria} onChange={e=>setDealCriteria(e.target.value)} rows={4} className="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="Kort uppställning: team, traction, vertical, go-to-market…" />
-          <div className="text-[11px] text-gray-500 mt-1">Tips: Ju tydligare kriterier desto bättre matchning (ex: “B2B SaaS, seed–A, EU, >$50k MRR, sales-led”).</div>
+          <div className="text-[11px] text-gray-500 mt-1">Tips: Ju tydligare kriterier desto bättre matchning (ex: "B2B SaaS, seed-A, EU, &gt;$50k MRR, sales-led").</div>
         </section>
 
         <div className="flex items-center justify-between">
