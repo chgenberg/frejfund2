@@ -2840,14 +2840,49 @@ export const INVESTOR_SEED_DATA = [
   }
 ];
 
+// --- English sanitation helpers (remove Swedish remnants and diacritics) ---
+const asciiOnly = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}+/gu, '');
+const looksNonEnglish = (s: string) => /[åäöÅÄÖ]/.test(s) || /[A-Za-z]/.test(s) === false;
+
+function sanitizeThesis(inv: any): string | undefined {
+  const base = Array.isArray(inv.industries) && inv.industries.length ? inv.industries[0] : 'technology';
+  const stage = Array.isArray(inv.stage) && inv.stage.length ? inv.stage[0].replace('_', ' ') : 'seed';
+  if (!inv.thesis) return `Venture firm investing in ${base} at ${stage} stage.`;
+  const t = String(inv.thesis);
+  if (looksNonEnglish(t)) return `Venture firm investing in ${base} at ${stage} stage.`;
+  return t;
+}
+
+function sanitizeName(x: string) {
+  // Replace country labels like "Sverige (Sweden)" → "Sweden"
+  return x.replace(/\(([^)]+)\)/g, '$1');
+}
+
+function sanitizeInvestor(inv: any) {
+  const copy = { ...inv };
+  if (typeof copy.name === 'string') copy.name = sanitizeName(copy.name);
+  if (typeof copy.firmName === 'string') copy.firmName = sanitizeName(copy.firmName);
+  if (typeof copy.thesis === 'string') copy.thesis = sanitizeThesis(copy);
+  if (Array.isArray(copy.notableInvestments)) {
+    copy.notableInvestments = copy.notableInvestments.filter((n: any) => typeof n === 'string' && !looksNonEnglish(n)).map((n: string) => asciiOnly(n));
+  }
+  return copy;
+}
+
+function sanitizeInvestors(data: any[]): any[] {
+  return data.map(sanitizeInvestor);
+}
+
+export const INVESTOR_SEED_DATA_EN = sanitizeInvestors(INVESTOR_SEED_DATA as any);
+
 export const getInvestorsByStage = (stage: string) => {
-  return INVESTOR_SEED_DATA.filter(inv => inv.stage.includes(stage));
+  return INVESTOR_SEED_DATA_EN.filter((inv: any) => Array.isArray(inv.stage) && inv.stage.includes(stage));
 };
 
 export const getInvestorsByIndustry = (industry: string) => {
-  return INVESTOR_SEED_DATA.filter(inv => inv.industries.includes(industry));
+  return INVESTOR_SEED_DATA_EN.filter((inv: any) => Array.isArray(inv.industries) && inv.industries.includes(industry));
 };
 
 export const getInvestorsByGeography = (geo: string) => {
-  return INVESTOR_SEED_DATA.filter(inv => inv.geographies.includes(geo));
+  return INVESTOR_SEED_DATA_EN.filter((inv: any) => Array.isArray(inv.geographies) && inv.geographies.includes(geo));
 };

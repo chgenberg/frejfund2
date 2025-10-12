@@ -110,19 +110,18 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
     try {
       // Check if user is asking about investors
       const investorKeywords = [
-        'investor', 'investerare', 'vc', 'venture capital',
-        'pitch', 'funding', 'finansiering', 'raise', 'söka kapital',
-        'contact', 'kontakta', 'reach out'
+        'investor', 'vc', 'venture capital',
+        'pitch', 'funding', 'raise',
+        'contact', 'reach out'
       ];
       
       const emailKeywords = [
-        'email', 'mejl', 'draft', 'write', 'skriv', 'intro', 'introduction',
-        'reach out', 'contact', 'message', 'meddelande'
+        'email', 'draft', 'write', 'intro', 'introduction',
+        'reach out', 'contact', 'message'
       ];
       
       const warmIntroKeywords = [
-        'warm intro', 'introduction', 'mutual connection', 'know anyone',
-        'känner någon', 'gemensam kontakt', 'warm introduction'
+        'warm intro', 'introduction', 'mutual connection', 'know anyone', 'warm introduction'
       ];
       
       const isAskingAboutInvestors = investorKeywords.some(keyword => 
@@ -189,7 +188,7 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
       if (isAskingForEmail && (isAskingAboutInvestors || message.toLowerCase().includes('draft'))) {
         try {
           // Extract investor name from message
-          const investorNameMatch = message.match(/(?:to|för|med)\s+([A-Z][a-zA-Z\s&]+?)(?:\s|$|\.|\?)/);
+          const investorNameMatch = message.match(/(?:to|with)\s+([A-Z][a-zA-Z\s&]+?)(?:\s|$|\.|\?)/);
           const investorName = investorNameMatch ? investorNameMatch[1].trim() : null;
           
           if (investorName && sessionId) {
@@ -256,7 +255,7 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
       if (isAskingForWarmIntro && isAskingAboutInvestors) {
         try {
           // Extract investor name
-          const investorNameMatch = message.match(/(?:to|för|med)\s+([A-Z][a-zA-Z\s&]+?)(?:\s|$|\.|\?)/);
+          const investorNameMatch = message.match(/(?:to|with)\s+([A-Z][a-zA-Z\s&]+?)(?:\s|$|\.|\?)/);
           const investorName = investorNameMatch ? investorNameMatch[1].trim() : 'the investor';
           
           const { generateWarmIntroGuidance } = await import('./warm-intro-simple');
