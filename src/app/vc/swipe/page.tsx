@@ -27,6 +27,14 @@ interface BlindProfile {
   readinessScore: number;
   founded?: string;
   geography: string;
+  explain?: {
+    kpis: { mrrScore: number; growthScore: number; usersScore: number; teamScore: number; composite: number };
+    readiness: number;
+    affinity: { industry?: number; stage?: number; geography?: number };
+    baseScore: number;
+    finalScore: number;
+    whyNot: string[];
+  };
 }
 
 export default function VCSwipePage() {
@@ -430,6 +438,27 @@ export default function VCSwipePage() {
                     <p className="text-sm text-gray-700 leading-relaxed">
                       {currentProfile.aiAnalysis}
                     </p>
+                    {currentProfile.explain && (
+                      <div className="mt-3 text-xs text-gray-700 grid grid-cols-2 gap-2">
+                        <div className="p-2 bg-white rounded border border-gray-200">
+                          <div className="font-semibold mb-1">KPI Breakdown</div>
+                          <div>Composite: {currentProfile.explain.kpis.composite}/100</div>
+                          <div className="text-[11px] text-gray-600">MRR {currentProfile.explain.kpis.mrrScore} • Growth {currentProfile.explain.kpis.growthScore} • Users {currentProfile.explain.kpis.usersScore} • Team {currentProfile.explain.kpis.teamScore}</div>
+                        </div>
+                        <div className="p-2 bg-white rounded border border-gray-200">
+                          <div className="font-semibold mb-1">Why this match</div>
+                          <div className="text-[11px]">Readiness {currentProfile.explain.readiness}/100 • Affinity ×{Number((currentProfile.explain.affinity?.industry||1)*(currentProfile.explain.affinity?.stage||1)*(currentProfile.explain.affinity?.geography||1)).toFixed(2)}</div>
+                        </div>
+                        {currentProfile.explain.whyNot && currentProfile.explain.whyNot.length>0 && (
+                          <div className="col-span-2 p-2 bg-yellow-50 rounded border border-yellow-200 text-yellow-900">
+                            <div className="font-semibold mb-1">Why not (heads-up)</div>
+                            <ul className="list-disc ml-5">
+                              {currentProfile.explain.whyNot.slice(0,3).map((t,i)=>(<li key={i}>{t}</li>))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </motion.div>
 
                   {/* Readiness Score */}

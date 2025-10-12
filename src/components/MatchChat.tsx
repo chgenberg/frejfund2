@@ -178,12 +178,19 @@ export default function MatchChat({ introRequestId, userEmail, userType, matchNa
                     }`}
                   >
                     <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                    <p className={`text-xs mt-1 ${isMe ? 'text-gray-400' : 'text-gray-500'}`}>
-                      {new Date(message.createdAt).toLocaleTimeString([], { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}
-                    </p>
+                    <div className="flex items-center justify-between mt-1">
+                      <p className={`text-xs ${isMe ? 'text-gray-400' : 'text-gray-500'}`}>
+                        {new Date(message.createdAt).toLocaleTimeString([], { 
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        })}
+                      </p>
+                      {isMe && (
+                        <span className={`text-[10px] ${message.isRead ? 'text-green-600' : 'text-gray-400'}`}>
+                          {message.isRead ? 'Seen' : 'Sent'}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </motion.div>
               );

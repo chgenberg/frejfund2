@@ -192,6 +192,12 @@ export async function GET(req: NextRequest) {
       };
       const finalScore = blendMatchScore({ baseScore, kpiScore: kpis.composite, readinessScore: readiness, affinity: aff });
 
+      // Why-not hints (surface likely gaps)
+      const whyNot: string[] = [];
+      if (kpis.composite < 50) whyNot.push('Tidigt skede – svaga KPI:er');
+      if (!user?.askAmount) whyNot.push('Oklar kapitalbehov (saknar ask)');
+      if (!businessInfo?.industry) whyNot.push('Oklar bransch');
+
       return {
         id: `anon_${session.id.slice(-8)}`,
         sessionId: session.id,
@@ -205,7 +211,15 @@ export async function GET(req: NextRequest) {
           ? `Matches your criteria: ${prefs.dealCriteria}. KPI score ${kpis.composite}/100, readiness ${readiness}/100.`
           : `Strong fundamentals. KPI score ${kpis.composite}/100, readiness ${readiness}/100.`,
         readinessScore: readiness,
-        geography: businessInfo?.targetMarket || 'Europe'
+        geography: businessInfo?.targetMarket || 'Europe',
+        explain: {
+          kpis,
+          readiness,
+          affinity: aff,
+          baseScore,
+          finalScore,
+          whyNot
+        }
       };
     }));
 
