@@ -1,5 +1,6 @@
 import prisma from './prisma';
 import { getOpenAIClient, getChatModel } from './ai-client';
+import { normalizeKpis, estimateReadiness, blendMatchScore } from './matching-utils';
 
 interface BusinessProfile {
   name: string;
@@ -158,15 +159,18 @@ export async function findInvestorMatches(
   const matches: InvestorMatch[] = [];
 
   for (const investor of investors) {
-    const { score, breakdown } = calculateMatchScore(business, investor);
+  const { score, breakdown } = calculateMatchScore(business, investor);
+  const kpis = normalizeKpis((investor as any)?.traction || {});
+  const readiness = estimateReadiness(business as any, kpis);
+  const finalScore = blendMatchScore({ baseScore: score, kpiScore: kpis.composite, readinessScore: readiness, affinity: {} });
 
     // Only include matches above 50%
-    if (score >= 50) {
+    if (finalScore >= 50) {
       const reasoning = await generateReasoning(business, investor, breakdown);
 
       matches.push({
         investor,
-        matchScore: score,
+        matchScore: finalScore,
         reasoning,
         stageMatch: breakdown.stageMatch,
         industryMatch: breakdown.industryMatch,

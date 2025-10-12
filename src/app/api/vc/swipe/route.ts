@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { normalizeKpis, estimateReadiness, computeVcAffinity, blendMatchScore } from '@/lib/matching-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -172,9 +173,24 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    const blindProfiles = unseenSessions.map((session) => {
+    // Compute VC affinity weights once
+    const affinity = await computeVcAffinity(vcEmail);
+
+    const blindProfiles = await Promise.all(unseenSessions.map(async (session) => {
       const businessInfo = session.businessInfo as any;
       const user = session.user;
+
+      const kpis = normalizeKpis(user?.traction || businessInfo?.traction || {});
+      const readiness = estimateReadiness(businessInfo, kpis);
+
+      // Base score (simple heuristic when smart matching unavailable)
+      const baseScore = 85 + Math.floor(Math.random() * 15);
+      const aff = {
+        industry: affinity.industry[String(businessInfo?.industry || user?.industry || '').toLowerCase()] || 1,
+        stage: affinity.stage[String(businessInfo?.stage || user?.stage || '').toLowerCase()] || 1,
+        geography: affinity.geography[String(businessInfo?.targetMarket || 'europe').toLowerCase()] || 1,
+      };
+      const finalScore = blendMatchScore({ baseScore, kpiScore: kpis.composite, readinessScore: readiness, affinity: aff });
 
       return {
         id: `anon_${session.id.slice(-8)}`,
@@ -184,12 +200,14 @@ export async function GET(req: NextRequest) {
         oneLiner: user?.oneLiner || 'Innovative company',
         askAmount: user?.askAmount || 2000000,
         traction: user?.traction || businessInfo?.traction || {},
-        matchScore: 85 + Math.floor(Math.random() * 15),
-        aiAnalysis: prefs?.dealCriteria ? `Matches your criteria: ${prefs.dealCriteria}` : `Matches your investment thesis. Strong fundamentals.`,
-        readinessScore: businessInfo?.readinessScore || 70,
+        matchScore: finalScore,
+        aiAnalysis: prefs?.dealCriteria
+          ? `Matches your criteria: ${prefs.dealCriteria}. KPI score ${kpis.composite}/100, readiness ${readiness}/100.`
+          : `Strong fundamentals. KPI score ${kpis.composite}/100, readiness ${readiness}/100.`,
+        readinessScore: readiness,
         geography: businessInfo?.targetMarket || 'Europe'
       };
-    });
+    }));
 
     return NextResponse.json({ 
       profiles: blindProfiles,
