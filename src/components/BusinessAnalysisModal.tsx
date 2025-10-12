@@ -98,7 +98,7 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
           const res = await fetch('/api/scrape', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url: businessInfo.website })
+            body: JSON.stringify({ url: businessInfo.website, maxPages: 4 })
           });
           if (res.ok) {
             const { result } = await res.json();

@@ -51,6 +51,10 @@ export async function fetchHtml(url: string, timeoutMs = 12000): Promise<string>
 
 export async function extractMainContentWithReadability(url: string, html: string): Promise<ScrapeResult | null> {
   try {
+    // Guard: skip heavy Readability on very large pages to avoid OOM
+    if (!html || html.length > 600_000) {
+      return null;
+    }
     // Lazy-require to avoid bundler resolving at build time
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { JSDOM } = require('jsdom');
@@ -113,13 +117,15 @@ export async function scrapeSiteShallow(startUrl: string, maxPages = 5): Promise
     if (visited.has(url)) continue;
     visited.add(url);
     try {
-      const page = await scrapeUrl(url);
-      if (page.text) {
-        combined.push(page.text);
-        sources.push({ url, snippet: page.text.slice(0, 200) });
-      }
-      // discover links (same-origin only)
       const html = await fetchHtml(url);
+      // Extract text once per page
+      const readability = await extractMainContentWithReadability(url, html);
+      const pageText = readability?.text || (await extractWithCheerio(url, html)).text;
+      if (pageText) {
+        combined.push(pageText);
+        sources.push({ url, snippet: pageText.slice(0, 200) });
+      }
+      // discover links (same-origin only) from the same HTML
       const $ = cheerio.load(html);
       $('a[href]').each((_, el) => {
         const href = $(el).attr('href') || '';
@@ -177,14 +183,15 @@ export async function scrapeSiteDeep(startUrl: string, maxPages = 20, maxDepth =
     if (visited.has(url)) continue;
     visited.add(url);
     try {
-      const page = await scrapeUrl(url);
-      if (page.text) {
-        combined.push(page.text);
-        sources.push({ url, snippet: page.text.slice(0, 200) });
+      const html = await fetchHtml(url);
+      const readability = await extractMainContentWithReadability(url, html);
+      const pageText = readability?.text || (await extractWithCheerio(url, html)).text;
+      if (pageText) {
+        combined.push(pageText);
+        sources.push({ url, snippet: pageText.slice(0, 200) });
       }
 
       if (depth < maxDepth) {
-        const html = await fetchHtml(url);
         const $ = cheerio.load(html);
         const candidates: Array<{ href: string; score: number }> = [];
         $('a[href]').each((_, el) => {

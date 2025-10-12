@@ -23,11 +23,11 @@ export async function POST(req: NextRequest) {
     }
 
     // shallow multi-page scrape (configurable)
-    const pagesFromEnv = Number(process.env.SCRAPE_MAX_PAGES || 12);
+    const pagesFromEnv = Number(process.env.SCRAPE_MAX_PAGES || 6);
     let pages = Number(maxPages ?? pagesFromEnv);
     if (!Number.isFinite(pages)) pages = 5;
-    pages = Math.max(1, Math.min(100, Math.floor(pages)));
-    const useDeep = pages > 12;
+    pages = Math.max(1, Math.min(20, Math.floor(pages)));
+    const useDeep = pages > 6;
     const { combinedText, sources } = useDeep
       ? await scrapeSiteDeep(url, pages, 2)
       : await scrapeSiteShallow(url, pages);

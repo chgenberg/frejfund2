@@ -31,8 +31,9 @@ export async function POST(req: NextRequest) {
       try {
         console.log(`[Background Scrape] Starting for ${url}`);
         
-        // Scrape website (deep scrape with max 5 pages)
-        const result = await scrapeSiteDeep(url, 5, 2);
+        // Scrape website (deep scrape but constrained)
+        const maxPages = Math.min(5, Number(process.env.SCRAPE_MAX_PAGES || 5));
+        const result = await scrapeSiteDeep(url, maxPages, 1);
         
         if (!result?.combinedText) {
           console.error(`[Background Scrape] No text extracted from ${url}`);
