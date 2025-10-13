@@ -154,8 +154,19 @@ export default function Home() {
         >
           <div className="minimal-box minimal-box-shadow text-center px-6 sm:px-8 md:px-10 py-8 sm:py-10 md:py-12">
             <div className="flex items-center justify-center mb-6 sm:mb-8">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-black rounded-full flex items-center justify-center">
-                <div className="w-1.5 h-1.5 bg-white rounded-full" />
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-black rounded-full flex items-center justify-center relative">
+                <motion.div 
+                  className="w-1.5 h-1.5 bg-white rounded-full"
+                  animate={{ 
+                    scale: [1, 1.3, 1],
+                    opacity: [1, 0.7, 1] 
+                  }}
+                  transition={{ 
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                />
               </div>
             </div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-black mb-3 sm:mb-4 tracking-tight leading-tight">

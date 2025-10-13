@@ -166,26 +166,33 @@ export default function Chatbot() {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 w-14 h-14 sm:w-16 sm:h-16 bg-black rounded-full flex items-center justify-center shadow-2xl z-[9999] group"
+        className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 bg-black rounded-full flex items-center justify-center shadow-2xl z-[9999] group"
         initial={{ opacity: 0, scale: 0 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 1, type: "spring", stiffness: 400 }}
       >
-        <div className="relative">
-          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-white rounded-full" />
+        {/* Mobile: Just the blinking dot */}
+        <div className="sm:hidden w-14 h-14 flex items-center justify-center relative">
+          <div className="w-2.5 h-2.5 bg-white rounded-full" />
           <motion.div
-            className="absolute inset-0 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-white rounded-full"
+            className="absolute inset-0 w-2.5 h-2.5 bg-white rounded-full m-auto"
             animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
             transition={{ repeat: Infinity, duration: 2 }}
           />
         </div>
-        <motion.div
-          initial={{ opacity: 0, x: 10 }}
-          whileHover={{ opacity: 1, x: 0 }}
-          className="absolute right-full mr-3 bg-black text-white px-3 py-1 rounded-lg text-sm whitespace-nowrap hidden sm:block"
-        >
-          Need help?
-        </motion.div>
+        
+        {/* Desktop: CHAT text with blinking dot */}
+        <div className="hidden sm:flex items-center space-x-2 px-5 py-3">
+          <div className="relative">
+            <div className="w-2.5 h-2.5 bg-white rounded-full" />
+            <motion.div
+              className="absolute inset-0 w-2.5 h-2.5 bg-white rounded-full"
+              animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+            />
+          </div>
+          <span className="text-white font-medium text-sm tracking-wide">CHAT</span>
+        </div>
       </motion.button>
 
       {/* Chat Window */}
