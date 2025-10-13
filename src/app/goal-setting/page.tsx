@@ -29,6 +29,25 @@ export default function GoalSettingPage() {
 
     const info = JSON.parse(stored) as BusinessInfo;
     setBusinessInfo(info);
+    
+    // Trigger deep analysis in background
+    const sessionId = localStorage.getItem('frejfund-session-id') || `sess-${Date.now()}`;
+    localStorage.setItem('frejfund-session-id', sessionId);
+    
+    fetch('/api/deep-analysis', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId,
+        businessInfo: info,
+        scrapedContent: info.preScrapedText || '',
+        uploadedDocuments: []
+      })
+    }).then(() => {
+      console.log('✅ Deep analysis started in background');
+    }).catch(error => {
+      console.error('❌ Failed to start deep analysis:', error);
+    });
   }, [router]);
 
   const handleSetGoal = async () => {
