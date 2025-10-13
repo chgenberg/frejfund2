@@ -103,7 +103,6 @@ export default function RootLayout({
               id="gtag-src"
               strategy="afterInteractive"
               src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GTM_ID || 'AW-17103900584'}`}
-              onError={() => { /* silently ignore if blocked */ }}
             />
             <Script
               id="gtag-init"
