@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "NODE_OPTIONS='--max-old-space-size=512' next build",
-    "start": "NODE_OPTIONS='--max-old-space-size=512' next start",
+    "build": "NODE_OPTIONS='--max-old-space-size=2048' next build",
+    "start": "NODE_OPTIONS='--max-old-space-size=1024' next start",
     "lint": "eslint",
     "cron": "node scripts/dev-cron.js"
   },

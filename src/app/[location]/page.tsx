@@ -7,12 +7,19 @@ interface PageProps {
   params: { location: string };
 }
 
-// Generate static params for all locations
+// Generate static params for only major tech hubs to reduce build time and memory
+// Other locations will be generated on-demand
 export async function generateStaticParams() {
-  return SEO_LOCATIONS.map((location) => ({
+  // Only pre-generate major tech hubs to save memory during build
+  const majorLocations = SEO_LOCATIONS.filter(l => l.tech_scene === 'major').slice(0, 20);
+  return majorLocations.map((location) => ({
     location: location.slug,
   }));
 }
+
+// Enable ISR for dynamic locations
+export const dynamicParams = true;
+export const revalidate = 3600; // Revalidate every hour
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
