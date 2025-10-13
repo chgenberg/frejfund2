@@ -96,10 +96,38 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
     status: 'idle',
     completedCategories: []
   });
+  const [dataGaps, setDataGaps] = useState<any>(null);
   const [showCompletionCelebration, setShowCompletionCelebration] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const loadDataGaps = async () => {
+    const sessionId = localStorage.getItem('frejfund-session-id') || localStorage.getItem('sessionId');
+    if (!sessionId) return;
+
+    try {
+      const response = await fetch(`/api/gaps?sessionId=${sessionId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setDataGaps(data);
+        
+        // If there are critical gaps, Freja should proactively mention them
+        if (data.criticalGaps > 0 && data.nextBestAction) {
+          const gapMessage: Message = {
+            id: Date.now().toString(),
+            content: `I've identified ${data.totalGaps} areas where we need more information to improve your investment readiness score.\n\nLet's start with the most critical: **${data.nextBestAction.dimensionName}** (currently ${data.nextBestAction.currentScore}%).\n\n${data.nextBestAction.questions[0]}\n\n💡 You can drag & drop documents directly here, or I can guide you on how to gather this information.`,
+            sender: 'agent',
+            timestamp: new Date(),
+            type: 'gap-prompt'
+          };
+          setMessages(prev => [...prev, gapMessage]);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load data gaps:', error);
+    }
   };
 
   useEffect(() => {
@@ -358,6 +386,9 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               // Show celebration
               setShowCompletionCelebration(true);
               setTimeout(() => setShowCompletionCelebration(false), 5000);
+              
+              // Load data gaps
+              loadDataGaps();
             }
           };
           
@@ -577,8 +608,8 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         .split(/\n{2,}/)
         .map((p: string) => p.replace(/\n+/g, ' ').trim())
         .filter(Boolean)
-        // Join with double newline for proper paragraph spacing
-        .join('\n\n');
+        // Join with single newline for minimal paragraph spacing
+        .join('\n');
 
       // Final trim
       text = text.trim();
@@ -1045,6 +1076,13 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                       <div className="absolute -top-2 left-4 w-0 h-0 border-l-[8px] border-r-[8px] border-b-[8px] border-transparent border-b-white"></div>
                     </div>
                   </span>
+                ) : dataGaps && dataGaps.totalGaps > 0 ? (
+                  <span className="flex items-center gap-1">
+                    <span>Active now</span>
+                    <span className="text-yellow-600 font-medium ml-2">
+                      · {dataGaps.totalGaps} {dataGaps.totalGaps === 1 ? 'gap' : 'gaps'} to fill
+                    </span>
+                  </span>
                 ) : (
                   'Active now'
                 )}
@@ -1328,11 +1366,11 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   {message.sender === 'agent' && parseStructured(message.content) ? (
                     <StructuredRenderer data={parseStructured(message.content)} />
                   ) : message.sender === 'agent' ? (
-                    <div className="text-sm leading-relaxed prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-black prose-headings:mt-2 prose-headings:mb-1 prose-h2:text-sm prose-h3:text-sm prose-strong:text-black prose-strong:font-semibold prose-p:text-gray-800 prose-p:my-1.5 prose-p:leading-normal prose-li:text-gray-800 prose-li:my-0.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-ul:space-y-0.5 prose-ol:space-y-0.5 whitespace-pre-wrap">
+                    <div className="text-sm leading-relaxed prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-black prose-headings:mt-2 prose-headings:mb-1 prose-h2:text-sm prose-h3:text-sm prose-strong:text-black prose-strong:font-semibold prose-p:text-gray-800 prose-p:my-0 prose-p:leading-relaxed prose-li:text-gray-800 prose-li:my-0.5 prose-ul:my-1 prose-ol:my-1 prose-ul:space-y-0.5 prose-ol:space-y-0.5 whitespace-pre-wrap">
                       <ReactMarkdown 
                         remarkPlugins={[remarkGfm]}
                         components={{
-                        p: ({children}) => <p className="mb-3 leading-relaxed">{children}</p>,
+                        p: ({children}) => <p className="mb-1 leading-relaxed">{children}</p>,
                           strong: ({children}) => <strong className="font-semibold text-black">{children}</strong>,
                         }}
                       >
@@ -1481,8 +1519,8 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               />
               <motion.div 
                 className="relative w-10 h-10 bg-black rounded-full flex items-center justify-center shadow-lg"
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
+                animate={{ scale: [1, 1.02, 1] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
               >
                 <Bot className="w-5 h-5 text-white" />
               </motion.div>

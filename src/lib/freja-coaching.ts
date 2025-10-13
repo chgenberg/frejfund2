@@ -5,6 +5,7 @@
 
 import { getDeepAnalysis, getUnansweredQuestions, getCriticalRedFlags } from './deep-analysis-runner';
 import { BusinessInfo } from '@/types/business';
+import { analyzeDataGaps, getGapSummaryForFreja } from './gap-analysis';
 
 /**
  * Get enhanced coaching context from deep analysis
@@ -113,6 +114,16 @@ export async function getFrejaCoachingContext(sessionId: string): Promise<string
     });
   }
 
+  // === DATA GAPS & PROGRESSIVE QUESTIONING ===
+  try {
+    const gapSummary = await getGapSummaryForFreja(sessionId);
+    if (gapSummary && !gapSummary.includes('No data gaps')) {
+      context.push(`\n${gapSummary}`);
+    }
+  } catch (error) {
+    console.log('Gap analysis not available');
+  }
+
   // === COACHING INSTRUCTIONS ===
   context.push(`\n--- FREJA COACHING RULES ---`);
   context.push(`1. ALWAYS reference specific dimensions when giving advice (e.g., "According to your Unit Economics analysis...")`);
@@ -121,6 +132,9 @@ export async function getFrejaCoachingContext(sessionId: string): Promise<string
   context.push(`4. TRACK PROGRESS: Compare to previous conversations when relevant`);
   context.push(`5. ASK SMART QUESTIONS: Use unanswered questions above, avoid asking what you already know`);
   context.push(`6. BE SPECIFIC: Always give concrete numbers, timelines, and next steps`);
+  context.push(`7. PROGRESSIVE QUESTIONING: If data gaps exist, ask for ONE gap at a time, guide user on how to obtain it`);
+  context.push(`8. ACCEPT UPLOADS: Tell user they can drag & drop documents directly in chat`);
+  context.push(`9. CELEBRATE PROGRESS: When user fills a gap, acknowledge improvement and move to next`);
 
   return context.join('\n');
 }

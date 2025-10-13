@@ -30,6 +30,18 @@ export default function Dashboard() {
   const [deepAnalysisData, setDeepAnalysisData] = useState<any>(null);
   const [isProfilePublic, setIsProfilePublic] = useState(false);
   const [publishingProfile, setPublishingProfile] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
+  const [editingEmail, setEditingEmail] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    name: '',
+    company: '',
+    industry: '',
+    stage: '',
+    website: '',
+    logo: ''
+  });
   const [integrations, setIntegrations] = useState<Integration[]>([
     {
       id: 'gmail',
@@ -83,6 +95,54 @@ export default function Dashboard() {
   const [showMetrics, setShowMetrics] = useState(false);
 
   const [recentActivity] = useState<any[]>([]);
+  const [dataGaps, setDataGaps] = useState<any>(null);
+  const [loadingGaps, setLoadingGaps] = useState(false);
+
+  // Load data gaps
+  const loadDataGaps = async (sessionId: string) => {
+    setLoadingGaps(true);
+    try {
+      const response = await fetch(`/api/gaps?sessionId=${sessionId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setDataGaps(data);
+      }
+    } catch (error) {
+      console.error('Failed to load data gaps:', error);
+    } finally {
+      setLoadingGaps(false);
+    }
+  };
+
+  // Load user data on mount
+  useEffect(() => {
+    const loadUserData = async () => {
+      const sessionId = localStorage.getItem('frejfund-session-id') || localStorage.getItem('sessionId');
+      if (!sessionId) return;
+
+      try {
+        const response = await fetch(`/api/session/get?sessionId=${sessionId}`);
+        if (response.ok) {
+          const data = await response.json();
+          const businessInfo = data.businessInfo || {};
+          
+          setUserEmail(businessInfo.email || '');
+          setProfileForm({
+            name: businessInfo.founderName || '',
+            company: businessInfo.name || '',
+            industry: businessInfo.industry || '',
+            stage: businessInfo.stage || '',
+            website: businessInfo.website || '',
+            logo: businessInfo.logo || ''
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load user data:', error);
+      }
+    };
+
+    loadUserData();
+  }, []);
 
   // Check if deep analysis is complete and listen for progress
   useEffect(() => {
@@ -100,6 +160,9 @@ export default function Dashboard() {
             setReadinessScore(data.score);
             setAnalysisProgress({ current: 95, total: 95, status: 'completed' });
             setShowMetrics(true);
+            
+            // Load data gaps when analysis is complete
+            loadDataGaps(sessionId);
             
             // Update metrics with real data
             setMetrics({
@@ -487,6 +550,51 @@ export default function Dashboard() {
                 </div>
 
                 <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                  {/* Data Gaps Widget (if analysis complete) */}
+                  {hasDeepAnalysis && dataGaps && dataGaps.totalGaps > 0 && (
+                    <div className="mb-6 pb-6 border-b border-gray-200">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-sm font-semibold text-black">Missing Information</h3>
+                        <span className="text-xs text-gray-500">
+                          {dataGaps.totalGaps} {dataGaps.totalGaps === 1 ? 'gap' : 'gaps'}
+                        </span>
+                      </div>
+                      <div className="space-y-2">
+                        {dataGaps.gaps.slice(0, 3).map((gap: any) => (
+                          <div key={gap.dimensionId} className="flex items-start justify-between p-3 bg-yellow-50 rounded-lg">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xs font-medium text-black">{gap.dimensionName}</span>
+                                <span className={`text-xs px-1.5 py-0.5 rounded ${
+                                  gap.priority === 'critical' ? 'bg-red-100 text-red-700' :
+                                  gap.priority === 'high' ? 'bg-yellow-100 text-yellow-700' :
+                                  'bg-gray-100 text-gray-700'
+                                }`}>
+                                  {gap.priority}
+                                </span>
+                              </div>
+                              <p className="text-xs text-gray-600">{gap.missingInfo[0]}</p>
+                            </div>
+                            <div className="text-xs text-gray-500 ml-2">+{gap.potentialScoreIncrease}%</div>
+                          </div>
+                        ))}
+                        {dataGaps.totalGaps > 3 && (
+                          <p className="text-xs text-gray-500 text-center pt-2">
+                            +{dataGaps.totalGaps - 3} more gaps
+                          </p>
+                        )}
+                      </div>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => router.push('/chat')}
+                        className="w-full mt-3 px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800"
+                      >
+                        Complete Missing Info
+                      </motion.button>
+                    </div>
+                  )}
+
                   <h2 className="text-lg font-semibold text-black mb-4">Quick Actions</h2>
                   <div className="grid grid-cols-2 gap-3">
                     <motion.button
@@ -821,21 +929,212 @@ export default function Dashboard() {
                 <div className="p-6">
                   <h3 className="text-lg font-medium text-black mb-4">Account</h3>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-800">Email</p>
-                        <p className="text-sm text-gray-500">founder@company.com</p>
-                      </div>
-                      <button className="text-sm text-gray-600 hover:text-black transition-colors">Change</button>
+                    {/* Email */}
+                    <div>
+                      {editingEmail ? (
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-gray-800">New Email</label>
+                          <div className="flex gap-2">
+                            <input
+                              type="email"
+                              value={newEmail}
+                              onChange={(e) => setNewEmail(e.target.value)}
+                              placeholder="new@email.com"
+                              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent"
+                            />
+                            <button
+                              onClick={async () => {
+                                const sessionId = localStorage.getItem('frejfund-session-id') || localStorage.getItem('sessionId');
+                                const response = await fetch('/api/user/update-email', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ sessionId, newEmail })
+                                });
+                                if (response.ok) {
+                                  setUserEmail(newEmail);
+                                  setEditingEmail(false);
+                                  setNewEmail('');
+                                }
+                              }}
+                              className="px-4 py-2 bg-black text-white rounded-lg text-sm hover:bg-gray-800"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditingEmail(false);
+                                setNewEmail('');
+                              }}
+                              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-800">Email</p>
+                            <p className="text-sm text-gray-500">{userEmail || 'Loading...'}</p>
+                          </div>
+                          <button 
+                            onClick={() => setEditingEmail(true)}
+                            className="text-sm text-gray-600 hover:text-black transition-colors"
+                          >
+                            Change
+                          </button>
+                        </div>
+                      )}
                     </div>
+
+                    {/* Password (Magic Link Info) */}
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-800">Password</p>
-                        <p className="text-sm text-gray-500">Last changed 30 days ago</p>
+                        <p className="text-sm font-medium text-gray-800">Authentication</p>
+                        <p className="text-sm text-gray-500">Magic link login (passwordless)</p>
                       </div>
-                      <button className="text-sm text-gray-600 hover:text-black transition-colors">Update</button>
+                      <button 
+                        onClick={() => router.push('/login')}
+                        className="text-sm text-gray-600 hover:text-black transition-colors"
+                      >
+                        Send Link
+                      </button>
                     </div>
                   </div>
+                </div>
+
+                {/* Profile Information */}
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-medium text-black">Company Information</h3>
+                    {!editingProfile && (
+                      <button
+                        onClick={() => setEditingProfile(true)}
+                        className="text-sm text-gray-600 hover:text-black transition-colors"
+                      >
+                        Edit
+                      </button>
+                    )}
+                  </div>
+                  
+                  {editingProfile ? (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Founder Name</label>
+                        <input
+                          type="text"
+                          value={profileForm.name}
+                          onChange={(e) => setProfileForm({...profileForm, name: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent mt-1"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Company Name</label>
+                        <input
+                          type="text"
+                          value={profileForm.company}
+                          onChange={(e) => setProfileForm({...profileForm, company: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent mt-1"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-700">Industry</label>
+                          <input
+                            type="text"
+                            value={profileForm.industry}
+                            onChange={(e) => setProfileForm({...profileForm, industry: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent mt-1"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-700">Stage</label>
+                          <select
+                            value={profileForm.stage}
+                            onChange={(e) => setProfileForm({...profileForm, stage: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent mt-1"
+                          >
+                            <option value="">Select stage</option>
+                            <option value="Idea">Idea</option>
+                            <option value="Pre-seed">Pre-seed</option>
+                            <option value="Seed">Seed</option>
+                            <option value="Series A">Series A</option>
+                            <option value="Series B+">Series B+</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Website</label>
+                        <input
+                          type="url"
+                          value={profileForm.website}
+                          onChange={(e) => setProfileForm({...profileForm, website: e.target.value})}
+                          placeholder="https://yourcompany.com"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent mt-1"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Company Logo URL</label>
+                        <input
+                          type="url"
+                          value={profileForm.logo}
+                          onChange={(e) => setProfileForm({...profileForm, logo: e.target.value})}
+                          placeholder="https://yourcompany.com/logo.png"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent mt-1"
+                        />
+                      </div>
+                      
+                      <div className="flex gap-2 pt-2">
+                        <button
+                          onClick={async () => {
+                            const sessionId = localStorage.getItem('frejfund-session-id') || localStorage.getItem('sessionId');
+                            const response = await fetch('/api/user/update-profile', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ sessionId, updates: profileForm })
+                            });
+                            if (response.ok) {
+                              setEditingProfile(false);
+                              // Refresh page to show updates
+                              window.location.reload();
+                            }
+                          }}
+                          className="flex-1 px-4 py-2 bg-black text-white rounded-lg text-sm hover:bg-gray-800"
+                        >
+                          Save Changes
+                        </button>
+                        <button
+                          onClick={() => setEditingProfile(false)}
+                          className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Founder</span>
+                        <span className="font-medium text-black">{profileForm.name || 'Not set'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Company</span>
+                        <span className="font-medium text-black">{profileForm.company || 'Not set'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Industry</span>
+                        <span className="font-medium text-black">{profileForm.industry || 'Not set'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Stage</span>
+                        <span className="font-medium text-black">{profileForm.stage || 'Not set'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Website</span>
+                        <span className="font-medium text-black truncate max-w-xs">{profileForm.website || 'Not set'}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-6">

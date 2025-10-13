@@ -73,34 +73,53 @@ export default function PitchPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <motion.div 
-                className="flex items-center space-x-3 cursor-pointer"
-                whileHover={{ scale: 1.02 }}
-                onClick={() => router.push('/dashboard')}
-              >
-                <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-white" />
-                </div>
-                <h1 className="text-xl font-semibold text-black">FrejFund Pitch Optimizer</h1>
-              </motion.div>
-            </div>
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="text-sm text-gray-600 hover:text-black transition-colors"
+      {/* Header - Consistent with landing page */}
+      <motion.header 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100"
+      >
+        <div className="container mx-auto px-4 sm:px-8 py-3 sm:py-4">
+          <div className="flex items-center justify-between">
+            <motion.div 
+              className="flex items-center space-x-3 cursor-pointer"
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 400 }}
+              onClick={() => router.push('/')}
             >
-              Back to Dashboard
-            </button>
+              <div className="relative">
+                <img 
+                  src="/FREJFUND-logo.png" 
+                  alt="FrejFund" 
+                  className="h-10 sm:h-12 md:h-14 w-auto"
+                />
+              </div>
+            </motion.div>
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => router.push('/login')}
+                className="px-3 sm:px-4 py-2 text-gray-600 hover:text-black text-xs sm:text-sm font-medium transition-colors"
+              >
+                Log in
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => router.push('/vc')}
+                className="px-4 sm:px-6 py-2 sm:py-2.5 bg-black text-white rounded-full text-xs sm:text-sm font-medium hover:bg-gray-800 transition-colors"
+              >
+                Investors
+              </motion.button>
+            </div>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-24 sm:pt-28">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-black mb-4">Perfect Your Pitch</h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">

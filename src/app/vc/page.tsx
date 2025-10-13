@@ -49,6 +49,7 @@ interface Startup {
 
 export default function VCDashboard() {
   const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
@@ -69,8 +70,15 @@ export default function VCDashboard() {
   });
 
   useEffect(() => {
+    // Check if VC is authenticated
+    const vcToken = localStorage.getItem('vc-token');
+    if (!vcToken) {
+      router.push('/vc/login');
+      return;
+    }
+    setIsAuthenticated(true);
     loadStartups();
-  }, []);
+  }, [router]);
 
   const loadStartups = async () => {
     setLoading(true);
@@ -147,6 +155,10 @@ export default function VCDashboard() {
     if (score >= 60) return 'text-yellow-600';
     return 'text-red-600';
   };
+
+  if (!isAuthenticated) {
+    return null; // Will redirect in useEffect
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

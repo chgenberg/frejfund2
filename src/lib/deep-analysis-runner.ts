@@ -286,7 +286,7 @@ Output must be valid JSON only.`
         }
       ],
       ...(getChatModel('complex').startsWith('gpt-5') ? {} : { response_format: { type: 'json_object' } }),
-      ...(getChatModel('complex').startsWith('gpt-5') ? { max_completion_tokens: 700 } : { max_tokens: 700 })
+      ...(getChatModel('complex').startsWith('gpt-5') ? { max_completion_tokens: 1500 } : { max_tokens: 1500 })
     });
 
     const raw = response.choices?.[0]?.message?.content || '{}';

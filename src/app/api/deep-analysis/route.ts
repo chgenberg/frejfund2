@@ -16,15 +16,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('🚀 Starting deep analysis for session:', sessionId);
+    // Single-run guard: don't start if already analyzing (STRONGER CHECK)
+    const { prisma } = await import('@/lib/prisma');
+    const existing = await prisma.deepAnalysis.findUnique({ where: { sessionId } });
+    
+    if (existing && existing.status === 'analyzing') {
+      console.log('⚠️ Analysis already running for session:', sessionId);
+      return NextResponse.json({ 
+        success: true, 
+        already_running: true, 
+        message: 'Analysis already in progress',
+        sessionId 
+      });
+    }
 
-    // Single-run guard: don't start if already analyzing
-    try {
-      const existing = await (await import('@/lib/prisma')).default.deepAnalysis.findUnique({ where: { sessionId } });
-      if (existing && existing.status === 'analyzing') {
-        return NextResponse.json({ success: true, already_running: true, sessionId });
-      }
-    } catch {}
+    console.log('🚀 Starting deep analysis for session:', sessionId);
     
     // Start deep analysis in background (non-blocking)
     // Note: In production, this should be a background job (BullMQ, Inngest, etc.)
@@ -100,18 +106,35 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform dimensions to match frontend interface
-    const transformedDimensions = analysis.dimensions.map(dim => ({
-      id: dim.dimensionId,
-      name: dim.name,
-      category: dim.category,
-      score: dim.score || 0,
-      status: dim.analyzed ? 'completed' : 'pending',
-      findings: dim.findings || [],
-      strengths: dim.strengths || [],
-      redFlags: dim.redFlags || [],
-      recommendations: dim.questions || [],
-      questions: dim.questions || []
-    }));
+    const transformedDimensions = analysis.dimensions.map(dim => {
+      // Safely parse JSON fields
+      const parseJsonField = (field: any): any[] => {
+        if (Array.isArray(field)) return field;
+        if (typeof field === 'string') {
+          try {
+            const parsed = JSON.parse(field);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch {
+            return [];
+          }
+        }
+        return [];
+      };
+
+      return {
+        id: dim.dimensionId,
+        name: dim.name,
+        category: dim.category,
+        score: dim.score || 0,
+        status: dim.analyzed ? 'completed' : 'pending',
+        findings: parseJsonField(dim.findings),
+        strengths: parseJsonField(dim.strengths),
+        redFlags: parseJsonField(dim.redFlags),
+        recommendations: parseJsonField(dim.questions),
+        questions: parseJsonField(dim.questions),
+        evidence: parseJsonField(dim.evidence)
+      };
+    });
 
     return NextResponse.json({
       status: analysis.status,
