@@ -62,22 +62,44 @@ export async function extractMainContentWithReadability(url: string, html: strin
     const { Readability } = require('@mozilla/readability');
     
     // Create DOM with resource limits
-    const dom = new JSDOM(html, { 
-      url,
-      resources: 'usable',
-      runScripts: 'outside-only',
-      pretendToBeVisual: false,
-      includeNodeLocations: false
-    });
+    let dom;
+    try {
+      dom = new JSDOM(html, { 
+        url,
+        resources: 'usable',
+        runScripts: 'outside-only',
+        pretendToBeVisual: false,
+        includeNodeLocations: false
+      });
+    } catch (domError) {
+      console.error('JSDOM creation failed:', domError);
+      return null;
+    }
+
+    // Verify document exists
+    if (!dom?.window?.document) {
+      console.error('JSDOM document not available');
+      try { dom?.window?.close(); } catch (e) { /* ignore */ }
+      return null;
+    }
     
-    const reader = new Readability(dom.window.document);
-    const article = reader.parse();
+    let article = null;
+    try {
+      const reader = new Readability(dom.window.document);
+      article = reader.parse();
+    } catch (readabilityError) {
+      console.error('Readability parsing failed:', readabilityError);
+    }
     
     // Clean up DOM to free memory
-    dom.window.close();
+    try {
+      dom.window.close();
+    } catch (e) {
+      // Ignore close errors
+    }
     
-    if (!article) return null;
-    const text = normalizeWhitespace(article.textContent || '').slice(0, 50000); // Limit text to 50k chars
+    if (!article || !article.textContent) return null;
+    const text = normalizeWhitespace(article.textContent).slice(0, 50000); // Limit text to 50k chars
     return { url, title: article.title || undefined, text };
   } catch (error) {
     console.error('Readability extraction failed:', error);
