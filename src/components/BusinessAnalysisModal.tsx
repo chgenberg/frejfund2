@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Brain, TrendingUp, Users, DollarSign, Target, AlertCircle, CheckCircle } from 'lucide-react';
+import { X, TrendingUp, Users, DollarSign, Target, AlertCircle, CheckCircle } from 'lucide-react';
 import { BusinessInfo, BusinessAnalysisResult, AnalysisState } from '@/types/business';
 import { BusinessAnalyzer } from '@/lib/business-analyzer';
 
@@ -29,7 +29,7 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
     { id: 'competition', label: 'Assessing competitive landscape', icon: Users, duration: 20000 },
     { id: 'team', label: 'Analyzing team capabilities', icon: Users, duration: 15000 },
     { id: 'financials', label: 'Reviewing financial metrics and unit economics', icon: DollarSign, duration: 25000 },
-    { id: 'insights', label: 'Generating recommendations and next steps', icon: Brain, duration: 20000 }
+    { id: 'insights', label: 'Generating recommendations and next steps', icon: null, duration: 20000 }
   ];
 
   const waitingTips = [
@@ -132,7 +132,7 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
 
   const getCurrentStepIcon = () => {
     const currentStepData = analysisSteps.find(step => step.label === currentStep);
-    return currentStepData?.icon || Brain;
+    return currentStepData?.icon;
   };
 
   const renderStartScreen = () => (
@@ -141,8 +141,8 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
       animate={{ opacity: 1, scale: 1 }}
       className="text-center"
     >
-      <div className="w-20 h-20 bg-black rounded-2xl mx-auto mb-6 flex items-center justify-center">
-        <Brain className="w-10 h-10 text-white" />
+      <div className="w-20 h-20 bg-black rounded-full mx-auto mb-6 flex items-center justify-center">
+        <div className="w-4 h-4 bg-white rounded-full" />
       </div>
       
       <h2 className="text-2xl font-bold text-black mb-4">
@@ -255,26 +255,28 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
                 className={`flex items-center space-x-3 p-3 rounded-lg transition-all ${
-                  isCurrent ? 'bg-blue-50 border border-blue-200' : 
-                  isCompleted ? 'bg-green-50 border border-green-200' : 
-                  'bg-gray-50 border border-gray-200'
+                  isCurrent ? 'bg-gray-100 border border-gray-300' : 
+                  isCompleted ? 'bg-gray-50 border border-gray-200' : 
+                  'bg-white border border-gray-100'
                 }`}
               >
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  isCompleted ? 'bg-green-600' : 
-                  isCurrent ? 'bg-blue-600' : 
-                  'bg-gray-400'
+                  isCompleted ? 'bg-gray-200' : 
+                  isCurrent ? 'bg-gray-400' : 
+                  'bg-gray-100'
                 }`}>
                   {isCompleted ? (
-                    <CheckCircle className="w-4 h-4 text-white" />
+                    <CheckCircle className="w-4 h-4 text-gray-600" />
+                  ) : step.icon ? (
+                    <step.icon className="w-4 h-4 text-gray-600" />
                   ) : (
-                    <step.icon className="w-4 h-4 text-white" />
+                    <div className="w-2 h-2 bg-gray-600 rounded-full" />
                   )}
                 </div>
                 <span className={`text-sm font-medium ${
-                  isCurrent ? 'text-blue-900' : 
-                  isCompleted ? 'text-green-900' : 
-                  'text-gray-600'
+                  isCurrent ? 'text-black' : 
+                  isCompleted ? 'text-gray-700' : 
+                  'text-gray-500'
                 }`}>
                   {step.label}
                 </span>

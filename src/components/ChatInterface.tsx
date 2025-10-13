@@ -15,6 +15,12 @@ import MatchChat from './MatchChat';
 import IntelligentSearchModal from './IntelligentSearchModal';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { 
+  analyzeDataGaps, 
+  generateSmartQuestions, 
+  generateProactiveInsights,
+  getNextBestAction 
+} from '@/lib/freja-intelligence';
 
 interface ChatInterfaceProps {
   businessInfo: BusinessInfo;
@@ -224,7 +230,19 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
     // Calculate readiness score and generate coaching welcome
     const { calculateReadinessScore, getWelcomeMessage } = await import('@/lib/coaching-prompts');
     const readiness = calculateReadinessScore(businessInfo);
-    const welcomeContent = getWelcomeMessage(businessInfo, readiness);
+    let welcomeContent = getWelcomeMessage(businessInfo, readiness);
+    
+    // Add proactive insights
+    const insights = generateProactiveInsights(businessInfo);
+    if (insights.length > 0) {
+      welcomeContent += '\n\n' + insights[0];
+    }
+    
+    // Add next best action
+    const nextAction = getNextBestAction(businessInfo);
+    if (nextAction.priority === 'high') {
+      welcomeContent += `\n\n**Next step:** ${nextAction.action}`;
+    }
     
     const welcomeMessage: Message = {
       id: `msg-welcome-${Date.now()}`,
@@ -1237,10 +1255,8 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                       <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider">Suggested actions</p>
                       <div className="flex flex-wrap gap-2">
                         {(() => {
-                          const { calculateReadinessScore, generateNextStepSuggestions } = require('@/lib/coaching-prompts');
-                          const readiness = calculateReadinessScore(businessInfo);
-                          const suggestions = generateNextStepSuggestions(businessInfo, readiness.score);
-                          return suggestions.map((suggestion: string, idx: number) => (
+                          const smartQuestions = generateSmartQuestions(businessInfo);
+                          return smartQuestions.map((suggestion: string, idx: number) => (
                             <button
                               key={idx}
                               onClick={() => {

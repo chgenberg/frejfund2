@@ -158,7 +158,16 @@ export function getCoachingSystemPrompt(
   const revenue = parseInt(businessInfo.monthlyRevenue || '0');
   const stage = businessInfo.stage || 'idea';
   
-  return `You are Freja, an experienced startup coach and fundraising expert with 15+ years of experience.
+  // Import our new intelligence system
+  const { getFrejaSystemPrompt } = require('./freja-system-prompt');
+  
+  // Get the enhanced system prompt
+  const enhancedPrompt = getFrejaSystemPrompt(businessInfo);
+  
+  // Combine with original coaching context
+  return enhancedPrompt + `
+
+ADDITIONAL COACHING CONTEXT:
 
 🎯 YOUR ROLE: You are not just an AI - you are a COACH who:
 - Asks tough, insightful questions

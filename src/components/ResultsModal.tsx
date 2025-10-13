@@ -36,9 +36,9 @@ export default function ResultsModal({ result, businessInfo, onClose }: ResultsM
   ];
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600 bg-green-100';
-    if (score >= 60) return 'text-yellow-600 bg-yellow-100';
-    return 'text-red-600 bg-red-100';
+    if (score >= 80) return 'text-black bg-gray-100';
+    if (score >= 60) return 'text-gray-700 bg-gray-100';
+    return 'text-gray-600 bg-gray-100';
   };
 
   const getPriorityColor = (priority: string) => {
@@ -86,7 +86,7 @@ export default function ResultsModal({ result, businessInfo, onClose }: ResultsM
       className="space-y-6"
     >
       {/* Company Context */}
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-200">
+      <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Company Context</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
           <div>
@@ -123,8 +123,8 @@ export default function ResultsModal({ result, businessInfo, onClose }: ResultsM
           className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm"
         >
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-              <Star className="w-6 h-6 text-blue-600" />
+            <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center">
+              <Star className="w-6 h-6 text-white" />
             </div>
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${getScoreColor(result.scores.overallScore)}`}>
               {result.scores.overallScore}/100
@@ -139,10 +139,10 @@ export default function ResultsModal({ result, businessInfo, onClose }: ResultsM
           className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm"
         >
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-              <Target className="w-6 h-6 text-green-600" />
+            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+              <Target className="w-6 h-6 text-gray-700" />
             </div>
-            <span className="px-3 py-1 bg-green-100 text-green-600 rounded-full text-sm font-medium">
+            <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
               {result.accuracy}%
             </span>
           </div>
@@ -155,10 +155,10 @@ export default function ResultsModal({ result, businessInfo, onClose }: ResultsM
           className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm"
         >
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-              <Brain className="w-6 h-6 text-purple-600" />
+            <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+              <div className="w-2 h-2 bg-gray-700 rounded-full" />
             </div>
-            <span className="px-3 py-1 bg-purple-100 text-purple-600 rounded-full text-sm font-medium">
+            <span className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm font-medium">
               {result.actionableInsights.length}
             </span>
           </div>
@@ -367,7 +367,7 @@ export default function ResultsModal({ result, businessInfo, onClose }: ResultsM
         ))}
       </div>
 
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-200">
+      <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
         <div className="text-center">
           <div className="text-4xl font-bold text-gray-900 mb-2">
             {result.scores.overallScore}/100
