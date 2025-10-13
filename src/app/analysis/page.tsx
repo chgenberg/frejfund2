@@ -39,7 +39,7 @@ const CATEGORIES = [
   { id: 'All', label: 'All Dimensions', icon: Brain, count: 95 }
 ];
 
-// Example data for each dimension
+// Example data (overrides) for specific dimensions
 const DIMENSION_EXAMPLES: Record<string, { description: string; examples: string[]; dataNeeded: string[] }> = {
   'Market Size (TAM/SAM/SOM)': {
     description: 'Total Addressable Market, Serviceable Addressable Market, and Serviceable Obtainable Market.',
@@ -87,6 +87,278 @@ const DIMENSION_EXAMPLES: Record<string, { description: string; examples: string
     dataNeeded: ['User surveys', 'Usage analytics', 'Customer testimonials', 'Retention data']
   }
 };
+
+function getAutoExample(dimensionName: string): { description: string; examples: string[]; dataNeeded: string[] } {
+  const n = dimensionName.toLowerCase();
+
+  // Market & Competition
+  if (n.includes('market size') || n.includes('tam') || n.includes('sam') || n.includes('som')) {
+    return DIMENSION_EXAMPLES['Market Size (TAM/SAM/SOM)'];
+  }
+  if (n.includes('market growth')) {
+    return {
+      description: 'Annual growth rate of the target market (CAGR) and momentum.',
+      examples: [
+        'Target market CAGR: 18% (2024-2029)',
+        'Segment growth: SMB HR tech +24% YoY',
+        'Key drivers: AI adoption, regulation, remote work'
+      ],
+      dataNeeded: ['Industry reports', 'Analyst notes', 'Public company filings']
+    };
+  }
+  if (n.includes('competitive landscape')) {
+    return {
+      description: 'Overview of primary competitors and market crowdedness.',
+      examples: [
+        'Top competitors: Company A, Company B, Company C',
+        'Positioning: We serve SMBs; incumbents focus on Enterprise',
+        'Differentiation: 10x faster onboarding, usage-based pricing'
+      ],
+      dataNeeded: ['Competitor websites', 'G2/Capterra', 'Customer interviews']
+    };
+  }
+  if (n.includes('moat') || n.includes('defensibility')) {
+    return {
+      description: 'Defensible advantages that are hard to copy.',
+      examples: [
+        'Network effects: each new customer improves recommendations',
+        'Data moat: 3 years of proprietary transaction data',
+        'Switching costs: embedded into customers’ workflows'
+      ],
+      dataNeeded: ['Product architecture', 'Usage telemetry', 'Patent filings']
+    };
+  }
+
+  // Business Model & Economics
+  if (n.includes('unit economics')) {
+    return {
+      description: 'LTV/CAC, payback, margins, retention – core profitability drivers.',
+      examples: [
+        'LTV: €1,800  |  CAC: €300  →  LTV:CAC = 6:1',
+        'CAC payback: 5.5 months',
+        'Gross margin: 82%'
+      ],
+      dataNeeded: ['Cohort retention', 'Pricing/ARPA', 'Paid spend by channel']
+    };
+  }
+  if (n.includes('revenue predict')) {
+    return {
+      description: 'Degree of recurring/contracted revenue and forecast accuracy.',
+      examples: [
+        'Revenue mix: 92% subscription, 8% services',
+        'NRR: 112%, GRR: 94%',
+        '90% of ARR under annual contracts'
+      ],
+      dataNeeded: ['Billing exports', 'Contract terms', 'Renewal metrics']
+    };
+  }
+  if (n.includes('pricing')) {
+    return {
+      description: 'Price levels, value metric, and ability to raise prices.',
+      examples: [
+        'Plan tiers: €49/€99/€249 per seat',
+        'Value metric: tracked projects per month',
+        'Price test: +15% with no impact on conversion'
+      ],
+      dataNeeded: ['Pricing page history', 'Win/loss data', 'Customer interviews']
+    };
+  }
+  if (n.includes('gross margin')) {
+    return {
+      description: 'Contribution margin after COGS; software vs services profile.',
+      examples: [
+        'Gross margin: 81% last quarter',
+        'COGS: hosting 7%, support 5%, integrations 7%',
+        'Target margin: 85%+'
+      ],
+      dataNeeded: ['P/L by function', 'COGS breakdown', 'Hosting invoices']
+    };
+  }
+  if (n.includes('profit')) {
+    return {
+      description: 'Path, milestones, and timeline to reach profitability.',
+      examples: [
+        'Breakeven at €350k MRR (Q2 2026)',
+        'Plan: reduce CAC by 20% and lift ARPA by 10% via packaging',
+        'Hiring plan aligned with unit economics'
+      ],
+      dataNeeded: ['Financial model', 'Hiring plan', 'Pricing strategy']
+    };
+  }
+
+  // Traction & Growth
+  if (n.includes('retention') || n.includes('churn')) {
+    return {
+      description: 'Customer retention quality and churn dynamics.',
+      examples: [
+        'Logo churn: 2.8%/mo, Revenue churn: 1.2%/mo',
+        'NRR: 118% driven by seat expansion',
+        'Cohort month 6 retention: 72%'
+      ],
+      dataNeeded: ['Cohort tables', 'Subscription events', 'MRR movements']
+    };
+  }
+  if (n.includes('product-market fit')) {
+    return DIMENSION_EXAMPLES['Product-Market Fit Signals'];
+  }
+  if (n.includes('sales efficiency') || n.includes('magic number')) {
+    return {
+      description: 'Revenue growth relative to sales & marketing spend.',
+      examples: [
+        'Magic Number: 0.82 (good)',
+        'S&M spend last quarter: €240k; Net new ARR: €197k',
+        'Target: >0.75 sustained over 2+ quarters'
+      ],
+      dataNeeded: ['ARR movements', 'S&M spend by month', 'Attribution model']
+    };
+  }
+
+  // Team & Execution
+  if (n.includes('founder-market fit') || n.includes('founder')) {
+    return {
+      description: 'Founder backgrounds aligned with the space and problem.',
+      examples: [
+        'CEO: 8 yrs in logistics; built routing engine at prior startup',
+        'CTO: ex-Stripe; scaled payments infra',
+        'Advisors: former DHL ops lead'
+      ],
+      dataNeeded: ['LinkedIn profiles', 'Past projects', 'Case studies']
+    };
+  }
+  if (n.includes('team completeness')) {
+    return DIMENSION_EXAMPLES['Team Completeness'];
+  }
+
+  // Go-to-Market
+  if (n.includes('customer acquisition strategy')) {
+    return {
+      description: 'How you reliably acquire customers – channels and playbooks.',
+      examples: [
+        'Core channels: SEO + outbound SDRs + partner referrals',
+        'Playbook: ICP → sequence → demo → pilot → close',
+        'Benchmarks: 22% SQL→Win, 35-day cycle'
+      ],
+      dataNeeded: ['CRM pipeline', 'Channel performance', 'Playbooks']
+    };
+  }
+  if (n.includes('icp')) {
+    return {
+      description: 'Ideal customer profile: industry, size, pain, budget, tech.',
+      examples: [
+        'ICP: EU B2B SaaS, 20-200 FTE, rev ops pain, HubSpot stack',
+        'Budget: €5k-€50k ARR; Decision-maker: Head of Sales Ops',
+        'Buying triggers: moving from spreadsheets to automation'
+      ],
+      dataNeeded: ['Won deals analysis', 'Firmographic data', 'Tech stack data']
+    };
+  }
+
+  // Product & Technology
+  if (n.includes('technical differentiation')) {
+    return {
+      description: 'Unique technical edge beyond UI – algorithms, data, IP.',
+      examples: [
+        'Proprietary forecasting model with 15% lower MAPE',
+        'Vector search on 10M docs with sub-100ms latency',
+        'Fine-tuned LLM for industry taxonomy'
+      ],
+      dataNeeded: ['Architecture docs', 'Benchmarks', 'Patents/whitepapers']
+    };
+  }
+  if (n.includes('platform') && n.includes('feature')) {
+    return {
+      description: 'Risk that product is a feature vs a defensible platform.',
+      examples: [
+        'Breadth: 4 modules integrated (ingest → analyze → act → report)',
+        'Ecosystem: 12 integrations; embedded across workflows',
+        'Moat: proprietary datasets only available here'
+      ],
+      dataNeeded: ['Product map', 'Integration list', 'Customer workflows']
+    };
+  }
+
+  // Fundraising & Capital
+  if (n.includes('runway') || n.includes('burn')) {
+    return {
+      description: 'Cash runway and burn health relative to milestones.',
+      examples: [
+        'Cash: €1.2M; Burn: €120k/mo → Runway: 10 months',
+        'Default alive at €180k MRR by Mar 2026',
+        'Plan: reduce burn by €20k with infra savings'
+      ],
+      dataNeeded: ['Bank balance', 'Monthly burn', 'Hiring plan']
+    };
+  }
+  if (n.includes('valuation')) {
+    return {
+      description: 'Fair valuation range given stage, traction and comps.',
+      examples: [
+        'Seed valuation range: €8–12M pre (based on €40k MRR, 8x–12x ARR)',
+        'Comps: ACME (€1.2M ARR, €12M pre); Bravo (€800k ARR, €8M pre)'
+      ],
+      dataNeeded: ['ARR/MRR', 'Growth rate', 'Market comps']
+    };
+  }
+
+  // Customer Validation / Social Proof
+  if (n.includes('nps') || n.includes('customer love')) {
+    return {
+      description: 'Customer advocacy signals and satisfaction (NPS/CSAT).',
+      examples: [
+        'NPS: 62 (last 90 days)',
+        'CSAT: 4.6/5 over 1,200 tickets',
+        'Testimonials: 25 curated quotes on website'
+      ],
+      dataNeeded: ['NPS tool exports', 'Support CSAT', 'Review sites']
+    };
+  }
+  if (n.includes('press') || n.includes('media')) {
+    return {
+      description: 'External validation via credible press or analysts.',
+      examples: [
+        'Featured in Sifted: “Top 10 Nordic AI Startups to watch”',
+        'TechCrunch mention (Feb 2025): Seed round coverage',
+        'Category mention in Gartner Market Guide'
+      ],
+      dataNeeded: ['Press links', 'Analyst notes', 'PR summaries']
+    };
+  }
+
+  // Operations & Risks
+  if (n.includes('metrics') || n.includes('dashboard')) {
+    return {
+      description: 'KPI discipline and reporting cadence.',
+      examples: [
+        'Weekly exec dashboard (MRR, NRR, churn, CAC payback)',
+        'Monthly board updates with forecast vs actuals',
+        'Single source of truth in BI tool'
+      ],
+      dataNeeded: ['KPI definitions', 'BI screenshots', 'Board decks']
+    };
+  }
+  if (n.includes('regulatory') || n.includes('compliance')) {
+    return {
+      description: 'Regulatory exposure and compliance posture.',
+      examples: [
+        'SOC2 Type II in progress (target Q3)',
+        'GDPR DPA in place; ISO 27001 planned',
+        'No licensing required for target markets'
+      ],
+      dataNeeded: ['Compliance roadmap', 'Security policies', 'Vendor audits']
+    };
+  }
+
+  // Default generic template
+  return {
+    description: 'Provide specific, verifiable data that allows a clear assessment.',
+    examples: [
+      'State current baseline metric and recent trend',
+      'Add one piece of evidence (screenshot, link, export)',
+      'Define your target benchmark for next 1–2 quarters'
+    ],
+    dataNeeded: ['Internal reports', 'Exports (CSV/PDF)', 'External benchmarks']
+  };
+}
 
 export default function AnalysisPage() {
   const router = useRouter();
@@ -341,7 +613,7 @@ export default function AnalysisPage() {
                           <h3 className="text-lg font-semibold text-black">
                             {dimension.name}
                           </h3>
-                          {DIMENSION_EXAMPLES[dimension.name] && (
+                          {(DIMENSION_EXAMPLES[dimension.name] || getAutoExample(dimension.name)) && (
                             <button
                               onClick={() => setShowInfoPopup(dimension.name)}
                               className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -475,13 +747,13 @@ export default function AnalysisPage() {
                 </div>
                 
                 <p className="text-gray-600 mb-6">
-                  {DIMENSION_EXAMPLES[showInfoPopup].description}
+                  {(DIMENSION_EXAMPLES[showInfoPopup] || getAutoExample(showInfoPopup)).description}
                 </p>
 
                 <div className="mb-6">
                   <h4 className="font-semibold text-black mb-3">Perfect Examples:</h4>
                   <div className="space-y-2">
-                    {DIMENSION_EXAMPLES[showInfoPopup].examples.map((example, idx) => (
+                    {(DIMENSION_EXAMPLES[showInfoPopup] || getAutoExample(showInfoPopup)).examples.map((example, idx) => (
                       <div key={idx} className="flex items-start gap-2">
                         <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
                         <p className="text-sm text-gray-700">{example}</p>
@@ -493,7 +765,7 @@ export default function AnalysisPage() {
                 <div className="mb-6">
                   <h4 className="font-semibold text-black mb-3">Data Sources Needed:</h4>
                   <div className="flex flex-wrap gap-2">
-                    {DIMENSION_EXAMPLES[showInfoPopup].dataNeeded.map((data, idx) => (
+                    {(DIMENSION_EXAMPLES[showInfoPopup] || getAutoExample(showInfoPopup)).dataNeeded.map((data, idx) => (
                       <span key={idx} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
                         {data}
                       </span>
@@ -511,7 +783,7 @@ export default function AnalysisPage() {
 ${showInfoPopup} - Data Collection Template
 
 Description:
-${DIMENSION_EXAMPLES[showInfoPopup].description}
+${(DIMENSION_EXAMPLES[showInfoPopup] || getAutoExample(showInfoPopup)).description}
 
 Please fill in your data below:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -532,10 +804,10 @@ Please fill in your data below:
    _________________________________
 
 Examples for reference:
-${DIMENSION_EXAMPLES[showInfoPopup].examples.map((ex, i) => `${i + 1}. ${ex}`).join('\n')}
+${(DIMENSION_EXAMPLES[showInfoPopup] || getAutoExample(showInfoPopup)).examples.map((ex, i) => `${i + 1}. ${ex}`).join('\n')}
 
 Data sources to check:
-${DIMENSION_EXAMPLES[showInfoPopup].dataNeeded.join(', ')}
+${(DIMENSION_EXAMPLES[showInfoPopup] || getAutoExample(showInfoPopup)).dataNeeded.join(', ')}
 `;
                       const blob = new Blob([template], { type: 'text/plain' });
                       const url = URL.createObjectURL(blob);
