@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Bot, User, TrendingUp, FileText, Brain, BarChart3, ThumbsUp, ThumbsDown, BookOpen, MoreVertical, Info, Lightbulb, X, HelpCircle, Bell, Circle } from 'lucide-react';
+import { Send, Bot, User, TrendingUp, FileText, Brain, BarChart3, ThumbsUp, ThumbsDown, BookOpen, MoreVertical, Info, Lightbulb, X, HelpCircle, Bell, Circle, Paperclip, Upload } from 'lucide-react';
 import { BusinessInfo, Message, BusinessAnalysisResult } from '@/types/business';
 import { getChatModel, TaskComplexity } from '@/lib/ai-client';
 import BusinessAnalysisModal from './BusinessAnalysisModal';
@@ -47,6 +47,8 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   const [feedbackMissing, setFeedbackMissing] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [sessionId] = useState<string>(() => {
     // Try to restore session from localStorage
     const savedSession = typeof window !== 'undefined' ? localStorage.getItem('frejfund-session-id') : null;
@@ -273,9 +275,35 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   };
 
   const showWelcomeMessage = async () => {
-    // Calculate readiness score and generate coaching welcome
-    const { calculateReadinessScore, getWelcomeMessage } = await import('@/lib/coaching-prompts');
-    const readiness = calculateReadinessScore(businessInfo);
+    const sessionId = typeof window !== 'undefined' ? localStorage.getItem('frejfund-session-id') : null;
+    
+    // Try to get readiness from completed deep analysis first
+    let readinessScore = 5;
+    let useDeepAnalysis = false;
+    
+    if (sessionId) {
+      try {
+        const res = await fetch(`/api/deep-analysis?sessionId=${sessionId}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.analysis?.investmentReadiness) {
+            readinessScore = data.analysis.investmentReadiness;
+            useDeepAnalysis = true;
+          }
+        }
+      } catch {}
+    }
+    
+    // Fallback to calculated score if deep analysis not available
+    if (!useDeepAnalysis) {
+      const { calculateReadinessScore } = await import('@/lib/coaching-prompts');
+      const readiness = calculateReadinessScore(businessInfo);
+      readinessScore = readiness.score;
+    }
+    
+    // Generate welcome with correct score
+    const { getWelcomeMessage, calculateReadinessScore } = await import('@/lib/coaching-prompts');
+    const readiness = { score: readinessScore, nextSteps: [], breakdown: {} };
     let welcomeContent = getWelcomeMessage(businessInfo, readiness);
     
     // Add proactive insights
@@ -287,7 +315,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
     // Add next best action
     const nextAction = getNextBestAction(businessInfo);
     if (nextAction.priority === 'high') {
-      welcomeContent += `\n\n**Next step:** ${nextAction.action}`;
+      welcomeContent += `\n\nNext step: ${nextAction.action}`;
     }
     
     const welcomeMessage: Message = {
@@ -301,8 +329,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
     
     // Save welcome message and readiness score to localStorage for session
     if (typeof window !== 'undefined') {
-      localStorage.setItem('frejfund-readiness-score', readiness.score.toString());
-      localStorage.setItem('frejfund-readiness-breakdown', JSON.stringify(readiness.breakdown));
+      localStorage.setItem('frejfund-readiness-score', readinessScore.toString());
     }
     
     // Save welcome message to database
@@ -825,6 +852,44 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         `Based on your business context, here's what I think about that...`
       ];
       return responses[Math.floor(Math.random() * responses.length)];
+    }
+  };
+
+  const handleFileUpload = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    
+    const file = files[0];
+    const sessionId = localStorage.getItem('frejfund-session-id');
+    
+    setInsightCard({ text: `Uploading ${file.name}...`, type: 'info' });
+    
+    try {
+      const response = await fetch('/api/documents', {
+        method: 'POST',
+        headers: {
+          'x-session-id': sessionId || '',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          type: file.name.includes('pitch') || file.name.includes('deck') ? 'pitch_deck' : 
+                file.name.includes('financial') || file.name.includes('model') ? 'financial_model' : 'other',
+          title: file.name,
+          content: await file.text(),
+          status: 'uploaded'
+        })
+      });
+      
+      if (response.ok) {
+        setInsightCard({ text: `${file.name} uploaded. Analyzing to improve your profile...`, type: 'success' });
+        setTimeout(() => setInsightCard(null), 3000);
+      } else {
+        setInsightCard({ text: 'Upload failed. Please try again.', type: 'warning' });
+        setTimeout(() => setInsightCard(null), 3000);
+      }
+    } catch (error) {
+      console.error('File upload error:', error);
+      setInsightCard({ text: 'Upload failed. Please try again.', type: 'warning' });
+      setTimeout(() => setInsightCard(null), 3000);
     }
   };
 
@@ -1794,9 +1859,42 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         initial={{ y: 100 }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+        onDragLeave={() => setIsDragging(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setIsDragging(false);
+          handleFileUpload(e.dataTransfer.files);
+        }}
       >
+        {isDragging && (
+          <div className="absolute inset-0 bg-black/10 backdrop-blur-sm z-50 flex items-center justify-center pointer-events-none">
+            <div className="bg-white rounded-xl p-6 shadow-2xl">
+              <Upload className="w-8 h-8 mx-auto mb-2 text-black" />
+              <p className="text-sm font-medium text-black">Drop file to upload</p>
+            </div>
+          </div>
+        )}
         <div className="max-w-3xl mx-auto">
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-3">
+            {/* File upload button */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.docx,.doc,.xlsx,.xls,.csv,.pptx,.ppt,.key,.txt"
+              onChange={(e) => handleFileUpload(e.target.files)}
+              className="hidden"
+            />
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => fileInputRef.current?.click()}
+              className="w-9 h-9 sm:w-10 sm:h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors flex-shrink-0"
+              title="Upload document"
+            >
+              <Paperclip className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
+            </motion.button>
+
             <motion.div 
               className="flex-1 relative"
               whileHover={{ scale: 1.01 }}

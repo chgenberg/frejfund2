@@ -324,45 +324,48 @@ export function getWelcomeMessage(
   const name = businessInfo.name || 'your company';
 
   if (score < 4) {
-    return `Hey! I'm Freja, your fundraising coach. 👋
+    return `I'm Freja, your investment coach.
 
-I've analyzed ${name} and I see potential! 
+I've analyzed ${name} and I see potential.
 
-**Investment Readiness: ${score}/10** 📊
+Investment Readiness: ${score}/10
 
 This means we have some fundamental things to fix before you're ready for investors. But don't panic - we'll take it step by step.
 
-**Your top 3 focus areas:**
-${nextSteps.map((step, i) => `${i + 1}. ${step}`).join('\n\n')}
+Your top 3 focus areas:
+
+${nextSteps.map((step, i) => `${i + 1}. ${step}`).join('\n')}
 
 Want to start with one of these, or do you have another question?`;
   }
 
   if (score < 7) {
-    return `Hey! I'm Freja, your fundraising coach. 👋
+    return `I'm Freja, your investment coach.
 
-I've analyzed ${name} - you're on the right track! 
+I've analyzed ${name} - you're on the right track.
 
-**Investment Readiness: ${score}/10** 📊
+Investment Readiness: ${score}/10
 
 You have the foundation in place, now it's about polishing and preparing for fundraising.
 
-**Next steps to reach 8+:**
-${nextSteps.map((step, i) => `${i + 1}. ${step}`).join('\n\n')}
+Next steps to reach 8+:
+
+${nextSteps.map((step, i) => `${i + 1}. ${step}`).join('\n')}
 
 What do you want to start with?`;
   }
 
-  return `Hey! I'm Freja, your fundraising coach. 👋
+  return `I'm Freja, your investment coach.
 
-I've analyzed ${name} - impressive! 🎉
+I've analyzed ${name} - impressive.
 
-**Investment Readiness: ${score}/10** 📊
+Investment Readiness: ${score}/10
 
 You're ready to start talking to investors. Let's create a concrete plan to find the right VCs and close your round.
 
-**Focus areas now:**
-${nextSteps.map((step, i) => `${i + 1}. ${step}`).join('\n\n')}
+Focus areas now:
+
+${nextSteps.map((step, i) => `${i + 1}. ${step}`).join('\n')}
 
 What's your first goal?`;
 }
