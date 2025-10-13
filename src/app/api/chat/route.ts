@@ -17,6 +17,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Parse metrics from user message and trigger re-analysis if found
+    let metricsExtracted = false;
+    let extractedCount = 0;
+    if (sessionId) {
+      try {
+        const metricsResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/metrics/update`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId, userMessage: message })
+        });
+        if (metricsResponse.ok) {
+          const metricsData = await metricsResponse.json();
+          if (metricsData.metricsFound) {
+            metricsExtracted = true;
+            extractedCount = metricsData.count || 0;
+            console.log(`📊 Extracted ${extractedCount} metrics, re-analyzing ${metricsData.affectedDimensions?.length || 0} dimensions`);
+          }
+        }
+      } catch (error) {
+        console.log('Metric parsing skipped:', error);
+      }
+    }
+
     // Index provided docContext into session store (once per call ok for now)
     if (sessionId && docContext) {
       try { await indexContextForSession(sessionId, docContext, { url: (businessInfo as BusinessInfo)?.website }); } catch {}

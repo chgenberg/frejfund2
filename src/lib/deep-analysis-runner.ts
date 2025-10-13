@@ -14,6 +14,7 @@ interface RunDeepAnalysisOptions {
   scrapedContent: string;
   uploadedDocuments?: string[];
   mode?: 'full' | 'critical-only' | 'progressive';
+  specificDimensions?: string[]; // Only re-analyze these specific dimensions
 }
 
 /**
@@ -21,7 +22,7 @@ interface RunDeepAnalysisOptions {
  * This will be called after initial scraping is complete
  */
 export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<string> {
-  const { sessionId, businessInfo, scrapedContent, uploadedDocuments = [], mode = 'progressive' } = options;
+  const { sessionId, businessInfo, scrapedContent, uploadedDocuments = [], mode = 'progressive', specificDimensions } = options;
   
   console.log(`🔬 Starting deep analysis for ${businessInfo.name} (${sessionId})`);
   console.log(`📋 Mode: ${mode}, Content length: ${scrapedContent.length}, Docs: ${uploadedDocuments.length}`);
@@ -49,9 +50,11 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
     await prisma.analysisInsight.deleteMany({ where: { analysisId: analysis.id } });
 
     // 2. Determine which dimensions to analyze
-    let dimensionsToAnalyze = mode === 'critical-only' 
-      ? getCriticalDimensions()
-      : ANALYSIS_DIMENSIONS;
+    let dimensionsToAnalyze = specificDimensions && specificDimensions.length > 0
+      ? ANALYSIS_DIMENSIONS.filter(d => specificDimensions.includes(d.name))
+      : mode === 'critical-only' 
+        ? getCriticalDimensions()
+        : ANALYSIS_DIMENSIONS;
 
     // Sort dimensions by priority order: critical -> high -> medium -> low
     const priorityOrder = ['critical', 'high', 'medium', 'low'];
