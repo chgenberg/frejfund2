@@ -98,7 +98,7 @@ export const faqSchema = {
       "name": "How does FrejFund's AI matching work?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Our AI analyzes your business across 68 dimensions including problem-solution fit, market size, traction, team, and business model. We then match you with investors based on their investment thesis, portfolio, stage preference, and sector focus."
+        "text": "Our AI analyzes your business across 95 dimensions including problem-solution fit, market size, traction, team, and business model. We then match you with investors based on their investment thesis, portfolio, stage preference, and sector focus."
       }
     },
     {
@@ -114,7 +114,7 @@ export const faqSchema = {
       "name": "What makes FrejFund different from other platforms?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "FrejFund uses advanced AI to provide deep business analysis, intelligent investor matching, and continuous coaching. Our 68-dimension analysis framework and focus on the European ecosystem sets us apart."
+        "text": "FrejFund uses advanced AI to provide deep business analysis, intelligent investor matching, and continuous coaching. Our 95-dimension analysis framework and focus on the European ecosystem sets us apart."
       }
     }
   ]
@@ -157,7 +157,7 @@ export const howToSchema = {
     {
       "@type": "HowToStep",
       "name": "Receive AI analysis",
-      "text": "Our AI analyzes your business across 68 dimensions and provides an investment readiness score with actionable feedback.",
+      "text": "Our AI analyzes your business across 95 dimensions and provides an investment readiness score with actionable feedback.",
       "url": "https://www.frejfund.com/chat",
       "image": "https://www.frejfund.com/step3.png"
     },
@@ -198,7 +198,7 @@ export const serviceSchema = {
         "itemOffered": {
           "@type": "Service",
           "name": "Investment Readiness Analysis",
-          "description": "AI-powered analysis of your startup across 68 dimensions"
+          "description": "AI-powered analysis of your startup across 95 dimensions"
         }
       },
       {

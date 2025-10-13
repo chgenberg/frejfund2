@@ -26,7 +26,7 @@ export default function Dashboard() {
   const [activeSection, setActiveSection] = useState<'overview' | 'integrations' | 'settings' | 'readiness'>('overview');
   const [hasDeepAnalysis, setHasDeepAnalysis] = useState(false);
   const [readinessScore, setReadinessScore] = useState(0);
-  const [analysisProgress, setAnalysisProgress] = useState({ current: 0, total: 68, status: 'idle' });
+  const [analysisProgress, setAnalysisProgress] = useState({ current: 0, total: 95, status: 'idle' });
   const [deepAnalysisData, setDeepAnalysisData] = useState<any>(null);
   const [integrations, setIntegrations] = useState<Integration[]>([
     {
@@ -96,7 +96,7 @@ export default function Dashboard() {
           if (data.completed && data.score) {
             setHasDeepAnalysis(true);
             setReadinessScore(data.score);
-            setAnalysisProgress({ current: 68, total: 68, status: 'completed' });
+            setAnalysisProgress({ current: 95, total: 95, status: 'completed' });
             setShowMetrics(true);
             
             // Update metrics with real data
@@ -122,7 +122,7 @@ export default function Dashboard() {
             });
           } else if (data.type === 'complete') {
             setHasDeepAnalysis(true);
-            setAnalysisProgress({ current: 68, total: 68, status: 'completed' });
+            setAnalysisProgress({ current: 95, total: 95, status: 'completed' });
             eventSource.close();
             // Re-check status to get final score
             checkAnalysis();
@@ -342,7 +342,7 @@ export default function Dashboard() {
                       <span className="text-2xl font-bold text-black">{metrics.dailyActiveScore}</span>
                     </div>
                     <h3 className="text-sm font-medium text-gray-600">Overall Score</h3>
-                    <p className="text-xs text-gray-500 mt-1">Across 68 dimensions</p>
+                    <p className="text-xs text-gray-500 mt-1">Across 95 dimensions</p>
                   </motion.div>
 
                   <motion.div
@@ -380,7 +380,7 @@ export default function Dashboard() {
                   </div>
                   <h3 className="text-xl font-semibold text-black mb-2">Deep Analysis in Progress</h3>
                   <p className="text-gray-600 mb-4">
-                    Your business is being analyzed across 68 dimensions. Metrics will appear here once complete.
+                    Your business is being analyzed across 95 dimensions. Metrics will appear here once complete.
                   </p>
                   <p className="text-sm text-gray-500">
                     This typically takes 15-30 minutes
@@ -406,13 +406,13 @@ export default function Dashboard() {
                         className="w-full px-4 py-3 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors inline-flex items-center justify-center gap-2"
                       >
                         <Brain className="w-4 h-4" />
-                        View All 68 Dimensions
+                        View All 95 Dimensions
                       </motion.button>
                     </div>
                   ) : analysisProgress.status === 'running' ? (
                     <div className="space-y-3">
                       <p className="text-sm text-gray-600">
-                        We're analyzing your business across 68 dimensions...
+                        We're analyzing your business across 95 dimensions...
                       </p>
                       <div className="bg-gray-50 rounded-lg p-4">
                         <div className="flex items-center justify-between mb-2">

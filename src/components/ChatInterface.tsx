@@ -92,7 +92,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
     completedCategories: string[];
   }>({
     current: 0,
-    total: 68,
+    total: 95,
     status: 'idle',
     completedCategories: []
   });
@@ -348,7 +348,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               // Show completion notification
               const completionMessage: Message = {
                 id: `analysis-complete-${Date.now()}`,
-                content: "Deep analysis complete! I now have a comprehensive understanding of your business across 68 dimensions. Ask me anything!",
+                content: "Deep analysis complete! I now have a comprehensive understanding of your business across 95 dimensions. Ask me anything!",
                 sender: 'agent',
                 timestamp: new Date(),
                 type: 'analysis'
@@ -1011,7 +1011,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                     <div className="absolute top-full left-0 mt-2 w-72 p-4 bg-gradient-to-br from-yellow-400 to-yellow-500 text-black text-xs rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-[100]">
                       <div className="font-bold mb-2 text-sm">🔬 Deep Analysis in Progress</div>
                       <div className="space-y-2 text-gray-900">
-                        <p className="font-semibold">Analyzing 68 dimensions:</p>
+                        <p className="font-semibold">Analyzing 95 dimensions:</p>
                         <p>• Market opportunity & competition</p>
                         <p>• Team strength & execution</p>
                         <p>• Financial health & metrics</p>
@@ -2002,7 +2002,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   
                   <h3 className="text-xl font-bold mb-2">Analysis Complete!</h3>
                   <p className="text-sm text-gray-300">
-                    I've analyzed your business across 68 dimensions and am ready to be your smartest investment coach.
+                    I've analyzed your business across 95 dimensions and am ready to be your smartest investment coach.
                   </p>
                   
                   {/* Animated dots */}

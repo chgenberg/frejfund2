@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
           
           if (analysis) {
             const completedCount = analysis.dimensions.length;
-            const totalCount = 68; // Total dimensions
+            const totalCount = 95; // Total dimensions
             const completedCategories = [...new Set(analysis.dimensions.map(d => d.category))];
             
             // Only send update if progress changed

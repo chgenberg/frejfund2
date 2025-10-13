@@ -24,16 +24,22 @@ interface AnalysisDimension {
 }
 
 const CATEGORIES = [
-  { id: 'market', label: 'Market & Competition', icon: Target, count: 20 },
-  { id: 'team', label: 'Team & Execution', icon: Users, count: 15 },
-  { id: 'product', label: 'Product & Technology', icon: Zap, count: 12 },
-  { id: 'traction', label: 'Traction & Growth', icon: TrendingUp, count: 11 },
-  { id: 'financials', label: 'Financial Health', icon: Brain, count: 10 }
+  { id: 'Problem & Solution', label: 'Problem & Solution', icon: Target, count: 6 },
+  { id: 'Market & Competition', label: 'Market & Competition', icon: Target, count: 8 },
+  { id: 'Business Model', label: 'Business Model', icon: Brain, count: 9 },
+  { id: 'Product & Technology', label: 'Product & Technology', icon: Zap, count: 5 },
+  { id: 'Team & Execution', label: 'Team & Execution', icon: Users, count: 6 },
+  { id: 'Traction & Growth', label: 'Traction & Growth', icon: TrendingUp, count: 7 },
+  { id: 'Customer Acquisition', label: 'Customer Acquisition', icon: Users, count: 5 },
+  { id: 'Financial Health', label: 'Financial Health', icon: TrendingUp, count: 5 },
+  { id: 'Fundraising', label: 'Fundraising', icon: Brain, count: 5 },
+  { id: 'Risks', label: 'Risks', icon: Shield, count: 5 },
+  { id: 'All', label: 'All Dimensions', icon: Brain, count: 95 }
 ];
 
 export default function AnalysisPage() {
   const router = useRouter();
-  const [activeCategory, setActiveCategory] = useState('market');
+  const [activeCategory, setActiveCategory] = useState('Problem & Solution');
   const [dimensions, setDimensions] = useState<AnalysisDimension[]>([]);
   const [overallScore, setOverallScore] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -73,6 +79,7 @@ export default function AnalysisPage() {
   };
 
   const getCategoryDimensions = (categoryId: string) => {
+    if (categoryId === 'All') return dimensions;
     return dimensions.filter(d => d.category === categoryId);
   };
 
@@ -121,7 +128,7 @@ export default function AnalysisPage() {
             Deep Business Analysis
           </h1>
           <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-            Your business analyzed across 68 critical dimensions using advanced AI reasoning
+            Your business analyzed across 95 critical dimensions using advanced AI reasoning
           </p>
           
           {/* Overall Score */}

@@ -322,7 +322,7 @@ export default function Home() {
                         <div className="w-16 h-16 bg-black rounded-full mx-auto mb-4 flex items-center justify-center">
                           <Brain className="w-8 h-8 text-white" />
                         </div>
-                        <h3 className="text-xl font-bold mb-2">68-Point Deep Analysis</h3>
+                        <h3 className="text-xl font-bold mb-2">95-Point Deep Analysis</h3>
                         <p className="text-gray-600">More insights than you knew existed about your business</p>
                       </div>
                       
