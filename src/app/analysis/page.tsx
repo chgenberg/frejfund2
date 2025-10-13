@@ -43,6 +43,7 @@ export default function AnalysisPage() {
   const [dimensions, setDimensions] = useState<AnalysisDimension[]>([]);
   const [overallScore, setOverallScore] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [analysisProgress, setAnalysisProgress] = useState<{current:number,total:number,status:'idle'|'running'|'completed'}>({current:0,total:95,status:'idle'});
 
   useEffect(() => {
     loadAnalysisData();
@@ -77,6 +78,20 @@ export default function AnalysisPage() {
       setIsLoading(false);
     }
   };
+
+  // Subscribe to progress via SSE (matches dashboard)
+  useEffect(() => {
+    const sessionId = localStorage.getItem('frejfund-session-id');
+    if (!sessionId) return;
+    const es = new EventSource(`/api/deep-analysis/progress?sessionId=${sessionId}`);
+    es.onmessage = (ev) => {
+      const data = JSON.parse(ev.data);
+      if (data.type === 'progress') setAnalysisProgress({current:data.current,total:data.total,status:'running'});
+      if (data.type === 'complete') setAnalysisProgress({current:95,total:95,status:'completed'});
+    };
+    es.onerror = () => { try { es.close(); } catch {} };
+    return () => { try { es.close(); } catch {} };
+  }, []);
 
   const getCategoryDimensions = (categoryId: string) => {
     if (categoryId === 'All') return dimensions;
@@ -204,6 +219,16 @@ export default function AnalysisPage() {
             })}
           </div>
         </div>
+
+        {/* Progress Banner (mirrors dashboard) */}
+        {analysisProgress && analysisProgress.status === 'running' && (
+          <motion.div initial={{opacity:0,y:-10}} animate={{opacity:1,y:0}} className="bg-black text-white rounded-xl px-4 py-3 mb-4">
+            <div className="flex items-center justify-between">
+              <span>Deep analysis in progress… {analysisProgress.current}/{analysisProgress.total}</span>
+              <span className="text-sm">{Math.round((analysisProgress.current/analysisProgress.total)*100)}%</span>
+            </div>
+          </motion.div>
+        )}
 
         {/* Dimension Content */}
         <AnimatePresence mode="wait">

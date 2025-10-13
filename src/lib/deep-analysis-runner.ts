@@ -59,36 +59,73 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
     let completed = 0;
     const completedCategories: string[] = [];
 
-    // 3. Run analysis for each dimension
-    for (const dimension of dimensionsToAnalyze) {
-      try {
-        // Analyze this dimension
-        const result = await analyzeDimension(
-          dimension,
-          businessInfo,
-          scrapedContent,
-          uploadedDocuments
-        );
-
-        // Save to database
-        await prisma.analysisDimension.create({
+    // Idempotent saver to avoid duplicates when re-running
+    const saveDimension = async (analysisId: string, dimensionMeta: any, result: any) => {
+      const existing = await prisma.analysisDimension.findFirst({
+        where: { analysisId, dimensionId: dimensionMeta.id }
+      });
+      if (existing) {
+        await prisma.analysisDimension.update({
+          where: { id: existing.id },
           data: {
-            analysisId: analysis.id,
-            dimensionId: dimension.id,
-            category: dimension.category,
-            name: dimension.name,
+            category: dimensionMeta.category,
+            name: dimensionMeta.name,
             score: result.score,
             findings: result.findings,
             redFlags: result.redFlags,
             strengths: result.strengths,
             questions: result.questionsToAsk,
-            evidence: [], // Could extract specific quotes
+            evidence: result.evidence || [],
             analyzed: true,
             analyzedAt: new Date(),
-            prompt: dimension.prompt(businessInfo, scrapedContent),
-            modelUsed: getChatModel('complex') // Use gpt-5 for deep analysis
+            prompt: dimensionMeta.prompt?.(businessInfo, scrapedContent),
+            modelUsed: getChatModel('complex')
           }
         });
+      } else {
+        await prisma.analysisDimension.create({
+          data: {
+            analysisId,
+            dimensionId: dimensionMeta.id,
+            category: dimensionMeta.category,
+            name: dimensionMeta.name,
+            score: result.score,
+            findings: result.findings,
+            redFlags: result.redFlags,
+            strengths: result.strengths,
+            questions: result.questionsToAsk,
+            evidence: result.evidence || [],
+            analyzed: true,
+            analyzedAt: new Date(),
+            prompt: dimensionMeta.prompt?.(businessInfo, scrapedContent),
+            modelUsed: getChatModel('complex')
+          }
+        });
+      }
+    };
+
+    // 3. Run analysis for each dimension
+    for (const dimension of dimensionsToAnalyze) {
+      try {
+        // Analyze with simple retry/backoff
+        let result: any | null = null;
+        for (let attempt = 1; attempt <= 2; attempt++) {
+          try {
+            result = await analyzeDimension(
+              dimension,
+              businessInfo,
+              scrapedContent,
+              uploadedDocuments
+            );
+            break;
+          } catch (e) {
+            if (attempt === 2) throw e;
+            await new Promise(r => setTimeout(r, 1000 * attempt));
+          }
+        }
+
+        // Save idempotently
+        await saveDimension(analysis.id, dimension, result);
 
         // Update progress
         completed++;
