@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import Chatbot from "@/components/Chatbot";
 
 // Disable prerendering globally to avoid Turbopack prerender errors on client-heavy pages
 export const dynamic = 'force-dynamic';
@@ -26,6 +27,7 @@ export default function RootLayout({
         className={`${inter.variable} font-sans antialiased`}
       >
         {children}
+        <Chatbot />
       </body>
     </html>
   );
