@@ -726,7 +726,21 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       });
 
       if (!response.ok) {
-        throw new Error('AI API failed');
+        const errText = await response.text().catch(() => '');
+        console.error('AI API error:', response.status, errText);
+        // Show a gentle retryable message to the user
+        setIsTyping(false);
+        setMessages(prev => ([
+          ...prev,
+          {
+            id: `ai-failed-${Date.now()}`,
+            sender: 'agent',
+            content: 'I had a temporary issue connecting to the AI service (502). Please try again in a few seconds.',
+            timestamp: new Date(),
+            type: 'text'
+          }
+        ]));
+        return;
       }
 
       const data = await response.json();
@@ -1313,11 +1327,11 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   {message.sender === 'agent' && parseStructured(message.content) ? (
                     <StructuredRenderer data={parseStructured(message.content)} />
                   ) : message.sender === 'agent' ? (
-                    <div className="text-sm leading-relaxed prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-black prose-headings:mt-3 prose-headings:mb-2 prose-h2:text-sm prose-h3:text-sm prose-strong:text-black prose-strong:font-semibold prose-p:text-gray-800 prose-p:my-3 prose-p:leading-relaxed prose-li:text-gray-800 prose-li:my-1 prose-ul:my-3 prose-ol:my-3 prose-ul:space-y-1 prose-ol:space-y-1 whitespace-pre-wrap">
+                    <div className="text-sm leading-relaxed prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-black prose-headings:mt-2 prose-headings:mb-1 prose-h2:text-sm prose-h3:text-sm prose-strong:text-black prose-strong:font-semibold prose-p:text-gray-800 prose-p:my-1 prose-p:leading-relaxed prose-li:text-gray-800 prose-li:my-0.5 prose-ul:my-1 prose-ol:my-1 prose-ul:space-y-0.5 prose-ol:space-y-0.5 whitespace-pre-wrap">
                       <ReactMarkdown 
                         remarkPlugins={[remarkGfm]}
                         components={{
-                          p: ({children}) => <p className="mb-4">{children}</p>,
+                          p: ({children}) => <p className="mb-2">{children}</p>,
                           strong: ({children}) => <strong className="font-semibold text-black">{children}</strong>,
                         }}
                       >
