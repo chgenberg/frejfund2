@@ -79,7 +79,7 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
             analyzed: true,
             analyzedAt: new Date(),
             prompt: dimension.prompt(businessInfo, scrapedContent),
-            modelUsed: getChatModel('simple')
+            modelUsed: getChatModel('complex') // Use gpt-5 for deep analysis
           }
         });
 
@@ -222,7 +222,7 @@ Be specific and reference actual data from the content when possible.`;
 
   try {
     const response = await openai.chat.completions.create({
-      model: getChatModel('simple'),
+      model: getChatModel('complex'), // Use gpt-5 for deep reasoning
       messages: [
         {
           role: 'system',
@@ -242,7 +242,7 @@ Analyze startups objectively using ALL available data sources. Reference specifi
       ],
       // Note: gpt-5 (o1) doesn't support response_format
       // It will naturally produce structured JSON output from the prompt
-      ...(getChatModel('simple').startsWith('gpt-5') ? {} : { response_format: { type: 'json_object' } })
+      ...(getChatModel('complex').startsWith('gpt-5') ? {} : { response_format: { type: 'json_object' } })
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
