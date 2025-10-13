@@ -187,14 +187,15 @@ async function analyzeDimension(
   
   const openai = getOpenAIClient();
   
-  // Combine all available content
+  // Combine all available content (enriched with LinkedIn, GitHub, Product Hunt)
   const fullContent = `
-Website Content:
+# Company Intelligence Report
+
 ${scrapedContent}
 
-Uploaded Documents:
-${uploadedDocuments.join('\n\n')}
-  `.slice(0, 8000); // Limit to prevent token overflow
+## Uploaded Documents Analysis:
+${uploadedDocuments.join('\n\n---\n\n')}
+  `.slice(0, 12000); // Increased limit for enriched data
 
   // Build the analysis prompt
   const analysisPrompt = `${dimension.prompt(businessInfo, fullContent)}
@@ -217,7 +218,14 @@ Be specific and reference actual data from the content when possible.`;
       messages: [
         {
           role: 'system',
-          content: 'You are an expert investment analyst. Analyze startups objectively and provide structured feedback in JSON format.'
+          content: `You are an expert investment analyst with access to comprehensive company intelligence including:
+- Website content and marketing materials
+- LinkedIn data (team size, hiring velocity, company growth)
+- GitHub activity (technical execution, code quality, development velocity)
+- Product Hunt traction (community validation, PMF signals)
+- Uploaded business documents
+
+Analyze startups objectively using ALL available data sources. Reference specific data points from LinkedIn, GitHub, and Product Hunt when relevant. Provide structured feedback in JSON format.`
         },
         {
           role: 'user',

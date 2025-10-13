@@ -64,14 +64,34 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
     const t = setTimeout(async () => {
       try {
         setIsScraping(true);
-        await fetch('/api/scrape/async', { 
+        // Use enhanced scraping for richer data
+        const response = await fetch('/api/scrape/enhanced', { 
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' }, 
-          body: JSON.stringify({ url, sessionId }) 
+          body: JSON.stringify({ 
+            ...businessInfo,
+            website: url,
+            sessionId 
+          }) 
         });
-        console.log(`Background scraping started for ${url}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`✅ Enhanced scraping complete! Sources: ${data.stats?.dataSources?.join(', ')}`);
+          
+          // Store enriched data
+          if (data.enrichedSummary) {
+            setBusinessInfo(prev => ({
+              ...prev,
+              preScrapedText: data.enrichedSummary,
+              preScrapedSources: data.stats?.dataSources || []
+            }));
+          }
+        } else {
+          console.log(`Background scraping started for ${url}`);
+        }
       } catch (error) {
-        console.error('Failed to start background scraping:', error);
+        console.error('Enhanced scraping failed, falling back:', error);
       } finally { 
         setIsScraping(false); 
       }
@@ -444,12 +464,12 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
                   animate={{ opacity: [1, 0.5, 1] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
                 >
-                  🔍 Analyzing website in background...
+                  🔍 Analyzing website + LinkedIn + GitHub + Product Hunt...
                 </motion.span>
               </p>
             )}
             <p className="text-xs text-gray-400 mt-1">
-              We'll automatically scrape and analyze your website content
+              We'll automatically scrape website, LinkedIn, GitHub, and Product Hunt
             </p>
           </div>
         );
