@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { runEnhancedScraping, generateEnrichedSummary } from '@/lib/enhanced-scraper';
 import { BusinessInfo } from '@/types/business';
 
 export const maxDuration = 60; // Allow up to 60 seconds for scraping
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs'; // Ensure Node.js runtime
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,6 +15,9 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Dynamic import to avoid build-time issues
+    const { runEnhancedScraping, generateEnrichedSummary } = await import('@/lib/enhanced-scraper');
 
     // Run enhanced scraping
     const scrapingResult = await runEnhancedScraping(businessInfo);

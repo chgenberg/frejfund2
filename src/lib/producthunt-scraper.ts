@@ -1,7 +1,13 @@
 /**
  * Product Hunt Scraper
  * Analyzes Product Hunt launches for community traction signals
+ * Server-side only
  */
+
+// Ensure this only runs on server
+if (typeof window !== 'undefined') {
+  throw new Error('producthunt-scraper must only be used server-side');
+}
 
 export interface ProductHuntData {
   productName: string;

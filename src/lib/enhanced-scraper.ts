@@ -1,7 +1,13 @@
 /**
  * Enhanced Scraper Orchestrator
  * Combines web scraping, LinkedIn, GitHub, and Product Hunt data
+ * Server-side only
  */
+
+// Ensure this only runs on server
+if (typeof window !== 'undefined') {
+  throw new Error('enhanced-scraper must only be used server-side');
+}
 
 import { scrapeSiteShallow } from './web-scraper';
 import { scrapeLinkedInCompany, analyzeHiringVelocity, type LinkedInCompanyData } from './linkedin-scraper';

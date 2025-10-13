@@ -1,7 +1,13 @@
 /**
  * LinkedIn Company Scraper
  * Scrapes public LinkedIn company pages for business intelligence
+ * Server-side only
  */
+
+// Ensure this only runs on server
+if (typeof window !== 'undefined') {
+  throw new Error('linkedin-scraper must only be used server-side');
+}
 
 export interface LinkedInCompanyData {
   name: string;

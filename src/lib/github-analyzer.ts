@@ -1,7 +1,13 @@
 /**
  * GitHub Organization Analyzer
  * Analyzes public GitHub repos for technical execution signals
+ * Server-side only
  */
+
+// Ensure this only runs on server
+if (typeof window !== 'undefined') {
+  throw new Error('github-analyzer must only be used server-side');
+}
 
 export interface GitHubOrgData {
   orgName: string;
