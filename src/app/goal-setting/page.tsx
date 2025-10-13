@@ -100,37 +100,37 @@ export default function GoalSettingPage() {
       <div className="pt-24" />
 
       {/* Main Content */}
-      <div className="container mx-auto px-6 py-12 max-w-4xl">
+      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
           {/* Success Badge */}
-          <div className="flex items-center justify-center mb-8">
-            <div className="bg-white border border-black rounded-full px-6 py-3 flex items-center space-x-2">
-              <Check className="w-5 h-5 text-black" />
-              <span className="text-black font-medium">Profile Created</span>
+          <div className="flex items-center justify-center mb-6 sm:mb-8">
+            <div className="bg-white border border-black rounded-full px-4 sm:px-6 py-2 sm:py-3 flex items-center space-x-2">
+              <Check className="w-4 h-4 sm:w-5 sm:h-5 text-black" />
+              <span className="text-black font-medium text-sm sm:text-base">Profile Created</span>
             </div>
           </div>
 
           {/* Readiness Score - Enhanced Design */}
-          <div className="text-center mb-12">
+          <div className="text-center mb-8 sm:mb-12">
             <motion.div 
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
-              className="inline-block minimal-box px-16 py-12 relative overflow-hidden"
+              className="inline-block minimal-box px-8 sm:px-16 py-8 sm:py-12 relative overflow-hidden"
             >
               {/* Background gradient effect */}
               <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-white opacity-50" />
               
-              <p className="text-sm text-gray-600 mb-6 font-light uppercase tracking-wider relative z-10">Investment Readiness</p>
+              <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6 font-light uppercase tracking-wider relative z-10">Investment Readiness</p>
               
               {/* Circular Progress */}
-              <div className="relative w-40 h-40 mx-auto mb-6">
+              <div className="relative w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-4 sm:mb-6">
                 {/* Background circle */}
-                <svg className="absolute inset-0 w-full h-full -rotate-90">
+                <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 160 160">
                   <circle
                     cx="80"
                     cy="80"
@@ -162,8 +162,8 @@ export default function GoalSettingPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.8 }}
                   >
-                    <span className="text-6xl font-bold text-black">{readinessScore}</span>
-                    <div className="text-lg text-gray-500 -mt-2">out of 10</div>
+                    <span className="text-4xl sm:text-6xl font-bold text-black">{readinessScore}</span>
+                    <div className="text-sm sm:text-lg text-gray-500 -mt-1 sm:-mt-2">out of 10</div>
                   </motion.div>
                 </div>
               </div>
@@ -173,7 +173,7 @@ export default function GoalSettingPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1 }}
-                className="text-sm text-gray-600 relative z-10"
+                className="text-xs sm:text-sm text-gray-600 relative z-10"
               >
                 {readinessScore <= 3 && "Early stage - let's build your foundation"}
                 {readinessScore > 3 && readinessScore <= 6 && "Making progress - keep pushing forward"}
@@ -200,27 +200,27 @@ export default function GoalSettingPage() {
           </div>
 
           {/* Goal Selection */}
-          <div className="text-center mb-8">
-            <div className="w-12 h-12 bg-black rounded-full mx-auto mb-4 flex items-center justify-center">
-              <div className="w-2 h-2 bg-white rounded-full" />
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-black rounded-full mx-auto mb-3 sm:mb-4 flex items-center justify-center">
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full" />
             </div>
-            <h2 className="text-3xl font-bold text-black mb-3">
+            <h2 className="text-2xl sm:text-3xl font-bold text-black mb-2 sm:mb-3">
               What's your primary goal?
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto font-light">
+            <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto font-light px-4 sm:px-0">
               Choose your main objective and I'll create a personalized roadmap to help you achieve it
             </p>
           </div>
 
           {/* Goal Options */}
-          <div className="grid md:grid-cols-2 gap-4 mb-8">
+          <div className="grid sm:grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8">
             {GOAL_OPTIONS.map((option) => (
               <motion.button
                 key={option.id}
                 onClick={() => setSelectedGoal(option.id)}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
-                className={`relative p-6 rounded-2xl border transition-all text-left ${
+                className={`relative p-4 sm:p-6 rounded-2xl border transition-all text-left ${
                   selectedGoal === option.id
                     ? 'border-black bg-white shadow-lg'
                     : 'border-gray-200 bg-white hover:border-gray-400'
@@ -233,26 +233,26 @@ export default function GoalSettingPage() {
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       exit={{ scale: 0 }}
-                      className="absolute top-4 right-4 w-6 h-6 bg-black rounded-full flex items-center justify-center"
+                      className="absolute top-3 right-3 sm:top-4 sm:right-4 w-5 h-5 sm:w-6 sm:h-6 bg-black rounded-full flex items-center justify-center"
                     >
-                      <Check className="w-4 h-4 text-white" />
+                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                     </motion.div>
                   )}
                 </AnimatePresence>
 
                 {/* Icon */}
-                <div className="text-3xl mb-3 font-light">{option.icon}</div>
+                <div className="text-2xl sm:text-3xl mb-2 sm:mb-3 font-light">{option.icon}</div>
 
                 {/* Title & Description */}
-                <h3 className="text-lg font-semibold text-black mb-2">
+                <h3 className="text-base sm:text-lg font-semibold text-black mb-1 sm:mb-2">
                   {option.title}
                 </h3>
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3">
                   {option.description}
                 </p>
 
                 {/* Meta Info */}
-                <div className="flex items-center space-x-3 text-xs text-gray-500">
+                <div className="flex items-center space-x-2 sm:space-x-3 text-[10px] sm:text-xs text-gray-500">
                   <span>{option.timeline}</span>
                   <span className="text-gray-300">•</span>
                   <span className={
@@ -274,16 +274,16 @@ export default function GoalSettingPage() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="mb-8"
+                className="mb-6 sm:mb-8"
               >
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2 px-1">
                   Describe your custom goal:
                 </label>
                 <textarea
                   value={customGoalText}
                   onChange={(e) => setCustomGoalText(e.target.value)}
                   placeholder="E.g., Launch my product in 3 markets, hire a CTO, reach $50k MRR..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent resize-none"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent resize-none text-sm sm:text-base"
                   rows={3}
                 />
               </motion.div>
@@ -297,7 +297,7 @@ export default function GoalSettingPage() {
               disabled={!selectedGoal || (selectedGoal === 'custom' && !customGoalText.trim()) || isGenerating}
               whileHover={{ scale: selectedGoal ? 1.05 : 1 }}
               whileTap={{ scale: selectedGoal ? 0.95 : 1 }}
-              className={`group relative px-12 py-5 rounded-full text-lg font-semibold transition-all ${
+              className={`group relative px-8 sm:px-12 py-4 sm:py-5 rounded-full text-base sm:text-lg font-semibold transition-all ${
                 !selectedGoal || (selectedGoal === 'custom' && !customGoalText.trim())
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   : 'bg-black text-white hover:shadow-2xl'
@@ -311,17 +311,17 @@ export default function GoalSettingPage() {
               ) : (
                 <span className="flex items-center space-x-2">
                   <span>Set Goal & Continue</span>
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
                 </span>
               )}
             </motion.button>
 
             {error && (
-              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-600">{error}</p>
+              <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-xs sm:text-sm text-red-600">{error}</p>
               </div>
             )}
-            <p className="text-sm text-gray-500 mt-4">
+            <p className="text-xs sm:text-sm text-gray-500 mt-3 sm:mt-4">
               You can always change your goal later
             </p>
           </div>
