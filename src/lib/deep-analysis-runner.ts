@@ -277,10 +277,14 @@ Analyze startups objectively using ALL available data sources. Reference specifi
  * Get deep analysis results for a session
  */
 export async function getDeepAnalysis(sessionId: string) {
-  return await prisma.deepAnalysis.findUnique({
+  const analysis = await prisma.deepAnalysis.findUnique({
     where: { sessionId },
     include: {
-      dimensions: true,
+      dimensions: {
+        include: {
+          insights: true
+        }
+      },
       insights: {
         where: { addressed: false },
         orderBy: [
@@ -290,6 +294,24 @@ export async function getDeepAnalysis(sessionId: string) {
       }
     }
   });
+  
+  if (!analysis) return null;
+  
+  // Transform to match the UI format
+  return {
+    ...analysis,
+    dimensions: analysis.dimensions.map(dim => ({
+      id: dim.dimension,
+      name: dim.name,
+      category: dim.category,
+      score: dim.score || 0,
+      status: dim.status,
+      findings: dim.insights?.filter(i => i.type === 'finding').map(i => i.content) || [],
+      strengths: dim.insights?.filter(i => i.type === 'strength').map(i => i.content) || [],
+      redFlags: dim.insights?.filter(i => i.type === 'red_flag').map(i => i.content) || [],
+      recommendations: dim.insights?.filter(i => i.type === 'recommendation').map(i => i.content) || []
+    }))
+  };
 }
 
 /**
