@@ -8,7 +8,6 @@ import {
   ArrowLeft, Circle, CheckCircle2, AlertCircle, Info
 } from 'lucide-react';
 import Header from '@/components/Header';
-import { getDeepAnalysis } from '@/lib/deep-analysis-runner';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,14 +50,20 @@ export default function AnalysisPage() {
     }
 
     try {
-      const analysis = await getDeepAnalysis(sessionId);
-      if (analysis && analysis.dimensions && analysis.dimensions.length > 0) {
-        setDimensions(analysis.dimensions);
-        setOverallScore(analysis.overallScore || 0);
+      // Fetch from API endpoint instead of direct database access
+      const response = await fetch(`/api/deep-analysis?sessionId=${sessionId}`);
+      if (response.ok) {
+        const analysis = await response.json();
+        if (analysis && analysis.dimensions && analysis.dimensions.length > 0) {
+          setDimensions(analysis.dimensions);
+          setOverallScore(analysis.overallScore || 0);
+        } else {
+          // Keep dimensions empty while loading
+          setDimensions([]);
+          setOverallScore(0);
+        }
       } else {
-        // Keep dimensions empty while loading
-        setDimensions([]);
-        setOverallScore(0);
+        console.error('Failed to load analysis:', response.statusText);
       }
     } catch (error) {
       console.error('Failed to load analysis:', error);

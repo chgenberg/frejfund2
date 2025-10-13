@@ -100,7 +100,8 @@ export async function GET(request: NextRequest) {
       insights: analysis.insights,
       completedAt: analysis.completedAt,
       totalDimensions: analysis.dimensions.length,
-      analyzedDimensions: analysis.dimensions.filter(d => d.analyzed).length
+      analyzedDimensions: analysis.dimensions.filter(d => d.analyzed).length,
+      dimensions: analysis.dimensions // Include full dimensions for analysis page
     });
 
   } catch (error) {
