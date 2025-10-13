@@ -17,6 +17,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
   }
 
+  // Import prisma dynamically
+  const { prisma } = await import('@/lib/prisma');
+  
   // Create a stream
   const stream = new ReadableStream({
     start(controller) {
@@ -25,32 +28,58 @@ export async function GET(request: NextRequest) {
       // Send initial connection message
       controller.enqueue(encoder.encode('data: {"type":"connected"}\n\n'));
       
-      // Poll for updates
-      const interval = setInterval(() => {
-        const progress = progressStore.get(sessionId);
-        
-        if (progress) {
-          const data = {
-            type: 'progress',
-            current: progress.current,
-            total: progress.total,
-            completedCategories: progress.completedCategories
-          };
+      let lastProgress = 0;
+      
+      // Poll for updates from database
+      const interval = setInterval(async () => {
+        try {
+          // Check database for progress
+          const analysis = await prisma.deepAnalysis.findUnique({
+            where: { sessionId },
+            include: {
+              dimensions: {
+                where: { status: 'completed' },
+                select: { category: true }
+              }
+            }
+          });
           
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
-          
-          // Check if complete
-          if (progress.current >= progress.total) {
-            controller.enqueue(encoder.encode('data: {"type":"complete"}\n\n'));
-            clearInterval(interval);
-            controller.close();
-            progressStore.delete(sessionId);
+          if (analysis) {
+            const completedCount = analysis.dimensions.length;
+            const totalCount = 68; // Total dimensions
+            const completedCategories = [...new Set(analysis.dimensions.map(d => d.category))];
+            
+            // Only send update if progress changed
+            if (completedCount !== lastProgress || completedCount === 0) {
+              lastProgress = completedCount;
+              
+              const data = {
+                type: 'progress',
+                current: completedCount,
+                total: totalCount,
+                completedCategories
+              };
+              
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+              console.log(`📡 SSE: Sent progress ${completedCount}/${totalCount} to client`);
+            }
+            
+            // Check if complete
+            if (analysis.status === 'completed' && completedCount >= totalCount) {
+              controller.enqueue(encoder.encode('data: {"type":"complete"}\n\n'));
+              console.log('📡 SSE: Analysis complete, closing connection');
+              clearInterval(interval);
+              controller.close();
+            }
           }
+        } catch (error) {
+          console.error('SSE poll error:', error);
         }
-      }, 1000); // Check every second
+      }, 2000); // Check every 2 seconds
       
       // Clean up on disconnect
       request.signal.addEventListener('abort', () => {
+        console.log('📡 SSE: Client disconnected');
         clearInterval(interval);
         controller.close();
       });

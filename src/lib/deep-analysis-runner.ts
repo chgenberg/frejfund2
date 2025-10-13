@@ -105,21 +105,8 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
         
         console.log(`📊 Progress: ${completed}/${totalDimensions} (${progress}%) - ${dimension.name}`);
         
-        // Send progress update via SSE
-        try {
-          await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/deep-analysis/progress`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              sessionId,
-              current: completed,
-              total: totalDimensions,
-              completedCategories
-            })
-          });
-        } catch (error) {
-          console.error('Failed to send progress update:', error);
-        }
+        // Progress is automatically tracked via database
+        // SSE endpoint reads directly from DeepAnalysis table
 
         // Generate insights from this dimension if critical
         if (dimension.priority === 'critical' && result.redFlags.length > 0) {
