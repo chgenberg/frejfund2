@@ -23,7 +23,8 @@ export const revalidate = 3600; // Revalidate every hour
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const location = SEO_LOCATIONS.find(l => l.slug === params.location);
+  const { location: locationSlug } = await params;
+  const location = SEO_LOCATIONS.find(l => l.slug === locationSlug);
   
   if (!location) {
     return {
@@ -68,8 +69,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default function LocationPage({ params }: PageProps) {
-  const location = SEO_LOCATIONS.find(l => l.slug === params.location);
+export default async function LocationPage({ params }: PageProps) {
+  const { location: locationSlug } = await params;
+  const location = SEO_LOCATIONS.find(l => l.slug === locationSlug);
   
   if (!location) {
     notFound();
