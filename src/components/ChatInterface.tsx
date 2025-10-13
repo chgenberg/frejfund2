@@ -1318,9 +1318,20 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                  className="w-6 h-6 sm:w-8 sm:h-8 bg-black rounded-full flex items-center justify-center flex-shrink-0"
+                  className="w-6 h-6 sm:w-8 sm:h-8 bg-black rounded-full flex items-center justify-center flex-shrink-0 relative"
                 >
-                  <div className="w-0.5 h-0.5 sm:w-1 sm:h-1 bg-white rounded-full" />
+                  <motion.div 
+                    className="w-0.5 h-0.5 sm:w-1 sm:h-1 bg-white rounded-full"
+                    animate={isTyping ? { 
+                      scale: [1, 1.3, 1],
+                      opacity: [1, 0.7, 1]
+                    } : {}}
+                    transition={{ 
+                      duration: 1.5, 
+                      repeat: isTyping ? Infinity : 0,
+                      ease: "easeInOut"
+                    }}
+                  />
                 </motion.div>
               )}
               
@@ -1642,12 +1653,12 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowQuickQuestions(true)}
-            className="fixed bottom-24 left-6 w-14 h-14 bg-black text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-800 transition-colors z-40"
+            className="fixed bottom-24 sm:bottom-28 left-4 sm:left-6 w-12 h-12 sm:w-14 sm:h-14 bg-black text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-800 transition-colors z-40"
           >
             <motion.span
               animate={{ rotate: [0, 15, -15, 0] }}
               transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-              className="text-2xl"
+              className="text-xl sm:text-2xl"
             >
               ?
             </motion.span>
