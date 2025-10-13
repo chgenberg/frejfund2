@@ -113,16 +113,20 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         const data = await response.json();
         setDataGaps(data);
         
-        // If there are critical gaps, Freja should proactively mention them
-        if (data.criticalGaps > 0 && data.nextBestAction) {
-          const gapMessage: Message = {
-            id: Date.now().toString(),
-            content: `I've identified ${data.totalGaps} areas where we need more information to improve your investment readiness score.\n\nLet's start with the most critical: **${data.nextBestAction.dimensionName}** (currently ${data.nextBestAction.currentScore}%).\n\n${data.nextBestAction.questions[0]}\n\n💡 You can drag & drop documents directly here, or I can guide you on how to gather this information.`,
-            sender: 'agent',
-            timestamp: new Date(),
-            type: 'gap-prompt'
-          };
-          setMessages(prev => [...prev, gapMessage]);
+        // If there are gaps, Freja proactively asks for them
+        if (data.totalGaps > 0 && data.nextBestAction) {
+          setTimeout(() => {
+            const gapMessage: Message = {
+              id: Date.now().toString(),
+              content: data.criticalGaps > 0
+                ? `Your analysis is complete! I've identified **${data.totalGaps} areas** where additional information could significantly boost your investment readiness.\n\n**Most critical:** ${data.nextBestAction.dimensionName} (currently ${data.nextBestAction.currentScore}%)\n\n${data.nextBestAction.questions[0]}\n\nYou can share this information by:\n1. Typing your answer below\n2. Dragging & dropping documents (Excel, PDF, etc.)\n3. Asking me to guide you on how to gather this data\n\nCompleting all gaps could increase your score by **+${data.potentialScoreIncrease} points**!`
+                : `Great work! Your analysis is solid. I found ${data.totalGaps} minor areas where we could gather more data to fine-tune your strategy.\n\nWant to address these, or shall we focus on your main goals?`,
+              sender: 'agent',
+              timestamp: new Date(),
+              type: 'gap-analysis'
+            };
+            setMessages(prev => [...prev, gapMessage]);
+          }, 2000); // Small delay after completion celebration
         }
       }
     } catch (error) {

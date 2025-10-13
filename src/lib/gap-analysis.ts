@@ -186,6 +186,42 @@ function identifyGapForDimension(dimension: any): DataGap | null {
         'What are your conversion rates at each funnel stage?'
       ]
     },
+    'Storytelling & Pitch': {
+      missingInfo: ['Pitch deck', 'Company story', 'Vision statement'],
+      documents: ['Pitch deck', 'One-pager', 'Company presentation'],
+      questions: [
+        'Can you share your pitch deck or investor presentation?',
+        'How do you explain your company vision in one sentence?',
+        'What is your origin story - why did you start this?'
+      ]
+    },
+    'Founder Background': {
+      missingInfo: ['Previous experience', 'Domain expertise', 'Track record'],
+      documents: ['LinkedIn profile', 'CV/Resume', 'Previous ventures'],
+      questions: [
+        'What is your professional background and relevant experience?',
+        'Have you built or exited companies before?',
+        'What makes you uniquely qualified to solve this problem?'
+      ]
+    },
+    'Financial Projections': {
+      missingInfo: ['3-year forecast', 'Revenue model', 'Cost breakdown'],
+      documents: ['Financial model', '3-year projections', 'Budget plan'],
+      questions: [
+        'Can you share your 3-year financial projections?',
+        'What are your revenue assumptions and growth drivers?',
+        'What is your path to profitability?'
+      ]
+    },
+    'Valuation': {
+      missingInfo: ['Valuation rationale', 'Comparables', 'Funding round details'],
+      documents: ['Cap table', 'Previous funding docs', 'Valuation analysis'],
+      questions: [
+        'What valuation are you targeting for this round?',
+        'What comparable companies are you using for valuation?',
+        'How much equity are you offering?'
+      ]
+    },
     // Default for any other dimension
     'default': {
       missingInfo: ['Specific metrics', 'Supporting documentation'],
