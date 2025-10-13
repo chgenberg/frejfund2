@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Mail, ArrowRight, Sparkles, Clock, MessageCircle } from 'lucide-react';
+import { Mail, ArrowRight, Sparkles, Clock, MessageCircle, CheckCircle } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,39 +12,63 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const [sessions, setSessions] = useState<any[]>([]);
   const [showSessions, setShowSessions] = useState(false);
+
+  // Check if authenticated from magic link
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const authenticatedEmail = params.get('email');
+      const isAuthenticated = params.get('authenticated');
+      
+      if (isAuthenticated && authenticatedEmail) {
+        // Load sessions for authenticated user
+        loadUserSessions(authenticatedEmail);
+      }
+    }
+  }, []);
+
+  const loadUserSessions = async (userEmail: string) => {
+    try {
+      const res = await fetch(`/api/session/save?email=${encodeURIComponent(userEmail)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.sessions && data.sessions.length > 0) {
+          localStorage.setItem('frejfund-user-email', userEmail);
+          setSessions(data.sessions);
+          setShowSessions(true);
+        } else {
+          localStorage.setItem('frejfund-user-email', userEmail);
+          router.push('/?start=true');
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load sessions:', error);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccess(false);
 
     try {
-      const res = await fetch(`/api/session/save?email=${encodeURIComponent(email)}`);
-      
+      // Send magic link
+      const res = await fetch('/api/auth/magic-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.toLowerCase() })
+      });
+
+      const data = await res.json();
+
       if (res.ok) {
-        const data = await res.json();
-        
-        if (data.sessions && data.sessions.length > 0) {
-          // User exists with sessions
-          setSessions(data.sessions);
-          setShowSessions(true);
-          
-          // Save user info to localStorage
-          localStorage.setItem('frejfund-user-email', email);
-          localStorage.setItem('frejfund-user-data', JSON.stringify(data.user));
-        } else {
-          // User exists but no sessions - go to wizard
-          localStorage.setItem('frejfund-user-email', email);
-          router.push('/?start=true');
-        }
-      } else if (res.status === 404) {
-        // New user - go to wizard
-        localStorage.setItem('frejfund-user-email', email);
-        router.push('/?start=true');
+        setSuccess(true);
       } else {
-        setError('Failed to login. Please try again.');
+        setError(data.error || 'Failed to send magic link. Please try again.');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -171,6 +195,29 @@ export default function LoginPage() {
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
               {error}
             </div>
+          )}
+
+          {success && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-4 bg-green-50 border border-green-200 rounded-lg"
+            >
+              <div className="flex items-start space-x-3">
+                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-green-900 mb-1">
+                    Check your email!
+                  </p>
+                  <p className="text-xs text-green-700">
+                    We've sent a magic link to <strong>{email}</strong>. Click the link to sign in instantly.
+                  </p>
+                  <p className="text-xs text-green-600 mt-2">
+                    Link expires in 15 minutes
+                  </p>
+                </div>
+              </div>
+            </motion.div>
           )}
 
           <motion.button

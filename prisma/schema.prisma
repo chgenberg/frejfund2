@@ -12,6 +12,21 @@ datasource db {
   // extensions = [pgvector(map: "vector")]  // Disabled for now - Railway doesn't support pgvector yet
 }
 
+// Magic Link for passwordless authentication
+model MagicLink {
+  id            String    @id @default(cuid())
+  email         String
+  token         String    @unique
+  used          Boolean   @default(false)
+  expiresAt     DateTime
+  createdAt     DateTime  @default(now())
+  
+  @@index([email])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("magic_links")
+}
+
 // User/Account management
 model User {
   id            String    @id @default(cuid())
