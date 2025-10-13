@@ -425,18 +425,31 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
           };
           connect();
           
-          // Start the analysis
-          await fetch('/api/deep-analysis', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              sessionId,
-              businessInfo,
-              scrapedContent: mergedContext || '',
-              uploadedDocuments: []
-            })
-          });
-          console.log('Deep analysis started in background');
+          // Only start analysis if not already triggered in this session
+          const analysisKey = `analysis-triggered-${sessionId}`;
+          const alreadyTriggered = sessionStorage.getItem(analysisKey);
+          
+          if (!alreadyTriggered) {
+            sessionStorage.setItem(analysisKey, 'true');
+            
+            const response = await fetch('/api/deep-analysis', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                sessionId,
+                businessInfo,
+                scrapedContent: mergedContext || '',
+                uploadedDocuments: []
+              })
+            });
+            
+            const data = await response.json();
+            if (data.already_running) {
+              console.log('Deep analysis already running');
+            } else {
+              console.log('Deep analysis started in background');
+            }
+          }
         } catch (error) {
           console.error('Failed to start deep analysis:', error);
           setAnalysisProgress(prev => ({ ...prev, status: 'idle' }));
@@ -1503,29 +1516,6 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                           )}
                         </div>
                       ))}
-                    </div>
-                  )}
-                  {/* Suggested Next Steps for agent messages */}
-                  {message.sender === 'agent' && messages.indexOf(message) === messages.length - 1 && (
-                    <div className="relative z-10 mt-3 pt-3 border-t border-gray-200">
-                      <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider">Suggested actions</p>
-                      <div className="flex flex-wrap gap-2">
-                        {(() => {
-                          const smartQuestions = generateSmartQuestions(businessInfo);
-                          return smartQuestions.map((suggestion: string, idx: number) => (
-                            <button
-                              key={idx}
-                              onClick={() => {
-                                setInputValue(suggestion);
-                                inputRef.current?.focus();
-                              }}
-                              className="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors"
-                            >
-                              {suggestion}
-                            </button>
-                          ));
-                        })()}
-                      </div>
                     </div>
                   )}
                   {message.type === 'analysis' && (

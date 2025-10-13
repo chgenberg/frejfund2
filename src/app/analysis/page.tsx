@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Target, Users, TrendingUp, Zap, Shield, Brain,
-  ArrowLeft, Circle, CheckCircle2, AlertCircle, Info
+  ArrowLeft, Circle, CheckCircle2, AlertCircle, Info, HelpCircle, FileDown, X
 } from 'lucide-react';
 import Header from '@/components/Header';
 
@@ -39,6 +39,55 @@ const CATEGORIES = [
   { id: 'All', label: 'All Dimensions', icon: Brain, count: 95 }
 ];
 
+// Example data for each dimension
+const DIMENSION_EXAMPLES: Record<string, { description: string; examples: string[]; dataNeeded: string[] }> = {
+  'Market Size (TAM/SAM/SOM)': {
+    description: 'Total Addressable Market, Serviceable Addressable Market, and Serviceable Obtainable Market.',
+    examples: [
+      'TAM: €100M - Total market for all CRM software in Europe',
+      'SAM: €20M - SMB segment we can realistically serve',
+      'SOM: €2M - What we can capture in year 3 (10% of SAM)'
+    ],
+    dataNeeded: ['Industry reports', 'Competitor revenues', 'Customer surveys', 'Market research data']
+  },
+  'Business Model Clarity': {
+    description: 'How you make money - pricing, revenue streams, and unit economics.',
+    examples: [
+      'SaaS: €99/month per seat, 3-year average customer lifetime',
+      'Marketplace: 15% take rate on €500 average transaction',
+      'Freemium: 3% conversion rate, €50/month average revenue per user'
+    ],
+    dataNeeded: ['Pricing strategy', 'Revenue breakdown', 'Customer segments', 'Cost structure']
+  },
+  'Monthly Recurring Revenue': {
+    description: 'Predictable revenue that comes in every month.',
+    examples: [
+      'Current MRR: €25,000',
+      'Growth rate: 15% month-over-month',
+      'Churn rate: 3% monthly'
+    ],
+    dataNeeded: ['Subscription data', 'Payment processor exports', 'Customer contracts']
+  },
+  'Team Completeness': {
+    description: 'Key roles filled and experience levels.',
+    examples: [
+      'CEO: 10 years industry experience, 2 exits',
+      'CTO: Ex-Google engineer, AI/ML expertise',
+      'Missing: Head of Sales (hiring Q2)'
+    ],
+    dataNeeded: ['Team bios', 'LinkedIn profiles', 'Org chart', 'Hiring roadmap']
+  },
+  'Product-Market Fit Signals': {
+    description: 'Evidence that customers love and need your product.',
+    examples: [
+      'NPS score: 72',
+      '40% of new users from referrals',
+      'Daily active usage: 65%'
+    ],
+    dataNeeded: ['User surveys', 'Usage analytics', 'Customer testimonials', 'Retention data']
+  }
+};
+
 export default function AnalysisPage() {
   const router = useRouter();
   const [activeCategory, setActiveCategory] = useState('Problem & Solution');
@@ -46,6 +95,7 @@ export default function AnalysisPage() {
   const [overallScore, setOverallScore] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [analysisProgress, setAnalysisProgress] = useState<{current:number,total:number,status:'idle'|'running'|'completed'}>({current:0,total:95,status:'idle'});
+  const [showInfoPopup, setShowInfoPopup] = useState<string | null>(null);
 
   useEffect(() => {
     loadAnalysisData();
@@ -287,9 +337,19 @@ export default function AnalysisPage() {
                     {/* Dimension Header */}
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-black mb-1">
-                          {dimension.name}
-                        </h3>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-lg font-semibold text-black">
+                            {dimension.name}
+                          </h3>
+                          {DIMENSION_EXAMPLES[dimension.name] && (
+                            <button
+                              onClick={() => setShowInfoPopup(dimension.name)}
+                              className="text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                              <HelpCircle className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-2">
                             <ScoreIcon className={`w-5 h-5 ${getScoreColor(dimension.score)}`} />
@@ -385,6 +445,125 @@ export default function AnalysisPage() {
           </motion.button>
         </div>
       </div>
+
+      {/* Info Popup Modal */}
+      <AnimatePresence>
+        {showInfoPopup && DIMENSION_EXAMPLES[showInfoPopup] && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowInfoPopup(null)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-2xl shadow-2xl z-50 max-h-[90vh] overflow-y-auto"
+            >
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <h3 className="text-xl font-semibold text-black">{showInfoPopup}</h3>
+                  <button
+                    onClick={() => setShowInfoPopup(null)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                
+                <p className="text-gray-600 mb-6">
+                  {DIMENSION_EXAMPLES[showInfoPopup].description}
+                </p>
+
+                <div className="mb-6">
+                  <h4 className="font-semibold text-black mb-3">Perfect Examples:</h4>
+                  <div className="space-y-2">
+                    {DIMENSION_EXAMPLES[showInfoPopup].examples.map((example, idx) => (
+                      <div key={idx} className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                        <p className="text-sm text-gray-700">{example}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <h4 className="font-semibold text-black mb-3">Data Sources Needed:</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {DIMENSION_EXAMPLES[showInfoPopup].dataNeeded.map((data, idx) => (
+                      <span key={idx} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
+                        {data}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      // Create a simple Word template
+                      const template = `
+${showInfoPopup} - Data Collection Template
+
+Description:
+${DIMENSION_EXAMPLES[showInfoPopup].description}
+
+Please fill in your data below:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Current Situation:
+   _________________________________
+   _________________________________
+   _________________________________
+
+2. Key Metrics:
+   _________________________________
+   _________________________________
+   _________________________________
+
+3. Supporting Evidence:
+   _________________________________
+   _________________________________
+   _________________________________
+
+Examples for reference:
+${DIMENSION_EXAMPLES[showInfoPopup].examples.map((ex, i) => `${i + 1}. ${ex}`).join('\n')}
+
+Data sources to check:
+${DIMENSION_EXAMPLES[showInfoPopup].dataNeeded.join(', ')}
+`;
+                      const blob = new Blob([template], { type: 'text/plain' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `${showInfoPopup.replace(/[^a-z0-9]/gi, '_')}_template.txt`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                    className="flex-1 px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <FileDown className="w-4 h-4" />
+                    Download Template
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setShowInfoPopup(null)}
+                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+                  >
+                    Close
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
