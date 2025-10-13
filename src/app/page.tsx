@@ -168,29 +168,31 @@ export default function Home() {
               <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </motion.button>
             
-            {/* How it works button */}
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setShowHowItWorks(true)}
-              className="mt-4 bg-white border-2 border-black text-black px-5 sm:px-6 py-2.5 sm:py-3 rounded-full text-sm sm:text-base font-medium hover:bg-gray-50 transition-all inline-flex items-center gap-2 relative overflow-hidden group"
-            >
-              {/* Pulsing effect */}
-              <motion.div
-                className="absolute inset-0 bg-black opacity-5"
-                animate={{
-                  scale: [1, 1.5, 1],
-                  opacity: [0.05, 0, 0.05],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-              <Info className="w-4 h-4 relative z-10" />
-              <span className="relative z-10">How it works</span>
-            </motion.button>
+            {/* How it works button - centered and smaller */}
+            <div className="flex justify-center mt-4">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowHowItWorks(true)}
+                className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-full text-xs font-medium hover:border-black hover:text-black transition-all inline-flex items-center gap-2 relative overflow-hidden group"
+              >
+                {/* Subtle pulsing effect */}
+                <motion.div
+                  className="absolute inset-0 bg-black opacity-5"
+                  animate={{
+                    scale: [1, 1.3, 1],
+                    opacity: [0.02, 0, 0.02],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                />
+                <Info className="w-3 h-3 relative z-10" />
+                <span className="relative z-10">How it works</span>
+              </motion.button>
+            </div>
           </div>
         </motion.div>
       </section>
@@ -302,7 +304,7 @@ export default function Home() {
                       
                       <div className="bg-gray-50 rounded-xl p-4 mt-6">
                         <p className="text-sm text-gray-700">
-                          <strong>💡 Pro tip:</strong> The more information you provide, the better our AI can help you. We analyze your website, LinkedIn, GitHub, and Product Hunt automatically!
+                          <strong>Pro tip:</strong> The more information you provide, the better our AI can help you. We analyze your website, LinkedIn, GitHub, and Product Hunt automatically!
                         </p>
                       </div>
                     </motion.div>
@@ -380,7 +382,7 @@ export default function Home() {
                       
                       <div className="bg-black text-white rounded-xl p-4 mt-6">
                         <p className="text-sm">
-                          <strong>🚀 Powered by GPT-5:</strong> Our analysis uses the most advanced AI to give you investor-grade insights in 15-30 minutes. You'll discover strengths and gaps you didn't know existed.
+                          <strong>Powered by GPT-5:</strong> Our analysis uses the most advanced AI to give you investor-grade insights in 15-30 minutes. You'll discover strengths and gaps you didn't know existed.
                         </p>
                       </div>
                     </motion.div>
@@ -404,28 +406,28 @@ export default function Home() {
                       
                       <div className="space-y-4">
                         <div className="bg-gray-50 rounded-xl p-4">
-                          <h4 className="font-semibold mb-2">🎯 Personalized Guidance</h4>
+                          <h4 className="font-semibold mb-2">Personalized Guidance</h4>
                           <p className="text-sm text-gray-600">
                             Freja analyzes your entire business context and provides specific, actionable advice tailored to your situation.
                           </p>
                         </div>
                         
                         <div className="bg-gray-50 rounded-xl p-4">
-                          <h4 className="font-semibold mb-2">💡 Strategic Questions</h4>
+                          <h4 className="font-semibold mb-2">Strategic Questions</h4>
                           <p className="text-sm text-gray-600">
                             She asks the tough questions investors will ask, helping you prepare and strengthen your pitch.
                           </p>
                         </div>
                         
                         <div className="bg-gray-50 rounded-xl p-4">
-                          <h4 className="font-semibold mb-2">📈 Growth Strategies</h4>
+                          <h4 className="font-semibold mb-2">Growth Strategies</h4>
                           <p className="text-sm text-gray-600">
                             Get specific advice on improving metrics, refining your business model, and accelerating growth.
                           </p>
                         </div>
                         
                         <div className="bg-gray-50 rounded-xl p-4">
-                          <h4 className="font-semibold mb-2">🔥 Pitch Optimization</h4>
+                          <h4 className="font-semibold mb-2">Pitch Optimization</h4>
                           <p className="text-sm text-gray-600">
                             Refine your story, strengthen your financials, and create a compelling narrative that resonates with investors.
                           </p>
@@ -458,28 +460,28 @@ export default function Home() {
                       
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div className="border border-gray-200 rounded-xl p-4">
-                          <h4 className="font-semibold mb-2">🎯 Precision Matching</h4>
+                          <h4 className="font-semibold mb-2">Precision Matching</h4>
                           <p className="text-sm text-gray-600">
                             We match based on industry, stage, check size, geography, and investment thesis alignment.
                           </p>
                         </div>
                         
                         <div className="border border-gray-200 rounded-xl p-4">
-                          <h4 className="font-semibold mb-2">📊 500+ Active Investors</h4>
+                          <h4 className="font-semibold mb-2">500+ Active Investors</h4>
                           <p className="text-sm text-gray-600">
                             Angels, VCs, corporate investors, and impact funds across Europe and globally.
                           </p>
                         </div>
                         
                         <div className="border border-gray-200 rounded-xl p-4">
-                          <h4 className="font-semibold mb-2">🤝 Warm Introductions</h4>
+                          <h4 className="font-semibold mb-2">Warm Introductions</h4>
                           <p className="text-sm text-gray-600">
                             We facilitate proper introductions with context, increasing your response rate by 4x.
                           </p>
                         </div>
                         
                         <div className="border border-gray-200 rounded-xl p-4">
-                          <h4 className="font-semibold mb-2">⚡ Fast Process</h4>
+                          <h4 className="font-semibold mb-2">Fast Process</h4>
                           <p className="text-sm text-gray-600">
                             From analysis to investor conversations in days, not months.
                           </p>
@@ -552,7 +554,7 @@ export default function Home() {
                           <div>
                             <h4 className="font-semibold mb-1">Closing the Deal</h4>
                             <p className="text-sm text-gray-600">
-                              Navigate legal processes and celebrate your success! 🎉
+                              Navigate legal processes and celebrate your success!
                             </p>
                           </div>
                         </div>

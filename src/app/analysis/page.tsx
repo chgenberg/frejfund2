@@ -56,42 +56,9 @@ export default function AnalysisPage() {
         setDimensions(analysis.dimensions);
         setOverallScore(analysis.overallScore || 0);
       } else {
-        // Show example data while analysis is running
-        setDimensions([
-          {
-            id: 'market-size',
-            name: 'Market Size & Growth Potential',
-            category: 'market',
-            score: 0,
-            status: 'analyzing',
-            findings: [],
-            strengths: [],
-            redFlags: [],
-            recommendations: []
-          },
-          {
-            id: 'competitive-landscape',
-            name: 'Competitive Landscape Analysis',
-            category: 'market',
-            score: 0,
-            status: 'pending',
-            findings: [],
-            strengths: [],
-            redFlags: [],
-            recommendations: []
-          },
-          {
-            id: 'team-completeness',
-            name: 'Team Completeness & Skills',
-            category: 'team',
-            score: 0,
-            status: 'pending',
-            findings: [],
-            strengths: [],
-            redFlags: [],
-            recommendations: []
-          }
-        ]);
+        // Keep dimensions empty while loading
+        setDimensions([]);
+        setOverallScore(0);
       }
     } catch (error) {
       console.error('Failed to load analysis:', error);
