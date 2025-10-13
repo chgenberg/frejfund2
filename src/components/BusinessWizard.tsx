@@ -11,13 +11,14 @@ interface BusinessWizardProps {
 }
 
 export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(-1); // Start with welcome screen
   const [businessInfo, setBusinessInfo] = useState<Partial<BusinessInfo>>({});
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isScraping, setIsScraping] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [analysisStatus, setAnalysisStatus] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const steps = [
     {
@@ -149,6 +150,11 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
   };
 
   const canProceed = () => {
+    // Welcome screen: requires terms acceptance
+    if (currentStep === -1) {
+      return acceptedTerms;
+    }
+    
     const currentFields = steps[currentStep].fields;
     
     if (currentStep === 0) {
@@ -164,6 +170,12 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
   };
 
   const handleNext = async () => {
+    // From welcome screen, go to first real step
+    if (currentStep === -1) {
+      setCurrentStep(0);
+      return;
+    }
+    
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
@@ -220,6 +232,89 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
       setCurrentStep(currentStep - 1);
     }
   };
+
+  const renderWelcomeScreen = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="max-w-2xl mx-auto text-center"
+    >
+      <div className="w-20 h-20 bg-black rounded-full mx-auto mb-6 flex items-center justify-center">
+        <div className="w-4 h-4 bg-white rounded-full" />
+      </div>
+
+      <h2 className="text-3xl font-bold text-black mb-4">
+        Welcome to FrejFund
+      </h2>
+      
+      <p className="text-lg text-gray-600 mb-8">
+        Let's analyze your business and help you become investment-ready
+      </p>
+
+      <div className="minimal-box text-left mb-8">
+        <h3 className="font-semibold text-black mb-4">What we'll do together:</h3>
+        <ul className="space-y-3 text-gray-700">
+          <li className="flex items-start">
+            <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">1</span>
+            <span>Gather information about your business, team, and traction</span>
+          </li>
+          <li className="flex items-start">
+            <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">2</span>
+            <span>Analyze your investment readiness across 10 key dimensions</span>
+          </li>
+          <li className="flex items-start">
+            <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">3</span>
+            <span>Connect you with AI coach Freja for personalized guidance</span>
+          </li>
+          <li className="flex items-start">
+            <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">4</span>
+            <span>Match you with relevant investors in our network</span>
+          </li>
+        </ul>
+      </div>
+
+      <div className="minimal-box text-left mb-8">
+        <h3 className="font-semibold text-black mb-4">Your data is safe:</h3>
+        <ul className="space-y-2 text-sm text-gray-600">
+          <li>• Your information is encrypted and stored securely</li>
+          <li>• We never share your data without explicit permission</li>
+          <li>• Investors only see what you choose to share</li>
+          <li>• You can delete your account anytime</li>
+        </ul>
+      </div>
+
+      <div className="bg-gray-50 rounded-xl p-6 mb-8">
+        <label className="flex items-start cursor-pointer group">
+          <input
+            type="checkbox"
+            checked={acceptedTerms}
+            onChange={(e) => setAcceptedTerms(e.target.checked)}
+            className="mt-1 mr-3 w-5 h-5 rounded border-gray-300 text-black focus:ring-black"
+          />
+          <span className="text-sm text-gray-700 text-left">
+            I agree to FrejFund's{' '}
+            <a href="/terms" target="_blank" className="text-black underline hover:no-underline">
+              Terms of Service
+            </a>{' '}
+            and{' '}
+            <a href="/privacy" target="_blank" className="text-black underline hover:no-underline">
+              Privacy Policy
+            </a>
+            . I understand that my data will be used to provide AI-powered investment readiness analysis and investor matching.
+          </span>
+        </label>
+      </div>
+
+      <button
+        onClick={handleNext}
+        disabled={!acceptedTerms}
+        className="minimal-button w-full disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Get Started
+      </button>
+    </motion.div>
+  );
 
   const renderField = (field: string) => {
     switch (field) {
@@ -606,27 +701,33 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="w-full max-w-xl"
       >
-        {/* Progress Dots */}
-        <div className="flex justify-center space-x-3 mb-12">
-          {steps.map((_, index) => (
-            <motion.div
-              key={index}
-              className={`h-2.5 rounded-full transition-all duration-500 ${
-                index === currentStep
-                  ? 'w-10 bg-black'
-                  : index < currentStep
-                  ? 'w-2.5 bg-gray-400'
-                  : 'w-2.5 bg-gray-200'
-              }`}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: index * 0.1, type: "spring", stiffness: 300 }}
-            />
-          ))}
-        </div>
+        {/* Welcome Screen */}
+        {currentStep === -1 && renderWelcomeScreen()}
 
-        {/* Form Card */}
-        <motion.div
+        {/* Regular wizard steps */}
+        {currentStep >= 0 && (
+          <>
+            {/* Progress Dots */}
+            <div className="flex justify-center space-x-3 mb-12">
+              {steps.map((_, index) => (
+                <motion.div
+                  key={index}
+                  className={`h-2.5 rounded-full transition-all duration-500 ${
+                    index === currentStep
+                      ? 'w-10 bg-black'
+                      : index < currentStep
+                      ? 'w-2.5 bg-gray-400'
+                      : 'w-2.5 bg-gray-200'
+                  }`}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: index * 0.1, type: "spring", stiffness: 300 }}
+                />
+              ))}
+            </div>
+
+            {/* Form Card */}
+            <motion.div
           className="minimal-box minimal-box-shadow"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -711,6 +812,8 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
             </motion.button>
           </div>
         </motion.div>
+          </>
+        )}
       </motion.div>
     </div>
   );
