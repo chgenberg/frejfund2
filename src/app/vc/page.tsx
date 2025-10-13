@@ -70,10 +70,15 @@ export default function VCDashboard() {
   });
 
   useEffect(() => {
-    // Check if VC is authenticated
-    const vcToken = localStorage.getItem('vc-token');
-    if (!vcToken) {
-      router.push('/vc/login');
+    // Guard for SSR/hydration
+    if (typeof window === 'undefined') return;
+    let token: string | null = null;
+    try {
+      token = localStorage.getItem('vc-token');
+    } catch {}
+    if (!token) {
+      // Soft redirect to avoid render crash loops
+      setTimeout(() => router.push('/vc/login'), 0);
       return;
     }
     setIsAuthenticated(true);

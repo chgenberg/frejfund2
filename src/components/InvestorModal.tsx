@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Building2, ArrowRight, Briefcase, TrendingUp, Users, Shield, Info } from 'lucide-react';
+import { X, Building2, ArrowRight, Briefcase, TrendingUp, Users, Shield, Info, Brain, Target, Sparkles } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface InvestorModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface InvestorModalProps {
 }
 
 export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
+  const router = useRouter();
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const [email, setEmail] = useState('');
@@ -30,8 +32,10 @@ export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('vc-token', data.token);
-        window.location.href = '/vc';
+        if (typeof window !== 'undefined') {
+          try { localStorage.setItem('vc-token', data.token); } catch {}
+        }
+        router.push('/vc');
       } else {
         setError(data.error || 'Login failed');
       }
@@ -43,25 +47,30 @@ export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
   };
 
   const vcTabs = [
-    { 
-      title: 'Deal Flow', 
-      icon: <TrendingUp className="w-5 h-5" />,
-      content: 'Access pre-vetted startups matched to your investment thesis. Filter by industry, stage, location, and metrics.'
+    {
+      title: 'Get Started',
+      icon: <Sparkles className="w-5 h-5" />,
+      content: 'Create an investor account (or use demo), set your thesis, and access a curated feed of startups that match your preferences.'
     },
-    { 
-      title: 'Deep Analysis', 
+    {
+      title: 'Deep Analysis',
+      icon: <Brain className="w-5 h-5" />,
+      content: 'Every startup is analyzed across 95 dimensions (market, team, traction, financials, risks) so you can make fast, confident decisions.'
+    },
+    {
+      title: 'Smart Matching',
+      icon: <Target className="w-5 h-5" />,
+      content: 'We match by stage, industry, geography, check size and thesis signals. Prioritized feed with high-fit deals first.'
+    },
+    {
+      title: 'Due Diligence',
       icon: <Briefcase className="w-5 h-5" />,
-      content: '95-dimension analysis on every startup. See traction, team strength, market opportunity, and investment readiness scores.'
+      content: 'One-click access to pitch decks, metrics, and references. Track red flags, strengths and follow-ups directly in the profile.'
     },
-    { 
-      title: 'Smart Matching', 
-      icon: <Users className="w-5 h-5" />,
-      content: 'AI matches startups to your portfolio strategy. Save time by focusing on companies that fit your criteria.'
-    },
-    { 
-      title: 'Due Diligence', 
-      icon: <Shield className="w-5 h-5" />,
-      content: 'Complete company profiles with pitch decks, financials, and real-time metrics. Make informed decisions faster.'
+    {
+      title: 'Invest & Track',
+      icon: <TrendingUp className="w-5 h-5" />,
+      content: 'Request intros, collaborate with your team, and track portfolio metrics post-investment with automated updates.'
     }
   ];
 
@@ -84,11 +93,11 @@ export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-2xl shadow-2xl z-[9999] overflow-hidden"
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl bg-white rounded-2xl shadow-2xl z-[9999] overflow-hidden"
           >
             {!showHowItWorks ? (
               /* Login View */
-              <div className="p-8">
+              <div className="p-6 sm:p-8">
                 <button
                   onClick={onClose}
                   className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -97,7 +106,7 @@ export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
                 </button>
 
                 <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-black rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
                     <Building2 className="w-8 h-8 text-white" />
                   </div>
                   <h2 className="text-2xl font-bold text-black mb-2">Investor Access</h2>
@@ -180,7 +189,7 @@ export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
               </div>
             ) : (
               /* How It Works View */
-              <div className="p-8">
+              <div className="p-0 sm:p-8">
                 <button
                   onClick={() => setShowHowItWorks(false)}
                   className="absolute top-4 left-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -195,33 +204,27 @@ export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
                   <X className="w-5 h-5" />
                 </button>
 
-                <div className="text-center mb-8 mt-4">
+                <div className="text-center mt-4 mb-2 sm:mb-6">
                   <h2 className="text-2xl font-bold text-black mb-2">How FrejFund Works for VCs</h2>
-                  <p className="text-gray-600">Find and evaluate investment opportunities efficiently</p>
+                  <p className="text-gray-600">Evaluate, decide and act faster with investor-grade AI insights</p>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex border-b border-gray-200 mb-6">
+                <div className="flex border-b border-gray-100 px-4 sm:px-8">
                   {vcTabs.map((tab, index) => (
                     <button
                       key={index}
                       onClick={() => setActiveTab(index)}
                       className={`flex-1 pb-3 text-sm font-medium transition-colors relative ${
                         activeTab === index
-                          ? 'text-black'
-                          : 'text-gray-500 hover:text-gray-700'
+                          ? 'text-black border-b-2 border-black bg-gray-50'
+                          : 'text-gray-500 hover:text-black hover:bg-gray-50'
                       }`}
                     >
                       <div className="flex flex-col items-center gap-1">
                         {tab.icon}
                         <span className="hidden sm:inline">{tab.title}</span>
                       </div>
-                      {activeTab === index && (
-                        <motion.div
-                          layoutId="activeTab"
-                          className="absolute bottom-0 left-0 right-0 h-0.5 bg-black"
-                        />
-                      )}
                     </button>
                   ))}
                 </div>
@@ -230,14 +233,14 @@ export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={activeTab}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.2 }}
-                    className="space-y-6"
+                    className="space-y-6 p-6 sm:p-8 max-h-[60vh] overflow-y-auto"
                   >
                     <div className="text-center">
-                      <div className="w-20 h-20 bg-black rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
                         {vcTabs[activeTab].icon}
                         {React.cloneElement(vcTabs[activeTab].icon, { className: "w-10 h-10 text-white" })}
                       </div>
@@ -312,14 +315,18 @@ export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
                   </motion.div>
                 </AnimatePresence>
 
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setShowHowItWorks(false)}
-                  className="w-full mt-8 px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
-                >
-                  Sign In to View Startups
-                </motion.button>
+                <div className="p-6 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
+                  <p className="text-sm text-gray-600">Ready to discover high-fit deals?</p>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setShowHowItWorks(false)}
+                    className="bg-black text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors inline-flex items-center gap-2"
+                  >
+                    Sign In to View Startups
+                    <ArrowRight className="w-4 h-4" />
+                  </motion.button>
+                </div>
               </div>
             )}
           </motion.div>
