@@ -1332,7 +1332,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                       <ReactMarkdown 
                         remarkPlugins={[remarkGfm]}
                         components={{
-                        p: ({children}) => <p className="mb-2 leading-normal">{children}</p>,
+                        p: ({children}) => <p className="mb-3 leading-relaxed">{children}</p>,
                           strong: ({children}) => <strong className="font-semibold text-black">{children}</strong>,
                         }}
                       >

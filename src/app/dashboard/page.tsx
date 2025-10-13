@@ -28,6 +28,8 @@ export default function Dashboard() {
   const [readinessScore, setReadinessScore] = useState(0);
   const [analysisProgress, setAnalysisProgress] = useState({ current: 0, total: 95, status: 'idle' });
   const [deepAnalysisData, setDeepAnalysisData] = useState<any>(null);
+  const [isProfilePublic, setIsProfilePublic] = useState(false);
+  const [publishingProfile, setPublishingProfile] = useState(false);
   const [integrations, setIntegrations] = useState<Integration[]>([
     {
       id: 'gmail',
@@ -762,6 +764,60 @@ export default function Dashboard() {
               <h2 className="text-2xl font-semibold text-black mb-6">Settings</h2>
               
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm divide-y divide-gray-100">
+                <div className="p-6">
+                  <h3 className="text-lg font-medium text-black mb-4">Profile Visibility</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-black">Make profile visible to investors</h4>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Allow verified VCs to see your company profile and analysis results
+                        </p>
+                      </div>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={async () => {
+                          setPublishingProfile(true);
+                          try {
+                            const sessionId = localStorage.getItem('frejfund-session-id') || localStorage.getItem('sessionId');
+                            const response = await fetch('/api/profile/publish', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ 
+                                sessionId, 
+                                isPublic: !isProfilePublic 
+                              })
+                            });
+                            if (response.ok) {
+                              setIsProfilePublic(!isProfilePublic);
+                            }
+                          } catch (error) {
+                            console.error('Failed to update profile visibility:', error);
+                          } finally {
+                            setPublishingProfile(false);
+                          }
+                        }}
+                        disabled={publishingProfile}
+                        className={`relative w-14 h-7 rounded-full transition-colors ${
+                          isProfilePublic ? 'bg-black' : 'bg-gray-300'
+                        }`}
+                      >
+                        <div className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
+                          isProfilePublic ? 'translate-x-7' : 'translate-x-0'
+                        }`} />
+                      </motion.button>
+                    </div>
+                    {isProfilePublic && (
+                      <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <p className="text-sm text-green-700 flex items-center">
+                          <CheckCircle2 className="w-4 h-4 mr-2" />
+                          Your profile is now visible to investors on the VC dashboard
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <div className="p-6">
                   <h3 className="text-lg font-medium text-black mb-4">Account</h3>
                   <div className="space-y-4">

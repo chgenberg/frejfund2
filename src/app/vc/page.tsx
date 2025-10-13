@@ -75,63 +75,43 @@ export default function VCDashboard() {
   const loadStartups = async () => {
     setLoading(true);
     try {
-      // In real app, this would fetch from API
-      const mockStartups: Startup[] = [
-        {
-          id: '1',
-          name: 'Emma Chen',
-          companyName: 'DataFlow AI',
-          location: {
-            city: 'Stockholm',
-            country: 'Sweden',
-            coordinates: [59.3293, 18.0686]
-          },
-          industry: 'B2B SaaS',
-          stage: 'Seed',
-          raised: 500000,
-          seeking: 2000000,
-          monthlyRevenue: 85000,
-          teamSize: 12,
-          foundedYear: 2022,
-          readinessScore: 87,
-          oneLiner: 'Real-time data pipelines for enterprise AI - making ML deployment 10x faster',
-          metrics: {
-            growth: 25,
-            retention: 92,
-            burnRate: 120000
-          },
-          tags: ['AI/ML', 'Infrastructure', 'Developer Tools'],
-          lastActive: new Date()
-        },
-        {
-          id: '2',
-          name: 'Marcus Berg',
-          companyName: 'GreenCharge',
-          location: {
-            city: 'Berlin',
-            country: 'Germany',
-            coordinates: [52.5200, 13.4050]
-          },
-          industry: 'Climate Tech',
-          stage: 'Series A',
-          raised: 3000000,
-          seeking: 8000000,
-          monthlyRevenue: 420000,
-          teamSize: 35,
-          foundedYear: 2021,
-          readinessScore: 92,
-          oneLiner: 'Smart EV charging network powered by renewable energy',
-          metrics: {
-            growth: 40,
-            retention: 88,
-            burnRate: 350000
-          },
-          tags: ['Sustainability', 'Hardware', 'Marketplace'],
-          lastActive: new Date()
-        }
-      ];
-      
-      setStartups(mockStartups);
+      const response = await fetch('/api/vc/startups');
+      if (response.ok) {
+        const data = await response.json();
+        setStartups(data.startups);
+      } else {
+        console.error('Failed to fetch startups');
+        // Use mock data as fallback
+        const mockStartups: Startup[] = [
+          {
+            id: '1',
+            name: 'Emma Chen',
+            companyName: 'DataFlow AI',
+            location: {
+              city: 'Stockholm',
+              country: 'Sweden',
+              coordinates: [59.3293, 18.0686]
+            },
+            industry: 'B2B SaaS',
+            stage: 'Seed',
+            raised: 500000,
+            seeking: 2000000,
+            monthlyRevenue: 85000,
+            teamSize: 12,
+            foundedYear: 2022,
+            readinessScore: 87,
+            oneLiner: 'Real-time data pipelines for enterprise AI - making ML deployment 10x faster',
+            metrics: {
+              growth: 25,
+              retention: 92,
+              burnRate: 120000
+            },
+            tags: ['AI/ML', 'Infrastructure', 'Developer Tools'],
+            lastActive: new Date()
+          }
+        ];
+        setStartups(mockStartups);
+      }
     } catch (error) {
       console.error('Error loading startups:', error);
     } finally {
@@ -377,7 +357,7 @@ export default function VCDashboard() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  onClick={() => setSelectedStartup(startup)}
+                  onClick={() => router.push(`/vc/startup/${startup.id}`)}
                   className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all cursor-pointer"
                 >
                   <div className="flex items-start justify-between">
@@ -547,7 +527,7 @@ export default function VCDashboard() {
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => router.push(`/founder/${selectedStartup.id}`)}
+                      onClick={() => router.push(`/vc/startup/${selectedStartup.id}`)}
                       className="flex-1 px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
                     >
                       View Full Analysis
