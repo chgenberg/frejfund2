@@ -135,11 +135,12 @@ export default function VCDashboard() {
   const filteredStartups = startups.filter(startup => {
     // Search filter
     if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      if (!startup.companyName.toLowerCase().includes(query) &&
-          !startup.name.toLowerCase().includes(query) &&
-          !startup.industry.toLowerCase().includes(query) &&
-          !startup.oneLiner.toLowerCase().includes(query)) {
+      const query = String(searchQuery || '').toLowerCase();
+      const company = String(startup.companyName || '').toLowerCase();
+      const name = String(startup.name || '').toLowerCase();
+      const industry = String(startup.industry || '').toLowerCase();
+      const oneLiner = String(startup.oneLiner || '').toLowerCase();
+      if (!company.includes(query) && !name.includes(query) && !industry.includes(query) && !oneLiner.includes(query)) {
         return false;
       }
     }
@@ -147,10 +148,14 @@ export default function VCDashboard() {
     // Apply other filters
     if (filters.industry !== 'all' && startup.industry !== filters.industry) return false;
     if (filters.stage !== 'all' && startup.stage !== filters.stage) return false;
-    if (startup.monthlyRevenue < filters.minRevenue || startup.monthlyRevenue > filters.maxRevenue) return false;
-    if (startup.seeking < filters.minSeeking || startup.seeking > filters.maxSeeking) return false;
-    if (filters.country !== 'all' && startup.location.country !== filters.country) return false;
-    if (startup.readinessScore < filters.readinessScore) return false;
+    const monthlyRevenue = Number(startup.monthlyRevenue || 0);
+    const seeking = Number(startup.seeking || 0);
+    const readiness = Number(startup.readinessScore || 0);
+    const country = (startup.location && startup.location.country) ? startup.location.country : '';
+    if (monthlyRevenue < filters.minRevenue || monthlyRevenue > filters.maxRevenue) return false;
+    if (seeking < filters.minSeeking || seeking > filters.maxSeeking) return false;
+    if (filters.country !== 'all' && country !== filters.country) return false;
+    if (readiness < filters.readinessScore) return false;
     
     return true;
   });
@@ -161,9 +166,8 @@ export default function VCDashboard() {
     return 'text-red-600';
   };
 
-  if (!isAuthenticated) {
-    return null; // Will redirect in useEffect
-  }
+  if (typeof window === 'undefined') return null;
+  if (!isAuthenticated) return null; // redirect handled in effect
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -282,7 +286,7 @@ export default function VCDashboard() {
                 {/* Stage Filter */}
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Stage</label>
-                  <select
+          <select
                     value={filters.stage}
                     onChange={(e) => setFilters({...filters, stage: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent"
@@ -429,20 +433,20 @@ export default function VCDashboard() {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                         <div className="bg-gray-50 rounded-lg p-3">
                           <div className="text-xs text-gray-600 mb-1">Monthly Revenue</div>
-                          <div className="text-lg font-bold text-black">
-                            ${(startup.monthlyRevenue / 1000).toFixed(0)}k
+                        <div className="text-lg font-bold text-black">
+                          ${((Number(startup.monthlyRevenue || 0)) / 1000).toFixed(0)}k
                           </div>
                         </div>
                         <div className="bg-gray-50 rounded-lg p-3">
                           <div className="text-xs text-gray-600 mb-1">Growth</div>
-                          <div className="text-lg font-bold text-green-600">
-                            +{startup.metrics.growth}%
+                        <div className="text-lg font-bold text-green-600">
+                          +{Number(startup.metrics?.growth || 0)}%
                           </div>
                         </div>
                         <div className="bg-gray-50 rounded-lg p-3">
                           <div className="text-xs text-gray-600 mb-1">Seeking</div>
-                          <div className="text-lg font-bold text-black">
-                            ${(startup.seeking / 1000000).toFixed(1)}M
+                        <div className="text-lg font-bold text-black">
+                          ${((Number(startup.seeking || 0)) / 1000000).toFixed(1)}M
                           </div>
                         </div>
                         <div className="bg-gray-50 rounded-lg p-3">
@@ -469,7 +473,7 @@ export default function VCDashboard() {
                           <Clock className="w-3 h-3 mr-1" />
                           Active today
                         </div>
-                      </div>
+                    </div>
                   </div>
                 </div>
               </motion.div>
