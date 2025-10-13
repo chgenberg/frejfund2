@@ -30,9 +30,19 @@ export default function GoalSettingPage() {
     const info = JSON.parse(stored) as BusinessInfo;
     setBusinessInfo(info);
     
-    // Trigger deep analysis in background
+    // Trigger deep analysis in background (only once per session)
     const sessionId = localStorage.getItem('frejfund-session-id') || `sess-${Date.now()}`;
     localStorage.setItem('frejfund-session-id', sessionId);
+    
+    // Check if analysis already triggered for this session
+    const analysisTriggered = sessionStorage.getItem(`analysis-triggered-${sessionId}`);
+    if (analysisTriggered) {
+      console.log('⚠️ Analysis already triggered for this session');
+      return;
+    }
+    
+    // Mark as triggered immediately to prevent duplicates
+    sessionStorage.setItem(`analysis-triggered-${sessionId}`, 'true');
     
     fetch('/api/deep-analysis', {
       method: 'POST',
@@ -43,10 +53,16 @@ export default function GoalSettingPage() {
         scrapedContent: info.preScrapedText || '',
         uploadedDocuments: []
       })
-    }).then(() => {
-      console.log('✅ Deep analysis started in background');
+    }).then((response) => {
+      if (response.ok) {
+        console.log('✅ Deep analysis started in background');
+      } else {
+        // If it failed, remove the trigger flag so user can retry
+        sessionStorage.removeItem(`analysis-triggered-${sessionId}`);
+      }
     }).catch(error => {
       console.error('❌ Failed to start deep analysis:', error);
+      sessionStorage.removeItem(`analysis-triggered-${sessionId}`);
     });
   }, [router]);
 

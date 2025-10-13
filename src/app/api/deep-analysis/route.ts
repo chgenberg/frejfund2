@@ -16,16 +16,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Single-run guard: don't start if already analyzing (STRONGER CHECK)
+    // Single-run guard: Check if already running BEFORE starting
     const { prisma } = await import('@/lib/prisma');
-    const existing = await prisma.deepAnalysis.findUnique({ where: { sessionId } });
+    const existing = await prisma.deepAnalysis.findUnique({ 
+      where: { sessionId },
+      select: { status: true, progress: true }
+    });
     
     if (existing && existing.status === 'analyzing') {
-      console.log('⚠️ Analysis already running for session:', sessionId);
+      console.log('⚠️ Analysis already running for session:', sessionId, `(${existing.progress}% complete)`);
       return NextResponse.json({ 
         success: true, 
         already_running: true, 
         message: 'Analysis already in progress',
+        progress: existing.progress,
         sessionId 
       });
     }
