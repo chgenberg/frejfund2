@@ -72,7 +72,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   const [showIntelligentSearch, setShowIntelligentSearch] = useState(false);
   const [prefetchedContext, setPrefetchedContext] = useState<string | null>(null);
   const [dailyCompass, setDailyCompass] = useState<{ insights: string[]; risks: string[]; actions: string[]; citations?: Array<{label:string; snippet:string}> } | null>(null);
-  const [showCompass, setShowCompass] = useState(true);
+  const [showCompass, setShowCompass] = useState(false);
   const [loadingCompass, setLoadingCompass] = useState(false);
   const [syncingInbox, setSyncingInbox] = useState(false);
   // Thin top progress bar while "thinking"
@@ -289,7 +289,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
             const dc = await dcRes.json();
             if (dc && (Array.isArray(dc.insights) || Array.isArray(dc.risks) || Array.isArray(dc.actions))) {
               setDailyCompass({ insights: dc.insights || [], risks: dc.risks || [], actions: dc.actions || [], citations: dc.citations });
-              setShowCompass(true);
+              setShowCompass(false);
             }
           }
         } catch {}
@@ -315,7 +315,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       if (res.ok) {
         const dc = await res.json();
         setDailyCompass({ insights: dc.insights || [], risks: dc.risks || [], actions: dc.actions || [], citations: dc.citations });
-        setShowCompass(true);
+        setShowCompass(false);
       }
     } catch {}
     setLoadingCompass(false);
@@ -346,7 +346,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       // Refresh Daily Compass (with citations)
       try {
         const dcRes = await fetch('/api/cron/daily?ui=1', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ sessionId }) });
-        if (dcRes.ok) { const dc = await dcRes.json(); setDailyCompass({ insights: dc.insights || [], risks: dc.risks || [], actions: dc.actions || [], citations: dc.citations }); setShowCompass(true); }
+        if (dcRes.ok) { const dc = await dcRes.json(); setDailyCompass({ insights: dc.insights || [], risks: dc.risks || [], actions: dc.actions || [], citations: dc.citations }); setShowCompass(false); }
       } catch {}
     } catch (e) {
       console.error('Sync inbox failed', e);
@@ -398,7 +398,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                 onClick={() => {
                   try {
                     const rows = [['KPI','Definition','Target'], ...data.kpis.map((k: any) => [k.name, k.definition, k.target])];
-                    const csv = rows.map(r => r.map((x) => '"'+String(x??'').replace(/"/g,'""')+'"').join(',')).join('\n');
+                    const csv = rows.map((r: any[]) => r.map((x: any) => '"'+String(x??'').replace(/"/g,'""')+'"').join(',')).join('\n');
                     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
@@ -472,14 +472,25 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       text = text.replace(/\[(\d+)\]\*/g, '[$1]'); // Fix reference asterisks like [1]*
       text = text.replace(/\*\[(\d+)\]/g, '[$1]'); // Fix *[1] to [1]
       
-      // Don't add excessive line breaks - keep text more compact
-      // Only add breaks for major sections
+      // Light section emphasis (no extra blank paragraphs)
       text = text.replace(/(Next steps:)/gi, '\n**$1**');
       text = text.replace(/(Key insights:)/gi, '\n**$1**');
       text = text.replace(/(Recommendations:)/gi, '\n**$1**');
-      
-      // Clean up excessive line breaks
-      text = text.replace(/^\n+/, '').replace(/\n{4,}/g, '\n\n').trim();
+
+      // Compact paragraphs:
+      // 1) Normalize CRLF
+      text = text.replace(/\r\n/g, '\n');
+      // 2) Collapse 3+ newlines to a single blank line
+      text = text.replace(/\n{3,}/g, '\n\n');
+      // 3) Within each paragraph (separated by blank line), turn single newlines into spaces
+      text = text
+        .split(/\n{2,}/)
+        .map((p: string) => p.replace(/\n+/g, ' ').trim())
+        .filter(Boolean)
+        .join('\n\n');
+
+      // Final trim
+      text = text.trim();
 
       return text;
     } catch {
@@ -763,7 +774,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       ]
     };
 
-    const industrySpecificQuestions = {
+    const industrySpecificQuestions: Record<string, string[]> = {
       'SaaS': [
         "How can I improve my SaaS metrics (CAC, LTV, churn)?",
         "What's the best pricing model for my SaaS product?",
