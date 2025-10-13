@@ -62,28 +62,7 @@ export default function Home() {
     }
   };
 
-  const features = [
-    {
-      icon: Brain,
-      title: 'AI-Powered Analysis',
-      description: 'Advanced algorithms analyze your business model, market fit, and growth potential'
-    },
-    {
-      icon: TrendingUp,
-      title: 'Investment Readiness',
-      description: 'Get specific recommendations to improve your pitch and attract investors'
-    },
-    {
-      icon: Users,
-      title: 'Team Assessment',
-      description: 'Evaluate team strengths and identify key hiring priorities'
-    },
-    {
-      icon: FileText,
-      title: 'Pitch Optimization',
-      description: 'Analyze your pitch deck and business documents for maximum impact'
-    }
-  ];
+  // Minimal landing – features removed
 
   if (currentView === 'wizard') {
     return <BusinessWizard onComplete={handleWizardComplete} />;
