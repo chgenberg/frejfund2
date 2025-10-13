@@ -104,8 +104,11 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
       }
     };
 
-    // 3. Run analysis for each dimension
-    for (const dimension of dimensionsToAnalyze) {
+    // 3. Run analysis for each dimension in small batches to reduce load
+    const batchSize = 5;
+    for (let idx = 0; idx < dimensionsToAnalyze.length; idx += batchSize) {
+      const batch = dimensionsToAnalyze.slice(idx, idx + batchSize);
+      for (const dimension of batch) {
       try {
         // Analyze with simple retry/backoff
         let result: any | null = null;
@@ -169,14 +172,19 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
           });
         }
 
-        // Progressive mode: Add delay to avoid rate limits
+        // Progressive mode: small delay between dimensions to avoid rate limits
         if (mode === 'progressive') {
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise(resolve => setTimeout(resolve, 250));
         }
 
       } catch (error) {
         console.error(`Error analyzing dimension ${dimension.id}:`, error);
         // Continue with other dimensions
+      }
+      }
+      // Short pause between batches
+      if (mode === 'progressive') {
+        await new Promise(r => setTimeout(r, 1000));
       }
     }
 
