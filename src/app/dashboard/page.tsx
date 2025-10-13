@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Activity, Mail, Calendar, Database, Settings, ChevronRight, 
   TrendingUp, AlertCircle, CheckCircle2, Clock, BarChart3,
-  MessageCircle, Brain, Users, FileText, Sparkles, X, Plus,
-  Link2, Zap, Shield, Key, RefreshCw, Download
+  MessageCircle, Brain, Users, FileText, X, Plus,
+  Link2, Zap, Shield, Key, RefreshCw, Download, Circle
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -103,7 +103,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
@@ -114,8 +114,8 @@ export default function Dashboard() {
                 whileHover={{ scale: 1.02 }}
                 onClick={() => router.push('/')}
               >
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-black rounded-xl flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-black rounded-full flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 bg-white rounded-full" />
                 </div>
                 <h1 className="text-base sm:text-xl font-semibold text-black hidden sm:block">FrejFund Dashboard</h1>
                 <h1 className="text-base font-semibold text-black sm:hidden">Dashboard</h1>
@@ -151,7 +151,7 @@ export default function Dashboard() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => router.push('/chat')}
-                className="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
+                className="minimal-button py-2 px-4 text-sm"
               >
                 Open Chat
               </motion.button>
@@ -210,11 +210,11 @@ export default function Dashboard() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-sm"
+                  className="minimal-box p-4 sm:p-6"
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <div className="p-1.5 sm:p-2 bg-gray-100 rounded-lg">
-                      <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
+                    <div className="p-1.5 sm:p-2 bg-black rounded-full">
+                      <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </div>
                     <span className="text-2xl font-bold text-black">{metrics.investmentReadiness}%</span>
                   </div>
@@ -224,11 +224,11 @@ export default function Dashboard() {
 
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-sm"
+                  className="minimal-box p-4 sm:p-6"
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <div className="p-2 bg-gray-100 rounded-lg">
-                      <Activity className="w-5 h-5 text-gray-700" />
+                    <div className="p-2 bg-black rounded-full">
+                      <Activity className="w-5 h-5 text-white" />
                     </div>
                     <span className="text-2xl font-bold text-black">{metrics.dailyActiveScore}</span>
                   </div>
@@ -238,11 +238,11 @@ export default function Dashboard() {
 
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-sm"
+                  className="minimal-box p-4 sm:p-6"
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <div className="p-2 bg-gray-100 rounded-lg">
-                      <Zap className="w-5 h-5 text-gray-700" />
+                    <div className="p-2 bg-black rounded-full">
+                      <Zap className="w-5 h-5 text-white" />
                     </div>
                     <span className="text-2xl font-bold text-black">{metrics.growthVelocity}x</span>
                   </div>
@@ -252,11 +252,11 @@ export default function Dashboard() {
 
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-sm"
+                  className="minimal-box p-4 sm:p-6"
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <div className="p-2 bg-gray-100 rounded-lg">
-                      <AlertCircle className="w-5 h-5 text-gray-700" />
+                    <div className="p-2 bg-black rounded-full">
+                      <AlertCircle className="w-5 h-5 text-white" />
                     </div>
                     <span className="text-2xl font-bold text-black">{metrics.riskScore}</span>
                   </div>
@@ -279,11 +279,11 @@ export default function Dashboard() {
                         className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0"
                       >
                         <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                            {activity.type === 'compass' && <Brain className="w-4 h-4 text-gray-600" />}
-                            {activity.type === 'email' && <Mail className="w-4 h-4 text-gray-600" />}
-                            {activity.type === 'document' && <FileText className="w-4 h-4 text-gray-600" />}
-                            {activity.type === 'insight' && <TrendingUp className="w-4 h-4 text-gray-600" />}
+                          <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
+                            {activity.type === 'compass' && <Brain className="w-4 h-4 text-white" />}
+                            {activity.type === 'email' && <Mail className="w-4 h-4 text-white" />}
+                            {activity.type === 'document' && <FileText className="w-4 h-4 text-white" />}
+                            {activity.type === 'insight' && <TrendingUp className="w-4 h-4 text-white" />}
                           </div>
                           <span className="text-sm text-gray-800">{activity.text}</span>
                         </div>
@@ -375,7 +375,7 @@ export default function Dashboard() {
                   <motion.div
                     key={integration.id}
                     whileHover={{ scale: 1.01 }}
-                    className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-sm"
+                    className="minimal-box p-4 sm:p-6"
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center space-x-3">

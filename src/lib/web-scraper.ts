@@ -52,7 +52,7 @@ export async function fetchHtml(url: string, timeoutMs = 12000): Promise<string>
 export async function extractMainContentWithReadability(url: string, html: string): Promise<ScrapeResult | null> {
   try {
     // Guard: skip heavy Readability on very large pages to avoid OOM
-    if (!html || html.length > 600_000) {
+    if (!html || html.length > 300_000) { // Reduced from 600K to 300K
       return null;
     }
     // Lazy-require to avoid bundler resolving at build time
@@ -60,13 +60,27 @@ export async function extractMainContentWithReadability(url: string, html: strin
     const { JSDOM } = require('jsdom');
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { Readability } = require('@mozilla/readability');
-    const dom = new JSDOM(html, { url });
+    
+    // Create DOM with resource limits
+    const dom = new JSDOM(html, { 
+      url,
+      resources: 'usable',
+      runScripts: 'outside-only',
+      pretendToBeVisual: false,
+      includeNodeLocations: false
+    });
+    
     const reader = new Readability(dom.window.document);
     const article = reader.parse();
+    
+    // Clean up DOM to free memory
+    dom.window.close();
+    
     if (!article) return null;
-    const text = normalizeWhitespace(article.textContent || '');
-    return { url, title: article.title || dom.window.document.title || undefined, text };
-  } catch {
+    const text = normalizeWhitespace(article.textContent || '').slice(0, 50000); // Limit text to 50k chars
+    return { url, title: article.title || undefined, text };
+  } catch (error) {
+    console.error('Readability extraction failed:', error);
     return null;
   }
 }

@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Target, CheckCircle2, Circle, ChevronRight, Sparkles, Calendar, TrendingUp } from 'lucide-react';
+import { Target, CheckCircle2, Circle, ChevronRight, Calendar, TrendingUp, ArrowLeft, ArrowRight } from 'lucide-react';
+import Header from '@/components/Header';
 import { UserRoadmap, calculateRoadmapProgress, getCurrentMilestone } from '@/lib/goal-system';
 
 export const dynamic = 'force-dynamic';
@@ -68,18 +69,19 @@ export default function RoadmapPage() {
   const weeksRemaining = Math.ceil((targetMs - Date.now()) / (7 * 24 * 60 * 60 * 1000));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
-      {/* Header */}
-      <div className="container mx-auto px-6 py-8">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-black rounded-2xl flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <h1 className="text-xl font-semibold">FrejFund</h1>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-white">
+      <Header 
+        rightContent={
+          <button
+            onClick={() => router.push('/goal-setting')}
+            className="text-sm text-gray-600 hover:text-black transition-colors flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Change goal
+          </button>
+        }
+      />
+      <div className="pt-24" />
 
       {/* Main Content */}
       <div className="container mx-auto px-6 py-8 max-w-4xl">
@@ -88,13 +90,13 @@ export default function RoadmapPage() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-3xl p-8 mb-8 text-center"
+          className="minimal-box minimal-box-shadow mb-8 text-center"
         >
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Target className="w-8 h-8 text-green-600" />
+          <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
+            <Target className="w-8 h-8 text-white" />
           </div>
           <h2 className="text-2xl font-bold text-black mb-2">
-            🎉 Your Personalized Roadmap is Ready!
+            Your Personalized Roadmap is Ready
           </h2>
           <p className="text-gray-700 max-w-xl mx-auto">
             Here's your step-by-step plan to <span className="font-semibold">{roadmap.goalTitle.toLowerCase()}</span>
@@ -114,7 +116,7 @@ export default function RoadmapPage() {
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 1, delay: 0.5 }}
-              className="bg-gradient-to-r from-gray-700 to-black h-full rounded-full"
+              className="bg-black h-full rounded-full"
             />
           </div>
 
@@ -261,7 +263,7 @@ export default function RoadmapPage() {
           >
             <span className="flex items-center space-x-2">
               <span>Start Coaching with Freja</span>
-              <Sparkles className="w-5 h-5" />
+              <ArrowRight className="w-5 h-5" />
             </span>
           </motion.button>
 

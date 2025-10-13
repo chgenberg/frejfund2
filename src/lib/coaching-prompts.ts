@@ -277,28 +277,28 @@ export function generateNextStepSuggestions(
   // Based on readiness score
   if (readinessScore < 4) {
     suggestions.push(
-      "💡 Help me create an investor-ready pitch deck",
-      "📊 Which KPIs should I focus on?",
-      "🎯 How do I find my first customers?"
+      "Help me create an investor-ready pitch deck",
+      "Which KPIs should I focus on?",
+      "How do I find my first customers?"
     );
   } else if (readinessScore < 7) {
     suggestions.push(
-      "🎤 Can we practice my pitch?",
-      "💰 How much should I try to raise?",
-      "📧 Help me write an investor email"
+      "Can we practice my pitch?",
+      "How much should I try to raise?",
+      "Help me write an investor email"
     );
   } else {
     suggestions.push(
-      "🔍 Which VCs fit my company?",
-      "📋 What should I prepare for investor meetings?",
-      "💼 How do I negotiate a term sheet?"
+      "Which VCs fit my company?",
+      "What should I prepare for investor meetings?",
+      "How do I negotiate a term sheet?"
     );
   }
 
   // Always include generic helpful options
   suggestions.push(
-    "📈 Analyze my business deeper",
-    "🎯 Set goals for next week"
+    "Analyze my business deeper",
+    "Set goals for next week"
   );
 
   return suggestions.slice(0, 5); // Max 5 suggestions

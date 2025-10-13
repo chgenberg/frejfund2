@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronLeft, Upload, X, FileText, Globe, Linkedin, ChevronDown } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Upload, X, FileText, Globe, Linkedin } from 'lucide-react';
 import { BusinessInfo } from '@/types/business';
 import { normalizeUrl, isValidUrl } from '@/lib/url-utils';
 
@@ -15,6 +15,9 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
   const [businessInfo, setBusinessInfo] = useState<Partial<BusinessInfo>>({});
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isScraping, setIsScraping] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
+  const [analysisStatus, setAnalysisStatus] = useState('');
 
   const steps = [
     {
@@ -160,27 +163,55 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
     return true; // File upload is optional
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Complete wizard
-      const completeInfo: BusinessInfo = {
-        name: businessInfo.name || '',
-        email: businessInfo.email || '',
-        website: businessInfo.website,
-        linkedinProfiles: businessInfo.linkedinProfiles,
-        stage: businessInfo.stage as BusinessInfo['stage'],
-        industry: businessInfo.industry || '',
-        targetMarket: businessInfo.targetMarket || '',
-        businessModel: businessInfo.businessModel || '',
-        monthlyRevenue: businessInfo.monthlyRevenue || '',
-        teamSize: businessInfo.teamSize || '',
-        uploadedFiles,
-        preScrapedText: businessInfo.preScrapedText,
-        preScrapedSources: businessInfo.preScrapedSources
-      };
-      onComplete(completeInfo);
+      // Start analysis
+      setIsAnalyzing(true);
+      setAnalysisProgress(0);
+      setAnalysisStatus('Preparing analysis...');
+
+      // Simulate analysis progress
+      const statuses = [
+        'Analyzing your business model...',
+        'Evaluating market potential...',
+        'Assessing team capabilities...',
+        'Calculating investment readiness...',
+        'Generating insights...'
+      ];
+
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 1.67; // 60 seconds = 100%
+        setAnalysisProgress(Math.min(progress, 100));
+        
+        const statusIndex = Math.floor(progress / 20);
+        if (statusIndex < statuses.length) {
+          setAnalysisStatus(statuses[statusIndex]);
+        }
+
+        if (progress >= 100) {
+          clearInterval(interval);
+          // Complete wizard
+          const completeInfo: BusinessInfo = {
+            name: businessInfo.name || '',
+            email: businessInfo.email || '',
+            website: businessInfo.website,
+            linkedinProfiles: businessInfo.linkedinProfiles,
+            stage: businessInfo.stage as BusinessInfo['stage'],
+            industry: businessInfo.industry || '',
+            targetMarket: businessInfo.targetMarket || '',
+            businessModel: businessInfo.businessModel || '',
+            monthlyRevenue: businessInfo.monthlyRevenue || '',
+            teamSize: businessInfo.teamSize || '',
+            uploadedFiles,
+            preScrapedText: businessInfo.preScrapedText,
+            preScrapedSources: businessInfo.preScrapedSources
+          };
+          onComplete(completeInfo);
+        }
+      }, 1000);
     }
   };
 
@@ -509,6 +540,63 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
         return null;
     }
   };
+
+  if (isAnalyzing) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center p-8">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md text-center"
+        >
+          <div className="minimal-box minimal-box-shadow">
+            {/* Progress Circle */}
+            <div className="relative w-32 h-32 mx-auto mb-8">
+              <svg className="w-32 h-32 transform -rotate-90">
+                <circle
+                  cx="64"
+                  cy="64"
+                  r="56"
+                  stroke="#e5e5e5"
+                  strokeWidth="12"
+                  fill="none"
+                />
+                <circle
+                  cx="64"
+                  cy="64"
+                  r="56"
+                  stroke="#000"
+                  strokeWidth="12"
+                  fill="none"
+                  strokeDasharray={`${2 * Math.PI * 56}`}
+                  strokeDashoffset={`${2 * Math.PI * 56 * (1 - analysisProgress / 100)}`}
+                  className="transition-all duration-500 ease-out"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-2xl font-bold text-black">{Math.round(analysisProgress)}%</span>
+              </div>
+            </div>
+
+            {/* Status Text */}
+            <h2 className="text-xl font-semibold text-black mb-2">Analyzing Your Business</h2>
+            <p className="text-gray-600 mb-6">{analysisStatus}</p>
+
+            {/* Progress Bar */}
+            <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+              <motion.div
+                className="h-full bg-black rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${analysisProgress}%` }}
+                transition={{ duration: 0.5 }}
+              />
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-8">

@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Target, ArrowRight, Check, Circle } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
+import Header from '@/components/Header';
 import { BusinessInfo } from '@/types/business';
 import { calculateReadinessScore } from '@/lib/coaching-prompts';
 import { GOAL_OPTIONS, UserGoal, generateRoadmap } from '@/lib/goal-system';
@@ -17,6 +18,7 @@ export default function GoalSettingPage() {
   const [selectedGoal, setSelectedGoal] = useState<UserGoal | null>(null);
   const [customGoalText, setCustomGoalText] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Load business info from sessionStorage
@@ -39,6 +41,7 @@ export default function GoalSettingPage() {
     if (!selectedGoal || !businessInfo) return;
 
     setIsGenerating(true);
+    setError(null);
 
     try {
       // Generate roadmap
@@ -75,9 +78,7 @@ export default function GoalSettingPage() {
       router.push('/roadmap');
     } catch (error) {
       console.error('Failed to save goal:', error);
-      // Continue anyway
-      router.push('/dashboard');
-    } finally {
+      setError('Failed to save your goal. Please try again.');
       setIsGenerating(false);
     }
   };
@@ -95,15 +96,8 @@ export default function GoalSettingPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="container mx-auto px-6 py-8">
-        <div className="flex items-center space-x-3 mb-8">
-          <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center">
-            <div className="w-1 h-1 bg-white rounded-full" />
-          </div>
-          <h1 className="text-xl font-semibold">FrejFund</h1>
-        </div>
-      </div>
+      <Header />
+      <div className="pt-24" />
 
       {/* Main Content */}
       <div className="container mx-auto px-6 py-12 max-w-4xl">
@@ -134,7 +128,7 @@ export default function GoalSettingPage() {
           {/* Goal Selection */}
           <div className="text-center mb-8">
             <div className="w-12 h-12 bg-black rounded-full mx-auto mb-4 flex items-center justify-center">
-              <Circle className="w-6 h-6 text-white" />
+              <div className="w-2 h-2 bg-white rounded-full" />
             </div>
             <h2 className="text-3xl font-bold text-black mb-3">
               What's your primary goal?
@@ -248,6 +242,11 @@ export default function GoalSettingPage() {
               )}
             </motion.button>
 
+            {error && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            )}
             <p className="text-sm text-gray-500 mt-4">
               You can always change your goal later
             </p>

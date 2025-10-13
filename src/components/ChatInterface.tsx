@@ -1244,7 +1244,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                             <button
                               key={idx}
                               onClick={() => {
-                                setInputValue(suggestion.replace(/^[📊💡🎤💰📧🔍📋💼📈🎯]\s*/, ''));
+                                setInputValue(suggestion);
                                 inputRef.current?.focus();
                               }}
                               className="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors"
