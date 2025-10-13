@@ -36,28 +36,36 @@ export default function Header({ showInvestorsButton = false, rightContent }: He
             </div>
           </motion.div>
           
-          {rightContent || (
-            showInvestorsButton && (
-              <div className="flex items-center space-x-2 sm:space-x-3">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => router.push('/locations')}
-                  className="px-3 sm:px-4 py-2 text-gray-600 hover:text-black text-xs sm:text-sm font-medium transition-colors hidden sm:block"
-                >
-                  Locations
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => router.push('/vc')}
-                  className="px-4 sm:px-6 py-2 sm:py-2.5 bg-black text-white rounded-full text-xs sm:text-sm font-medium hover:bg-gray-800 transition-colors"
-                >
-                  Investors
-                </motion.button>
-              </div>
-            )
-          )}
+                {rightContent || (
+                  showInvestorsButton && (
+                    <div className="flex items-center space-x-2 sm:space-x-3">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => router.push('/locations')}
+                        className="px-3 sm:px-4 py-2 text-gray-600 hover:text-black text-xs sm:text-sm font-medium transition-colors hidden sm:block"
+                      >
+                        Locations
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => router.push('/login')}
+                        className="px-3 sm:px-4 py-2 text-gray-600 hover:text-black text-xs sm:text-sm font-medium transition-colors"
+                      >
+                        Log in
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => router.push('/vc')}
+                        className="px-4 sm:px-6 py-2 sm:py-2.5 bg-black text-white rounded-full text-xs sm:text-sm font-medium hover:bg-gray-800 transition-colors"
+                      >
+                        Investors
+                      </motion.button>
+                    </div>
+                  )
+                )}
         </div>
       </div>
     </motion.header>

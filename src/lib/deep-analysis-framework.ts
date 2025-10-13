@@ -711,6 +711,214 @@ export const ANALYSIS_DIMENSIONS: AnalysisDimension[] = [
     priority: 'low',
     prompt: (bi, content) => `How does ${bi.companyName} position in the ecosystem? Partner with platforms or compete? Integrations? Content: ${content.slice(0, 1000)}`,
     extractionLogic: 'Check: integrations, partnerships, API strategy'
+  },
+
+  // ===== CATEGORY 15: CUSTOMER ACQUISITION DEPTH (5 dimensions) =====
+  {
+    id: 'cac-trends',
+    category: 'Customer Acquisition',
+    name: 'CAC Trends',
+    description: 'Is customer acquisition cost improving or degrading?',
+    priority: 'high',
+    prompt: (bi, content) => `Analyze ${bi.companyName}'s CAC trends over time. Is it improving, stable, or getting worse? What's driving the change? Content: ${content.slice(0, 1500)}`,
+    extractionLogic: 'Look for: CAC over time, efficiency improvements, channel performance'
+  },
+  {
+    id: 'channel-roi',
+    category: 'Customer Acquisition',
+    name: 'Channel ROI Analysis',
+    description: 'Which acquisition channels have best ROI?',
+    priority: 'medium',
+    prompt: (bi, content) => `Break down ${bi.companyName}'s ROI by acquisition channel. Which channels are most efficient? Content: ${content.slice(0, 1500)}`,
+    extractionLogic: 'Extract: channel performance, conversion rates by source'
+  },
+  {
+    id: 'conversion-funnel',
+    category: 'Customer Acquisition',
+    name: 'Conversion Funnel Health',
+    description: 'Where are prospects dropping off?',
+    priority: 'high',
+    prompt: (bi, content) => `Analyze ${bi.companyName}'s conversion funnel. Where are the biggest drop-offs? Visitor → Trial → Paid. Content: ${content.slice(0, 1500)}`,
+    extractionLogic: 'Look for: funnel metrics, conversion rates, drop-off points'
+  },
+  {
+    id: 'lead-quality',
+    category: 'Customer Acquisition',
+    name: 'Lead Quality Score',
+    description: 'Are they attracting high-quality or tire-kicker leads?',
+    priority: 'medium',
+    prompt: (bi, content) => `Assess the quality of ${bi.companyName}'s leads. Enterprise vs SMB? High intent vs browsers? Content: ${content.slice(0, 1000)}`,
+    extractionLogic: 'Analyze: customer segments, deal sizes, sales qualification'
+  },
+  {
+    id: 'acquisition-velocity',
+    category: 'Customer Acquisition',
+    name: 'Customer Acquisition Speed',
+    description: 'How fast can they onboard new customers?',
+    priority: 'medium',
+    prompt: (bi, content) => `How quickly can ${bi.companyName} acquire and activate new customers? Self-serve or high-touch? Content: ${content.slice(0, 1000)}`,
+    extractionLogic: 'Check: onboarding time, time-to-value, activation metrics'
+  },
+
+  // ===== CATEGORY 16: FINANCIAL HEALTH (5 dimensions) =====
+  {
+    id: 'cash-conversion',
+    category: 'Financial Health',
+    name: 'Cash Conversion Cycle',
+    description: 'How efficiently do they convert revenue to cash?',
+    priority: 'high',
+    prompt: (bi, content) => `Analyze ${bi.companyName}'s cash conversion cycle. How long from sale to cash collection? Any AR issues? Content: ${content.slice(0, 1000)}`,
+    extractionLogic: 'Look for: payment terms, collections, cash flow timing'
+  },
+  {
+    id: 'working-capital',
+    category: 'Financial Health',
+    name: 'Working Capital Management',
+    description: 'Are they managing cash efficiently?',
+    priority: 'medium',
+    prompt: (bi, content) => `Evaluate ${bi.companyName}'s working capital management. Inventory, receivables, payables optimization? Content: ${content.slice(0, 1000)}`,
+    extractionLogic: 'Analyze: cash management, payment cycles, capital efficiency'
+  },
+  {
+    id: 'debt-equity-strategy',
+    category: 'Financial Health',
+    name: 'Debt vs Equity Strategy',
+    description: 'Are they using debt strategically or purely equity?',
+    priority: 'low',
+    prompt: (bi, content) => `Does ${bi.companyName} use debt financing strategically? Revenue-based financing? Or pure equity? Content: ${content.slice(0, 1000)}`,
+    extractionLogic: 'Check: financing mix, debt mentions, alternative financing'
+  },
+  {
+    id: 'financial-reporting',
+    category: 'Financial Health',
+    name: 'Financial Reporting Quality',
+    description: 'How sophisticated is their financial tracking?',
+    priority: 'medium',
+    prompt: (bi, content) => `Assess ${bi.companyName}'s financial reporting maturity. Real-time dashboards? Monthly close process? Content: ${content.slice(0, 1000)}`,
+    extractionLogic: 'Look for: reporting cadence, metrics tracked, financial discipline'
+  },
+  {
+    id: 'budget-variance',
+    category: 'Financial Health',
+    name: 'Budget vs Actual Performance',
+    description: 'How accurately do they forecast and execute?',
+    priority: 'medium',
+    prompt: (bi, content) => `How well does ${bi.companyName} hit their forecasts? Consistent execution or big misses? Content: ${content.slice(0, 1000)}`,
+    extractionLogic: 'Analyze: forecast accuracy, execution discipline'
+  },
+
+  // ===== CATEGORY 17: COMPETITIVE INTELLIGENCE (4 dimensions) =====
+  {
+    id: 'feature-parity',
+    category: 'Competitive Intelligence',
+    name: 'Feature Parity Analysis',
+    description: 'Are they ahead or playing catch-up on features?',
+    priority: 'medium',
+    prompt: (bi, content) => `Compare ${bi.companyName}'s features vs main competitors. Leading, at parity, or lagging? Content: ${content.slice(0, 1500)}`,
+    extractionLogic: 'Extract: feature comparisons, unique capabilities, gaps'
+  },
+  {
+    id: 'market-share-trajectory',
+    category: 'Competitive Intelligence',
+    name: 'Market Share Trajectory',
+    description: 'Are they gaining or losing market share?',
+    priority: 'high',
+    prompt: (bi, content) => `Is ${bi.companyName} gaining market share vs competitors? Growing faster or slower than market? Content: ${content.slice(0, 1000)}`,
+    extractionLogic: 'Look for: relative growth rates, customer wins/losses'
+  },
+  {
+    id: 'win-loss-analysis',
+    category: 'Competitive Intelligence',
+    name: 'Win/Loss Reasons',
+    description: 'Why do they win or lose deals?',
+    priority: 'high',
+    prompt: (bi, content) => `Why does ${bi.companyName} win deals? Why do they lose? Price, features, or other? Content: ${content.slice(0, 1500)}`,
+    extractionLogic: 'Analyze: win reasons, loss reasons, competitive positioning'
+  },
+  {
+    id: 'pricing-competitiveness',
+    category: 'Competitive Intelligence',
+    name: 'Pricing vs Competition',
+    description: 'Premium, at par, or discount pricing?',
+    priority: 'medium',
+    prompt: (bi, content) => `How does ${bi.companyName}'s pricing compare to competitors? Premium positioning or competing on price? Content: ${content.slice(0, 1000)}`,
+    extractionLogic: 'Compare: pricing tiers, value proposition, positioning'
+  },
+
+  // ===== CATEGORY 18: PRODUCT STRATEGY (4 dimensions) =====
+  {
+    id: 'roadmap-quality',
+    category: 'Product Strategy',
+    name: 'Product Roadmap Quality',
+    description: 'Is the roadmap customer-driven or feature factory?',
+    priority: 'medium',
+    prompt: (bi, content) => `Evaluate ${bi.companyName}'s product roadmap. Customer-driven priorities or random features? Clear vision? Content: ${content.slice(0, 1500)}`,
+    extractionLogic: 'Look for: roadmap structure, prioritization logic, customer input'
+  },
+  {
+    id: 'feature-prioritization',
+    category: 'Product Strategy',
+    name: 'Feature Prioritization Logic',
+    description: 'How do they decide what to build next?',
+    priority: 'medium',
+    prompt: (bi, content) => `How does ${bi.companyName} prioritize features? Data-driven? Customer requests? Strategic vision? Content: ${content.slice(0, 1000)}`,
+    extractionLogic: 'Analyze: decision process, customer feedback loops'
+  },
+  {
+    id: 'technical-moat-depth',
+    category: 'Product Strategy',
+    name: 'Technical Moat Depth',
+    description: 'How deep is their technical advantage?',
+    priority: 'high',
+    prompt: (bi, content) => `How deep is ${bi.companyName}'s technical moat? Years ahead or easily replicable? Patents? Algorithms? Content: ${content.slice(0, 1500)}`,
+    extractionLogic: 'Assess: technical complexity, IP, time to replicate'
+  },
+  {
+    id: 'api-platform-strategy',
+    category: 'Product Strategy',
+    name: 'API/Platform Strategy',
+    description: 'Are they building an ecosystem or closed system?',
+    priority: 'medium',
+    prompt: (bi, content) => `Does ${bi.companyName} have an API/platform strategy? Building ecosystem or walled garden? Content: ${content.slice(0, 1000)}`,
+    extractionLogic: 'Look for: API mentions, developer docs, partner integrations'
+  },
+
+  // ===== CATEGORY 19: BRAND & MARKETING (4 dimensions) =====
+  {
+    id: 'brand-strength',
+    category: 'Brand & Marketing',
+    name: 'Brand Recognition',
+    description: 'How strong is their brand in the market?',
+    priority: 'medium',
+    prompt: (bi, content) => `Assess ${bi.companyName}'s brand strength. Known in their space? Category leader or unknown? Content: ${content.slice(0, 1000)}`,
+    extractionLogic: 'Check: press mentions, industry recognition, brand consistency'
+  },
+  {
+    id: 'content-marketing',
+    category: 'Brand & Marketing',
+    name: 'Content Marketing Quality',
+    description: 'Are they thought leaders or just noise?',
+    priority: 'low',
+    prompt: (bi, content) => `Evaluate ${bi.companyName}'s content marketing. High-quality thought leadership or generic content? SEO performance? Content: ${content.slice(0, 1000)}`,
+    extractionLogic: 'Analyze: blog quality, SEO rankings, content frequency'
+  },
+  {
+    id: 'community-building',
+    category: 'Brand & Marketing',
+    name: 'Community Building',
+    description: 'Have they built an engaged user community?',
+    priority: 'medium',
+    prompt: (bi, content) => `Has ${bi.companyName} built a community? User forums? Slack groups? Events? How engaged? Content: ${content.slice(0, 1000)}`,
+    extractionLogic: 'Look for: community mentions, user groups, engagement levels'
+  },
+  {
+    id: 'thought-leadership',
+    category: 'Brand & Marketing',
+    name: 'Thought Leadership',
+    description: 'Are founders/team recognized experts?',
+    priority: 'low',
+    prompt: (bi, content) => `Are ${bi.companyName}'s founders/team thought leaders? Speaking at conferences? Published articles? Content: ${content.slice(0, 1000)}`,
+    extractionLogic: 'Check: speaking engagements, publications, industry visibility'
   }
 ];
 

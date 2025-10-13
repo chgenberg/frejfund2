@@ -234,7 +234,42 @@ export default function Chatbot() {
                         : 'bg-gray-100 text-gray-900 rounded-bl-md text-sm'
                     }`}
                   >
-                    <p className="text-xs sm:text-sm whitespace-pre-wrap">{message.text}</p>
+                    <div className="text-xs sm:text-sm">
+                      {message.text.split('\n').map((line, idx) => {
+                        // Check if line is a bullet point
+                        const isBullet = line.trim().startsWith('•') || line.trim().startsWith('-');
+                        const lineContent = isBullet ? line.trim().substring(1).trim() : line;
+                        
+                        // Parse markdown-style bold text
+                        const parts = lineContent.split(/(\*\*[^*]+\*\*)/);
+                        
+                        const parsedContent = parts.map((part, partIdx) => {
+                          if (part.startsWith('**') && part.endsWith('**')) {
+                            return (
+                              <strong key={partIdx} className="font-semibold">
+                                {part.slice(2, -2)}
+                              </strong>
+                            );
+                          }
+                          return part;
+                        });
+                        
+                        if (isBullet) {
+                          return (
+                            <div key={idx} className={`flex items-start ${idx > 0 ? 'mt-1' : ''}`}>
+                              <span className="mr-2">•</span>
+                              <span>{parsedContent}</span>
+                            </div>
+                          );
+                        }
+                        
+                        return (
+                          <p key={idx} className={idx > 0 && !isBullet ? 'mt-3' : ''}>
+                            {parsedContent}
+                          </p>
+                        );
+                      })}
+                    </div>
                   </div>
                 </motion.div>
               ))}
