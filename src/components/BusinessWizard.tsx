@@ -171,30 +171,35 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
       [file.name]: { status: 'extracting' }
     }));
     
-    try {
-      // Dynamic import to avoid bundling issues
-      const { extractFromFile } = await import('@/lib/file-extractor');
-      const result = await extractFromFile(file);
-      
-      const wordCount = result.text.split(/\s+/).filter(w => w.length > 0).length;
-      
-      setFileExtractionStatus(prev => ({
-        ...prev,
-        [file.name]: { 
-          status: 'success',
-          wordCount 
-        }
-      }));
-    } catch (error) {
-      console.error(`Failed to extract ${file.name}:`, error);
-      setFileExtractionStatus(prev => ({
-        ...prev,
-        [file.name]: { 
-          status: 'error',
-          error: 'Could not extract text'
-        }
-      }));
-    }
+    // Extract in background (non-blocking)
+    (async () => {
+      try {
+        // Dynamic import to avoid bundling issues
+        const { extractFromFile } = await import('@/lib/file-extractor');
+        const result = await extractFromFile(file);
+        
+        const wordCount = result.text.split(/\s+/).filter(w => w.length > 0).length;
+        
+        setFileExtractionStatus(prev => ({
+          ...prev,
+          [file.name]: { 
+            status: 'success',
+            wordCount 
+          }
+        }));
+      } catch (error) {
+        console.error(`Failed to extract ${file.name}:`, error);
+        setFileExtractionStatus(prev => ({
+          ...prev,
+          [file.name]: { 
+            status: 'error',
+            error: 'Could not extract text'
+          }
+        }));
+      }
+    })();
+    
+    // Return immediately, don't block UI
   };
   
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -304,6 +309,9 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
             preScrapedText: businessInfo.preScrapedText,
             preScrapedSources: businessInfo.preScrapedSources
           };
+          
+          // Note: File extraction continues in background
+          // Backend will handle full extraction during deep analysis
           onComplete(completeInfo);
         }
       }, 1000);
@@ -689,6 +697,9 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
               </p>
               <p className="text-xs text-gray-400">
                 Max 50MB per file • Up to 10 files • 100MB total
+              </p>
+              <p className="text-xs text-green-600 mt-2">
+                💡 You can continue while files are being analyzed in the background
               </p>
               <input
                 type="file"
