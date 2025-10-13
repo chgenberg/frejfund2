@@ -83,6 +83,20 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   const [syncingInbox, setSyncingInbox] = useState(false);
   // Thin top progress bar while "thinking"
   const [thinkingProgress, setThinkingProgress] = useState(0);
+  
+  // Deep analysis progress tracking
+  const [analysisProgress, setAnalysisProgress] = useState<{
+    current: number;
+    total: number;
+    status: 'idle' | 'running' | 'completed';
+    completedCategories: string[];
+  }>({
+    current: 0,
+    total: 68,
+    status: 'idle',
+    completedCategories: []
+  });
+  const [showCompletionCelebration, setShowCompletionCelebration] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -311,8 +325,48 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
             }
           }
         } catch {}
-        // Trigger deep analysis in background
+        // Trigger deep analysis in background with SSE progress
         try {
+          setAnalysisProgress(prev => ({ ...prev, status: 'running' }));
+          
+          const eventSource = new EventSource(`/api/deep-analysis/progress?sessionId=${sessionId}`);
+          
+          eventSource.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            
+            if (data.type === 'progress') {
+              setAnalysisProgress({
+                current: data.current,
+                total: data.total,
+                status: 'running',
+                completedCategories: data.completedCategories || []
+              });
+            } else if (data.type === 'complete') {
+              setAnalysisProgress(prev => ({ ...prev, status: 'completed' }));
+              eventSource.close();
+              
+              // Show completion notification
+              const completionMessage: Message = {
+                id: `analysis-complete-${Date.now()}`,
+                content: "Deep analysis complete! I now have a comprehensive understanding of your business across 68 dimensions. Ask me anything!",
+                sender: 'agent',
+                timestamp: new Date(),
+                type: 'analysis'
+              };
+              setMessages(prev => [...prev, completionMessage]);
+              
+              // Show celebration
+              setShowCompletionCelebration(true);
+              setTimeout(() => setShowCompletionCelebration(false), 5000);
+            }
+          };
+          
+          eventSource.onerror = () => {
+            eventSource.close();
+            setAnalysisProgress(prev => ({ ...prev, status: 'idle' }));
+          };
+          
+          // Start the analysis
           await fetch('/api/deep-analysis', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -320,12 +374,13 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               sessionId,
               businessInfo,
               scrapedContent: mergedContext || '',
-              uploadedDocuments: businessInfo.preScrapedFiles || []
+              uploadedDocuments: []
             })
           });
           console.log('Deep analysis started in background');
         } catch (error) {
           console.error('Failed to start deep analysis:', error);
+          setAnalysisProgress(prev => ({ ...prev, status: 'idle' }));
         }
 
         // Fetch one-shot summary to seed context (include prefetched docs). Keep it hidden.
@@ -1108,6 +1163,96 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         </div>
       </motion.header>
 
+      {/* Deep Analysis Progress Indicator */}
+      <AnimatePresence>
+        {analysisProgress.status === 'running' && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="bg-gray-50 border-b border-gray-200"
+          >
+            <div className="max-w-3xl mx-auto px-4 py-3">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-3">
+                  <div className="relative">
+                    <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                        className="w-1.5 h-1.5 bg-white rounded-full"
+                      />
+                    </div>
+                    <motion.div
+                      className="absolute inset-0 w-8 h-8 border-2 border-black rounded-full"
+                      animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0, 0.3] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-black">
+                      Analyzing your business deeply
+                    </p>
+                    <p className="text-xs text-gray-600">
+                      {analysisProgress.current} of {analysisProgress.total} dimensions analyzed
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-medium text-black">
+                    {Math.round((analysisProgress.current / analysisProgress.total) * 100)}%
+                  </p>
+                  {analysisProgress.completedCategories.length > 0 && (
+                    <p className="text-xs text-gray-500">
+                      {analysisProgress.completedCategories[analysisProgress.completedCategories.length - 1]}
+                    </p>
+                  )}
+                </div>
+              </div>
+              
+              {/* Progress bar */}
+              <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                <motion.div
+                  className="h-full bg-black rounded-full relative overflow-hidden"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${(analysisProgress.current / analysisProgress.total) * 100}%` }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                >
+                  {/* Shimmer effect */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                    animate={{ x: [-200, 200] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                  />
+                </motion.div>
+              </div>
+              
+              {/* Category pills */}
+              {analysisProgress.completedCategories.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {['critical', 'high', 'medium', 'low'].map((priority) => {
+                    const isCompleted = analysisProgress.completedCategories.includes(priority);
+                    return (
+                      <span
+                        key={priority}
+                        className={`text-xs px-2 py-0.5 rounded-full transition-all ${
+                          isCompleted
+                            ? 'bg-black text-white'
+                            : 'bg-gray-200 text-gray-400'
+                        }`}
+                      >
+                        {priority}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Thinking progress bar */}
       <div className="h-1 w-full bg-gray-100">
         <motion.div
@@ -1848,6 +1993,68 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
             }}
             onClose={() => setShowIntelligentSearch(false)}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Completion Celebration */}
+      <AnimatePresence>
+        {showCompletionCelebration && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+            className="fixed inset-x-0 top-24 mx-auto max-w-lg z-50 pointer-events-none"
+          >
+            <div className="mx-4">
+              <motion.div
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="bg-black text-white rounded-2xl p-6 text-center shadow-2xl relative overflow-hidden"
+              >
+                {/* Shimmer effect */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                  animate={{ x: [-400, 400] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                />
+                
+                {/* Content */}
+                <div className="relative z-10">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
+                    className="w-16 h-16 bg-white rounded-full mx-auto mb-4 flex items-center justify-center"
+                  >
+                    <motion.div
+                      animate={{ rotate: [0, 360] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      className="w-3 h-3 bg-black rounded-full"
+                    />
+                  </motion.div>
+                  
+                  <h3 className="text-xl font-bold mb-2">Analysis Complete!</h3>
+                  <p className="text-sm text-gray-300">
+                    I've analyzed your business across 68 dimensions and am ready to be your smartest investment coach.
+                  </p>
+                  
+                  {/* Animated dots */}
+                  <div className="flex justify-center mt-4 space-x-2">
+                    {[0, 1, 2].map((i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.5 + i * 0.1 }}
+                        className="w-2 h-2 bg-white rounded-full"
+                      />
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

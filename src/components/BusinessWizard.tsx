@@ -81,12 +81,22 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
 
   const [uploadError, setUploadError] = useState<string>('');
   const [isDragging, setIsDragging] = useState(false);
+  const [fileExtractionStatus, setFileExtractionStatus] = useState<Record<string, {
+    status: 'extracting' | 'success' | 'error';
+    wordCount?: number;
+    error?: string;
+  }>>({});
   
-  const validateAndAddFiles = (files: File[]) => {
+  const ALLOWED_FORMATS = [
+    '.pdf', '.docx', '.doc', '.xlsx', '.xls', 
+    '.pptx', '.ppt', '.key', '.csv', '.txt'
+  ];
+  
+  const validateAndAddFiles = async (files: File[]) => {
     setUploadError('');
     
-    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-    const MAX_TOTAL_SIZE = 50 * 1024 * 1024; // 50MB
+    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+    const MAX_TOTAL_SIZE = 100 * 1024 * 1024; // 100MB
     const MAX_FILES = 10;
     
     // Check file count
@@ -95,10 +105,25 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
       return;
     }
     
+    // Check file formats
+    for (const file of files) {
+      const hasValidFormat = ALLOWED_FORMATS.some(ext => 
+        file.name.toLowerCase().endsWith(ext)
+      );
+      if (!hasValidFormat) {
+        setUploadError(
+          `"${file.name}" has unsupported format. Allowed: ${ALLOWED_FORMATS.join(', ')}`
+        );
+        return;
+      }
+    }
+    
     // Check individual file sizes
     for (const file of files) {
       if (file.size > MAX_FILE_SIZE) {
-        setUploadError(`File "${file.name}" is too large. Max size: 10MB`);
+        setUploadError(
+          `"${file.name}" is too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Max: 50MB`
+        );
         return;
       }
     }
@@ -107,11 +132,49 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
     const currentTotal = uploadedFiles.reduce((sum, f) => sum + f.size, 0);
     const newTotal = files.reduce((sum, f) => sum + f.size, 0);
     if (currentTotal + newTotal > MAX_TOTAL_SIZE) {
-      setUploadError('Total upload size would exceed 50MB limit');
+      setUploadError('Total upload size would exceed 100MB limit');
       return;
     }
     
+    // Add files and start extraction preview
     setUploadedFiles(prev => [...prev, ...files]);
+    
+    // Extract text preview from files
+    for (const file of files) {
+      extractFilePreview(file);
+    }
+  };
+  
+  const extractFilePreview = async (file: File) => {
+    setFileExtractionStatus(prev => ({
+      ...prev,
+      [file.name]: { status: 'extracting' }
+    }));
+    
+    try {
+      // Dynamic import to avoid bundling issues
+      const { extractFromFile } = await import('@/lib/file-extractor');
+      const result = await extractFromFile(file);
+      
+      const wordCount = result.text.split(/\s+/).filter(w => w.length > 0).length;
+      
+      setFileExtractionStatus(prev => ({
+        ...prev,
+        [file.name]: { 
+          status: 'success',
+          wordCount 
+        }
+      }));
+    } catch (error) {
+      console.error(`Failed to extract ${file.name}:`, error);
+      setFileExtractionStatus(prev => ({
+        ...prev,
+        [file.name]: { 
+          status: 'error',
+          error: 'Could not extract text'
+        }
+      }));
+    }
   };
   
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -357,13 +420,37 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
               <Globe className="inline w-4 h-4 mr-1" />
               Company Website
             </label>
-            <input
-              type="text"
-              value={businessInfo.website || ''}
-              onChange={(e) => handleInputChange('website', e.target.value)}
-              placeholder="yourcompany.com (http:// auto-added)"
-              className="minimal-select w-full"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={businessInfo.website || ''}
+                onChange={(e) => handleInputChange('website', e.target.value)}
+                placeholder="yourcompany.com (http:// auto-added)"
+                className="minimal-select w-full"
+              />
+              {isScraping && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    className="w-4 h-4 border-2 border-gray-300 border-t-black rounded-full"
+                  />
+                </div>
+              )}
+            </div>
+            {isScraping && (
+              <p className="text-xs text-gray-500 mt-2 flex items-center">
+                <motion.span
+                  animate={{ opacity: [1, 0.5, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  🔍 Analyzing website in background...
+                </motion.span>
+              </p>
+            )}
+            <p className="text-xs text-gray-400 mt-1">
+              We'll automatically scrape and analyze your website content
+            </p>
           </div>
         );
 
@@ -577,13 +664,16 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
               <p className={`font-medium mb-2 transition-colors ${isDragging ? 'text-black text-lg' : 'text-gray-700'}`}>
                 {isDragging ? '✨ Drop your files here!' : 'Drag & drop files here or click to browse'}
               </p>
-              <p className="text-sm text-gray-500">
-                Any document type supported • PDF, Office, Apple (Keynote/Pages/Numbers), Images • Max 10MB
+              <p className="text-sm text-gray-500 mb-1">
+                PDF, Word, Excel, PowerPoint, Keynote, CSV, Text
+              </p>
+              <p className="text-xs text-gray-400">
+                Max 50MB per file • Up to 10 files • 100MB total
               </p>
               <input
                 type="file"
                 multiple
-                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.key,.pages,.numbers,.txt,.csv,.rtf,.png,.jpg,.jpeg"
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.key,.txt,.csv"
                 onChange={handleFileUpload}
                 className="hidden"
                 id="file-upload"
@@ -598,34 +688,81 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
 
             {uploadedFiles.length > 0 && (
               <div className="mt-4 space-y-2">
-                {uploadedFiles.map((file, index) => (
-                  <motion.div 
-                    key={index} 
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="flex items-center justify-between bg-white p-3 rounded-xl border border-gray-200"
-                  >
-                    <div className="flex items-center">
-                      <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
-                        <FileText className="w-4 h-4 text-gray-600" />
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium text-gray-900 block">{file.name}</span>
-                        <span className="text-xs text-gray-500">
-                          {Math.round(file.size / 1024).toLocaleString()} KB
-                        </span>
-                      </div>
-                    </div>
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => removeFile(index)}
-                      className="text-gray-400 hover:text-gray-600 p-1"
+                <div className="text-xs text-gray-500 mb-2 flex items-center justify-between">
+                  <span>{uploadedFiles.length} file{uploadedFiles.length > 1 ? 's' : ''} uploaded</span>
+                  <span>
+                    {(uploadedFiles.reduce((sum, f) => sum + f.size, 0) / 1024 / 1024).toFixed(1)} MB total
+                  </span>
+                </div>
+                {uploadedFiles.map((file, index) => {
+                  const extractionStatus = fileExtractionStatus[file.name];
+                  return (
+                    <motion.div 
+                      key={index} 
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="bg-white p-3 rounded-xl border border-gray-200"
                     >
-                      <X className="w-4 h-4" />
-                    </motion.button>
-                  </motion.div>
-                ))}
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center flex-1 min-w-0">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center mr-3 ${
+                            extractionStatus?.status === 'success' ? 'bg-green-50' :
+                            extractionStatus?.status === 'error' ? 'bg-red-50' :
+                            'bg-gray-100'
+                          }`}>
+                            <FileText className={`w-4 h-4 ${
+                              extractionStatus?.status === 'success' ? 'text-green-600' :
+                              extractionStatus?.status === 'error' ? 'text-red-600' :
+                              'text-gray-600'
+                            }`} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className="text-sm font-medium text-gray-900 block truncate">
+                              {file.name}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {(file.size / 1024).toFixed(0)} KB
+                            </span>
+                          </div>
+                        </div>
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => removeFile(index)}
+                          className="text-gray-400 hover:text-gray-600 p-1 ml-2"
+                        >
+                          <X className="w-4 h-4" />
+                        </motion.button>
+                      </div>
+                      
+                      {/* Extraction Status */}
+                      {extractionStatus && (
+                        <div className="mt-2 pt-2 border-t border-gray-100">
+                          {extractionStatus.status === 'extracting' && (
+                            <div className="flex items-center text-xs text-gray-500">
+                              <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                className="w-3 h-3 border-2 border-gray-300 border-t-black rounded-full mr-2"
+                              />
+                              Extracting text...
+                            </div>
+                          )}
+                          {extractionStatus.status === 'success' && (
+                            <div className="text-xs text-green-600 font-medium">
+                              ✓ Extracted {extractionStatus.wordCount?.toLocaleString()} words
+                            </div>
+                          )}
+                          {extractionStatus.status === 'error' && (
+                            <div className="text-xs text-red-600">
+                              ✗ {extractionStatus.error}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </motion.div>
+                  );
+                })}
               </div>
             )}
           </div>

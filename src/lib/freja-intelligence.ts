@@ -244,7 +244,7 @@ export function generateSmartQuestions(businessInfo: BusinessInfo): string[] {
       questions.push(
         'What is your current MRR and growth rate?',
         'What is your customer acquisition strategy?',
-        'How sticky is your product (what's the churn)?'
+        'How sticky is your product (what is the churn)?'
       );
       break;
     case 'growth':

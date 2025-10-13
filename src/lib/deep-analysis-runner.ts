@@ -35,12 +35,19 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
     });
 
     // 2. Determine which dimensions to analyze
-    const dimensionsToAnalyze = mode === 'critical-only' 
+    let dimensionsToAnalyze = mode === 'critical-only' 
       ? getCriticalDimensions()
       : ANALYSIS_DIMENSIONS;
 
+    // Sort dimensions by priority order: critical -> high -> medium -> low
+    const priorityOrder = ['critical', 'high', 'medium', 'low'];
+    dimensionsToAnalyze = dimensionsToAnalyze.sort((a, b) => {
+      return priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority);
+    });
+
     const totalDimensions = dimensionsToAnalyze.length;
     let completed = 0;
+    const completedCategories: string[] = [];
 
     // 3. Run analysis for each dimension
     for (const dimension of dimensionsToAnalyze) {
@@ -77,10 +84,37 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
         completed++;
         const progress = Math.round((completed / totalDimensions) * 100);
         
+        // Track completed categories
+        if (!completedCategories.includes(dimension.priority)) {
+          const categoryDimensions = dimensionsToAnalyze.filter(d => d.priority === dimension.priority);
+          const categoryCompleted = categoryDimensions.every(d => 
+            completed >= dimensionsToAnalyze.indexOf(d) + 1
+          );
+          if (categoryCompleted) {
+            completedCategories.push(dimension.priority);
+          }
+        }
+        
         await prisma.deepAnalysis.update({
           where: { id: analysis.id },
           data: { progress }
         });
+        
+        // Send progress update via SSE
+        try {
+          await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/deep-analysis/progress`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sessionId,
+              current: completed,
+              total: totalDimensions,
+              completedCategories
+            })
+          });
+        } catch (error) {
+          console.error('Failed to send progress update:', error);
+        }
 
         // Generate insights from this dimension if critical
         if (dimension.priority === 'critical' && result.redFlags.length > 0) {
