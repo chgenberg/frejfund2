@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
             where: { sessionId },
             include: {
               dimensions: {
-                where: { status: 'completed' },
+                where: { analyzed: true },
                 select: { category: true }
               }
             }
