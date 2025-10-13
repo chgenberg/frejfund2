@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["postgresqlExtensions"]
 }
 
@@ -14,13 +14,13 @@ datasource db {
 
 // Magic Link for passwordless authentication
 model MagicLink {
-  id            String    @id @default(cuid())
-  email         String
-  token         String    @unique
-  used          Boolean   @default(false)
-  expiresAt     DateTime
-  createdAt     DateTime  @default(now())
-  
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  used      Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
   @@index([email])
   @@index([token])
   @@index([expiresAt])
@@ -29,71 +29,92 @@ model MagicLink {
 
 // User/Account management
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  name          String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Business info
-  company       String?
-  industry      String?
-  stage         String?
-  website       String?
-  
+  company  String?
+  industry String?
+  stage    String?
+  website  String?
+
   // Founder profile (for sharing with VCs)
-  isProfilePublic Boolean   @default(false)
-  profileSlug     String?   @unique
-  pitchDeck       String?   // URL to pitch deck
-  oneLiner        String?   // One sentence pitch
-  askAmount       Int?      // How much raising (USD)
-  traction        Json?     // Key metrics
-  
+  isProfilePublic Boolean @default(false)
+  profileSlug     String? @unique
+  pitchDeck       String? // URL to pitch deck
+  oneLiner        String? // One sentence pitch
+  askAmount       Int? // How much raising (USD)
+  traction        Json? // Key metrics
+
   // Relations
-  sessions      Session[]
-  integrations  Integration[]
-  insights      Insight[]
-  
+  sessions     Session[]
+  integrations Integration[]
+  insights     Insight[]
+
   @@map("users")
+}
+
+// VC User for investor access
+model VCUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  firm         String?
+  role         String? // e.g., "Partner", "Principal"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Investment preferences
+  industries   String[] // e.g., ["B2B SaaS", "Fintech"]
+  stages       String[] // e.g., ["Seed", "Series A"]
+  minCheckSize Int? // USD
+  maxCheckSize Int? // USD
+  geographies  String[] // e.g., ["Sweden", "Europe"]
+
+  @@map("vc_users")
 }
 
 // Session management (chat sessions)
 model Session {
-  id            String    @id @default(cuid())
-  userId        String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  lastActivity  DateTime  @default(now())
-  
+  id           String   @id @default(cuid())
+  userId       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  lastActivity DateTime @default(now())
+
   // Business context
-  businessInfo  Json?     // Store BusinessInfo type as JSON
-  
+  businessInfo Json? // Store BusinessInfo type as JSON
+
   // Relations
-  user          User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  messages      Message[]
-  documents     Document[]
-  
+  user      User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  Message[]
+  documents Document[]
+
   @@index([userId])
   @@map("sessions")
 }
 
 // Chat messages
 model Message {
-  id            String    @id @default(cuid())
-  sessionId     String
-  role          String    // 'user' | 'assistant' | 'system'
-  content       String    @db.Text
-  createdAt     DateTime  @default(now())
-  
+  id        String   @id @default(cuid())
+  sessionId String
+  role      String // 'user' | 'assistant' | 'system'
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
   // Metadata
-  tokens        Int?
-  latencyMs     Int?
-  cost          Float?
-  model         String?
-  
+  tokens    Int?
+  latencyMs Int?
+  cost      Float?
+  model     String?
+
   // Relations
-  session       Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
   @@index([sessionId])
   @@index([createdAt])
   @@map("messages")
@@ -101,33 +122,33 @@ model Message {
 
 // OAuth integrations (Gmail, Calendar, Stripe, etc)
 model Integration {
-  id              String    @id @default(cuid())
-  userId          String
-  provider        String    // 'gmail' | 'calendar' | 'stripe' | 'hubspot' | 'slack'
-  status          String    @default("disconnected") // 'connected' | 'disconnected' | 'error'
-  
+  id       String @id @default(cuid())
+  userId   String
+  provider String // 'gmail' | 'calendar' | 'stripe' | 'hubspot' | 'slack'
+  status   String @default("disconnected") // 'connected' | 'disconnected' | 'error'
+
   // OAuth tokens (encrypted)
-  accessToken     String?   @db.Text
-  refreshToken    String?   @db.Text
-  tokenExpiresAt  DateTime?
-  
+  accessToken    String?   @db.Text
+  refreshToken   String?   @db.Text
+  tokenExpiresAt DateTime?
+
   // Metadata
-  scopes          String[]
-  accountId       String?   // External account ID
-  accountEmail    String?
-  
+  scopes       String[]
+  accountId    String? // External account ID
+  accountEmail String?
+
   // Sync tracking
-  lastSyncAt      DateTime?
-  lastSyncStatus  String?   // 'success' | 'error'
-  syncedItemsCount Int      @default(0)
-  
+  lastSyncAt       DateTime?
+  lastSyncStatus   String? // 'success' | 'error'
+  syncedItemsCount Int       @default(0)
+
   // Timestamps
-  connectedAt     DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  
+  connectedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
   // Relations
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, provider])
   @@index([userId])
   @@index([provider])
@@ -136,55 +157,55 @@ model Integration {
 
 // Vector embeddings for RAG
 model Document {
-  id            String    @id @default(cuid())
-  sessionId     String
-  
+  id        String @id @default(cuid())
+  sessionId String
+
   // Content
-  content       String    @db.Text
-  metadata      Json?     // source, type, filename, etc
-  
+  content  String @db.Text
+  metadata Json? // source, type, filename, etc
+
   // Vector embedding (will use JSON for now, migrate to pgvector later)
   // embedding     Unsupported("vector(1536)")?
-  embedding     Json?     // Store as JSON array for now
-  
+  embedding Json? // Store as JSON array for now
+
   // Timestamps
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relations
-  session       Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
   @@index([sessionId])
   @@map("documents")
 }
 
 // Daily insights and compass
 model Insight {
-  id            String    @id @default(cuid())
-  userId        String
-  type          String    // 'daily_compass' | 'risk' | 'opportunity' | 'metric'
-  
+  id     String @id @default(cuid())
+  userId String
+  type   String // 'daily_compass' | 'risk' | 'opportunity' | 'metric'
+
   // Content
-  title         String
-  description   String    @db.Text
-  priority      String?   // 'high' | 'medium' | 'low'
-  category      String?   // 'revenue' | 'pipeline' | 'team' | 'product'
-  
+  title       String
+  description String  @db.Text
+  priority    String? // 'high' | 'medium' | 'low'
+  category    String? // 'revenue' | 'pipeline' | 'team' | 'product'
+
   // Metadata
-  data          Json?     // Additional structured data
-  citations     Json?     // Source references
-  
+  data      Json? // Additional structured data
+  citations Json? // Source references
+
   // Status
-  status        String    @default("active") // 'active' | 'dismissed' | 'completed'
-  dismissedAt   DateTime?
-  
+  status      String    @default("active") // 'active' | 'dismissed' | 'completed'
+  dismissedAt DateTime?
+
   // Timestamps
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relations
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
   @@index([type])
   @@index([createdAt])
@@ -193,21 +214,21 @@ model Insight {
 
 // Feedback for AI responses
 model Feedback {
-  id            String    @id @default(cuid())
-  messageId     String?   // Can be null for general feedback
-  sessionId     String?
-  
+  id        String  @id @default(cuid())
+  messageId String? // Can be null for general feedback
+  sessionId String?
+
   // Feedback data
-  rating        String    // 'up' | 'down'
-  reason        String?   @db.Text
-  missing       String?   @db.Text
-  
+  rating  String // 'up' | 'down'
+  reason  String? @db.Text
+  missing String? @db.Text
+
   // Metadata
-  userAgent     String?
-  
+  userAgent String?
+
   // Timestamps
-  createdAt     DateTime  @default(now())
-  
+  createdAt DateTime @default(now())
+
   @@index([messageId])
   @@index([createdAt])
   @@map("feedback")
@@ -215,38 +236,38 @@ model Feedback {
 
 // Auto-generated documents (pitch decks, one-pagers, etc.)
 model GeneratedDocument {
-  id            String    @id @default(cuid())
-  sessionId     String
-  userId        String?
-  
+  id        String  @id @default(cuid())
+  sessionId String
+  userId    String?
+
   // Document info
-  type          String    // 'pitch_deck' | 'one_pager' | 'investor_update' | 'financial_model' | 'due_diligence' | 'email_template'
-  title         String
-  description   String?   @db.Text
-  
+  type        String // 'pitch_deck' | 'one_pager' | 'investor_update' | 'financial_model' | 'due_diligence' | 'email_template'
+  title       String
+  description String? @db.Text
+
   // Status
-  status        String    @default("draft") // 'ready' | 'draft' | 'generating' | 'outdated'
-  version       String?   // e.g., "v3.2"
-  
+  status  String  @default("draft") // 'ready' | 'draft' | 'generating' | 'outdated'
+  version String? // e.g., "v3.2"
+
   // Content
-  content       Json?     // Structured content (slides, sections, etc.)
-  fileUrl       String?   // URL to generated PDF/PPTX
-  shareUrl      String?   // Public sharing URL
-  
+  content  Json? // Structured content (slides, sections, etc.)
+  fileUrl  String? // URL to generated PDF/PPTX
+  shareUrl String? // Public sharing URL
+
   // Analytics
-  viewCount     Int       @default(0)
-  shareCount    Int       @default(0)
-  avgViewTime   Int?      // in seconds
-  
+  viewCount   Int  @default(0)
+  shareCount  Int  @default(0)
+  avgViewTime Int? // in seconds
+
   // Metadata
-  metadata      Json?     // Additional data (colors, branding, etc.)
-  generatedBy   String?   // AI model used
-  
+  metadata    Json? // Additional data (colors, branding, etc.)
+  generatedBy String? // AI model used
+
   // Timestamps
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  publishedAt   DateTime?
-  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+
   @@index([sessionId])
   @@index([userId])
   @@index([type])
@@ -257,50 +278,50 @@ model GeneratedDocument {
 
 // Investor database
 model Investor {
-  id                String    @id @default(cuid())
-  
+  id String @id @default(cuid())
+
   // Basic info
-  name              String
-  firmName          String?
-  type              String    // 'vc' | 'angel' | 'corporate_vc' | 'accelerator' | 'family_office'
-  
+  name     String
+  firmName String?
+  type     String // 'vc' | 'angel' | 'corporate_vc' | 'accelerator' | 'family_office'
+
   // Contact
-  email             String?
-  linkedIn          String?
-  twitter           String?
-  website           String?
-  
+  email    String?
+  linkedIn String?
+  twitter  String?
+  website  String?
+
   // Investment profile
-  stage             String[]  // ['seed', 'series_a', 'series_b', etc.]
-  industries        String[]  // ['saas', 'fintech', 'healthcare', etc.]
-  geographies       String[]  // ['nordics', 'europe', 'us', 'global']
-  checkSizeMin      BigInt?   // in USD
-  checkSizeMax      BigInt?   // in USD
-  
+  stage        String[] // ['seed', 'series_a', 'series_b', etc.]
+  industries   String[] // ['saas', 'fintech', 'healthcare', etc.]
+  geographies  String[] // ['nordics', 'europe', 'us', 'global']
+  checkSizeMin BigInt? // in USD
+  checkSizeMax BigInt? // in USD
+
   // Investment thesis
-  thesis            String?   @db.Text
-  sweetSpot         String?   @db.Text
-  
+  thesis    String? @db.Text
+  sweetSpot String? @db.Text
+
   // Portfolio
-  portfolioCount    Int       @default(0)
+  portfolioCount     Int      @default(0)
   notableInvestments String[] // Company names
-  
+
   // Metrics
-  fundSize          BigInt?   // in USD
-  yearFounded       Int?
-  dealsPerYear      Int?
-  
+  fundSize     BigInt? // in USD
+  yearFounded  Int?
+  dealsPerYear Int?
+
   // Metadata
-  tags              String[]  // ['b2b', 'consumer', 'deep_tech', etc.]
-  ranking           Int?      // Internal ranking/score
-  
+  tags    String[] // ['b2b', 'consumer', 'deep_tech', etc.]
+  ranking Int? // Internal ranking/score
+
   // Timestamps
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relations
-  matches           InvestorMatch[]
-  
+  matches InvestorMatch[]
+
   @@index([firmName])
   @@index([stage])
   @@index([geographies])
@@ -309,37 +330,37 @@ model Investor {
 
 // AI-generated investor matches
 model InvestorMatch {
-  id            String    @id @default(cuid())
-  sessionId     String
-  investorId    String
-  
+  id         String @id @default(cuid())
+  sessionId  String
+  investorId String
+
   // Match score
-  matchScore    Int       // 0-100
-  reasoning     String    @db.Text
-  
+  matchScore Int // 0-100
+  reasoning  String @db.Text
+
   // Match factors
-  stageMatch    Int       // 0-100
-  industryMatch Int       // 0-100
-  geoMatch      Int       // 0-100
-  checkSizeMatch Int      // 0-100
-  
+  stageMatch     Int // 0-100
+  industryMatch  Int // 0-100
+  geoMatch       Int // 0-100
+  checkSizeMatch Int // 0-100
+
   // Outreach tracking
-  status        String    @default("suggested") // 'suggested' | 'contacted' | 'meeting_scheduled' | 'passed' | 'invested'
-  notes         String?   @db.Text
-  contactedAt   DateTime?
-  respondedAt   DateTime?
-  
+  status      String    @default("suggested") // 'suggested' | 'contacted' | 'meeting_scheduled' | 'passed' | 'invested'
+  notes       String?   @db.Text
+  contactedAt DateTime?
+  respondedAt DateTime?
+
   // Warm intro path
-  hasWarmIntro  Boolean   @default(false)
-  introPath     Json?     // LinkedIn connection path
-  
+  hasWarmIntro Boolean @default(false)
+  introPath    Json? // LinkedIn connection path
+
   // Timestamps
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relations
-  investor      Investor  @relation(fields: [investorId], references: [id], onDelete: Cascade)
-  
+  investor Investor @relation(fields: [investorId], references: [id], onDelete: Cascade)
+
   @@unique([sessionId, investorId])
   @@index([sessionId])
   @@index([matchScore])
@@ -349,35 +370,35 @@ model InvestorMatch {
 
 // Intro requests from VCs to founders
 model IntroRequest {
-  id            String    @id @default(cuid())
-  
+  id String @id @default(cuid())
+
   // Who
-  vcEmail       String    // VC email who requested
-  vcName        String    // VC name
-  vcFirm        String    // VC firm
-  founderId     String    // User ID of founder
-  
+  vcEmail   String // VC email who requested
+  vcName    String // VC name
+  vcFirm    String // VC firm
+  founderId String // User ID of founder
+
   // What
-  founderName   String
+  founderName    String
   founderCompany String
-  matchScore    Int?      // Original match score
-  
+  matchScore     Int? // Original match score
+
   // Status
-  status        String    @default("pending") // 'pending' | 'accepted' | 'declined' | 'intro_sent'
+  status          String  @default("pending") // 'pending' | 'accepted' | 'declined' | 'intro_sent'
   founderResponse String? @db.Text
-  
+
   // Meeting
-  meetingScheduled Boolean @default(false)
-  meetingDate   DateTime?
-  
+  meetingScheduled Boolean   @default(false)
+  meetingDate      DateTime?
+
   // Tracking
-  requestedAt   DateTime  @default(now())
-  respondedAt   DateTime?
-  introSentAt   DateTime?
-  
+  requestedAt DateTime  @default(now())
+  respondedAt DateTime?
+  introSentAt DateTime?
+
   // Metadata
-  metadata      Json?     // Additional context
-  
+  metadata Json? // Additional context
+
   @@index([founderId])
   @@index([vcEmail])
   @@index([status])
@@ -387,31 +408,31 @@ model IntroRequest {
 
 // VC swipes (Tinder-style matching)
 model VCSwipe {
-  id            String    @id @default(cuid())
-  
+  id String @id @default(cuid())
+
   // Who swiped
-  vcEmail       String
-  vcFirm        String
-  
+  vcEmail String
+  vcFirm  String
+
   // What they swiped on
-  founderId     String
-  sessionId     String    // Founder's session
-  
+  founderId String
+  sessionId String // Founder's session
+
   // Swipe action
-  action        String    // 'like' | 'pass' | 'super_like'
-  
+  action String // 'like' | 'pass' | 'super_like'
+
   // Match state
-  isRevealed    Boolean   @default(false)
-  revealedAt    DateTime?
-  
+  isRevealed Boolean   @default(false)
+  revealedAt DateTime?
+
   // Metadata (what VC saw when swiping)
-  anonymousData Json      // The blind profile data
+  anonymousData Json // The blind profile data
   matchScore    Int?
-  aiReasoning   String?   @db.Text
-  
+  aiReasoning   String? @db.Text
+
   // Timestamps
-  createdAt     DateTime  @default(now())
-  
+  createdAt DateTime @default(now())
+
   @@unique([vcEmail, founderId])
   @@index([vcEmail])
   @@index([founderId])
@@ -422,25 +443,25 @@ model VCSwipe {
 
 // Messages between matched VC and Founder
 model MatchMessage {
-  id            String    @id @default(cuid())
-  
+  id String @id @default(cuid())
+
   // Match reference (from IntroRequest)
   introRequestId String
-  
+
   // Who sent it
-  senderType    String    // 'vc' | 'founder'
-  senderEmail   String
-  
+  senderType  String // 'vc' | 'founder'
+  senderEmail String
+
   // Message
-  content       String    @db.Text
-  
+  content String @db.Text
+
   // Read status
-  isRead        Boolean   @default(false)
-  readAt        DateTime?
-  
+  isRead Boolean   @default(false)
+  readAt DateTime?
+
   // Timestamps
-  createdAt     DateTime  @default(now())
-  
+  createdAt DateTime @default(now())
+
   @@index([introRequestId])
   @@index([senderEmail])
   @@index([createdAt])
@@ -449,23 +470,23 @@ model MatchMessage {
 
 // VC investment preferences
 model VCPreference {
-  id            String    @id @default(cuid())
+  id String @id @default(cuid())
 
   // VC identity
-  vcEmail       String    @unique
-  vcFirm        String?
+  vcEmail String  @unique
+  vcFirm  String?
 
   // Preferences
-  stages        String[]  // ['pre_seed','seed','series_a','series_b','growth']
-  industries    String[]  // ['saas','fintech','health tech','marketplace','deep_tech','consumer']
-  geographies   String[]  // ['nordics','europe','us','global']
-  checkSizeMin  BigInt?
-  checkSizeMax  BigInt?
-  dealCriteria  String?   @db.Text
+  stages       String[] // ['pre_seed','seed','series_a','series_b','growth']
+  industries   String[] // ['saas','fintech','health tech','marketplace','deep_tech','consumer']
+  geographies  String[] // ['nordics','europe','us','global']
+  checkSizeMin BigInt?
+  checkSizeMax BigInt?
+  dealCriteria String?  @db.Text
 
   // Timestamps
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([vcEmail])
   @@map("vc_preferences")
@@ -473,27 +494,27 @@ model VCPreference {
 
 // Deep Analysis Results - stores comprehensive analysis across 68 dimensions
 model DeepAnalysis {
-  id            String    @id @default(cuid())
-  sessionId     String    @unique
-  userId        String?
-  
+  id        String  @id @default(cuid())
+  sessionId String  @unique
+  userId    String?
+
   // Analysis metadata
-  status        String    @default("pending") // 'pending' | 'analyzing' | 'completed' | 'failed'
-  progress      Int       @default(0) // 0-100
-  
+  status   String @default("pending") // 'pending' | 'analyzing' | 'completed' | 'failed'
+  progress Int    @default(0) // 0-100
+
   // Overall scores
-  overallScore      Int?       // 0-100
-  investmentReadiness Int?     // 0-10
-  
+  overallScore        Int? // 0-100
+  investmentReadiness Int? // 0-10
+
   // Timestamps
   startedAt     DateTime  @default(now())
   completedAt   DateTime?
   lastUpdatedAt DateTime  @updatedAt
-  
+
   // Relations
-  dimensions    AnalysisDimension[]
-  insights      AnalysisInsight[]
-  
+  dimensions AnalysisDimension[]
+  insights   AnalysisInsight[]
+
   @@index([sessionId])
   @@index([userId])
   @@index([status])
@@ -502,40 +523,40 @@ model DeepAnalysis {
 
 // Individual dimension analysis results
 model AnalysisDimension {
-  id            String    @id @default(cuid())
-  analysisId    String
-  
+  id         String @id @default(cuid())
+  analysisId String
+
   // Dimension info
-  dimensionId   String    // e.g., 'problem-clarity', 'unit-economics'
-  category      String    // e.g., 'Problem & Solution', 'Business Model'
-  name          String    // Human-readable name
-  
+  dimensionId String // e.g., 'problem-clarity', 'unit-economics'
+  category    String // e.g., 'Problem & Solution', 'Business Model'
+  name        String // Human-readable name
+
   // Analysis results
-  score         Int?      // 0-100
-  findings      String[]  // Key findings from analysis
-  redFlags      String[]  // Warning signs identified
-  strengths     String[]  // Positive signals
-  evidence      String[]  // Quotes/data supporting the analysis
-  
+  score     Int? // 0-100
+  findings  String[] // Key findings from analysis
+  redFlags  String[] // Warning signs identified
+  strengths String[] // Positive signals
+  evidence  String[] // Quotes/data supporting the analysis
+
   // Questions generated for this dimension
-  questions     String[]  // Smart questions to ask founder
-  
+  questions String[] // Smart questions to ask founder
+
   // Status
-  analyzed      Boolean   @default(false)
-  analyzedAt    DateTime?
-  
+  analyzed   Boolean   @default(false)
+  analyzedAt DateTime?
+
   // GPT metadata
-  prompt        String?   @db.Text
-  modelUsed     String?
-  tokensUsed    Int?
-  
+  prompt     String? @db.Text
+  modelUsed  String?
+  tokensUsed Int?
+
   // Timestamps
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relations
-  analysis      DeepAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
-  
+  analysis DeepAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+
   @@index([analysisId])
   @@index([dimensionId])
   @@index([category])
@@ -544,33 +565,33 @@ model AnalysisDimension {
 
 // High-level insights generated from analysis
 model AnalysisInsight {
-  id            String    @id @default(cuid())
-  analysisId    String
-  
+  id         String @id @default(cuid())
+  analysisId String
+
   // Insight data
-  type          String    // 'strength' | 'weakness' | 'opportunity' | 'threat' | 'question'
-  priority      String    // 'critical' | 'high' | 'medium' | 'low'
-  category      String    // Maps to dimension category
-  
+  type     String // 'strength' | 'weakness' | 'opportunity' | 'threat' | 'question'
+  priority String // 'critical' | 'high' | 'medium' | 'low'
+  category String // Maps to dimension category
+
   // Content
-  title         String
-  description   String    @db.Text
-  recommendation String?  @db.Text
-  
+  title          String
+  description    String  @db.Text
+  recommendation String? @db.Text
+
   // Supporting data
   relatedDimensions String[] // IDs of related dimensions
-  evidence      String[]  // Supporting quotes/data
-  
+  evidence          String[] // Supporting quotes/data
+
   // Status
-  addressed     Boolean   @default(false)
-  addressedAt   DateTime?
-  
+  addressed   Boolean   @default(false)
+  addressedAt DateTime?
+
   // Timestamps
-  createdAt     DateTime  @default(now())
-  
+  createdAt DateTime @default(now())
+
   // Relations
-  analysis      DeepAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
-  
+  analysis DeepAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+
   @@index([analysisId])
   @@index([type])
   @@index([priority])
