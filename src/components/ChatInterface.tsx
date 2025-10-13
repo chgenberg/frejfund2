@@ -1008,9 +1008,9 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                     <Info className="w-3 h-3 ml-1.5 text-gray-400 cursor-help" />
                     
                     {/* Tooltip - appears below the icon */}
-                    <div className="absolute top-full left-0 mt-2 w-72 p-4 bg-gradient-to-br from-yellow-400 to-yellow-500 text-black text-xs rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-[100]">
-                      <div className="font-bold mb-2 text-sm">🔬 Deep Analysis in Progress</div>
-                      <div className="space-y-2 text-gray-900">
+                    <div className="absolute top-full left-0 mt-2 w-72 p-4 bg-white text-black text-xs rounded-xl shadow-2xl border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-[100]">
+                      <div className="font-bold mb-2 text-sm">Deep Analysis in Progress</div>
+                      <div className="space-y-2 text-gray-800">
                         <p className="font-semibold">Analyzing 95 dimensions:</p>
                         <p>• Market opportunity & competition</p>
                         <p>• Team strength & execution</p>
@@ -1018,16 +1018,16 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                         <p>• Product-market fit signals</p>
                         <p>• Investment readiness</p>
                       </div>
-                      <div className="mt-3 pt-3 border-t border-yellow-600/30">
-                        <p className="font-medium text-gray-900">📊 Data sources:</p>
-                        <p className="text-gray-800">Website, LinkedIn, GitHub, Product Hunt, documents</p>
+                      <div className="mt-3 pt-3 border-t border-gray-200">
+                        <p className="font-medium text-gray-900">Data sources:</p>
+                        <p className="text-gray-700">Website, LinkedIn, GitHub, Product Hunt, documents</p>
                       </div>
-                      <div className="mt-2 pt-2 border-t border-yellow-600/30 bg-black/10 rounded-lg p-2 -mx-1">
-                        <p className="font-bold text-gray-900">⏱️ 15-30 minutes</p>
-                        <p className="text-gray-800 text-[10px]">Using GPT-5 for deep reasoning</p>
+                      <div className="mt-2 pt-2 border-t border-gray-200 rounded-lg p-2 -mx-1 bg-gray-50">
+                        <p className="font-bold text-gray-900">15-30 minutes</p>
+                        <p className="text-gray-700 text-[10px]">Optimized for cost with gpt-5-mini</p>
                       </div>
                       {/* Arrow pointing up */}
-                      <div className="absolute -top-2 left-4 w-0 h-0 border-l-[8px] border-r-[8px] border-b-[8px] border-transparent border-b-yellow-400"></div>
+                      <div className="absolute -top-2 left-4 w-0 h-0 border-l-[8px] border-r-[8px] border-b-[8px] border-transparent border-b-white"></div>
                     </div>
                   </span>
                 ) : (

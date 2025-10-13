@@ -27,13 +27,20 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
   console.log(`📋 Mode: ${mode}, Content length: ${scrapedContent.length}, Docs: ${uploadedDocuments.length}`);
   
   try {
-    // 1. Create DeepAnalysis record in database
-    const analysis = await prisma.deepAnalysis.create({
-      data: {
+    // 1. Create or reuse DeepAnalysis record (avoid P2002 on re-run)
+    const analysis = await prisma.deepAnalysis.upsert({
+      where: { sessionId },
+      create: {
         sessionId,
         userId: businessInfo.email, // Use email as userId for now
         status: 'analyzing',
         progress: 0
+      },
+      update: {
+        status: 'analyzing',
+        // reset progress if a new run starts
+        progress: 0,
+        startedAt: new Date(),
       }
     });
 
