@@ -86,6 +86,7 @@ export async function GET(
       id: startup.id,
       name: startup.name || businessInfo.founderName || 'Unknown',
       companyName: startup.company || businessInfo.name || 'Unknown Company',
+      logo: startup.logo || businessInfo.logo,
       location: {
         city: businessInfo.city || 'Stockholm',
         country: businessInfo.country || 'Sweden'

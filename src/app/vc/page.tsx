@@ -83,8 +83,8 @@ export default function VCDashboard() {
         console.error('Failed to fetch startups');
         // Use mock data as fallback
         const mockStartups: Startup[] = [
-          {
-            id: '1',
+      {
+        id: '1',
             name: 'Emma Chen',
             companyName: 'DataFlow AI',
             location: {
@@ -92,8 +92,8 @@ export default function VCDashboard() {
               country: 'Sweden',
               coordinates: [59.3293, 18.0686]
             },
-            industry: 'B2B SaaS',
-            stage: 'Seed',
+        industry: 'B2B SaaS',
+        stage: 'Seed',
             raised: 500000,
             seeking: 2000000,
             monthlyRevenue: 85000,
@@ -115,7 +115,7 @@ export default function VCDashboard() {
     } catch (error) {
       console.error('Error loading startups:', error);
     } finally {
-      setLoading(false);
+    setLoading(false);
     }
   };
 
@@ -269,19 +269,19 @@ export default function VCDashboard() {
                     value={filters.stage}
                     onChange={(e) => setFilters({...filters, stage: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent"
-                  >
-                    <option value="all">All Stages</option>
-                    <option value="Pre-seed">Pre-seed</option>
-                    <option value="Seed">Seed</option>
-                    <option value="Series A">Series A</option>
+          >
+            <option value="all">All Stages</option>
+            <option value="Pre-seed">Pre-seed</option>
+            <option value="Seed">Seed</option>
+            <option value="Series A">Series A</option>
                     <option value="Series B">Series B</option>
-                  </select>
+          </select>
                 </div>
 
                 {/* Country Filter */}
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Country</label>
-                  <select
+          <select
                     value={filters.country}
                     onChange={(e) => setFilters({...filters, country: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent"
@@ -292,8 +292,8 @@ export default function VCDashboard() {
                     <option value="UK">United Kingdom</option>
                     <option value="France">France</option>
                     <option value="USA">United States</option>
-                  </select>
-                </div>
+          </select>
+        </div>
 
                 {/* Min Revenue */}
                 <div>
@@ -317,7 +317,7 @@ export default function VCDashboard() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent"
                     placeholder="$10M"
                   />
-                </div>
+      </div>
 
                 {/* Readiness Score */}
                 <div>
@@ -350,39 +350,55 @@ export default function VCDashboard() {
         ) : viewMode === 'list' ? (
           /* List View */
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="space-y-4">
+          <div className="space-y-4">
               {filteredStartups.map((startup, index) => (
-                <motion.div
+              <motion.div
                   key={startup.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
                   onClick={() => router.push(`/vc/startup/${startup.id}`)}
                   className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all cursor-pointer"
-                >
+              >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       {/* Company Header */}
                       <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <h3 className="text-xl font-bold text-black">{startup.companyName}</h3>
-                          <p className="text-gray-600 mt-1">{startup.oneLiner}</p>
-                          <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
-                            <span className="flex items-center">
-                              <MapPin className="w-3 h-3 mr-1" />
-                              {startup.location.city}, {startup.location.country}
-                            </span>
-                            <span className="flex items-center">
-                              <Users className="w-3 h-3 mr-1" />
-                              {startup.teamSize} team members
-                            </span>
-                            <span className="flex items-center">
-                              <Calendar className="w-3 h-3 mr-1" />
-                              Founded {startup.foundedYear}
-                            </span>
-                          </div>
-                        </div>
-                        
+                        <div className="flex items-start space-x-4 flex-1">
+                          {/* Company Logo */}
+                          <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                            {startup.logo ? (
+                              <img 
+                                src={startup.logo} 
+                                alt={`${startup.companyName} logo`}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
+                                <div className="w-2 h-2 bg-white rounded-full" />
+                              </div>
+                            )}
+                      </div>
+                          <div className="flex-1">
+                            <h3 className="text-xl font-bold text-black">{startup.companyName}</h3>
+                            <p className="text-gray-600 mt-1">{startup.oneLiner}</p>
+                            <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                              <span className="flex items-center">
+                                <MapPin className="w-3 h-3 mr-1" />
+                                {startup.location.city}, {startup.location.country}
+                        </span>
+                              <span className="flex items-center">
+                                <Users className="w-3 h-3 mr-1" />
+                                {startup.teamSize} team members
+                        </span>
+                              <span className="flex items-center">
+                                <Calendar className="w-3 h-3 mr-1" />
+                                Founded {startup.foundedYear}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
                         {/* Readiness Score */}
                         <div className="text-center ml-6">
                           <div className={`text-3xl font-bold ${getScoreColor(startup.readinessScore)}`}>
@@ -417,9 +433,9 @@ export default function VCDashboard() {
                           <div className="text-lg font-bold text-black">
                             {startup.stage}
                           </div>
-                        </div>
-                      </div>
-
+                    </div>
+                    </div>
+                    
                       {/* Tags and Info */}
                       <div className="flex items-center justify-between">
                         <div className="flex flex-wrap gap-2">
@@ -437,10 +453,10 @@ export default function VCDashboard() {
                           Active today
                         </div>
                       </div>
-                    </div>
                   </div>
-                </motion.div>
-              ))}
+                </div>
+              </motion.div>
+            ))}
             </div>
 
             {filteredStartups.length === 0 && (
@@ -540,8 +556,8 @@ export default function VCDashboard() {
                       Request Introduction
                     </motion.button>
                   </div>
-                </div>
-              </div>
+          </div>
+        </div>
             </motion.div>
           </motion.div>
         )}

@@ -14,6 +14,7 @@ interface StartupProfile {
   id: string;
   name: string;
   companyName: string;
+  logo?: string;
   location: {
     city: string;
     country: string;
@@ -137,6 +138,20 @@ export default function StartupProfilePage() {
               >
                 <ArrowLeft className="w-5 h-5" />
               </motion.button>
+              {/* Company Logo */}
+              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                {startup.logo ? (
+                  <img 
+                    src={startup.logo} 
+                    alt={`${startup.companyName} logo`}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center">
+                    <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                  </div>
+                )}
+              </div>
               <div>
                 <h1 className="text-xl font-bold text-black">{startup.companyName}</h1>
                 <p className="text-sm text-gray-600">{startup.oneLiner}</p>

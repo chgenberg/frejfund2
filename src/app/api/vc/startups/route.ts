@@ -54,6 +54,7 @@ export async function GET(request: NextRequest) {
         id: user.id,
         name: user.name || businessInfo.founderName || 'Unknown',
         companyName: user.company || businessInfo.name || 'Unknown Company',
+        logo: user.logo || businessInfo.logo,
         location: {
           city: businessInfo.city || 'Stockholm',
           country: businessInfo.country || 'Sweden',
