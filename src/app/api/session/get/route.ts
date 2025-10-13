@@ -21,8 +21,6 @@ export async function GET(request: NextRequest) {
         id: true,
         userId: true,
         businessInfo: true,
-        scrapedText: true,
-        scrapedSources: true,
         createdAt: true,
         updatedAt: true
       }
@@ -39,8 +37,6 @@ export async function GET(request: NextRequest) {
       sessionId: session.id,
       userId: session.userId,
       businessInfo: session.businessInfo,
-      scrapedText: session.scrapedText,
-      scrapedSources: session.scrapedSources,
       createdAt: session.createdAt,
       updatedAt: session.updatedAt
     });

@@ -24,12 +24,16 @@ export async function GET(request: NextRequest) {
   const stream = new ReadableStream({
     start(controller) {
       const encoder = new TextEncoder();
-      
+
+      const write = (payload: any) => {
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
+      };
+
       // Send initial connection message
-      controller.enqueue(encoder.encode('data: {"type":"connected"}\n\n'));
-      
+      write({ type: 'connected' });
+
       let lastProgress = 0;
-      
+
       // Poll for updates from database
       const interval = setInterval(async () => {
         try {
@@ -52,21 +56,14 @@ export async function GET(request: NextRequest) {
             // Only send update if progress changed
             if (completedCount !== lastProgress || completedCount === 0) {
               lastProgress = completedCount;
-              
-              const data = {
-                type: 'progress',
-                current: completedCount,
-                total: totalCount,
-                completedCategories
-              };
-              
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+              const data = { type: 'progress', current: completedCount, total: totalCount, completedCategories };
+              write(data);
               console.log(`📡 SSE: Sent progress ${completedCount}/${totalCount} to client`);
             }
             
             // Check if complete
             if (analysis.status === 'completed' && completedCount >= totalCount) {
-              controller.enqueue(encoder.encode('data: {"type":"complete"}\n\n'));
+              write({ type: 'complete' });
               console.log('📡 SSE: Analysis complete, closing connection');
               clearInterval(interval);
               controller.close();
@@ -76,11 +73,17 @@ export async function GET(request: NextRequest) {
           console.error('SSE poll error:', error);
         }
       }, 2000); // Check every 2 seconds
-      
+
+      // Heartbeat to keep Safari/Proxies alive
+      const keepAlive = setInterval(() => {
+        controller.enqueue(encoder.encode(':keepalive\n\n'));
+      }, 20000);
+
       // Clean up on disconnect
       request.signal.addEventListener('abort', () => {
         console.log('📡 SSE: Client disconnected');
         clearInterval(interval);
+        clearInterval(keepAlive);
         controller.close();
       });
     }

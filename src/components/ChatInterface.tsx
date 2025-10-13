@@ -361,23 +361,17 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         try {
           setAnalysisProgress(prev => ({ ...prev, status: 'running' }));
           
-          const eventSource = new EventSource(`/api/deep-analysis/progress?sessionId=${sessionId}`);
-          
-          eventSource.onmessage = (event) => {
+          let backoff = 1000;
+          let eventSource: EventSource | null = null;
+
+          const handleMessage = (event: MessageEvent) => {
             const data = JSON.parse(event.data);
-            
             if (data.type === 'progress') {
-              setAnalysisProgress({
-                current: data.current,
-                total: data.total,
-                status: 'running',
-                completedCategories: data.completedCategories || []
-              });
+              setAnalysisProgress({ current: data.current, total: data.total, status: 'running', completedCategories: data.completedCategories || [] });
+              backoff = 1000; // reset on data
             } else if (data.type === 'complete') {
               setAnalysisProgress(prev => ({ ...prev, status: 'completed' }));
-              eventSource.close();
-              
-              // Show completion notification
+              try { eventSource && eventSource.close(); } catch {}
               const completionMessage: Message = {
                 id: `analysis-complete-${Date.now()}`,
                 content: "Deep analysis complete! I now have a comprehensive understanding of your business across 95 dimensions. Ask me anything!",
@@ -386,20 +380,23 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                 type: 'analysis'
               };
               setMessages(prev => [...prev, completionMessage]);
-              
-              // Show celebration
               setShowCompletionCelebration(true);
               setTimeout(() => setShowCompletionCelebration(false), 5000);
-              
-              // Load data gaps
               loadDataGaps();
             }
           };
-          
-          eventSource.onerror = () => {
-            eventSource.close();
-            setAnalysisProgress(prev => ({ ...prev, status: 'idle' }));
+
+          const connect = () => {
+            try { eventSource && eventSource.close(); } catch {}
+            eventSource = new EventSource(`/api/deep-analysis/progress?sessionId=${sessionId}`);
+            eventSource.onmessage = handleMessage;
+            eventSource.onerror = () => {
+              try { eventSource && eventSource.close(); } catch {}
+              setTimeout(connect, backoff);
+              backoff = Math.min(backoff * 2, 30000);
+            };
           };
+          connect();
           
           // Start the analysis
           await fetch('/api/deep-analysis', {
@@ -592,35 +589,33 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       let text = String(raw || '').trim();
       if (!text) return text;
 
-      // First, clean up any existing asterisks mess
-      text = text.replace(/\*{3,}/g, '**'); // Replace 3+ asterisks with just 2
-      text = text.replace(/\[(\d+)\]\*/g, '[$1]'); // Fix reference asterisks like [1]*
-      text = text.replace(/\*\[(\d+)\]/g, '[$1]'); // Fix *[1] to [1]
-      
-      // Light section emphasis (no extra blank paragraphs)
-      text = text.replace(/(Next steps:)/gi, '\n**$1**');
-      text = text.replace(/(Key insights:)/gi, '\n**$1**');
-      text = text.replace(/(Recommendations:)/gi, '\n**$1**');
-
-      // Compact paragraphs:
-      // 1) Normalize CRLF
+      // 0) Normalize newlines
       text = text.replace(/\r\n/g, '\n');
-      // 2) Collapse 3+ newlines to a single blank line
-      text = text.replace(/\n{3,}/g, '\n\n');
-      // 3) Within each paragraph (separated by blank line), turn single newlines into spaces
+
+      // 1) Sanitize bold markers and references
+      text = text.replace(/\*{3,}/g, '**');
+      text = text.replace(/\[(\d+)\]\*/g, '[$1]');
+      text = text.replace(/\*\[(\d+)\]/g, '[$1]');
+
+      // 2) Promote common sections to their own paragraphs
+      text = text.replace(/\s*(next\s*steps?\s*:)/gi, '\n\n$1');
+      text = text.replace(/\s*(key\s*insights?\s*:)/gi, '\n\n$1');
+      text = text.replace(/\s*(recommendations?\s*:)/gi, '\n\n$1');
+
+      // 3) Ensure lists start as separate blocks
+      text = text.replace(/\n(\s*)(-\s+)/g, '\n\n$2');
+      text = text.replace(/\n(\s*)(\d+\.\s+)/g, '\n\n$2');
+
+      // 4) Split into paragraphs on 2+ newlines, flatten intra-paragraph newlines
       text = text
         .split(/\n{2,}/)
         .map((p: string) => p.replace(/\n+/g, ' ').trim())
         .filter(Boolean)
-        // Join with single newline for minimal paragraph spacing
-        .join('\n');
+        .join('\n\n'); // Important: two newlines -> real <p>
 
-      // Final trim
-      text = text.trim();
-
-      return text;
+      return text.trim();
     } catch {
-      return raw;
+      return String(raw || '');
     }
   };
 
@@ -747,7 +742,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         }
       } catch (streamErr) {
         // Fallback to non-streaming
-      const response = await fetch('/api/chat', {
+      const response = await fetch('/api/ai', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1370,12 +1365,23 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   {message.sender === 'agent' && parseStructured(message.content) ? (
                     <StructuredRenderer data={parseStructured(message.content)} />
                   ) : message.sender === 'agent' ? (
-                    <div className="text-sm leading-relaxed prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-black prose-headings:mt-2 prose-headings:mb-1 prose-h2:text-sm prose-h3:text-sm prose-strong:text-black prose-strong:font-semibold prose-p:text-gray-800 prose-p:my-0 prose-p:leading-relaxed prose-li:text-gray-800 prose-li:my-0.5 prose-ul:my-1 prose-ol:my-1 prose-ul:space-y-0.5 prose-ol:space-y-0.5 whitespace-pre-wrap">
+                    <div className="text-sm leading-relaxed max-w-none">
                       <ReactMarkdown 
                         remarkPlugins={[remarkGfm]}
                         components={{
-                        p: ({children}) => <p className="mb-1 leading-relaxed">{children}</p>,
+                          p: ({children}) => (
+                            <p className="mb-2 sm:mb-2.5 leading-relaxed text-gray-800">{children}</p>
+                          ),
+                          ul: ({children}) => (
+                            <ul className="my-2 pl-4 list-disc space-y-1 text-gray-800">{children}</ul>
+                          ),
+                          ol: ({children}) => (
+                            <ol className="my-2 pl-4 list-decimal space-y-1 text-gray-800">{children}</ol>
+                          ),
+                          li: ({children}) => <li className="mb-1">{children}</li>,
                           strong: ({children}) => <strong className="font-semibold text-black">{children}</strong>,
+                          h2: ({children}) => <h2 className="text-sm font-semibold text-black mt-2 mb-1">{children}</h2>,
+                          h3: ({children}) => <h3 className="text-sm font-semibold text-black mt-2 mb-1">{children}</h3>,
                         }}
                       >
                         {formatAsMarkdown(message.content)}
