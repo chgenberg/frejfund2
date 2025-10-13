@@ -20,7 +20,9 @@ interface AnalysisDimension {
   findings: string[];
   strengths: string[];
   redFlags: string[];
-  recommendations: string[];
+  recommendations?: string[];
+  suggestions?: string[];
+  questions?: string[];
 }
 
 const CATEGORIES = [
@@ -83,14 +85,25 @@ export default function AnalysisPage() {
   useEffect(() => {
     const sessionId = localStorage.getItem('frejfund-session-id');
     if (!sessionId) return;
-    const es = new EventSource(`/api/deep-analysis/progress?sessionId=${sessionId}`);
-    es.onmessage = (ev) => {
-      const data = JSON.parse(ev.data);
-      if (data.type === 'progress') setAnalysisProgress({current:data.current,total:data.total,status:'running'});
-      if (data.type === 'complete') setAnalysisProgress({current:95,total:95,status:'completed'});
+    let es: EventSource | null = null;
+    let retries = 0;
+    const connect = () => {
+      es = new EventSource(`/api/deep-analysis/progress?sessionId=${sessionId}`);
+      es.onmessage = (ev) => {
+        const data = JSON.parse(ev.data);
+        if (data.type === 'progress') setAnalysisProgress({current:data.current,total:data.total,status:'running'});
+        if (data.type === 'complete') setAnalysisProgress({current:95,total:95,status:'completed'});
+      };
+      es.onerror = () => {
+        try { es && es.close(); } catch {}
+        if (retries < 5) {
+          retries += 1;
+          setTimeout(connect, 1000 * retries); // backoff
+        }
+      };
     };
-    es.onerror = () => { try { es.close(); } catch {} };
-    return () => { try { es.close(); } catch {} };
+    connect();
+    return () => { try { es && es.close(); } catch {} };
   }, []);
 
   const getCategoryDimensions = (categoryId: string) => {
@@ -327,11 +340,11 @@ export default function AnalysisPage() {
                     </div>
 
                     {/* Recommendations */}
-                    {dimension.recommendations.length > 0 && (
+                    {(dimension.recommendations && dimension.recommendations.length > 0) || (dimension.suggestions && dimension.suggestions.length > 0) ? (
                       <div className="mt-4 pt-4 border-t border-gray-100">
                         <h4 className="text-sm font-medium text-gray-700 mb-2">Recommendations</h4>
                         <div className="space-y-2">
-                          {dimension.recommendations.map((rec, i) => (
+                          {(dimension.recommendations || dimension.suggestions || []).map((rec, i) => (
                             <div key={i} className="flex items-start gap-2">
                               <div className="w-1 h-1 bg-black rounded-full mt-2" />
                               <p className="text-sm text-gray-600">{rec}</p>
@@ -339,7 +352,7 @@ export default function AnalysisPage() {
                           ))}
                         </div>
                       </div>
-                    )}
+                    ) : null}
                   </motion.div>
                 );
               })
