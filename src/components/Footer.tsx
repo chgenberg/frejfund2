@@ -8,7 +8,7 @@ export default function Footer() {
   return (
     <footer className="bg-white border-t border-gray-100 py-8 sm:py-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 mb-8">
           {/* Logo section - full width on mobile */}
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center space-x-3 mb-4">
@@ -22,27 +22,7 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* For Founders section */}
-          <div className="col-span-1">
-            <h3 className="font-semibold text-black mb-2 sm:mb-3 text-sm sm:text-base">For Founders</h3>
-            <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-600">
-              <li>
-                <Link href="/pitch" className="hover:text-black transition-colors">
-                  Pitch Analysis
-                </Link>
-              </li>
-              <li>
-                <Link href="/analysis" className="hover:text-black transition-colors">
-                  Business Analysis
-                </Link>
-              </li>
-              <li>
-                <Link href="/chat" className="hover:text-black transition-colors">
-                  AI Coach
-                </Link>
-              </li>
-            </ul>
-          </div>
+          {/* Removed Founders quick-links per request */}
 
           {/* For Investors section */}
           <div className="col-span-1">
