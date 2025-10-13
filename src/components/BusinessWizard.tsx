@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronLeft, Upload, X, FileText, Globe, Linkedin } from 'lucide-react';
+import { ChevronRight, ChevronLeft, ChevronDown, Upload, X, FileText, Globe, Linkedin } from 'lucide-react';
 import { BusinessInfo } from '@/types/business';
 import { normalizeUrl, isValidUrl } from '@/lib/url-utils';
 
