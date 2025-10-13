@@ -96,21 +96,35 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Google Tag Manager */}
-        <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=AW-17103900584"
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'AW-17103900584');
-            `,
-          }}
-        />
+        {/* Google Tag Manager (guarded) */}
+        {process.env.NODE_ENV === 'production' && (
+          <>
+            <Script
+              id="gtag-src"
+              strategy="afterInteractive"
+              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GTM_ID || 'AW-17103900584'}`}
+              onError={() => { /* silently ignore if blocked */ }}
+            />
+            <Script
+              id="gtag-init"
+              strategy="afterInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `
+                  try {
+                    if (typeof window !== 'undefined') {
+                      window.dataLayer = window.dataLayer || [];
+                      function gtag(){dataLayer.push(arguments);} 
+                      gtag('js', new Date());
+                      gtag('config', '${process.env.NEXT_PUBLIC_GTM_ID || 'AW-17103900584'}');
+                    }
+                  } catch (e) {
+                    // no-op if blocked by ITP/adblock
+                  }
+                `,
+              }}
+            />
+          </>
+        )}
         
         {/* JSON-LD Structured Data for LLMs */}
         {structuredData.map((schema, index) => (
