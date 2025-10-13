@@ -8,6 +8,7 @@ import { BusinessInfo } from '@/types/business';
 
 /**
  * Get enhanced coaching context from deep analysis
+ * NOW WITH: proactive triggers, dimension references, evidence citations, smart questions
  */
 export async function getFrejaCoachingContext(sessionId: string): Promise<string> {
   const analysis = await getDeepAnalysis(sessionId);
@@ -19,77 +20,107 @@ export async function getFrejaCoachingContext(sessionId: string): Promise<string
   // Build comprehensive context for Freja
   const context: string[] = [];
 
-  context.push(`DEEP ANALYSIS COMPLETED (${analysis.dimensions.length} dimensions analyzed)`);
-  context.push(`Overall Investment Readiness: ${analysis.investmentReadiness}/10`);
-  context.push(`Overall Score: ${analysis.overallScore}/100\n`);
+  context.push(`=== DEEP ANALYSIS INTELLIGENCE (95 dimensions) ===`);
+  context.push(`Investment Readiness: ${analysis.investmentReadiness}/10`);
+  context.push(`Overall Score: ${analysis.overallScore}/100`);
+  context.push(`Completed: ${new Date(analysis.completedAt || '').toLocaleDateString()}\n`);
 
-  // Group dimensions by category with scores
+  // === PROACTIVE COACHING TRIGGERS ===
+  context.push(`--- PROACTIVE COACHING ALERTS ---`);
+  const triggers: string[] = [];
+  
+  for (const dim of analysis.dimensions) {
+    const score = dim.score || 0;
+    
+    // Trigger 1: Critical dimensions with low scores
+    if (score < 50 && ['Problem & Solution', 'Market & Competition', 'Business Model', 'Traction & Growth'].includes(dim.category)) {
+      triggers.push(`🚨 URGENT: ${dim.name} (${score}%) - ${dim.redFlags?.[0] || 'Needs immediate attention'}`);
+    }
+    
+    // Trigger 2: High-impact opportunities
+    if (score >= 40 && score < 70 && dim.category.includes('Traction')) {
+      triggers.push(`💡 OPPORTUNITY: ${dim.name} (${score}%) - Quick wins available`);
+    }
+    
+    // Trigger 3: Strengths to leverage
+    if (score >= 85) {
+      triggers.push(`✅ LEVERAGE: ${dim.name} (${score}%) - ${dim.strengths?.[0] || 'Strong asset to highlight'}`);
+    }
+  }
+  
+  if (triggers.length > 0) {
+    context.push(triggers.slice(0, 5).join('\n'));
+  } else {
+    context.push('No critical alerts - good foundation overall');
+  }
+  context.push('');
+
+  // === DIMENSION-SPECIFIC CONTEXT WITH EVIDENCE ===
+  context.push(`--- DETAILED DIMENSION INSIGHTS ---`);
+  
+  // Group by category
   const categoryData: Record<string, any[]> = {};
   for (const dim of analysis.dimensions) {
-    if (!categoryData[dim.category]) {
-      categoryData[dim.category] = [];
-    }
+    if (!categoryData[dim.category]) categoryData[dim.category] = [];
     categoryData[dim.category].push(dim);
   }
 
-  // Summarize each category
   for (const [category, dimensions] of Object.entries(categoryData)) {
-    const avgScore = Math.round(
-      dimensions.reduce((sum, d) => sum + (d.score || 0), 0) / dimensions.length
-    );
+    const avgScore = Math.round(dimensions.reduce((sum, d) => sum + (d.score || 0), 0) / dimensions.length);
+    context.push(`\n${category} (Average: ${avgScore}/100):`);
     
-    context.push(`**${category}** (${avgScore}/100):`);
-    
-    // List low-scoring dimensions in this category
-    const weakDimensions = dimensions.filter(d => (d.score || 0) < 60);
-    if (weakDimensions.length > 0) {
-      context.push(`  ⚠️ Weak areas: ${weakDimensions.map(d => d.name).join(', ')}`);
+    // For each dimension, include actionable context
+    for (const dim of dimensions) {
+      const score = dim.score || 0;
+      const evidence = (dim.evidence || []).slice(0, 1).join(' ');
       
-      // Add specific red flags
-      for (const dim of weakDimensions) {
-        if (dim.redFlags && dim.redFlags.length > 0) {
-          context.push(`    - ${dim.name}: ${dim.redFlags[0]}`);
-        }
+      context.push(`  • ${dim.name}: ${score}%`);
+      
+      if (score < 60 && dim.redFlags && dim.redFlags.length > 0) {
+        context.push(`    ⚠️ Issue: ${dim.redFlags[0]}`);
+        if (evidence) context.push(`    📄 Evidence: ${evidence.slice(0, 120)}`);
+      } else if (score >= 80 && dim.strengths && dim.strengths.length > 0) {
+        context.push(`    ✅ Strength: ${dim.strengths[0]}`);
       }
-    }
-    
-    // List strengths
-    const strongDimensions = dimensions.filter(d => (d.score || 0) >= 80);
-    if (strongDimensions.length > 0) {
-      context.push(`  ✅ Strengths: ${strongDimensions.map(d => d.name).join(', ')}`);
-    }
-    
-    context.push('');
-  }
-
-  // Add critical insights
-  if (analysis.insights && analysis.insights.length > 0) {
-    context.push('\nCRITICAL INSIGHTS:');
-    for (const insight of analysis.insights.slice(0, 5)) {
-      context.push(`- [${insight.priority.toUpperCase()}] ${insight.title}: ${insight.description}`);
-      if (insight.recommendation) {
-        context.push(`  → Recommendation: ${insight.recommendation}`);
+      
+      if (dim.findings && dim.findings.length > 0) {
+        context.push(`    📊 Finding: ${dim.findings[0]}`);
       }
     }
   }
 
-  // Add unanswered questions
-  const unansweredQuestions = await getUnansweredQuestions(sessionId);
-  if (unansweredQuestions.length > 0) {
-    context.push('\nKEY QUESTIONS TO ASK FOUNDER:');
-    unansweredQuestions.slice(0, 5).forEach((q, i) => {
+  // === SMART QUESTIONS (avoiding duplicates) ===
+  context.push(`\n--- UNANSWERED STRATEGIC QUESTIONS ---`);
+  const allQuestions = await getUnansweredQuestions(sessionId);
+  const uniqueQuestions = [...new Set(allQuestions)]; // Deduplicate
+  
+  if (uniqueQuestions.length > 0) {
+    context.push('Ask these when relevant (prioritized by impact):');
+    uniqueQuestions.slice(0, 7).forEach((q, i) => {
       context.push(`${i + 1}. ${q}`);
     });
+  } else {
+    context.push('All key questions addressed ✅');
   }
 
-  // Add critical red flags
+  // === CRITICAL ACTIONS ===
   const redFlags = await getCriticalRedFlags(sessionId);
   if (redFlags.length > 0) {
-    context.push('\nCRITICAL RED FLAGS:');
-    redFlags.forEach(flag => {
-      context.push(`⚠️ ${flag.category} - ${flag.dimension}: ${flag.issue}`);
+    context.push(`\n--- CRITICAL ACTIONS NEEDED ---`);
+    redFlags.slice(0, 3).forEach(flag => {
+      context.push(`⚠️ ${flag.dimension}: ${flag.issue}`);
+      context.push(`   → Fix: ${flag.recommendation || 'Address before fundraising'}`);
     });
   }
+
+  // === COACHING INSTRUCTIONS ===
+  context.push(`\n--- FREJA COACHING RULES ---`);
+  context.push(`1. ALWAYS reference specific dimensions when giving advice (e.g., "According to your Unit Economics analysis...")`);
+  context.push(`2. CITE evidence when available (e.g., "Your website mentions X, but...")`);
+  context.push(`3. BE PROACTIVE: Point out low-scoring dimensions without being asked`);
+  context.push(`4. TRACK PROGRESS: Compare to previous conversations when relevant`);
+  context.push(`5. ASK SMART QUESTIONS: Use unanswered questions above, avoid asking what you already know`);
+  context.push(`6. BE SPECIFIC: Always give concrete numbers, timelines, and next steps`);
 
   return context.join('\n');
 }
@@ -175,4 +206,68 @@ export async function getNextBestActionFromAnalysis(sessionId: string): Promise<
     priority: (lowestDim.score || 0) < 40 ? 'critical' : 'high',
     category: lowestDim.category
   };
+}
+
+/**
+ * Track progress over time - compare current vs previous analysis
+ */
+export async function getProgressComparison(sessionId: string): Promise<string> {
+  const { prisma } = await import('./prisma');
+  
+  // Get all completed analyses for this session, ordered by date
+  const analyses = await prisma.deepAnalysis.findMany({
+    where: { sessionId, status: 'completed' },
+    orderBy: { completedAt: 'desc' },
+    take: 2,
+    include: { dimensions: true }
+  });
+
+  if (analyses.length < 2) {
+    return 'First analysis - no historical comparison available yet.';
+  }
+
+  const [current, previous] = analyses;
+  const comparison: string[] = [];
+  
+  comparison.push(`=== PROGRESS SINCE LAST ANALYSIS ===`);
+  comparison.push(`Last analysis: ${new Date(previous.completedAt || '').toLocaleDateString()}`);
+  comparison.push(`Current analysis: ${new Date(current.completedAt || '').toLocaleDateString()}\n`);
+  
+  // Compare overall scores
+  const scoreDelta = (current.overallScore || 0) - (previous.overallScore || 0);
+  if (scoreDelta > 0) {
+    comparison.push(`📈 Overall improvement: +${scoreDelta} points (${previous.overallScore} → ${current.overallScore})`);
+  } else if (scoreDelta < 0) {
+    comparison.push(`📉 Overall decline: ${scoreDelta} points (${previous.overallScore} → ${current.overallScore})`);
+  } else {
+    comparison.push(`➡️ Overall score stable at ${current.overallScore}/100`);
+  }
+  
+  // Find biggest improvements and declines
+  const improvements: string[] = [];
+  const declines: string[] = [];
+  
+  for (const currDim of current.dimensions) {
+    const prevDim = previous.dimensions.find(d => d.dimensionId === currDim.dimensionId);
+    if (!prevDim) continue;
+    
+    const delta = (currDim.score || 0) - (prevDim.score || 0);
+    if (delta >= 10) {
+      improvements.push(`  ✅ ${currDim.name}: +${delta}% (${prevDim.score} → ${currDim.score})`);
+    } else if (delta <= -10) {
+      declines.push(`  ⚠️ ${currDim.name}: ${delta}% (${prevDim.score} → ${currDim.score})`);
+    }
+  }
+  
+  if (improvements.length > 0) {
+    comparison.push(`\nBiggest Improvements:`);
+    comparison.push(improvements.slice(0, 3).join('\n'));
+  }
+  
+  if (declines.length > 0) {
+    comparison.push(`\nAreas Needing Attention:`);
+    comparison.push(declines.slice(0, 3).join('\n'));
+  }
+  
+  return comparison.join('\n');
 }

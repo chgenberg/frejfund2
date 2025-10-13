@@ -41,7 +41,8 @@ export default function DocumentsPage() {
     setLoading(true);
     
     try {
-      const sessionId = localStorage.getItem('sessionId');
+      // Support both keys to be robust across pages/components
+      const sessionId = localStorage.getItem('frejfund-session-id') || localStorage.getItem('sessionId');
       if (!sessionId) {
         console.warn('No session ID found');
         setLoading(false);

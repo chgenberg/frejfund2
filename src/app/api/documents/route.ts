@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { runDeepAnalysis } from '@/lib/deep-analysis-runner';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,6 +62,26 @@ export async function POST(req: NextRequest) {
         generatedBy: 'gpt-5'
       }
     });
+
+    // If a pitch or fundraising-relevant doc is uploaded, trigger a partial reanalysis in background
+    try {
+      const isRelevant = ['pitch_deck', 'financial_model', 'investor_update'].includes(type);
+      if (isRelevant) {
+        // Fetch minimal businessInfo from session (if available)
+        const session = await prisma.session.findUnique({ where: { id: sessionId } });
+        const businessInfo = (session?.businessInfo as any) || {};
+        // Trigger re-analysis of critical/high dimensions (progressive mode);
+        // we reuse existing sessionId so progress updates stream via SSE
+        runDeepAnalysis({
+          sessionId,
+          businessInfo,
+          scrapedContent: '',
+          uploadedDocuments: [],
+          // faster, targeted re-run to refresh Storytelling/Fundraising/PMF
+          mode: 'critical-only'
+        }).catch(() => {});
+      }
+    } catch {}
 
     return NextResponse.json({ document }, { status: 201 });
   } catch (error) {

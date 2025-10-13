@@ -88,7 +88,13 @@ export default function AnalysisPage() {
     let es: EventSource | null = null;
     let retries = 0;
     const connect = () => {
+      if (!(window as any).__ff_es) (window as any).__ff_es = {};
+      if ((window as any).__ff_es[sessionId]) {
+        es = (window as any).__ff_es[sessionId];
+        return;
+      }
       es = new EventSource(`/api/deep-analysis/progress?sessionId=${sessionId}`);
+      (window as any).__ff_es[sessionId] = es;
       es.onmessage = (ev) => {
         const data = JSON.parse(ev.data);
         if (data.type === 'progress') setAnalysisProgress({current:data.current,total:data.total,status:'running'});
@@ -103,7 +109,7 @@ export default function AnalysisPage() {
       };
     };
     connect();
-    return () => { try { es && es.close(); } catch {} };
+    return () => { try { es && es.close(); (window as any).__ff_es[sessionId] = null; } catch {} };
   }, []);
 
   const getCategoryDimensions = (categoryId: string) => {

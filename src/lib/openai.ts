@@ -308,11 +308,19 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
       
       // Enhance with deep analysis context if available
       try {
-        const { getFrejaCoachingContext } = await import('./freja-coaching');
+        const { getFrejaCoachingContext, getProgressComparison } = await import('./freja-coaching');
         const deepContext = await getFrejaCoachingContext(sessionId || 'unknown');
         
         if (deepContext && !deepContext.includes('still running')) {
           coachingSystemPrompt += '\n\n--- DEEP ANALYSIS RESULTS ---\n' + deepContext;
+          
+          // Add progress comparison if this isn't the first analysis
+          try {
+            const progressContext = await getProgressComparison(sessionId || 'unknown');
+            if (progressContext && !progressContext.includes('First analysis')) {
+              coachingSystemPrompt += '\n\n' + progressContext;
+            }
+          } catch {}
         }
       } catch (error) {
         console.log('Deep analysis context not available yet');

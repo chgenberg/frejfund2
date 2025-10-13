@@ -109,27 +109,57 @@ export default function Dashboard() {
           }
         }
 
-        // Listen for progress updates
-        const eventSource = new EventSource(`/api/deep-analysis/progress?sessionId=${sessionId}`);
+        // Listen for progress updates (single instance with reconnect)
+        if (!(window as any).__ff_es) (window as any).__ff_es = {};
         
-        eventSource.onmessage = (event) => {
-          const data = JSON.parse(event.data);
-          if (data.type === 'progress') {
-            setAnalysisProgress({
-              current: data.current,
-              total: data.total,
-              status: 'running'
-            });
-          } else if (data.type === 'complete') {
-            setHasDeepAnalysis(true);
-            setAnalysisProgress({ current: 95, total: 95, status: 'completed' });
-            eventSource.close();
-            // Re-check status to get final score
-            checkAnalysis();
+        let eventSource: EventSource | null = null;
+        let retries = 0;
+        
+        const connect = () => {
+          if ((window as any).__ff_es[sessionId]) {
+            eventSource = (window as any).__ff_es[sessionId];
+            return;
           }
+          
+          eventSource = new EventSource(`/api/deep-analysis/progress?sessionId=${sessionId}`);
+          (window as any).__ff_es[sessionId] = eventSource;
+          
+          eventSource.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            retries = 0; // reset on successful message
+            if (data.type === 'progress') {
+              setAnalysisProgress({
+                current: data.current,
+                total: data.total,
+                status: 'running'
+              });
+            } else if (data.type === 'complete') {
+              setHasDeepAnalysis(true);
+              setAnalysisProgress({ current: 95, total: 95, status: 'completed' });
+              try { eventSource && eventSource.close(); } catch {}
+              (window as any).__ff_es[sessionId] = null;
+              checkAnalysis();
+            }
+          };
+          
+          eventSource.onerror = () => {
+            try { eventSource && eventSource.close(); } catch {}
+            (window as any).__ff_es[sessionId] = null;
+            if (retries < 5) {
+              retries++;
+              setTimeout(connect, 1000 * retries);
+            }
+          };
         };
+        
+        connect();
 
-        return () => eventSource.close();
+        return () => { 
+          try { 
+            if (eventSource) eventSource.close(); 
+            (window as any).__ff_es[sessionId] = null; 
+          } catch {} 
+        };
       } catch (error) {
         console.error('Failed to check analysis status:', error);
       }

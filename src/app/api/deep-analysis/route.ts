@@ -17,6 +17,14 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('🚀 Starting deep analysis for session:', sessionId);
+
+    // Single-run guard: don't start if already analyzing
+    try {
+      const existing = await (await import('@/lib/prisma')).default.deepAnalysis.findUnique({ where: { sessionId } });
+      if (existing && existing.status === 'analyzing') {
+        return NextResponse.json({ success: true, already_running: true, sessionId });
+      }
+    } catch {}
     
     // Start deep analysis in background (non-blocking)
     // Note: In production, this should be a background job (BullMQ, Inngest, etc.)
@@ -91,6 +99,20 @@ export async function GET(request: NextRequest) {
       categoryScores[category] = Math.round(categoryScores[category] / count);
     }
 
+    // Transform dimensions to match frontend interface
+    const transformedDimensions = analysis.dimensions.map(dim => ({
+      id: dim.dimensionId,
+      name: dim.name,
+      category: dim.category,
+      score: dim.score || 0,
+      status: dim.analyzed ? 'completed' : 'pending',
+      findings: dim.findings || [],
+      strengths: dim.strengths || [],
+      redFlags: dim.redFlags || [],
+      recommendations: dim.questions || [],
+      questions: dim.questions || []
+    }));
+
     return NextResponse.json({
       status: analysis.status,
       progress: analysis.progress,
@@ -101,7 +123,7 @@ export async function GET(request: NextRequest) {
       completedAt: analysis.completedAt,
       totalDimensions: analysis.dimensions.length,
       analyzedDimensions: analysis.dimensions.filter(d => d.analyzed).length,
-      dimensions: analysis.dimensions
+      dimensions: transformedDimensions
     });
 
   } catch (error) {
