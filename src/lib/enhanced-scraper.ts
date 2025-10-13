@@ -3,7 +3,7 @@
  * Combines web scraping, LinkedIn, GitHub, and Product Hunt data
  */
 
-import { scrapeWebsite } from './web-scraper';
+import { scrapeSiteShallow } from './web-scraper';
 import { scrapeLinkedInCompany, analyzeHiringVelocity, type LinkedInCompanyData } from './linkedin-scraper';
 import { analyzeGitHubOrg, type GitHubOrgData } from './github-analyzer';
 import { scrapeProductHunt, searchProductHunt, type ProductHuntData } from './producthunt-scraper';
@@ -45,11 +45,11 @@ export async function runEnhancedScraping(
   console.log('🚀 Starting enhanced scraping for:', businessInfo.name);
 
   // 1. Website scraping (always run)
-  const websiteData = await scrapeWebsite(businessInfo.website || '');
+  const websiteData = await scrapeSiteShallow(businessInfo.website || '', 5);
   
   const result: EnhancedScrapingResult = {
-    websiteContent: websiteData.text,
-    websiteSources: websiteData.sources,
+    websiteContent: websiteData.combinedText,
+    websiteSources: websiteData.sources.map(s => s.url),
     totalDataPoints: 1,
     scrapingDuration: 0,
     dataSources
