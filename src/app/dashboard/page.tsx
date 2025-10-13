@@ -23,7 +23,9 @@ interface Integration {
 
 export default function Dashboard() {
   const router = useRouter();
-  const [activeSection, setActiveSection] = useState<'overview' | 'integrations' | 'settings'>('overview');
+  const [activeSection, setActiveSection] = useState<'overview' | 'integrations' | 'settings' | 'readiness'>('overview');
+  const [hasDeepAnalysis, setHasDeepAnalysis] = useState(false);
+  const [readinessScore, setReadinessScore] = useState(0);
   const [integrations, setIntegrations] = useState<Integration[]>([
     {
       id: 'gmail',
@@ -81,6 +83,29 @@ export default function Dashboard() {
     { time: '2 days ago', text: 'Growth strategy updated', type: 'insight' }
   ]);
 
+  // Check if deep analysis is complete
+  useEffect(() => {
+    const checkAnalysis = async () => {
+      const sessionId = localStorage.getItem('frejfund-session-id');
+      if (!sessionId) return;
+
+      try {
+        const res = await fetch(`/api/deep-analysis/status?sessionId=${sessionId}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.completed && data.score) {
+            setHasDeepAnalysis(true);
+            setReadinessScore(data.score);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to check analysis status:', error);
+      }
+    };
+
+    checkAnalysis();
+  }, []);
+
   const handleConnect = async (integrationId: string) => {
     // Simulated connection flow
     setIntegrations(prev => 
@@ -131,6 +156,16 @@ export default function Dashboard() {
               >
                 Overview
               </button>
+              {hasDeepAnalysis && (
+                <button
+                  onClick={() => setActiveSection('readiness')}
+                  className={`text-sm font-medium transition-colors ${
+                    activeSection === 'readiness' ? 'text-black' : 'text-gray-500 hover:text-black'
+                  }`}
+                >
+                  Investment Readiness
+                </button>
+              )}
               <button
                 onClick={() => setActiveSection('integrations')}
                 className={`text-sm font-medium transition-colors ${
@@ -170,6 +205,16 @@ export default function Dashboard() {
         >
           Overview
         </button>
+        {hasDeepAnalysis && (
+          <button
+            onClick={() => setActiveSection('readiness')}
+            className={`text-sm font-medium whitespace-nowrap px-3 py-1.5 rounded-lg transition-colors ${
+              activeSection === 'readiness' ? 'bg-black text-white' : 'text-gray-600'
+            }`}
+          >
+            Readiness
+          </button>
+        )}
         <button
           onClick={() => setActiveSection('integrations')}
           className={`text-sm font-medium whitespace-nowrap px-3 py-1.5 rounded-lg transition-colors ${
@@ -438,6 +483,122 @@ export default function Dashboard() {
                     )}
                   </motion.div>
                 ))}
+              </div>
+            </motion.div>
+          )}
+
+          {activeSection === 'readiness' && hasDeepAnalysis && (
+            <motion.div
+              key="readiness"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-6"
+            >
+              {/* Readiness Score - Enhanced Design */}
+              <div className="text-center mb-8 sm:mb-12">
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
+                  className="inline-block minimal-box px-8 sm:px-16 py-8 sm:py-12 relative overflow-hidden"
+                >
+                  {/* Background gradient effect */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-white opacity-50" />
+                  
+                  <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6 font-light uppercase tracking-wider relative z-10">Investment Readiness</p>
+                  
+                  {/* Circular Progress */}
+                  <div className="relative w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-4 sm:mb-6">
+                    {/* Background circle */}
+                    <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 160 160">
+                      <circle
+                        cx="80"
+                        cy="80"
+                        r="70"
+                        fill="none"
+                        stroke="#e5e5e5"
+                        strokeWidth="12"
+                      />
+                      {/* Progress circle */}
+                      <motion.circle
+                        cx="80"
+                        cy="80"
+                        r="70"
+                        fill="none"
+                        stroke="#000"
+                        strokeWidth="12"
+                        strokeLinecap="round"
+                        strokeDasharray={440} // 2 * PI * r
+                        initial={{ strokeDashoffset: 440 }}
+                        animate={{ strokeDashoffset: 440 - (readinessScore / 10) * 440 }}
+                        transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
+                      />
+                    </svg>
+                    
+                    {/* Score display */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.8 }}
+                      >
+                        <span className="text-4xl sm:text-6xl font-bold text-black">{readinessScore}</span>
+                        <div className="text-sm sm:text-lg text-gray-500 -mt-1 sm:-mt-2">out of 10</div>
+                      </motion.div>
+                    </div>
+                  </div>
+                  
+                  {/* Status message */}
+                  <motion.p 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1 }}
+                    className="text-xs sm:text-sm text-gray-600 relative z-10"
+                  >
+                    {readinessScore <= 3 && "Early stage - let's build your foundation"}
+                    {readinessScore > 3 && readinessScore <= 6 && "Making progress - keep pushing forward"}
+                    {readinessScore > 6 && readinessScore <= 8 && "Almost there - fine-tune for investors"}
+                    {readinessScore > 8 && "Investment ready - time to connect!"}
+                  </motion.p>
+                  
+                  {/* Decorative dots */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.3 }}
+                    transition={{ delay: 1.2 }}
+                    className="absolute top-8 right-8 flex space-x-1"
+                  >
+                    {[...Array(3)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="w-1.5 h-1.5 bg-black rounded-full"
+                        style={{ opacity: 0.2 + i * 0.3 }}
+                      />
+                    ))}
+                  </motion.div>
+                </motion.div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => router.push('/chat')}
+                  className="px-6 py-3 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-colors"
+                >
+                  Get Personalized Advice
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => router.push('/analysis')}
+                  className="px-6 py-3 bg-white text-black border border-gray-300 rounded-xl font-medium hover:border-black transition-colors"
+                >
+                  View Full Analysis
+                </motion.button>
               </div>
             </motion.div>
           )}
