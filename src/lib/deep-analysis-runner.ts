@@ -186,8 +186,7 @@ async function analyzeDimension(
   
   const openai = getOpenAIClient();
   
-  // Note: Using gpt-5 (o1) for deep reasoning - takes 2-5 min per dimension
-  // gpt-5 doesn't support temperature or response_format
+  // gpt-5 / gpt-5-mini: temperature not used; response_format unsupported on gpt-5*
   
   // Combine all available content (enriched with LinkedIn, GitHub, Product Hunt)
   const fullContent = `
@@ -195,24 +194,32 @@ async function analyzeDimension(
 
 ${scrapedContent}
 
-## Uploaded Documents Analysis:
+## Uploaded Documents:
 ${uploadedDocuments.join('\n\n---\n\n')}
-  `.slice(0, 12000); // Increased limit for enriched data
+  `.slice(0, 8000);
 
-  // Build the analysis prompt
+  // Build the analysis prompt – optimized for concise, value-dense output
   const analysisPrompt = `${dimension.prompt(businessInfo, fullContent)}
 
-Based on the above information, provide a structured analysis in JSON format:
+Return ONLY valid compact JSON using this schema (no extra text):
 {
-  "score": <number 0-100>,
-  "findings": ["finding1", "finding2", ...],
-  "redFlags": ["concern1", "concern2", ...],
-  "strengths": ["strength1", "strength2", ...],
-  "questionsToAsk": ["question1", "question2", ...],
-  "suggestions": ["suggestion1", "suggestion2", ...]
+  "score": number,                       // 0-100
+  "findings": string[],                  // max 3 items, <= 25 words each
+  "redFlags": string[],                  // max 3
+  "strengths": string[],                 // max 3
+  "recommendations": string[],           // max 3, actionable
+  "questionsToAsk": string[],            // max 3
+  "evidence": [                          // up to 2 citations
+    { "source": "website|document|github|producthunt|linkedin", "snippet": string, "url": string }
+  ],
+  "impactTag": "growth|risk|fundraising|product|team|market",
+  "confidence": number                   // 0.0-1.0
 }
 
-Be specific and reference actual data from the content when possible.`;
+Rules:
+- Use the available content only; if insufficient, set arrays to [] and score to 0.
+- Keep each list item short and specific.
+- Do not include any commentary outside JSON.`;
 
   try {
     const response = await openai.chat.completions.create({
@@ -220,35 +227,50 @@ Be specific and reference actual data from the content when possible.`;
       messages: [
         {
           role: 'system',
-          content: `You are an expert investment analyst with access to comprehensive company intelligence including:
-- Website content and marketing materials
-- LinkedIn data (team size, hiring velocity, company growth)
-- GitHub activity (technical execution, code quality, development velocity)
-- Product Hunt traction (community validation, PMF signals)
-- Uploaded business documents
-
-Analyze startups objectively using ALL available data sources. Reference specific data points from LinkedIn, GitHub, and Product Hunt when relevant. Provide structured feedback in JSON format.`
+          content: `You are an expert investment analyst. Be concise, factual, and strictly structured.
+Use only the provided context. If data is missing, set empty arrays and low confidence.
+Output must be valid JSON only.`
         },
         {
           role: 'user',
           content: analysisPrompt
         }
       ],
-      // Note: gpt-5 (o1) doesn't support response_format
-      // It will naturally produce structured JSON output from the prompt
-      ...(getChatModel('complex').startsWith('gpt-5') ? {} : { response_format: { type: 'json_object' } })
+      ...(getChatModel('complex').startsWith('gpt-5') ? {} : { response_format: { type: 'json_object' } }),
+      ...(getChatModel('complex').startsWith('gpt-5') ? { max_completion_tokens: 700 } : { max_tokens: 700 })
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
+    const raw = response.choices?.[0]?.message?.content || '{}';
+    let result: any = {};
+    try {
+      result = JSON.parse(raw);
+    } catch {
+      // best-effort: extract first JSON block
+      const start = raw.indexOf('{');
+      const end = raw.lastIndexOf('}');
+      if (start >= 0 && end > start) {
+        try { result = JSON.parse(raw.slice(start, end + 1)); } catch {}
+      }
+    }
     
+    const evidenceArray = Array.isArray(result.evidence) ? result.evidence : [];
+    const evidenceStrings = evidenceArray.slice(0, 2).map((e: any) => {
+      const src = e?.source ? String(e.source) : 'source';
+      const snip = e?.snippet ? String(e.snippet) : '';
+      const url = e?.url ? ` (${e.url})` : '';
+      return `${src}: ${snip}${url}`.slice(0, 240);
+    });
+
     return {
       dimension: dimension.id,
-      score: result.score || 50,
-      findings: result.findings || [],
-      redFlags: result.redFlags || [],
-      strengths: result.strengths || [],
-      questionsToAsk: result.questionsToAsk || [],
-      suggestions: result.suggestions || []
+      score: Number.isFinite(result.score) ? Math.max(0, Math.min(100, Number(result.score))) : 0,
+      findings: Array.isArray(result.findings) ? result.findings.slice(0, 3) : [],
+      redFlags: Array.isArray(result.redFlags) ? result.redFlags.slice(0, 3) : [],
+      strengths: Array.isArray(result.strengths) ? result.strengths.slice(0, 3) : [],
+      questionsToAsk: Array.isArray(result.questionsToAsk) ? result.questionsToAsk.slice(0, 3) : [],
+      suggestions: Array.isArray(result.recommendations) ? result.recommendations.slice(0, 3) : (Array.isArray(result.suggestions) ? result.suggestions.slice(0, 3) : []),
+      // store textual evidence in existing field
+      evidence: evidenceStrings
     };
 
   } catch (error) {
