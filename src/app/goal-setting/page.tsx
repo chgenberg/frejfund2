@@ -114,15 +114,89 @@ export default function GoalSettingPage() {
             </div>
           </div>
 
-          {/* Readiness Score */}
+          {/* Readiness Score - Enhanced Design */}
           <div className="text-center mb-12">
-            <div className="inline-block minimal-box px-12 py-8">
-              <p className="text-sm text-gray-600 mb-3 font-light uppercase tracking-wider">Investment Readiness</p>
-              <div className="flex items-end justify-center space-x-2">
-                <span className="text-5xl font-bold text-black">{readinessScore}</span>
-                <span className="text-2xl text-gray-400 mb-2">/10</span>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
+              className="inline-block minimal-box px-16 py-12 relative overflow-hidden"
+            >
+              {/* Background gradient effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-white opacity-50" />
+              
+              <p className="text-sm text-gray-600 mb-6 font-light uppercase tracking-wider relative z-10">Investment Readiness</p>
+              
+              {/* Circular Progress */}
+              <div className="relative w-40 h-40 mx-auto mb-6">
+                {/* Background circle */}
+                <svg className="absolute inset-0 w-full h-full -rotate-90">
+                  <circle
+                    cx="80"
+                    cy="80"
+                    r="70"
+                    fill="none"
+                    stroke="#e5e5e5"
+                    strokeWidth="12"
+                  />
+                  {/* Progress circle */}
+                  <motion.circle
+                    cx="80"
+                    cy="80"
+                    r="70"
+                    fill="none"
+                    stroke="#000"
+                    strokeWidth="12"
+                    strokeLinecap="round"
+                    strokeDasharray={440} // 2 * PI * r
+                    initial={{ strokeDashoffset: 440 }}
+                    animate={{ strokeDashoffset: 440 - (readinessScore / 10) * 440 }}
+                    transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
+                  />
+                </svg>
+                
+                {/* Score display */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.8 }}
+                  >
+                    <span className="text-6xl font-bold text-black">{readinessScore}</span>
+                    <div className="text-lg text-gray-500 -mt-2">out of 10</div>
+                  </motion.div>
+                </div>
               </div>
-            </div>
+              
+              {/* Status message */}
+              <motion.p 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1 }}
+                className="text-sm text-gray-600 relative z-10"
+              >
+                {readinessScore <= 3 && "Early stage - let's build your foundation"}
+                {readinessScore > 3 && readinessScore <= 6 && "Making progress - keep pushing forward"}
+                {readinessScore > 6 && readinessScore <= 8 && "Almost there - fine-tune for investors"}
+                {readinessScore > 8 && "Investment ready - time to connect!"}
+              </motion.p>
+              
+              {/* Decorative dots */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.3 }}
+                transition={{ delay: 1.2 }}
+                className="absolute top-8 right-8 flex space-x-1"
+              >
+                {[...Array(3)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="w-1.5 h-1.5 bg-black rounded-full"
+                    style={{ opacity: 0.2 + i * 0.3 }}
+                  />
+                ))}
+              </motion.div>
+            </motion.div>
           </div>
 
           {/* Goal Selection */}
