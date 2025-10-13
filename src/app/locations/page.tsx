@@ -32,7 +32,7 @@ export default function LocationsPage() {
         <div className="max-w-7xl mx-auto px-6">
           {/* Hero */}
           <div className="text-center mb-16">
-            <h1 className="text-5xl font-bold text-black mb-6">
+            <h1 className="text-5xl font-bold text-black mb-6 uppercase tracking-tight">
               FrejFund Worldwide
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
