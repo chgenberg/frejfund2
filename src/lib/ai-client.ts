@@ -49,10 +49,10 @@ export function getOpenAIClient(): OpenAI {
 export type TaskComplexity = 'simple' | 'complex';
 
 export function getChatModel(complexity: TaskComplexity = 'simple'): string {
-  // For simple chat interactions, use mini
-  // For complex analysis, use full model
-  const simpleModel = process.env.OPENAI_CHAT_MODEL_MINI || 'gpt-5-mini';
-  const complexModel = process.env.OPENAI_CHAT_MODEL || 'gpt-5';
+  // Use gpt-4o-mini for all tasks (cost-effective and fast)
+  // Note: gpt-4o-mini doesn't support temperature or max_tokens restrictions
+  const simpleModel = process.env.OPENAI_CHAT_MODEL_MINI || 'gpt-4o-mini';
+  const complexModel = process.env.OPENAI_CHAT_MODEL || 'gpt-4o-mini';
   
   return complexity === 'simple' ? simpleModel : complexModel;
 }

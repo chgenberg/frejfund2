@@ -224,7 +224,6 @@ Be specific and reference actual data from the content when possible.`;
           content: analysisPrompt
         }
       ],
-      temperature: 0.3, // Lower for more consistent analysis
       response_format: { type: 'json_object' }
     });
 
