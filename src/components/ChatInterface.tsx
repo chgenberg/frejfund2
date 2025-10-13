@@ -577,8 +577,8 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         .split(/\n{2,}/)
         .map((p: string) => p.replace(/\n+/g, ' ').trim())
         .filter(Boolean)
-        // Join with a single newline to avoid double spacing between paragraphs
-        .join('\n');
+        // Join with double newline for proper paragraph spacing
+        .join('\n\n');
 
       // Final trim
       text = text.trim();
@@ -1328,11 +1328,11 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   {message.sender === 'agent' && parseStructured(message.content) ? (
                     <StructuredRenderer data={parseStructured(message.content)} />
                   ) : message.sender === 'agent' ? (
-                    <div className="text-sm leading-relaxed prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-black prose-headings:mt-1 prose-headings:mb-0.5 prose-h2:text-sm prose-h3:text-sm prose-strong:text-black prose-strong:font-semibold prose-p:text-gray-800 prose-p:my-0 prose-p:leading-snug prose-li:text-gray-800 prose-li:my-0 prose-ul:my-0 prose-ol:my-0 prose-ul:space-y-0 prose-ol:space-y-0 whitespace-pre-wrap">
+                    <div className="text-sm leading-relaxed prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-black prose-headings:mt-2 prose-headings:mb-1 prose-h2:text-sm prose-h3:text-sm prose-strong:text-black prose-strong:font-semibold prose-p:text-gray-800 prose-p:my-1.5 prose-p:leading-normal prose-li:text-gray-800 prose-li:my-0.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-ul:space-y-0.5 prose-ol:space-y-0.5 whitespace-pre-wrap">
                       <ReactMarkdown 
                         remarkPlugins={[remarkGfm]}
                         components={{
-                        p: ({children}) => <p className="m-0 mb-1 leading-snug">{children}</p>,
+                        p: ({children}) => <p className="mb-2 leading-normal">{children}</p>,
                           strong: ({children}) => <strong className="font-semibold text-black">{children}</strong>,
                         }}
                       >

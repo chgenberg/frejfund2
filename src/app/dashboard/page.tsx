@@ -302,7 +302,7 @@ export default function Dashboard() {
       </nav>
 
       {/* Deep Analysis Progress Banner */}
-      {analysisProgress.status === 'running' && (
+      {(analysisProgress.status === 'running' || (analysisProgress.current > 0 && analysisProgress.current < analysisProgress.total)) && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}

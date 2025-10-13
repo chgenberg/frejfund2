@@ -58,43 +58,8 @@ export default function DocumentsPage() {
       if (response.ok) {
         const data = await response.json();
         
-        // If no documents exist, seed with sample documents
-        if (data.documents.length === 0) {
-          await fetch('/api/documents/seed', {
-            method: 'POST',
-            headers: {
-              'x-session-id': sessionId
-            }
-          });
-          
-          // Reload documents after seeding
-          const reloadResponse = await fetch('/api/documents', {
-            headers: {
-              'x-session-id': sessionId
-            }
-          });
-          
-          if (reloadResponse.ok) {
-            const reloadData = await reloadResponse.json();
-            const formattedDocs: Document[] = reloadData.documents.map((doc: any) => ({
-              id: doc.id,
-              type: doc.type,
-              title: doc.title,
-              description: doc.description || '',
-              status: doc.status,
-              lastUpdated: doc.updatedAt,
-              version: doc.version,
-              metrics: {
-                views: doc.viewCount,
-                avgTime: doc.avgViewTime ? `${Math.floor(doc.avgViewTime / 60)} min` : undefined,
-                shares: doc.shareCount
-              },
-              url: doc.fileUrl
-            }));
-            
-            setDocuments(formattedDocs);
-          }
-        } else {
+        // Show real documents only (no dummy data)
+        if (data.documents && data.documents.length > 0) {
           const formattedDocs: Document[] = data.documents.map((doc: any) => ({
             id: doc.id,
             type: doc.type,
@@ -112,6 +77,9 @@ export default function DocumentsPage() {
           }));
           
           setDocuments(formattedDocs);
+        } else {
+          // No documents yet - empty state will show suggestions
+          setDocuments([]);
         }
       } else {
         console.error('Failed to fetch documents');
@@ -350,23 +318,83 @@ export default function DocumentsPage() {
           </div>
         )}
 
-        {/* Empty State */}
+        {/* Empty State - Smart Suggestions */}
         {!loading && filteredDocuments.length === 0 && (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FileText className="w-8 h-8 text-gray-400" />
+          <div className="space-y-6">
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FileText className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No documents uploaded yet</h3>
+              <p className="text-gray-600 mb-6">Upload the materials below to strengthen your analysis and investor readiness</p>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No documents yet</h3>
-            <p className="text-gray-600 mb-6">Start by chatting with Freja to generate your first documents</p>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => router.push('/chat')}
-              className="px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors inline-flex items-center space-x-2"
-            >
-              <Sparkles className="w-5 h-5" />
-              <span>Chat with Freja</span>
-            </motion.button>
+
+            {/* Suggested Documents to Upload */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white border-2 border-dashed border-gray-300 rounded-xl p-6 hover:border-black transition-colors cursor-pointer"
+                onClick={() => router.push('/chat')}
+              >
+                <FileText className="w-8 h-8 text-gray-700 mb-3" />
+                <h4 className="font-semibold text-black mb-2">Pitch Deck</h4>
+                <p className="text-sm text-gray-600 mb-3">Upload your investor presentation (PDF, PPTX, Keynote)</p>
+                <span className="text-xs text-gray-500 bg-yellow-50 px-2 py-1 rounded">Highly recommended</span>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-white border-2 border-dashed border-gray-300 rounded-xl p-6 hover:border-black transition-colors cursor-pointer"
+                onClick={() => router.push('/chat')}
+              >
+                <BarChart3 className="w-8 h-8 text-gray-700 mb-3" />
+                <h4 className="font-semibold text-black mb-2">Financial Model</h4>
+                <p className="text-sm text-gray-600 mb-3">Your 3-year projections (Excel, Google Sheets)</p>
+                <span className="text-xs text-gray-500 bg-yellow-50 px-2 py-1 rounded">Highly recommended</span>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-white border-2 border-dashed border-gray-300 rounded-xl p-6 hover:border-black transition-colors cursor-pointer"
+                onClick={() => router.push('/chat')}
+              >
+                <TrendingUp className="w-8 h-8 text-gray-700 mb-3" />
+                <h4 className="font-semibold text-black mb-2">KPI Dashboard</h4>
+                <p className="text-sm text-gray-600 mb-3">Monthly metrics export (CSV, Excel)</p>
+                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">Optional</span>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-white border-2 border-dashed border-gray-300 rounded-xl p-6 hover:border-black transition-colors cursor-pointer"
+                onClick={() => router.push('/chat')}
+              >
+                <CheckCircle2 className="w-8 h-8 text-gray-700 mb-3" />
+                <h4 className="font-semibold text-black mb-2">Cap Table</h4>
+                <p className="text-sm text-gray-600 mb-3">Current ownership structure (Excel, PDF)</p>
+                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">Optional</span>
+              </motion.div>
+            </div>
+
+            <div className="text-center mt-8">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => router.push('/chat')}
+                className="px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors inline-flex items-center space-x-2"
+              >
+                <Sparkles className="w-5 h-5" />
+                <span>Upload via Chat</span>
+              </motion.button>
+              <p className="text-xs text-gray-500 mt-2">Drag & drop files in chat or ask Freja for help</p>
+            </div>
           </div>
         )}
 
