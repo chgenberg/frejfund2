@@ -21,6 +21,14 @@ export default function Home() {
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
 
+  const tabs = [
+    { icon: Sparkles, label: "Get Started" },
+    { icon: Brain, label: "Deep Analysis" },
+    { icon: Target, label: "AI Coaching" },
+    { icon: Users, label: "Investor Matching" },
+    { icon: TrendingUp, label: "Get Funded" }
+  ];
+
   const handleStartAnalysis = () => {
     setCurrentView('wizard');
   };
@@ -229,13 +237,7 @@ export default function Home() {
 
               {/* Tabs */}
               <div className="flex border-b border-gray-100">
-                {[
-                  { icon: Sparkles, label: "Get Started" },
-                  { icon: Brain, label: "Deep Analysis" },
-                  { icon: Target, label: "AI Coaching" },
-                  { icon: Users, label: "Investor Matching" },
-                  { icon: TrendingUp, label: "Get Funded" }
-                ].map((tab, index) => (
+                {tabs.map((tab, index) => (
                   <button
                     key={index}
                     onClick={() => setActiveTab(index)}
