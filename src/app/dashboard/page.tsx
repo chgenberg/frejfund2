@@ -77,6 +77,8 @@ export default function Dashboard() {
     growthVelocity: 0,
     riskScore: 'Unknown'
   });
+  
+  const [showMetrics, setShowMetrics] = useState(false);
 
   const [recentActivity] = useState<any[]>([]);
 
@@ -95,6 +97,7 @@ export default function Dashboard() {
             setHasDeepAnalysis(true);
             setReadinessScore(data.score);
             setAnalysisProgress({ current: 68, total: 68, status: 'completed' });
+            setShowMetrics(true);
             
             // Update metrics with real data
             setMetrics({
@@ -311,64 +314,79 @@ export default function Dashboard() {
               transition={{ duration: 0.3 }}
               className="space-y-6"
             >
-              {/* Metrics Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  className="minimal-box p-4 sm:p-6"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="p-1.5 sm:p-2 bg-black rounded-full">
-                      <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              {/* Metrics Grid - Only show when analysis is complete */}
+              {showMetrics ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    className="minimal-box p-4 sm:p-6"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-1.5 sm:p-2 bg-black rounded-full">
+                        <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                      </div>
+                      <span className="text-2xl font-bold text-black">{metrics.investmentReadiness}%</span>
                     </div>
-                    <span className="text-2xl font-bold text-black">{metrics.investmentReadiness}%</span>
-                  </div>
-                  <h3 className="text-sm font-medium text-gray-600">Investment Readiness</h3>
-                  <p className="text-xs text-gray-500 mt-1">+5% from last week</p>
-                </motion.div>
+                    <h3 className="text-sm font-medium text-gray-600">Investment Readiness</h3>
+                    <p className="text-xs text-gray-500 mt-1">Based on deep analysis</p>
+                  </motion.div>
 
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  className="minimal-box p-4 sm:p-6"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="p-2 bg-black rounded-full">
-                      <Activity className="w-5 h-5 text-white" />
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    className="minimal-box p-4 sm:p-6"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-2 bg-black rounded-full">
+                        <Activity className="w-5 h-5 text-white" />
+                      </div>
+                      <span className="text-2xl font-bold text-black">{metrics.dailyActiveScore}</span>
                     </div>
-                    <span className="text-2xl font-bold text-black">{metrics.dailyActiveScore}</span>
-                  </div>
-                  <h3 className="text-sm font-medium text-gray-600">Daily Active Score</h3>
-                  <p className="text-xs text-gray-500 mt-1">Above average</p>
-                </motion.div>
+                    <h3 className="text-sm font-medium text-gray-600">Overall Score</h3>
+                    <p className="text-xs text-gray-500 mt-1">Across 68 dimensions</p>
+                  </motion.div>
 
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  className="minimal-box p-4 sm:p-6"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="p-2 bg-black rounded-full">
-                      <Zap className="w-5 h-5 text-white" />
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    className="minimal-box p-4 sm:p-6"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-2 bg-black rounded-full">
+                        <Zap className="w-5 h-5 text-white" />
+                      </div>
+                      <span className="text-2xl font-bold text-black">{metrics.growthVelocity}x</span>
                     </div>
-                    <span className="text-2xl font-bold text-black">{metrics.growthVelocity}x</span>
-                  </div>
-                  <h3 className="text-sm font-medium text-gray-600">Growth Velocity</h3>
-                  <p className="text-xs text-gray-500 mt-1">Month over month</p>
-                </motion.div>
+                    <h3 className="text-sm font-medium text-gray-600">Growth Potential</h3>
+                    <p className="text-xs text-gray-500 mt-1">Projected trajectory</p>
+                  </motion.div>
 
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  className="minimal-box p-4 sm:p-6"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="p-2 bg-black rounded-full">
-                      <AlertCircle className="w-5 h-5 text-white" />
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    className="minimal-box p-4 sm:p-6"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-2 bg-black rounded-full">
+                        <AlertCircle className="w-5 h-5 text-white" />
+                      </div>
+                      <span className="text-2xl font-bold text-black">{metrics.riskScore}</span>
                     </div>
-                    <span className="text-2xl font-bold text-black">{metrics.riskScore}</span>
+                    <h3 className="text-sm font-medium text-gray-600">Risk Level</h3>
+                    <p className="text-xs text-gray-500 mt-1">Overall assessment</p>
+                  </motion.div>
+                </div>
+              ) : (
+                <div className="minimal-box p-8 sm:p-12 text-center">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <Brain className="w-8 h-8 text-gray-400" />
                   </div>
-                  <h3 className="text-sm font-medium text-gray-600">Risk Level</h3>
-                  <p className="text-xs text-gray-500 mt-1">2 items need attention</p>
-                </motion.div>
-              </div>
+                  <h3 className="text-xl font-semibold text-black mb-2">Deep Analysis in Progress</h3>
+                  <p className="text-gray-600 mb-4">
+                    Your business is being analyzed across 68 dimensions. Metrics will appear here once complete.
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    This typically takes 15-30 minutes
+                  </p>
+                </div>
+              )}
 
               {/* Recent Activity & Quick Actions */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -378,24 +396,18 @@ export default function Dashboard() {
                   </h2>
                   {hasDeepAnalysis ? (
                     <div className="space-y-3">
-                      {/* Show top insights from deep analysis */}
-                      <p className="text-sm text-gray-600">
-                        Your complete business analysis is ready. Here are the key findings:
+                      <p className="text-sm text-gray-600 mb-4">
+                        Your complete business analysis is ready. View detailed insights:
                       </p>
-                      <div className="space-y-2">
-                        <div className="flex items-start space-x-2">
-                          <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5" />
-                          <span className="text-sm text-gray-800">Strong market opportunity identified</span>
-                        </div>
-                        <div className="flex items-start space-x-2">
-                          <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5" />
-                          <span className="text-sm text-gray-800">Team expansion needed for scaling</span>
-                        </div>
-                        <div className="flex items-start space-x-2">
-                          <TrendingUp className="w-4 h-4 text-blue-600 mt-0.5" />
-                          <span className="text-sm text-gray-800">Revenue growth trending positively</span>
-                        </div>
-                      </div>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => router.push('/analysis')}
+                        className="w-full px-4 py-3 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors inline-flex items-center justify-center gap-2"
+                      >
+                        <Brain className="w-4 h-4" />
+                        View All 68 Dimensions
+                      </motion.button>
                     </div>
                   ) : analysisProgress.status === 'running' ? (
                     <div className="space-y-3">
