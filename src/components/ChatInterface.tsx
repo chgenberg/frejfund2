@@ -1464,7 +1464,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowQuickQuestions(true)}
-            className="fixed bottom-24 right-6 w-14 h-14 bg-black text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-800 transition-colors z-40"
+            className="fixed bottom-24 left-6 w-14 h-14 bg-black text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-800 transition-colors z-40"
           >
             <motion.span
               animate={{ rotate: [0, 15, -15, 0] }}
@@ -1489,11 +1489,11 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               onClick={() => setShowQuickQuestions(false)}
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.8, x: 100 }}
+              initial={{ opacity: 0, scale: 0.8, x: -100 }}
               animate={{ opacity: 1, scale: 1, x: 0 }}
-              exit={{ opacity: 0, scale: 0.8, x: 100 }}
+              exit={{ opacity: 0, scale: 0.8, x: -100 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="fixed bottom-24 right-6 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 p-6 z-40"
+              className="fixed bottom-40 left-6 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 p-6 z-40"
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-black">Quick Questions</h3>
