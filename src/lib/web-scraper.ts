@@ -52,7 +52,13 @@ export async function fetchHtml(url: string, timeoutMs = 12000): Promise<string>
 export async function extractMainContentWithReadability(url: string, html: string): Promise<ScrapeResult | null> {
   try {
     // Guard: skip heavy Readability on very large pages to avoid OOM
-    if (!html || html.length > 300_000) { // Reduced from 600K to 300K
+    if (!html || html.trim().length === 0) {
+      console.log(`[Scraper] Empty HTML for ${url} - will use Cheerio fallback`);
+      return null;
+    }
+    
+    if (html.length > 300_000) {
+      console.log(`[Scraper] HTML too large (${(html.length / 1000).toFixed(0)}KB) for ${url} - using Cheerio instead`);
       return null;
     }
     // Lazy-require to avoid bundler resolving at build time
@@ -72,13 +78,13 @@ export async function extractMainContentWithReadability(url: string, html: strin
         includeNodeLocations: false
       });
     } catch (domError) {
-      console.error('JSDOM creation failed:', domError);
+      console.log(`[Scraper] JSDOM failed for ${url}: ${domError.message || 'Unknown error'} - using Cheerio`);
       return null;
     }
 
     // Verify document exists
     if (!dom?.window?.document) {
-      console.error('JSDOM document not available');
+      console.log(`[Scraper] JSDOM document not available for ${url} - using Cheerio`);
       try { dom?.window?.close(); } catch (e) { /* ignore */ }
       return null;
     }
@@ -87,8 +93,18 @@ export async function extractMainContentWithReadability(url: string, html: strin
     try {
       const reader = new Readability(dom.window.document);
       article = reader.parse();
+      
+      if (!article || !article.textContent || article.textContent.length < 100) {
+        console.log(`[Scraper] Readability extracted too little content from ${url} (${article?.textContent?.length || 0} chars) - using Cheerio`);
+        try { dom.window.close(); } catch (e) { /* ignore */ }
+        return null;
+      }
+      
+      console.log(`[Scraper] ✓ Readability extracted ${article.textContent.length} chars from ${url}`);
     } catch (readabilityError) {
-      console.error('Readability parsing failed:', readabilityError);
+      console.log(`[Scraper] Readability parsing failed for ${url}: ${readabilityError.message || 'Unknown'} - using Cheerio`);
+      try { dom.window.close(); } catch (e) { /* ignore */ }
+      return null;
     }
     
     // Clean up DOM to free memory
@@ -119,6 +135,8 @@ export async function extractWithCheerio(url: string, html: string): Promise<Scr
     const content = $(el).attr('content');
     if (name && content) meta[name] = content;
   });
+  
+  console.log(`[Scraper] ✓ Cheerio extracted ${bodyText.length} chars from ${url}`);
   return { url, title, text: bodyText, meta };
 }
 
