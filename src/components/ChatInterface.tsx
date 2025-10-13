@@ -311,6 +311,23 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
             }
           }
         } catch {}
+        // Trigger deep analysis in background
+        try {
+          await fetch('/api/deep-analysis', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sessionId,
+              businessInfo,
+              scrapedContent: mergedContext || '',
+              uploadedDocuments: businessInfo.preScrapedFiles || []
+            })
+          });
+          console.log('Deep analysis started in background');
+        } catch (error) {
+          console.error('Failed to start deep analysis:', error);
+        }
+
         // Fetch one-shot summary to seed context (include prefetched docs). Keep it hidden.
         const summaryRes = await fetch('/api/summary', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },

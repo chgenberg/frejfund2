@@ -299,12 +299,24 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
       }
       
       // Get coaching system prompt with goal awareness
-      const coachingSystemPrompt = getCoachingSystemPrompt(
+      let coachingSystemPrompt = getCoachingSystemPrompt(
         businessInfo, 
         readiness.score,
         userGoal,
         currentMilestone
       );
+      
+      // Enhance with deep analysis context if available
+      try {
+        const { getFrejaCoachingContext } = await import('./freja-coaching');
+        const deepContext = await getFrejaCoachingContext(sessionId || 'unknown');
+        
+        if (deepContext && !deepContext.includes('still running')) {
+          coachingSystemPrompt += '\n\n--- DEEP ANALYSIS RESULTS ---\n' + deepContext;
+        }
+      } catch (error) {
+        console.log('Deep analysis context not available yet');
+      }
       
       const contextPrompt = `User Question: ${message}`;
 

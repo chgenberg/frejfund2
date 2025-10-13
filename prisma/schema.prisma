@@ -455,3 +455,109 @@ model VCPreference {
   @@index([vcEmail])
   @@map("vc_preferences")
 }
+
+// Deep Analysis Results - stores comprehensive analysis across 68 dimensions
+model DeepAnalysis {
+  id            String    @id @default(cuid())
+  sessionId     String    @unique
+  userId        String?
+  
+  // Analysis metadata
+  status        String    @default("pending") // 'pending' | 'analyzing' | 'completed' | 'failed'
+  progress      Int       @default(0) // 0-100
+  
+  // Overall scores
+  overallScore      Int?       // 0-100
+  investmentReadiness Int?     // 0-10
+  
+  // Timestamps
+  startedAt     DateTime  @default(now())
+  completedAt   DateTime?
+  lastUpdatedAt DateTime  @updatedAt
+  
+  // Relations
+  dimensions    AnalysisDimension[]
+  insights      AnalysisInsight[]
+  
+  @@index([sessionId])
+  @@index([userId])
+  @@index([status])
+  @@map("deep_analyses")
+}
+
+// Individual dimension analysis results
+model AnalysisDimension {
+  id            String    @id @default(cuid())
+  analysisId    String
+  
+  // Dimension info
+  dimensionId   String    // e.g., 'problem-clarity', 'unit-economics'
+  category      String    // e.g., 'Problem & Solution', 'Business Model'
+  name          String    // Human-readable name
+  
+  // Analysis results
+  score         Int?      // 0-100
+  findings      String[]  // Key findings from analysis
+  redFlags      String[]  // Warning signs identified
+  strengths     String[]  // Positive signals
+  evidence      String[]  // Quotes/data supporting the analysis
+  
+  // Questions generated for this dimension
+  questions     String[]  // Smart questions to ask founder
+  
+  // Status
+  analyzed      Boolean   @default(false)
+  analyzedAt    DateTime?
+  
+  // GPT metadata
+  prompt        String?   @db.Text
+  modelUsed     String?
+  tokensUsed    Int?
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  analysis      DeepAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  
+  @@index([analysisId])
+  @@index([dimensionId])
+  @@index([category])
+  @@map("analysis_dimensions")
+}
+
+// High-level insights generated from analysis
+model AnalysisInsight {
+  id            String    @id @default(cuid())
+  analysisId    String
+  
+  // Insight data
+  type          String    // 'strength' | 'weakness' | 'opportunity' | 'threat' | 'question'
+  priority      String    // 'critical' | 'high' | 'medium' | 'low'
+  category      String    // Maps to dimension category
+  
+  // Content
+  title         String
+  description   String    @db.Text
+  recommendation String?  @db.Text
+  
+  // Supporting data
+  relatedDimensions String[] // IDs of related dimensions
+  evidence      String[]  // Supporting quotes/data
+  
+  // Status
+  addressed     Boolean   @default(false)
+  addressedAt   DateTime?
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  
+  // Relations
+  analysis      DeepAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  
+  @@index([analysisId])
+  @@index([type])
+  @@index([priority])
+  @@map("analysis_insights")
+}
