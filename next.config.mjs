@@ -11,7 +11,6 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   // Memory optimization for build
-  swcMinify: true, // Use SWC for faster, more memory-efficient minification
   productionBrowserSourceMaps: false, // Disable source maps in production to save memory
   // Reduce parallelization during build to use less memory
   webpack: (config, { isServer }) => {

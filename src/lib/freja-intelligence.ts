@@ -37,7 +37,7 @@ export const DATA_REQUIREMENTS: DataRequirement[] = [
         description: 'Current monthly recurring revenue',
         dataType: 'number',
         required: true,
-        followUp: 'What's your revenue growth rate month-over-month?'
+        followUp: 'What is your revenue growth rate month-over-month?'
       },
       {
         name: 'Burn Rate',
@@ -51,14 +51,14 @@ export const DATA_REQUIREMENTS: DataRequirement[] = [
         description: 'Cost to acquire one customer',
         dataType: 'number',
         required: true,
-        followUp: 'What's your CAC payback period?'
+        followUp: 'What is your CAC payback period?'
       },
       {
         name: 'Lifetime Value (LTV)',
         description: 'Average customer lifetime value',
         dataType: 'number',
         required: true,
-        followUp: 'What's your LTV:CAC ratio?'
+        followUp: 'What is your LTV:CAC ratio?'
       },
       {
         name: 'Gross Margin',
@@ -78,7 +78,7 @@ export const DATA_REQUIREMENTS: DataRequirement[] = [
         description: 'Number of paying customers',
         dataType: 'number',
         required: true,
-        followUp: 'What's your customer growth rate?'
+        followUp: 'What is your customer growth rate?'
       },
       {
         name: 'Churn Rate',
@@ -92,7 +92,7 @@ export const DATA_REQUIREMENTS: DataRequirement[] = [
         description: 'Value of deals in pipeline',
         dataType: 'number',
         required: false,
-        followUp: 'What's your average sales cycle length?'
+        followUp: 'What is your average sales cycle length?'
       },
       {
         name: 'Market TAM',
@@ -188,7 +188,7 @@ export function analyzeDataGaps(businessInfo: BusinessInfo): AnalysisGap[] {
       missing: financialMissing,
       impact: 'Cannot accurately assess unit economics and growth efficiency',
       questions: [
-        'What's your current monthly revenue?',
+        'What is your current monthly revenue?',
         'How much are you spending each month (burn rate)?',
         'What does it cost to acquire each customer?'
       ]
@@ -229,29 +229,29 @@ export function generateSmartQuestions(businessInfo: BusinessInfo): string[] {
     case 'idea':
       questions.push(
         'Have you validated the problem with potential customers?',
-        'What's your plan to build an MVP?',
+        'What is your plan to build an MVP?',
         'Who is your ideal first customer?'
       );
       break;
     case 'mvp':
       questions.push(
         'How many beta users do you have?',
-        'What's the feedback been like?',
+        'What is the feedback been like?',
         'When do you plan to start charging?'
       );
       break;
     case 'revenue':
       questions.push(
-        'What's your current MRR and growth rate?',
-        'What's your customer acquisition strategy?',
+        'What is your current MRR and growth rate?',
+        'What is your customer acquisition strategy?',
         'How sticky is your product (what's the churn)?'
       );
       break;
     case 'growth':
       questions.push(
-        'What's your path to profitability?',
+        'What is your path to profitability?',
         'How will you scale customer acquisition?',
-        'What's your competitive moat?'
+        'What is your competitive moat?'
       );
       break;
   }
@@ -274,34 +274,34 @@ export function generateSmartQuestions(businessInfo: BusinessInfo): string[] {
 function getIndustrySpecificQuestions(industry: string): string[] {
   const questions: { [key: string]: string[] } = {
     'SaaS': [
-      'What's your net revenue retention rate?',
+      'What is your net revenue retention rate?',
       'How long is your average customer contract?',
-      'What's your magic number (sales efficiency)?'
+      'What is your magic number (sales efficiency)?'
     ],
     'Marketplace': [
-      'What's your take rate?',
+      'What is your take rate?',
       'How do you solve the chicken-and-egg problem?',
-      'What's your GMV growth rate?'
+      'What is your GMV growth rate?'
     ],
     'FinTech': [
       'How do you handle regulatory compliance?',
-      'What's your fraud rate?',
+      'What is your fraud rate?',
       'Do you have necessary licenses?'
     ],
     'HealthTech': [
-      'What's your regulatory pathway (FDA, CE, etc)?',
+      'What is your regulatory pathway (FDA, CE, etc)?',
       'How long is your sales cycle to healthcare providers?',
       'Do you have clinical validation?'
     ],
     'E-commerce': [
-      'What's your customer acquisition cost vs AOV?',
+      'What is your customer acquisition cost vs AOV?',
       'How do you differentiate from Amazon?',
-      'What's your repeat purchase rate?'
+      'What is your repeat purchase rate?'
     ],
     'Hardware': [
-      'What's your gross margin per unit?',
+      'What is your gross margin per unit?',
       'How do you handle manufacturing and supply chain?',
-      'What's your warranty/return rate?'
+      'What is your warranty/return rate?'
     ]
   };
 
