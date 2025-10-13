@@ -975,25 +975,25 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       <motion.header 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between"
+        className="bg-white border-b border-gray-200 px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between"
       >
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-3">
           <motion.div 
-            className="w-10 h-10 bg-black rounded-full flex items-center justify-center cursor-pointer"
+            className="w-8 h-8 sm:w-10 sm:h-10 bg-black rounded-full flex items-center justify-center cursor-pointer"
             whileHover={{ scale: 1.02 }}
             onClick={() => window.location.href = '/dashboard'}
           >
-            <div className="w-1.5 h-1.5 bg-white rounded-full" />
+            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-white rounded-full" />
           </motion.div>
           <div>
-            <h1 className="text-lg font-semibold text-black">Freja</h1>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full" />
-              <p className="text-xs text-gray-500">Active now</p>
+            <h1 className="text-base sm:text-lg font-semibold text-black">Freja</h1>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full" />
+              <p className="text-[10px] sm:text-xs text-gray-500">Active now</p>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <div className="relative">
             <button
               onClick={() => setShowInfoPopup((v) => !v)}
@@ -1301,7 +1301,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 max-w-3xl mx-auto w-full">
+      <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-3 sm:py-4 space-y-2 sm:space-y-3 max-w-3xl mx-auto w-full">
         <AnimatePresence>
           {messages.map((message) => (
             <motion.div
@@ -1309,7 +1309,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className={`flex items-start space-x-3 ${
+              className={`flex items-start space-x-2 sm:space-x-3 ${
                 message.sender === 'user' ? 'justify-end' : 'justify-start'
               }`}
             >
@@ -1318,24 +1318,24 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                  className="w-8 h-8 bg-black rounded-full flex items-center justify-center flex-shrink-0"
+                  className="w-6 h-6 sm:w-8 sm:h-8 bg-black rounded-full flex items-center justify-center flex-shrink-0"
                 >
-                  <div className="w-1 h-1 bg-white rounded-full" />
+                  <div className="w-0.5 h-0.5 sm:w-1 sm:h-1 bg-white rounded-full" />
                 </motion.div>
               )}
               
-              <div className={`max-w-md ${message.sender === 'user' ? 'order-1' : ''}`}>
+              <div className={`max-w-[85%] sm:max-w-md ${message.sender === 'user' ? 'order-1' : ''}`}>
                   <motion.div
                     initial={{ scale: 0.95, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     whileHover={{ scale: 1.01 }}
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                    className={`px-4 py-2.5 group relative overflow-hidden ${
+                    className={`px-3 sm:px-4 py-2 sm:py-2.5 group relative overflow-hidden ${
                       message.sender === 'user'
-                        ? 'bg-black text-white rounded-2xl rounded-br-sm'
+                        ? 'bg-black text-white rounded-2xl rounded-br-sm text-sm sm:text-base'
                         : message.type === 'analysis'
-                        ? 'bg-gray-100 text-gray-900 rounded-2xl rounded-bl-sm border border-gray-200'
-                        : 'bg-gray-100 text-gray-900 rounded-2xl rounded-bl-sm'
+                        ? 'bg-gray-100 text-gray-900 rounded-2xl rounded-bl-sm border border-gray-200 text-sm sm:text-base'
+                        : 'bg-gray-100 text-gray-900 rounded-2xl rounded-bl-sm text-sm sm:text-base'
                     }`}
                   >
                   {/* Subtle gradient overlay on hover */}
@@ -1671,15 +1671,15 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               animate={{ opacity: 1, scale: 1, x: 0 }}
               exit={{ opacity: 0, scale: 0.8, x: -100 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="fixed bottom-40 left-6 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 p-6 z-40"
+              className="fixed bottom-24 sm:bottom-40 left-3 sm:left-6 right-3 sm:right-auto sm:w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 p-4 sm:p-6 z-40"
             >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-black">Quick Questions</h3>
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <h3 className="text-base sm:text-lg font-semibold text-black">Quick Questions</h3>
                 <button
                   onClick={() => setShowQuickQuestions(false)}
                   className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
                 >
-                  <X className="w-5 h-5 text-gray-500" />
+                  <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
                 </button>
               </div>
               <div className="space-y-2">

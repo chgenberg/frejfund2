@@ -301,45 +301,45 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="max-w-2xl mx-auto text-center"
+      className="max-w-2xl mx-auto text-center px-4 sm:px-0"
     >
-      <div className="w-20 h-20 bg-black rounded-full mx-auto mb-6 flex items-center justify-center">
-        <div className="w-4 h-4 bg-white rounded-full" />
+      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-black rounded-full mx-auto mb-4 sm:mb-6 flex items-center justify-center">
+        <div className="w-3 h-3 sm:w-4 sm:h-4 bg-white rounded-full" />
       </div>
 
-      <h2 className="text-3xl font-bold text-black mb-4">
+      <h2 className="text-2xl sm:text-3xl font-bold text-black mb-3 sm:mb-4">
         Welcome to FrejFund
       </h2>
       
-      <p className="text-lg text-gray-600 mb-8">
+      <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">
         Let's analyze your business and help you become investment-ready
       </p>
 
-      <div className="minimal-box text-left mb-8">
-        <h3 className="font-semibold text-black mb-4">What we'll do together:</h3>
-        <ul className="space-y-3 text-gray-700">
+      <div className="minimal-box text-left mb-6 sm:mb-8 p-4 sm:p-6">
+        <h3 className="font-semibold text-black mb-3 sm:mb-4 text-sm sm:text-base">What we'll do together:</h3>
+        <ul className="space-y-2 sm:space-y-3 text-sm sm:text-base text-gray-700">
           <li className="flex items-start">
-            <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">1</span>
+            <span className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-100 rounded-full flex items-center justify-center mr-2 sm:mr-3 mt-0.5 flex-shrink-0 text-xs sm:text-sm">1</span>
             <span>Gather information about your business, team, and traction</span>
           </li>
           <li className="flex items-start">
-            <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">2</span>
+            <span className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-100 rounded-full flex items-center justify-center mr-2 sm:mr-3 mt-0.5 flex-shrink-0 text-xs sm:text-sm">2</span>
             <span>Analyze your investment readiness across 10 key dimensions</span>
           </li>
           <li className="flex items-start">
-            <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">3</span>
+            <span className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-100 rounded-full flex items-center justify-center mr-2 sm:mr-3 mt-0.5 flex-shrink-0 text-xs sm:text-sm">3</span>
             <span>Connect you with AI coach Freja for personalized guidance</span>
           </li>
           <li className="flex items-start">
-            <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">4</span>
+            <span className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-100 rounded-full flex items-center justify-center mr-2 sm:mr-3 mt-0.5 flex-shrink-0 text-xs sm:text-sm">4</span>
             <span>Match you with relevant investors in our network</span>
           </li>
         </ul>
       </div>
 
-      <div className="minimal-box text-left mb-8">
-        <h3 className="font-semibold text-black mb-4">Your data is safe:</h3>
-        <ul className="space-y-2 text-sm text-gray-600">
+      <div className="minimal-box text-left mb-6 sm:mb-8 p-4 sm:p-6">
+        <h3 className="font-semibold text-black mb-3 sm:mb-4 text-sm sm:text-base">Your data is safe:</h3>
+        <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-gray-600">
           <li>• Your information is encrypted and stored securely</li>
           <li>• We never share your data without explicit permission</li>
           <li>• Investors only see what you choose to share</li>
@@ -460,7 +460,7 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
             <label className="block text-sm font-medium text-gray-700 mb-3">
               Business Stage *
             </label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
               {[
                 { value: 'idea', label: 'Idea', desc: 'Concept stage' },
                 { value: 'mvp', label: 'MVP', desc: 'Early product' },
@@ -831,7 +831,7 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
   }
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-8">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4 sm:p-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -845,16 +845,16 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
         {currentStep >= 0 && (
           <>
             {/* Progress Dots */}
-            <div className="flex justify-center space-x-3 mb-12">
+            <div className="flex justify-center space-x-2 sm:space-x-3 mb-8 sm:mb-12">
               {steps.map((_, index) => (
                 <motion.div
                   key={index}
-                  className={`h-2.5 rounded-full transition-all duration-500 ${
+                  className={`h-2 sm:h-2.5 rounded-full transition-all duration-500 ${
                     index === currentStep
-                      ? 'w-10 bg-black'
+                      ? 'w-8 sm:w-10 bg-black'
                       : index < currentStep
-                      ? 'w-2.5 bg-gray-400'
-                      : 'w-2.5 bg-gray-200'
+                      ? 'w-2 sm:w-2.5 bg-gray-400'
+                      : 'w-2 sm:w-2.5 bg-gray-200'
                   }`}
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
@@ -879,11 +879,11 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="text-center mb-10">
+              <div className="text-center mb-6 sm:mb-10">
                 <motion.h2 
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-3xl font-semibold text-black mb-3 tracking-tight"
+                  className="text-xl sm:text-3xl font-semibold text-black mb-2 sm:mb-3 tracking-tight"
                 >
                   {steps[currentStep].title}
                 </motion.h2>
@@ -891,7 +891,7 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.1 }}
-                  className="text-lg text-gray-600 font-light"
+                  className="text-sm sm:text-lg text-gray-600 font-light"
                 >
                   {steps[currentStep].subtitle}
                 </motion.p>
@@ -913,19 +913,19 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
           </AnimatePresence>
 
           {/* Navigation */}
-          <div className="flex items-center justify-between mt-10">
+          <div className="flex items-center justify-between mt-8 sm:mt-10">
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handlePrevious}
               disabled={currentStep === 0}
-              className={`flex items-center px-6 py-3 rounded-full text-sm font-medium transition-all ${
+              className={`flex items-center px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-medium transition-all ${
                 currentStep === 0 
                   ? 'text-gray-400 cursor-not-allowed' 
                   : 'text-gray-700 hover:text-black hover:bg-gray-50'
               }`}
             >
-              <ChevronLeft className="w-4 h-4 mr-1" />
+              <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
               Back
             </motion.button>
 
@@ -934,11 +934,11 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
               whileTap={{ scale: 0.98 }}
               onClick={handleNext}
               disabled={!canProceed()}
-              className="relative px-8 py-3 bg-black text-white rounded-full font-medium overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
+              className="relative px-6 sm:px-8 py-2.5 sm:py-3 bg-black text-white rounded-full text-xs sm:text-sm font-medium overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="relative z-10 flex items-center">
                 {currentStep === steps.length - 1 ? 'Start Analysis' : 'Continue'}
-                <ChevronRight className="w-4 h-4 ml-1" />
+                <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
               </span>
               <motion.div
                 className="absolute inset-0 bg-gray-800"

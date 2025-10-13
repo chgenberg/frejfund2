@@ -111,6 +111,25 @@ select.minimal-select:focus,
   transition: all 0.2s ease;
 }
 
+/* Mobile responsive adjustments */
+@media (max-width: 640px) {
+  .minimal-box {
+    padding: 24px;
+    border-radius: 20px;
+  }
+  
+  .minimal-button {
+    padding: 14px 24px;
+    font-size: 14px;
+  }
+  
+  select.minimal-select,
+  .minimal-select {
+    padding: 10px 36px 10px 14px;
+    font-size: 14px;
+  }
+}
+
 .minimal-button:hover {
   background: #1a1a1a;
   transform: translateY(-1px);
