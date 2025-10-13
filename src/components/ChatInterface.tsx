@@ -991,7 +991,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full" />
               <p className="text-[10px] sm:text-xs text-gray-500">
                 {analysisProgress.status === 'running' ? (
-                  <span className="flex items-center">
+                  <span className="flex items-center relative group">
                     <motion.span
                       animate={{ opacity: [1, 0.5, 1] }}
                       transition={{ duration: 1.5, repeat: Infinity }}
@@ -1005,6 +1005,24 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                     <span className="ml-1 text-gray-400">
                       ({Math.round((analysisProgress.current / analysisProgress.total) * 100)}%)
                     </span>
+                    <Info className="w-3 h-3 ml-1.5 text-gray-400 cursor-help" />
+                    
+                    {/* Tooltip */}
+                    <div className="absolute bottom-full left-0 mb-2 w-64 p-3 bg-black text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                      <div className="font-semibold mb-2">Deep Analysis in Progress</div>
+                      <div className="space-y-1.5">
+                        <p>🔍 Analyzing your business across 68 dimensions:</p>
+                        <p>• Market opportunity & competitive landscape</p>
+                        <p>• Team strength & execution capability</p>
+                        <p>• Financial health & growth metrics</p>
+                        <p>• Product-market fit signals</p>
+                        <p>• Investment readiness factors</p>
+                      </div>
+                      <div className="mt-2 pt-2 border-t border-gray-700">
+                        <p className="text-gray-300">Data sources: Website, LinkedIn, GitHub, Product Hunt, uploaded documents</p>
+                      </div>
+                      <div className="absolute -bottom-2 left-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black"></div>
+                    </div>
                   </span>
                 ) : (
                   'Active now'

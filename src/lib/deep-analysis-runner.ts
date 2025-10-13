@@ -23,6 +23,9 @@ interface RunDeepAnalysisOptions {
 export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<string> {
   const { sessionId, businessInfo, scrapedContent, uploadedDocuments = [], mode = 'progressive' } = options;
   
+  console.log(`🔬 Starting deep analysis for ${businessInfo.name} (${sessionId})`);
+  console.log(`📋 Mode: ${mode}, Content length: ${scrapedContent.length}, Docs: ${uploadedDocuments.length}`);
+  
   try {
     // 1. Create DeepAnalysis record in database
     const analysis = await prisma.deepAnalysis.create({
@@ -99,6 +102,8 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
           where: { id: analysis.id },
           data: { progress }
         });
+        
+        console.log(`📊 Progress: ${completed}/${totalDimensions} (${progress}%) - ${dimension.name}`);
         
         // Send progress update via SSE
         try {

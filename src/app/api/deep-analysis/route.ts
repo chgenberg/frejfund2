@@ -16,6 +16,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log('🚀 Starting deep analysis for session:', sessionId);
+    
     // Start deep analysis in background (non-blocking)
     // Note: In production, this should be a background job (BullMQ, Inngest, etc.)
     runDeepAnalysis({
@@ -24,8 +26,10 @@ export async function POST(request: NextRequest) {
       scrapedContent: scrapedContent || '',
       uploadedDocuments: uploadedDocuments || [],
       mode: 'progressive' // Run progressively to avoid rate limits
+    }).then(() => {
+      console.log('✅ Deep analysis completed for session:', sessionId);
     }).catch(error => {
-      console.error('Background deep analysis failed:', error);
+      console.error('❌ Background deep analysis failed:', error);
     });
 
     return NextResponse.json({
