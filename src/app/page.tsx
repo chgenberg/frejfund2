@@ -8,6 +8,7 @@ import { BusinessInfo, Message } from '@/types/business';
 import { demoCompany, demoWebsiteText, demoKpiCsv } from '@/lib/demo-case';
 import ChatInterface from '@/components/ChatInterface';
 import BusinessWizard from '@/components/BusinessWizard';
+import Footer from '@/components/Footer';
 
 // Disable prerendering; this page depends on client-only state/localStorage and async flows
 export const dynamic = 'force-dynamic';
@@ -156,19 +157,7 @@ export default function Home() {
       {/* (Intentionally minimalist: one pulsing card) */}
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-100 py-12">
-        <div className="max-w-6xl mx-auto px-8 text-center">
-          <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center">
-              <div className="w-1 h-1 bg-white rounded-full" />
-            </div>
-            <span className="text-xl font-semibold text-black">FrejFund</span>
-          </div>
-          <p className="text-gray-500 font-light text-sm">
-            © 2024 FrejFund
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

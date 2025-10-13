@@ -56,6 +56,16 @@ export default function Chatbot() {
   }, [isOpen]);
 
   useEffect(() => {
+    // Listen for custom event to open chatbot
+    const handleOpenChatbot = () => setIsOpen(true);
+    window.addEventListener('openChatbot', handleOpenChatbot);
+    
+    return () => {
+      window.removeEventListener('openChatbot', handleOpenChatbot);
+    };
+  }, []);
+
+  useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
