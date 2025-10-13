@@ -32,17 +32,24 @@ export default function Home() {
     if (info.email && typeof window !== 'undefined') {
       try {
         const sessionId = localStorage.getItem('frejfund-session-id') || `sess-${Date.now()}`;
-        await fetch('/api/session/save', {
+        localStorage.setItem('frejfund-session-id', sessionId);
+        
+        const response = await fetch('/api/session/save', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             email: info.email,
             sessionId,
             businessInfo: info,
-            scrapedText: info.preScrapedText,
-            scrapedSources: info.preScrapedSources
+            scrapedText: info.preScrapedText || '',
+            scrapedSources: info.preScrapedSources || []
           })
         });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('Session save failed:', errorData);
+        }
       } catch (error) {
         console.error('Failed to save session:', error);
       }
