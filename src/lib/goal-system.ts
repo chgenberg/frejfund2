@@ -55,7 +55,7 @@ export const GOAL_OPTIONS: GoalOption[] = [
     id: 'find-investors-3m',
     title: 'Find investors within 3 months',
     description: 'Raise capital from angels or VCs in the next quarter',
-    icon: '💰',
+    icon: '○',
     timeline: '3 months',
     difficulty: 'hard'
   },
@@ -63,7 +63,7 @@ export const GOAL_OPTIONS: GoalOption[] = [
     id: 'improve-pitch',
     title: 'Improve my pitch deck',
     description: 'Create an investor-ready pitch that converts',
-    icon: '🎤',
+    icon: '□',
     timeline: '2-4 weeks',
     difficulty: 'easy'
   },
@@ -71,7 +71,7 @@ export const GOAL_OPTIONS: GoalOption[] = [
     id: 'get-bank-loan',
     title: 'Get a bank loan',
     description: 'Secure debt financing for growth',
-    icon: '🏦',
+    icon: '△',
     timeline: '1-2 months',
     difficulty: 'medium'
   },
@@ -79,7 +79,7 @@ export const GOAL_OPTIONS: GoalOption[] = [
     id: 'build-investment-ready',
     title: 'Build an investment-ready business',
     description: 'Improve fundamentals before fundraising',
-    icon: '🏗️',
+    icon: '◇',
     timeline: '6-12 months',
     difficulty: 'medium'
   },
@@ -87,7 +87,7 @@ export const GOAL_OPTIONS: GoalOption[] = [
     id: 'custom',
     title: 'Other goal',
     description: 'Set a custom goal for your business',
-    icon: '🎯',
+    icon: '+',
     timeline: 'Custom',
     difficulty: 'medium'
   }

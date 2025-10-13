@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { BusinessInfo, Message } from '@/types/business';
 import { demoCompany, demoWebsiteText, demoKpiCsv } from '@/lib/demo-case';
 import ChatInterface from '@/components/ChatInterface';
@@ -123,44 +123,33 @@ export default function Home() {
       {/* Centered Pulsing Box */}
       <section className="min-h-screen flex items-center justify-center px-6 pt-24">
         <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
           className="relative max-w-3xl w-full"
         >
-          <motion.div
-            animate={{
-              scale: [1, 1.01, 1],
-              boxShadow: [
-                '0 20px 40px rgba(0,0,0,0.15)',
-                '0 35px 80px rgba(0,0,0,0.28)',
-                '0 20px 40px rgba(0,0,0,0.15)'
-              ]
-            }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-            className="bg-white border border-gray-200 rounded-3xl p-10 text-center"
-          >
-            <div className="flex items-center justify-center mb-4">
-              <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-white" />
+          <div className="minimal-box minimal-box-shadow text-center">
+            <div className="flex items-center justify-center mb-8">
+              <div className="w-14 h-14 bg-black rounded-full flex items-center justify-center">
+                <div className="w-1.5 h-1.5 bg-white rounded-full" />
               </div>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-black mb-3 tracking-tight">
-              Turning ambition into opportunity.
+            <h1 className="text-4xl md:text-5xl font-bold text-black mb-4 tracking-tight leading-tight">
+              Turning ambition into<br />opportunity.
             </h1>
-            <p className="text-lg md:text-xl text-gray-600 mb-8">
+            <p className="text-lg md:text-xl text-gray-600 mb-10 font-light">
               Helping founders meet the investors who can make it real.
             </p>
             <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleStartAnalysis}
-              className="px-8 py-4 bg-black text-white rounded-full font-semibold inline-flex items-center gap-2 hover:bg-gray-800"
+              className="minimal-button inline-flex items-center gap-3"
             >
               <span>Get Started Free</span>
               <ArrowRight className="w-5 h-5" />
             </motion.button>
-          </motion.div>
+          </div>
         </motion.div>
       </section>
 
@@ -170,13 +159,13 @@ export default function Home() {
       <footer className="bg-white border-t border-gray-100 py-12">
         <div className="max-w-6xl mx-auto px-8 text-center">
           <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-10 h-10 bg-black rounded-2xl flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center">
+              <div className="w-1 h-1 bg-white rounded-full" />
             </div>
             <span className="text-xl font-semibold text-black">FrejFund</span>
           </div>
-          <p className="text-gray-500 font-light">
-            © 2024 FrejFund. Empowering startups with intelligent insights.
+          <p className="text-gray-500 font-light text-sm">
+            © 2024 FrejFund
           </p>
         </div>
       </footer>

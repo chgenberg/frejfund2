@@ -203,7 +203,7 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
               value={businessInfo.name || ''}
               onChange={(e) => handleInputChange('name', e.target.value)}
               placeholder="John Doe"
-              className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all text-black placeholder-gray-400"
+              className="minimal-select w-full"
             />
           </div>
         );
@@ -219,7 +219,7 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
               value={businessInfo.email || ''}
               onChange={(e) => handleInputChange('email', e.target.value)}
               placeholder="john@company.com"
-              className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all text-black placeholder-gray-400"
+              className="minimal-select w-full"
             />
           </div>
         );
@@ -236,7 +236,7 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
               value={businessInfo.website || ''}
               onChange={(e) => handleInputChange('website', e.target.value)}
               placeholder="yourcompany.com (http:// auto-added)"
-              className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all text-black placeholder-gray-400"
+              className="minimal-select w-full"
             />
           </div>
         );
@@ -283,7 +283,7 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
               <select
                 value={businessInfo.industry || ''}
                 onChange={(e) => handleInputChange('industry', e.target.value)}
-                className="w-full px-5 py-4 pr-12 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all text-black appearance-none cursor-pointer hover:bg-gray-100"
+                className="minimal-select w-full"
               >
                 <option value="">Select your industry</option>
                 <option value="SaaS">SaaS / Software</option>
@@ -317,7 +317,7 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
             <select
               value={businessInfo.targetMarket || ''}
               onChange={(e) => handleInputChange('targetMarket', e.target.value)}
-              className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all text-black placeholder-gray-400"
+              className="minimal-select w-full"
             >
               <option value="">Select your target market</option>
               <option value="SMBs">Small & Medium Businesses</option>
@@ -339,7 +339,7 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
             <select
               value={businessInfo.businessModel || ''}
               onChange={(e) => handleInputChange('businessModel', e.target.value)}
-              className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all text-black placeholder-gray-400"
+              className="minimal-select w-full"
             >
               <option value="">Select your business model</option>
               <option value="B2B Subscription">B2B Subscription (SaaS)</option>
@@ -364,7 +364,7 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
             <select
               value={businessInfo.monthlyRevenue || ''}
               onChange={(e) => handleInputChange('monthlyRevenue', e.target.value)}
-              className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all text-black placeholder-gray-400"
+              className="minimal-select w-full"
             >
               <option value="">Select revenue range</option>
               <option value="0">€0 (Pre-revenue)</option>
@@ -385,7 +385,7 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
             <select
               value={businessInfo.teamSize || ''}
               onChange={(e) => handleInputChange('teamSize', e.target.value)}
-              className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all text-black placeholder-gray-400"
+              className="minimal-select w-full"
             >
               <option value="">Select team size</option>
               <option value="1">Solo founder</option>
@@ -409,7 +409,7 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
               value={businessInfo.linkedinProfiles || ''}
               onChange={(e) => handleInputChange('linkedinProfiles', e.target.value)}
               placeholder="https://linkedin.com/in/founder1, https://linkedin.com/in/founder2"
-              className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all text-black placeholder-gray-400"
+              className="minimal-select w-full"
             />
             <p className="text-sm text-gray-500 mt-1">
               Comma-separated LinkedIn URLs for team analysis
@@ -511,7 +511,7 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
+    <div className="min-h-screen bg-white flex items-center justify-center p-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -539,7 +539,7 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
 
         {/* Form Card */}
         <motion.div
-          className="bg-white rounded-3xl shadow-sm p-10"
+          className="minimal-box minimal-box-shadow"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Target, ArrowRight, Check, Sparkles } from 'lucide-react';
+import { Target, ArrowRight, Check, Circle } from 'lucide-react';
 import { BusinessInfo } from '@/types/business';
 import { calculateReadinessScore } from '@/lib/coaching-prompts';
 import { GOAL_OPTIONS, UserGoal, generateRoadmap } from '@/lib/goal-system';
@@ -94,12 +94,12 @@ export default function GoalSettingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="container mx-auto px-6 py-8">
         <div className="flex items-center space-x-3 mb-8">
-          <div className="w-10 h-10 bg-black rounded-2xl flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center">
+            <div className="w-1 h-1 bg-white rounded-full" />
           </div>
           <h1 className="text-xl font-semibold">FrejFund</h1>
         </div>
@@ -114,16 +114,16 @@ export default function GoalSettingPage() {
         >
           {/* Success Badge */}
           <div className="flex items-center justify-center mb-8">
-            <div className="bg-green-50 border border-green-200 rounded-full px-6 py-3 flex items-center space-x-2">
-              <Check className="w-5 h-5 text-green-600" />
-              <span className="text-green-700 font-medium">Profile Created!</span>
+            <div className="bg-white border border-black rounded-full px-6 py-3 flex items-center space-x-2">
+              <Check className="w-5 h-5 text-black" />
+              <span className="text-black font-medium">Profile Created</span>
             </div>
           </div>
 
           {/* Readiness Score */}
           <div className="text-center mb-12">
-            <div className="inline-block bg-gray-100 rounded-2xl px-8 py-6">
-              <p className="text-sm text-gray-600 mb-2">Investment Readiness</p>
+            <div className="inline-block minimal-box px-12 py-8">
+              <p className="text-sm text-gray-600 mb-3 font-light uppercase tracking-wider">Investment Readiness</p>
               <div className="flex items-end justify-center space-x-2">
                 <span className="text-5xl font-bold text-black">{readinessScore}</span>
                 <span className="text-2xl text-gray-400 mb-2">/10</span>
@@ -133,11 +133,13 @@ export default function GoalSettingPage() {
 
           {/* Goal Selection */}
           <div className="text-center mb-8">
-            <Target className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <div className="w-12 h-12 bg-black rounded-full mx-auto mb-4 flex items-center justify-center">
+              <Circle className="w-6 h-6 text-white" />
+            </div>
             <h2 className="text-3xl font-bold text-black mb-3">
               What's your primary goal?
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <p className="text-gray-600 max-w-2xl mx-auto font-light">
               Choose your main objective and I'll create a personalized roadmap to help you achieve it
             </p>
           </div>
@@ -148,12 +150,12 @@ export default function GoalSettingPage() {
               <motion.button
                 key={option.id}
                 onClick={() => setSelectedGoal(option.id)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={`relative p-6 rounded-2xl border-2 transition-all text-left ${
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                className={`relative p-6 rounded-2xl border transition-all text-left ${
                   selectedGoal === option.id
-                    ? 'border-black bg-gray-50 shadow-lg'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
+                    ? 'border-black bg-white shadow-lg'
+                    : 'border-gray-200 bg-white hover:border-gray-400'
                 }`}
               >
                 {/* Selection Indicator */}
@@ -171,7 +173,7 @@ export default function GoalSettingPage() {
                 </AnimatePresence>
 
                 {/* Icon */}
-                <div className="text-4xl mb-3">{option.icon}</div>
+                <div className="text-3xl mb-3 font-light">{option.icon}</div>
 
                 {/* Title & Description */}
                 <h3 className="text-lg font-semibold text-black mb-2">
@@ -183,12 +185,12 @@ export default function GoalSettingPage() {
 
                 {/* Meta Info */}
                 <div className="flex items-center space-x-3 text-xs text-gray-500">
-                  <span>⏱️ {option.timeline}</span>
-                  <span>•</span>
+                  <span>{option.timeline}</span>
+                  <span className="text-gray-300">•</span>
                   <span className={
-                    option.difficulty === 'easy' ? 'text-green-600' :
-                    option.difficulty === 'medium' ? 'text-yellow-600' :
-                    'text-red-600'
+                    option.difficulty === 'easy' ? 'text-gray-600' :
+                    option.difficulty === 'medium' ? 'text-gray-700' :
+                    'text-black'
                   }>
                     {option.difficulty.charAt(0).toUpperCase() + option.difficulty.slice(1)}
                   </span>
