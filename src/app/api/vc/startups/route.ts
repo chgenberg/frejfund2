@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     // Transform to startup format for VC dashboard
     const transformedStartups = startups.map(user => {
       const analysis = user.deepAnalyses[0];
-      const businessInfo = user.sessions[0]?.businessInfo as any || {};
+      const businessInfo = (analysis?.businessInfo || user.sessions[0]?.businessInfo) as any || {};
       
       // Extract key metrics from dimensions
       const dimensions = analysis?.dimensions || [];

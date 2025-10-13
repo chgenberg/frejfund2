@@ -51,9 +51,10 @@ model User {
   traction        Json? // Key metrics
 
   // Relations
-  sessions     Session[]
-  integrations Integration[]
-  insights     Insight[]
+  sessions      Session[]
+  integrations  Integration[]
+  insights      Insight[]
+  deepAnalyses  DeepAnalysis[]
 
   @@map("users")
 }
@@ -506,6 +507,9 @@ model DeepAnalysis {
   // Overall scores
   overallScore        Int? // 0-100
   investmentReadiness Int? // 0-10
+  
+  // Cached business info for VC display
+  businessInfo Json?
 
   // Timestamps
   startedAt     DateTime  @default(now())
@@ -513,6 +517,7 @@ model DeepAnalysis {
   lastUpdatedAt DateTime  @updatedAt
 
   // Relations
+  user       User?              @relation(fields: [userId], references: [id])
   dimensions AnalysisDimension[]
   insights   AnalysisInsight[]
 

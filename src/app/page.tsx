@@ -9,6 +9,7 @@ import { demoCompany, demoWebsiteText, demoKpiCsv } from '@/lib/demo-case';
 import ChatInterface from '@/components/ChatInterface';
 import BusinessWizard from '@/components/BusinessWizard';
 import Footer from '@/components/Footer';
+import InvestorModal from '@/components/InvestorModal';
 
 // Disable prerendering; this page depends on client-only state/localStorage and async flows
 export const dynamic = 'force-dynamic';
@@ -20,6 +21,7 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
+  const [showInvestorModal, setShowInvestorModal] = useState(false);
 
   const tabs = [
     { icon: Sparkles, label: "Get Started" },
@@ -134,7 +136,7 @@ export default function Home() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => router.push('/vc')}
+                onClick={() => setShowInvestorModal(true)}
                 className="px-4 sm:px-6 py-2 sm:py-2.5 bg-black text-white rounded-full text-xs sm:text-sm font-medium hover:bg-gray-800 transition-colors"
               >
                 Investors
@@ -155,9 +157,9 @@ export default function Home() {
           <div className="minimal-box minimal-box-shadow text-center px-6 sm:px-8 md:px-10 py-8 sm:py-10 md:py-12">
             <div className="flex items-center justify-center mb-6 sm:mb-8">
               <div className="w-12 h-12 sm:w-14 sm:h-14 bg-black rounded-full flex items-center justify-center relative">
-                <motion.div 
+          <motion.div
                   className="w-1.5 h-1.5 bg-white rounded-full"
-                  animate={{ 
+            animate={{
                     scale: [1, 1.3, 1],
                     opacity: [1, 0.7, 1] 
                   }}
@@ -570,8 +572,8 @@ export default function Home() {
                               Navigate legal processes and celebrate your success!
                             </p>
                           </div>
-                        </div>
-                      </div>
+            </div>
+          </div>
                       
                       <div className="bg-gradient-to-r from-gray-900 to-black text-white rounded-xl p-6 mt-6">
                         <h4 className="font-bold mb-2 flex items-center gap-2">
@@ -580,8 +582,8 @@ export default function Home() {
                         </h4>
                         <p className="text-sm opacity-90">
                           Our founders have raised €50M+ from top-tier investors. Average time from first analysis to funding: 3.5 months.
-                        </p>
-                      </div>
+          </p>
+        </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -614,6 +616,12 @@ export default function Home() {
 
       {/* Footer */}
       <Footer />
+
+      {/* Investor Modal */}
+      <InvestorModal 
+        isOpen={showInvestorModal} 
+        onClose={() => setShowInvestorModal(false)} 
+      />
     </div>
   );
 }
