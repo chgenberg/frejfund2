@@ -135,10 +135,10 @@ export default function Home() {
               </div>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-black mb-4 tracking-tight leading-tight">
-              Turning ambition into<br />opportunity.
+              Because great ideas<br />deserve a chance.
             </h1>
             <p className="text-lg md:text-xl text-gray-600 mb-10 font-light">
-              Helping founders meet the investors who can make it real.
+              We connect founders and investors who believe in building a better future
             </p>
             <motion.button
               whileHover={{ scale: 1.02 }}

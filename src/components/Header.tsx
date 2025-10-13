@@ -42,6 +42,14 @@ export default function Header({ showInvestorsButton = false, rightContent }: He
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
+                  onClick={() => router.push('/locations')}
+                  className="px-4 py-2 text-gray-600 hover:text-black text-sm font-medium transition-colors"
+                >
+                  Locations
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => router.push('/vc')}
                   className="px-6 py-2.5 bg-black text-white rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
                 >
