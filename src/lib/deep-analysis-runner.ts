@@ -44,6 +44,10 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
       }
     });
 
+    // If we are re-running for this session, clear prior dimension results/insights to avoid 95/95 at start
+    await prisma.analysisDimension.deleteMany({ where: { analysisId: analysis.id } });
+    await prisma.analysisInsight.deleteMany({ where: { analysisId: analysis.id } });
+
     // 2. Determine which dimensions to analyze
     let dimensionsToAnalyze = mode === 'critical-only' 
       ? getCriticalDimensions()
