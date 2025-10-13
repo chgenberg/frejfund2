@@ -192,6 +192,9 @@ async function analyzeDimension(
   
   const openai = getOpenAIClient();
   
+  // Note: Using gpt-5 (o1) for deep reasoning - takes 2-5 min per dimension
+  // gpt-5 doesn't support temperature or response_format
+  
   // Combine all available content (enriched with LinkedIn, GitHub, Product Hunt)
   const fullContent = `
 # Company Intelligence Report
@@ -237,7 +240,9 @@ Analyze startups objectively using ALL available data sources. Reference specifi
           content: analysisPrompt
         }
       ],
-      response_format: { type: 'json_object' }
+      // Note: gpt-5 (o1) doesn't support response_format
+      // It will naturally produce structured JSON output from the prompt
+      ...(getChatModel('simple').startsWith('gpt-5') ? {} : { response_format: { type: 'json_object' } })
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{}');

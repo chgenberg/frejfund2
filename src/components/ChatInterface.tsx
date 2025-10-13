@@ -1020,6 +1020,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                       </div>
                       <div className="mt-2 pt-2 border-t border-gray-700">
                         <p className="text-gray-300">Data sources: Website, LinkedIn, GitHub, Product Hunt, uploaded documents</p>
+                        <p className="text-yellow-300 mt-1">⏱️ Takes 15-30 minutes (using GPT-5 for deep reasoning)</p>
                       </div>
                       <div className="absolute -bottom-2 left-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black"></div>
                     </div>

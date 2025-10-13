@@ -49,10 +49,10 @@ export function getOpenAIClient(): OpenAI {
 export type TaskComplexity = 'simple' | 'complex';
 
 export function getChatModel(complexity: TaskComplexity = 'simple'): string {
-  // Use gpt-4o-mini for all tasks (cost-effective and fast)
-  // Note: gpt-4o-mini doesn't support temperature or max_tokens restrictions
-  const simpleModel = process.env.OPENAI_CHAT_MODEL_MINI || 'gpt-4o-mini';
-  const complexModel = process.env.OPENAI_CHAT_MODEL || 'gpt-4o-mini';
+  // Use gpt-5 (o1) for deep analysis - superior reasoning
+  // Note: gpt-5 (o1) doesn't support temperature or response_format
+  const simpleModel = process.env.OPENAI_CHAT_MODEL_MINI || 'gpt-5-mini';
+  const complexModel = process.env.OPENAI_CHAT_MODEL || 'gpt-5';
   
   return complexity === 'simple' ? simpleModel : complexModel;
 }
@@ -63,10 +63,11 @@ export function getEmbeddingsModel(): string {
 
 /**
  * Pricing per model (per 1M tokens)
+ * Source: OpenAI Pricing (January 2025)
  */
 const MODEL_PRICING: Record<string, { input: number; output: number }> = {
-  'gpt-5': { input: 2.5, output: 10.0 },
-  'gpt-5-mini': { input: 0.15, output: 0.6 },
+  'gpt-5': { input: 15.0, output: 60.0 },  // o1 model - premium reasoning
+  'gpt-5-mini': { input: 3.0, output: 12.0 },  // o1-mini - faster reasoning
   'gpt-4o': { input: 2.5, output: 10.0 },
   'gpt-4o-mini': { input: 0.15, output: 0.6 },
   'gpt-4-turbo': { input: 10.0, output: 30.0 },

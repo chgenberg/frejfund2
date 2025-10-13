@@ -12,7 +12,7 @@ async function chatWithFallback(args: { messages: { role: 'system' | 'user' | 'a
       model,
       messages: args.messages,
       ...(isGpt5 ? {} : { temperature: args.temperature }),
-      ...(args.maxTokens ? { max_tokens: args.maxTokens } : {})
+      ...(args.maxTokens ? (isGpt5 ? { max_completion_tokens: args.maxTokens } : { max_tokens: args.maxTokens }) : {})
     });
     console.log('[DEBUG] Chat Completions succeeded');
     return resp.choices[0]?.message?.content || '';
