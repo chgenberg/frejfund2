@@ -63,6 +63,11 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
     try {
       const knowledge = await fetchGptKnowledgeForCompany(businessInfo);
       gptKnowledgeText = knowledge.combinedText || '';
+      // Persist harvest on the analysis record for auditability
+      await prisma.deepAnalysis.update({
+        where: { id: analysis.id },
+        data: { publicKnowledge: { text: knowledge.combinedText, chunks: knowledge.chunks } }
+      });
     } catch {}
 
     // 3. Determine which dimensions to analyze
