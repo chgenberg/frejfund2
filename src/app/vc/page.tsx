@@ -1,25 +1,15 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Search, Filter, MapPin, TrendingUp, DollarSign, Users, 
-  Calendar, Target, Building2, X, ChevronDown, Globe,
-  BarChart3, List, Map as MapIcon, Activity, Briefcase,
-  Clock, CheckCircle2, AlertCircle, Sparkles
-} from 'lucide-react';
 import dynamic from 'next/dynamic';
-
-// Dynamically import map component to avoid SSR issues
-const InteractiveMap = dynamic(() => import('@/components/InteractiveMap'), { 
-  ssr: false,
-  loading: () => <div className="w-full h-full bg-gray-100 animate-pulse" />
-});
 
 export const dynamic = 'force-dynamic';
 
-interface Startup {
+const VCDashboardClient = dynamic(() => import('./VCDashboardClient'), { ssr: false });
+
+export default function VCDashboardPage() {
+  return <VCDashboardClient />;
+}
+
+// Keep types here for client component re-export
+export interface Startup {
   id: string;
   name: string;
   companyName: string;
@@ -47,7 +37,7 @@ interface Startup {
   lastActive: Date;
 }
 
-export default function VCDashboard() {
+export function VCDashboard() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
