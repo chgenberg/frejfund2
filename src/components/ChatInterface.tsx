@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { ANALYSIS_DIMENSIONS } from '@/lib/deep-analysis-framework';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Bot, User, TrendingUp, FileText, Brain, BarChart3, ThumbsUp, ThumbsDown, BookOpen, MoreVertical, Info, Lightbulb, X, HelpCircle, Bell, Circle, Paperclip, Upload } from 'lucide-react';
 import { BusinessInfo, Message, BusinessAnalysisResult } from '@/types/business';
@@ -34,6 +35,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const [showResultsModal, setShowResultsModal] = useState(false);
+  const [lastGap, setLastGap] = useState<{ messageId: string; dimensionName: string; question: string } | null>(null);
   const [analysisResult, setAnalysisResult] = useState<BusinessAnalysisResult | null>(null);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showKpiModal, setShowKpiModal] = useState(false);
@@ -118,16 +120,25 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         // If there are gaps, Freja proactively asks for them
         if (data.totalGaps > 0 && data.nextBestAction) {
           setTimeout(() => {
+            // Short description of the most critical dimension
+            const dim = ANALYSIS_DIMENSIONS.find(d => d.name === data.nextBestAction?.dimensionName);
+            const dimDesc = dim?.description ? `\n\nWhat this step means: ${dim.description}` : '';
+
             const gapMessage: Message = {
               id: Date.now().toString(),
               content: data.criticalGaps > 0
-                ? `Your analysis is complete! I've identified **${data.totalGaps} areas** where additional information could significantly boost your investment readiness.\n\n**Most critical:** ${data.nextBestAction.dimensionName} (currently ${data.nextBestAction.currentScore}%)\n\n${data.nextBestAction.questions[0]}\n\nYou can share this information by:\n1. Typing your answer below\n2. Dragging & dropping documents (Excel, PDF, etc.)\n3. Asking me to guide you on how to gather this data\n\nCompleting all gaps could increase your score by **+${data.potentialScoreIncrease} points**!`
+                ? `Your analysis is complete! I've identified **${data.totalGaps} areas** where additional information could significantly boost your investment readiness.\n\n**Most critical:** ${data.nextBestAction.dimensionName} (currently ${data.nextBestAction.currentScore}%)${dimDesc}\n\n${data.nextBestAction.questions[0]}\n\nYou can share this information by:\n1. Typing your answer below\n2. Dragging & dropping documents (Excel, PDF, etc.)\n3. Asking me to guide you on how to gather this data\n\nCompleting all gaps could increase your score by **+${data.potentialScoreIncrease} points**!`
                 : `Great work! Your analysis is solid. I found ${data.totalGaps} minor areas where we could gather more data to fine-tune your strategy.\n\nWant to address these, or shall we focus on your main goals?`,
               sender: 'agent',
               timestamp: new Date(),
               type: 'analysis'
             };
             setMessages(prev => [...prev, gapMessage]);
+            setLastGap({
+              messageId: gapMessage.id,
+              dimensionName: data.nextBestAction?.dimensionName || 'this topic',
+              question: Array.isArray(data.nextBestAction?.questions) && data.nextBestAction.questions.length > 0 ? data.nextBestAction.questions[0] : 'Can you provide the missing details?'
+            });
           }, 2000); // Small delay after completion celebration
         }
       }
@@ -1515,12 +1526,44 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => setShowResultsModal(true)}
+                      onClick={() => {
+                        if (analysisResult) {
+                          setShowResultsModal(true);
+                        } else {
+                          window.location.href = '/analysis';
+                        }
+                      }}
                       className="mt-3 inline-flex items-center px-3 py-1 bg-black text-white rounded-lg text-xs font-medium hover:bg-gray-800 transition-colors"
                     >
                       View Full Results
                       <TrendingUp className="w-3 h-3 ml-1" />
                     </motion.button>
+                  )}
+                  {message.type === 'analysis' && lastGap && lastGap.messageId === message.id && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <button
+                        onClick={() => { setInputValue(lastGap.question); try { inputRef.current?.focus(); } catch {} }}
+                        className="px-2.5 py-1 text-xs border border-gray-300 rounded-full hover:border-black"
+                      >
+                        Answer here
+                      </button>
+                      <button
+                        onClick={() => { try { fileInputRef.current?.click(); } catch {} }}
+                        className="px-2.5 py-1 text-xs border border-gray-300 rounded-full hover:border-black"
+                      >
+                        Upload file
+                      </button>
+                      <button
+                        onClick={async () => {
+                          const msg = `Guide me to collect the data for ${lastGap.dimensionName}.`;
+                          addMessage(msg, 'user');
+                          await getAIResponse(msg);
+                        }}
+                        className="px-2.5 py-1 text-xs border border-gray-300 rounded-full hover:border-black"
+                      >
+                        Guide me
+                      </button>
+                    </div>
                   )}
                 </motion.div>
                 <div className="mt-1 text-xs text-gray-500 px-1">
@@ -1576,11 +1619,11 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                 transition={{ duration: 2, repeat: Infinity, ease: "easeOut", delay: 0.5 }}
               />
               <motion.div 
-                className="relative w-10 h-10 bg-black rounded-full flex items-center justify-center shadow-lg"
+                className="relative w-10 h-10 bg-black rounded-full flex items-center justify-center shadow-lg overflow-hidden"
                 animate={{ scale: [1, 1.02, 1] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
               >
-                <Bot className="w-5 h-5 text-white" />
+                <img src="/freja.png" alt="Freja" className="w-full h-full object-cover" />
               </motion.div>
             </motion.div>
             

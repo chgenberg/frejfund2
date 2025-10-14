@@ -469,18 +469,43 @@ export default function Dashboard() {
                   </motion.div>
                 </div>
               ) : (
-                <div className="minimal-box p-8 sm:p-12 text-center">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                    <Brain className="w-8 h-8 text-gray-400" />
+                analysisProgress.status === 'completed' && dataGaps ? (
+                  <div className="minimal-box p-6 sm:p-8">
+                    <h3 className="text-base sm:text-lg font-semibold text-black mb-2">Analysis Summary</h3>
+                    {dataGaps.totalGaps > 0 ? (
+                      <>
+                        <p className="text-sm text-gray-600 mb-3">We found {dataGaps.totalGaps} missing items that would significantly improve the accuracy of your score.</p>
+                        <ul className="text-sm text-gray-700 list-disc pl-5 space-y-1">
+                          {dataGaps.gaps.slice(0,3).map((g:any) => (
+                            <li key={g.dimensionId}><span className="font-medium">{g.dimensionName}:</span> {g.missingInfo[0]}</li>
+                          ))}
+                        </ul>
+                        {dataGaps.totalGaps > 3 && (
+                          <p className="text-xs text-gray-500 mt-2">+{dataGaps.totalGaps-3} more gaps</p>
+                        )}
+                        <div className="mt-4 flex gap-2">
+                          <motion.button whileHover={{scale:1.02}} whileTap={{scale:0.98}} onClick={() => router.push('/chat')} className="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium">Fix Gaps with Freja</motion.button>
+                          <motion.button whileHover={{scale:1.02}} whileTap={{scale:0.98}} onClick={() => router.push('/analysis')} className="px-4 py-2 bg-white border border-gray-300 text-sm rounded-lg hover:border-black">View Full Analysis</motion.button>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-sm text-gray-600">Your deep analysis is complete and no critical gaps were detected. Explore all 95 dimensions or chat with Freja for next steps.</p>
+                    )}
                   </div>
-                  <h3 className="text-xl font-semibold text-black mb-2">Deep Analysis in Progress</h3>
-                  <p className="text-gray-600 mb-4">
-                    Your business is being analyzed across 95 dimensions. Metrics will appear here once complete.
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    This typically takes 15-30 minutes
-                  </p>
-                </div>
+                ) : (
+                  <div className="minimal-box p-8 sm:p-12 text-center">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <Brain className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-black mb-2">Deep Analysis in Progress</h3>
+                    <p className="text-gray-600 mb-4">
+                      Your business is being analyzed across 95 dimensions. Metrics will appear here once complete.
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      This typically takes 15-30 minutes
+                    </p>
+                  </div>
+                )
               )}
 
               {/* Recent Activity & Quick Actions */}
@@ -854,7 +879,7 @@ export default function Dashboard() {
                 className="px-6 py-3 bg-white text-black border border-gray-300 rounded-xl font-medium hover:border-black transition-colors inline-flex items-center gap-2"
               >
                 <Brain className="w-4 h-4" />
-                View All 68 Dimensions
+                View All 95 Dimensions
               </motion.button>
               </div>
             </motion.div>

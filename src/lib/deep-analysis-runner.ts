@@ -16,6 +16,7 @@ interface RunDeepAnalysisOptions {
   uploadedDocuments?: string[];
   mode?: 'full' | 'critical-only' | 'progressive';
   specificDimensions?: string[]; // Only re-analyze these specific dimensions
+  preHarvestText?: string; // optional: provide GPT public knowledge text (skip internal harvest)
 }
 
 /**
@@ -58,17 +59,26 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
     await prisma.analysisDimension.deleteMany({ where: { analysisId: analysis.id } });
     await prisma.analysisInsight.deleteMany({ where: { analysisId: analysis.id } });
 
-    // 2. Fetch GPT public knowledge (low-priority source) in background
-    let gptKnowledgeText = '';
-    try {
-      const knowledge = await fetchGptKnowledgeForCompany(businessInfo);
-      gptKnowledgeText = knowledge.combinedText || '';
-      // Persist harvest on the analysis record for auditability
-      await prisma.deepAnalysis.update({
-        where: { id: analysis.id },
-        data: { publicKnowledge: { text: knowledge.combinedText, chunks: knowledge.chunks } }
-      });
-    } catch {}
+    // 2. GPT public knowledge (low-priority source)
+    // If provided by orchestrator, use it; otherwise harvest now
+    let gptKnowledgeText = options.preHarvestText || '';
+    if (!gptKnowledgeText) {
+      try {
+        const knowledge = await fetchGptKnowledgeForCompany(businessInfo);
+        gptKnowledgeText = knowledge.combinedText || '';
+        await prisma.deepAnalysis.update({
+          where: { id: analysis.id },
+          data: { publicKnowledge: { text: knowledge.combinedText, chunks: knowledge.chunks } }
+        });
+      } catch {}
+    } else {
+      try {
+        await prisma.deepAnalysis.update({
+          where: { id: analysis.id },
+          data: { publicKnowledge: { text: gptKnowledgeText } }
+        });
+      } catch {}
+    }
 
     // 3. Determine which dimensions to analyze
     let dimensionsToAnalyze = specificDimensions && specificDimensions.length > 0

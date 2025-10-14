@@ -625,9 +625,13 @@ export default function AnalysisPage() {
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-2">
                             <ScoreIcon className={`w-5 h-5 ${getScoreColor(dimension.score)}`} />
-                            <span className={`text-2xl font-bold ${getScoreColor(dimension.score)}`}>
-                              {dimension.score}%
-                            </span>
+                            {dimension.score > 0 ? (
+                              <span className={`text-2xl font-bold ${getScoreColor(dimension.score)}`}>
+                                {dimension.score}%
+                              </span>
+                            ) : (
+                              <span className="text-sm font-medium text-gray-500">Pending – Not enough data</span>
+                            )}
                           </div>
                           {dimension.status === 'completed' && (
                             <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
@@ -661,6 +665,18 @@ export default function AnalysisPage() {
                       {/* Red Flags */}
                       {dimension.redFlags.length > 0 && (
                         <div className="space-y-2">
+                      {dimension.score === 0 && dimension.strengths.length === 0 && dimension.redFlags.length === 0 && (
+                        <div className="col-span-2">
+                          <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <p className="text-sm text-gray-700 mb-2">What’s needed to assess this:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {(DIMENSION_EXAMPLES[dimension.name] || getAutoExample(dimension.name)).dataNeeded.map((d, i) => (
+                                <span key={i} className="px-2.5 py-1 text-xs bg-white border border-gray-300 rounded-full">{d}</span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                           <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
                             <AlertCircle className="w-4 h-4 text-red-600" />
                             Red Flags

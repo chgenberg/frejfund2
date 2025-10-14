@@ -24,9 +24,19 @@ export async function GET(request: NextRequest) {
   const stream = new ReadableStream({
     start(controller) {
       const encoder = new TextEncoder();
+      let closed = false;
+
+      const safeEnqueue = (chunk: string) => {
+        if (closed) return; // guard double-writes after close
+        try {
+          controller.enqueue(encoder.encode(chunk));
+        } catch {
+          closed = true;
+        }
+      };
 
       const write = (payload: any) => {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
+        safeEnqueue(`data: ${JSON.stringify(payload)}\n\n`);
       };
 
       // Send initial connection message
@@ -36,6 +46,7 @@ export async function GET(request: NextRequest) {
 
       // Poll for updates from database
       const interval = setInterval(async () => {
+        if (closed) return;
         try {
           // Check database for progress
           const analysis = await prisma.deepAnalysis.findUnique({
@@ -66,7 +77,11 @@ export async function GET(request: NextRequest) {
               write({ type: 'complete' });
               console.log('📡 SSE: Analysis complete, closing connection');
               clearInterval(interval);
-              controller.close();
+              clearInterval(keepAlive);
+              if (!closed) {
+                closed = true;
+                try { controller.close(); } catch {}
+              }
             }
           }
         } catch (error) {
@@ -76,7 +91,8 @@ export async function GET(request: NextRequest) {
 
       // Heartbeat to keep Safari/Proxies alive
       const keepAlive = setInterval(() => {
-        controller.enqueue(encoder.encode(':keepalive\n\n'));
+        if (closed) return;
+        safeEnqueue(':keepalive\n\n');
       }, 20000);
 
       // Clean up on disconnect
@@ -84,8 +100,15 @@ export async function GET(request: NextRequest) {
         console.log('📡 SSE: Client disconnected');
         clearInterval(interval);
         clearInterval(keepAlive);
-        controller.close();
+        if (!closed) {
+          closed = true;
+          try { controller.close(); } catch {}
+        }
       });
+    },
+    cancel() {
+      // Stream consumer cancelled; ensure we stop timers and stop writing
+      try { /* no-op */ } catch {}
     }
   });
 

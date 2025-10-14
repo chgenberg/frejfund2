@@ -36,25 +36,104 @@ export async function POST(request: NextRequest) {
 
     console.log('🚀 Starting deep analysis for session:', sessionId);
     
-    // Start deep analysis in background (non-blocking)
-    // Note: In production, this should be a background job (BullMQ, Inngest, etc.)
-    runDeepAnalysis({
-      sessionId,
-      businessInfo,
-      scrapedContent: scrapedContent || '',
-      uploadedDocuments: uploadedDocuments || [],
-      mode: 'progressive' // Run progressively to avoid rate limits
-    }).then(() => {
+    // Orchestrate: harvest (mini) + scrape + docs before analysis
+    (async () => {
+      const { fetchGptKnowledgeForCompany } = await import('@/lib/gpt-knowledge');
+      const { scrapeSiteShallow } = await import('@/lib/web-scraper');
+
+      // Run harvest and shallow scrape in parallel with adaptive gating
+      const abortController = new AbortController();
+      const harvestPromise = fetchGptKnowledgeForCompany(businessInfo, abortController.signal);
+      const scrapePromise = businessInfo.website ? scrapeSiteShallow(businessInfo.website, 6) : Promise.resolve({ combinedText: '', sources: [] });
+
+      const baseGateMs = 120000; // 120s
+      const extraSliceMs = 60000; // 60s slices
+      const hardMaxMs = 240000; // 240s
+
+      const waitWithTimeout = async <T>(p: Promise<T>, ms: number): Promise<T | null> => {
+        return await Promise.race<T | null>([
+          p as any,
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), ms))
+        ]);
+      };
+
+      let harvest = await waitWithTimeout(harvestPromise as any, baseGateMs);
+      let websiteData = await waitWithTimeout(scrapePromise as any, baseGateMs);
+
+      let waited = baseGateMs;
+      const isHarvestWeak = () => !harvest || !(harvest as any).combinedText || ((harvest as any).combinedText as string).length < 1200 || Array.isArray((harvest as any).chunks) && (harvest as any).chunks.length < 3;
+      const isScrapeWeak = () => !websiteData || !(websiteData as any).combinedText || ((websiteData as any).combinedText as string).length < 20000 || Array.isArray((websiteData as any).sources) && (websiteData as any).sources.length < 3;
+
+      // Extend to 180s if harvest+scrape are weak
+      if ((isHarvestWeak() && isScrapeWeak()) && waited < 180000) {
+        const slice = await Promise.all([
+          harvest ? Promise.resolve(harvest) : waitWithTimeout(harvestPromise as any, extraSliceMs),
+          websiteData ? Promise.resolve(websiteData) : waitWithTimeout(scrapePromise as any, extraSliceMs)
+        ]);
+        harvest = slice[0] ?? harvest;
+        websiteData = slice[1] ?? websiteData;
+        waited += extraSliceMs;
+      }
+
+      // Final chance up to 240s hard max if båda fortfarande svaga
+      if ((isHarvestWeak() && isScrapeWeak()) && waited < hardMaxMs) {
+        const slice = await Promise.all([
+          harvest ? Promise.resolve(harvest) : waitWithTimeout(harvestPromise as any, extraSliceMs),
+          websiteData ? Promise.resolve(websiteData) : waitWithTimeout(scrapePromise as any, extraSliceMs)
+        ]);
+        harvest = slice[0] ?? harvest;
+        websiteData = slice[1] ?? websiteData;
+        waited += extraSliceMs;
+      }
+
+      try { abortController.abort(); } catch {}
+
+      const preHarvestText = (harvest && (harvest as any).combinedText) ? (harvest as any).combinedText : '';
+      const mergedScraped = (scrapedContent || '') + '\n\n' + ((websiteData as any)?.combinedText || '');
+
+      // Start deep analysis with merged pre-context (phase 1)
+      const phase1 = runDeepAnalysis({
+        sessionId,
+        businessInfo,
+        scrapedContent: mergedScraped,
+        uploadedDocuments: uploadedDocuments || [],
+        mode: 'progressive',
+        preHarvestText
+      });
+
+      // Kick off deep scrape in background while phase 1 runs
+      const deepResultPromise = businessInfo.website ? (async () => {
+        const { scrapeSiteDeep } = await import('@/lib/web-scraper');
+        try { return await scrapeSiteDeep(businessInfo.website, 20, 2); } catch { return { combinedText: '', sources: [] }; }
+      })() : Promise.resolve({ combinedText: '', sources: [] });
+
+      // Wait for phase 1 to finish, then optionally run a targeted re-run with deeper context
+      await phase1;
+      const deepResult = await deepResultPromise;
+      const hasDeeper = (deepResult?.combinedText || '').length > 0;
+      if (hasDeeper) {
+        try {
+          await runDeepAnalysis({
+            sessionId,
+            businessInfo,
+            scrapedContent: (mergedScraped + '\n\n' + (deepResult.combinedText || '')).slice(0, 180000),
+            uploadedDocuments: uploadedDocuments || [],
+            mode: 'critical-only',
+            // let runner decide critical set; we can pass none or a subset if needed
+            specificDimensions: [] as any,
+            preHarvestText
+          });
+        } catch (err) {
+          console.error('Targeted re-run failed:', err);
+        }
+      }
+    })().then(() => {
       console.log('✅ Deep analysis completed for session:', sessionId);
     }).catch(error => {
       console.error('❌ Background deep analysis failed:', error);
     });
 
-    return NextResponse.json({
-      success: true,
-      message: 'Deep analysis started in background',
-      sessionId
-    });
+    return NextResponse.json({ success: true, message: 'Deep analysis orchestration started', sessionId });
 
   } catch (error) {
     console.error('Deep analysis API error:', error);
