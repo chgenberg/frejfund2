@@ -1,101 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-/**
- * Save complete session data including business info, scraped content, and documents
- * Tied to user email for future retrieval
- */
 export async function POST(req: NextRequest) {
   try {
-    const payload = await req.json();
-    const email = payload?.email;
-    const sessionId = payload?.sessionId;
-    const scrapedText = payload?.scrapedText;
-    const scrapedSources = payload?.scrapedSources;
-    // Accept optional goal/roadmap fields but do not persist unknown types blindly
-    const businessInfo = payload?.businessInfo ?? {};
+    const { email, sessionId, businessInfo, ...rest } = await req.json();
+    const id = sessionId || `sess-${Date.now()}`;
 
-    if (!email || !sessionId) {
-      return NextResponse.json({ 
-        error: 'email and sessionId required' 
-      }, { status: 400 });
-    }
-
-    // Create or update user
-    const user = await prisma.user.upsert({
-      where: { email },
-      update: {
-        name: businessInfo?.name,
-        company: businessInfo?.company,
-        industry: businessInfo?.industry,
-        stage: businessInfo?.stage,
-        website: businessInfo?.website
-      },
-      create: {
-        email,
-        name: businessInfo?.name,
-        company: businessInfo?.company,
-        industry: businessInfo?.industry,
-        stage: businessInfo?.stage,
-        website: businessInfo?.website
-      }
-    });
-
-    // Create or update session
-    const session = await prisma.session.upsert({
-      where: { id: sessionId },
-      update: {
-        userId: user.id,
-        businessInfo: businessInfo || {},
-        lastActivity: new Date()
-      },
-      create: {
-        id: sessionId,
-        userId: user.id,
-        businessInfo: businessInfo || {},
-        lastActivity: new Date()
-      }
-    });
-
-    // If scraped text provided, save as document
-    if (scrapedText) {
-      await prisma.document.create({
-        data: {
-          sessionId: session.id,
-          content: scrapedText,
-          metadata: {
-            source: 'wizard',
-            sources: scrapedSources || [],
-            savedAt: new Date().toISOString()
-          }
-        }
+    // Upsert user by email if provided
+    let userId: string | null = null;
+    if (email) {
+      const user = await prisma.user.upsert({
+        where: { email },
+        update: { updatedAt: new Date() },
+        create: { email }
       });
+      userId = user.id;
     }
 
-    return NextResponse.json({ 
-      ok: true,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name
+    // Upsert session
+    await prisma.session.upsert({
+      where: { id },
+      update: {
+        userId: userId || undefined,
+        businessInfo: businessInfo || undefined,
+        lastActivity: new Date()
       },
-      session: {
-        id: session.id
+      create: {
+        id,
+        userId,
+        businessInfo
       }
     });
+
+    const res = NextResponse.json({ success: true, sessionId: id, ...rest });
+    // Set stable HttpOnly cookie for session id
+    res.cookies.set('ff-session', id, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30 // 30 days
+    });
+    return res;
   } catch (error) {
     console.error('Session save error:', error);
-    console.error('Error details:', {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
-    });
-    return NextResponse.json({ 
-      error: 'Failed to save session',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to save session' }, { status: 500 });
   }
 }
 

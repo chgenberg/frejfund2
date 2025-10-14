@@ -117,8 +117,9 @@ export async function extractMainContentWithReadability(url: string, html: strin
     if (!article || !article.textContent) return null;
     const text = normalizeWhitespace(article.textContent).slice(0, 50000); // Limit text to 50k chars
     return { url, title: article.title || undefined, text };
-  } catch (error) {
-    console.error('Readability extraction failed:', error);
+  } catch (error: any) {
+    // Quieter logging: one-line fallback only
+    console.log(`[Scraper] Readability extraction failed: ${error?.message || 'Unknown'} – using Cheerio`);
     return null;
   }
 }
