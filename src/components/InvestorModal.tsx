@@ -10,6 +10,35 @@ interface InvestorModalProps {
   onClose: () => void;
 }
 
+// Hoist VC tabs to avoid any TDZ issues across branches of rendering
+const VC_TABS = [
+  {
+    title: 'Get Started',
+    icon: <Sparkles className="w-5 h-5" />,
+    content: 'Create an investor account (or use demo), set your thesis, and access a curated feed of startups that match your preferences.'
+  },
+  {
+    title: 'Deep Analysis',
+    icon: <Brain className="w-5 h-5" />,
+    content: 'Every startup is analyzed across 95 dimensions (market, team, traction, financials, risks) so you can make fast, confident decisions.'
+  },
+  {
+    title: 'Smart Matching',
+    icon: <Target className="w-5 h-5" />,
+    content: 'We match by stage, industry, geography, check size and thesis signals. Prioritized feed with high-fit deals first.'
+  },
+  {
+    title: 'Due Diligence',
+    icon: <Briefcase className="w-5 h-5" />,
+    content: 'One-click access to pitch decks, metrics, and references. Track red flags, strengths and follow-ups directly in the profile.'
+  },
+  {
+    title: 'Invest & Track',
+    icon: <TrendingUp className="w-5 h-5" />,
+    content: 'Request intros, collaborate with your team, and track portfolio metrics post-investment with automated updates.'
+  }
+];
+
 export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
   const router = useRouter();
   const [showHowItWorks, setShowHowItWorks] = useState(false);
@@ -44,33 +73,7 @@ export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
     }
   };
 
-  const vcTabs = [
-    {
-      title: 'Get Started',
-      icon: <Sparkles className="w-5 h-5" />,
-      content: 'Create an investor account (or use demo), set your thesis, and access a curated feed of startups that match your preferences.'
-    },
-    {
-      title: 'Deep Analysis',
-      icon: <Brain className="w-5 h-5" />,
-      content: 'Every startup is analyzed across 95 dimensions (market, team, traction, financials, risks) so you can make fast, confident decisions.'
-    },
-    {
-      title: 'Smart Matching',
-      icon: <Target className="w-5 h-5" />,
-      content: 'We match by stage, industry, geography, check size and thesis signals. Prioritized feed with high-fit deals first.'
-    },
-    {
-      title: 'Due Diligence',
-      icon: <Briefcase className="w-5 h-5" />,
-      content: 'One-click access to pitch decks, metrics, and references. Track red flags, strengths and follow-ups directly in the profile.'
-    },
-    {
-      title: 'Invest & Track',
-      icon: <TrendingUp className="w-5 h-5" />,
-      content: 'Request intros, collaborate with your team, and track portfolio metrics post-investment with automated updates.'
-    }
-  ];
+  const vcTabs = VC_TABS;
 
   return (
     <AnimatePresence>
@@ -239,11 +242,11 @@ export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
                   >
                     <div className="text-center">
                       <div className="w-16 h-16 sm:w-20 sm:h-20 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
-                        {vcTabs[activeTab].icon}
-                        {React.cloneElement(vcTabs[activeTab].icon, { className: "w-10 h-10 text-white" })}
+                        {vcTabs[activeTab]?.icon}
+                        {vcTabs[activeTab] ? React.cloneElement(vcTabs[activeTab].icon, { className: "w-10 h-10 text-white" }) : null}
                       </div>
-                      <h3 className="text-xl font-bold text-black mb-3">{vcTabs[activeTab].title}</h3>
-                      <p className="text-gray-600 leading-relaxed">{vcTabs[activeTab].content}</p>
+                      <h3 className="text-xl font-bold text-black mb-3">{vcTabs[activeTab]?.title}</h3>
+                      <p className="text-gray-600 leading-relaxed">{vcTabs[activeTab]?.content}</p>
                     </div>
 
                     {activeTab === 0 && (
