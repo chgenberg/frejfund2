@@ -1,12 +1,6 @@
-import dynamic from 'next/dynamic';
+"use client";
 
-export const dynamic = 'force-dynamic';
-
-const VCDashboardClient = dynamic(() => import('./VCDashboardClient'), { ssr: false });
-
-export default function Page() {
-  return <VCDashboardClient />;
-}
+export { default } from './VCDashboardClient';
 
 export function VCDashboard() {
   const router = useRouter();
