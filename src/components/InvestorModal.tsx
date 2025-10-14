@@ -52,22 +52,37 @@ export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
     setLoading(true);
     setError('');
     try {
+      // Timeout guard so UI never spins forever
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 15000);
+
       const response = await fetch('/api/vc/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
+        signal: controller.signal
+      }).catch((e) => {
+        throw e;
       });
 
-      const data = await response.json();
+      clearTimeout(timer);
+
+      let data: any = {};
+      try {
+        data = await response.json();
+      } catch {}
 
       if (response.ok) {
-        // Cookie is set server-side; just navigate
         router.push('/vc');
       } else {
-        setError(data.error || 'Login failed');
+        setError(data?.error || 'Login failed (server error). Please try again.');
       }
-    } catch (err) {
-      setError('An error occurred. Please try again.');
+    } catch (err: any) {
+      if (err?.name === 'AbortError') {
+        setError('Login timed out. Please check your connection and try again.');
+      } else {
+        setError('Network error. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

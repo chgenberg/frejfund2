@@ -1,5 +1,21 @@
 'use client';
 
+export default function PrivacyPage() {
+  return (
+    <div className="min-h-screen bg-white text-black p-8 max-w-3xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Privacy Policy</h1>
+      <p className="text-gray-700 mb-4">We respect your privacy. This placeholder page acknowledges your right to transparency. A full policy will be published here. Until then, we only store data required to run FrejFund and never sell personal information.</p>
+      <ul className="list-disc pl-5 text-gray-700 space-y-2">
+        <li>Purpose limitation: analysis, matching, and product improvement</li>
+        <li>Storage: encrypted at rest; restricted access</li>
+        <li>Deletion: email support@frejfund.com for data removal</li>
+      </ul>
+    </div>
+  );
+}
+
+'use client';
+
 import { motion } from 'framer-motion';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';

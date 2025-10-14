@@ -1,5 +1,21 @@
 'use client';
 
+export default function TermsPage() {
+  return (
+    <div className="min-h-screen bg-white text-black p-8 max-w-3xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Terms of Service</h1>
+      <p className="text-gray-700 mb-4">These simplified terms are a placeholder. Final terms will be published here. By using FrejFund you agree to use the service lawfully and not attempt to extract proprietary data or abuse the platform.</p>
+      <ul className="list-disc pl-5 text-gray-700 space-y-2">
+        <li>Service: provided “as is”, best-effort</li>
+        <li>Liability: limited to the extent permitted by law</li>
+        <li>Content: you must have rights to upload any files</li>
+      </ul>
+    </div>
+  );
+}
+
+'use client';
+
 import { motion } from 'framer-motion';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
