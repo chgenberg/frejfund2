@@ -140,17 +140,14 @@ export default function StartupProfilePage() {
               </motion.button>
               {/* Company Logo */}
               <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                {startup.logo ? (
-                  <img 
-                    src={startup.logo} 
-                    alt={`${startup.companyName} logo`}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center">
-                    <div className="w-1.5 h-1.5 bg-white rounded-full" />
-                  </div>
-                )}
+                <img 
+                  src={startup.logo || '/placeholder.png'} 
+                  alt={`${startup.companyName} logo`}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/placeholder.png';
+                  }}
+                />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-black">{startup.companyName}</h1>

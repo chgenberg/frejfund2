@@ -65,7 +65,7 @@ export default function VCAnalytics() {
             <select
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent"
+              className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent appearance-none cursor-pointer hover:border-gray-400 transition-colors"
             >
               <option value="7d">Last 7 days</option>
               <option value="30d">Last 30 days</option>

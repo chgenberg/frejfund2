@@ -177,7 +177,7 @@ export default function VCDashboardClient() {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Industry</label>
-                  <select value={filters.industry} onChange={(e) => setFilters({ ...filters, industry: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent">
+                  <select value={filters.industry} onChange={(e) => setFilters({ ...filters, industry: e.target.value })} className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent appearance-none cursor-pointer hover:border-gray-400 transition-colors">
                     <option value="all">All Industries</option>
                     <option value="B2B SaaS">B2B SaaS</option>
                     <option value="Fintech">Fintech</option>
@@ -188,7 +188,7 @@ export default function VCDashboardClient() {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Stage</label>
-                  <select value={filters.stage} onChange={(e) => setFilters({ ...filters, stage: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent">
+                  <select value={filters.stage} onChange={(e) => setFilters({ ...filters, stage: e.target.value })} className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent appearance-none cursor-pointer hover:border-gray-400 transition-colors">
                     <option value="all">All Stages</option>
                     <option value="Pre-seed">Pre-seed</option>
                     <option value="Seed">Seed</option>
@@ -198,7 +198,7 @@ export default function VCDashboardClient() {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Country</label>
-                  <select value={filters.country} onChange={(e) => setFilters({ ...filters, country: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent">
+                  <select value={filters.country} onChange={(e) => setFilters({ ...filters, country: e.target.value })} className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent appearance-none cursor-pointer hover:border-gray-400 transition-colors">
                     <option value="all">All Countries</option>
                     <option value="Sweden">Sweden</option>
                     <option value="Germany">Germany</option>
@@ -237,64 +237,66 @@ export default function VCDashboardClient() {
           </div>
         ) : viewMode === 'list' ? (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredStartups.map((startup, index) => (
-                <motion.div key={startup.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }} onClick={() => router.push(`/vc/startup/${startup.id}`)} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all cursor-pointer">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-start space-x-4 flex-1">
-                          <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                            {startup.logo ? (
-                              <img src={startup.logo} alt={`${startup.companyName} logo`} className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
-                                <div className="w-2 h-2 bg-white rounded-full" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="text-xl font-bold text-black">{startup.companyName}</h3>
-                            <p className="text-gray-600 mt-1">{startup.oneLiner}</p>
-                            <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
-                              <span className="flex items-center"><MapPin className="w-3 h-3 mr-1" />{startup.location.city}, {startup.location.country}</span>
-                              <span className="flex items-center"><Users className="w-3 h-3 mr-1" />{startup.teamSize} team members</span>
-                              <span className="flex items-center"><Calendar className="w-3 h-3 mr-1" />Founded {startup.foundedYear}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-center ml-6">
-                          <div className={`text-3xl font-bold ${getScoreColor(startup.readinessScore)}`}>{startup.readinessScore}</div>
-                          <p className="text-xs text-gray-600">Readiness</p>
-                        </div>
+                <motion.div key={startup.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }} onClick={() => router.push(`/vc/startup/${startup.id}`)} className="bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all cursor-pointer flex flex-col h-full">
+                  {/* Company Header */}
+                  <div className="p-6 flex-1">
+                    <div className="flex items-start space-x-4 mb-4">
+                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        <img 
+                          src={startup.logo || '/placeholder.png'} 
+                          alt={`${startup.companyName} logo`} 
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/placeholder.png';
+                          }}
+                        />
                       </div>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                        <div className="bg-gray-50 rounded-lg p-3">
-                          <div className="text-xs text-gray-600 mb-1">Monthly Revenue</div>
-                          <div className="text-lg font-bold text-black">${((Number(startup.monthlyRevenue || 0)) / 1000).toFixed(0)}k</div>
-                        </div>
-                        <div className="bg-gray-50 rounded-lg p-3">
-                          <div className="text-xs text-gray-600 mb-1">Growth</div>
-                          <div className="text-lg font-bold text-green-600">+{Number(startup.metrics?.growth || 0)}%</div>
-                        </div>
-                        <div className="bg-gray-50 rounded-lg p-3">
-                          <div className="text-xs text-gray-600 mb-1">Seeking</div>
-                          <div className="text-lg font-bold text-black">${((Number(startup.seeking || 0)) / 1000000).toFixed(1)}M</div>
-                        </div>
-                        <div className="bg-gray-50 rounded-lg p-3">
-                          <div className="text-xs text-gray-600 mb-1">Stage</div>
-                          <div className="text-lg font-bold text-black">{startup.stage}</div>
-                        </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-black line-clamp-1">{startup.companyName}</h3>
+                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">{startup.oneLiner}</p>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex flex-wrap gap-2">
-                          <span className="px-2 py-1 bg-black text-white rounded text-xs">{startup.industry}</span>
-                          {startup.tags.map(tag => (
-                            <span key={tag} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">{tag}</span>
-                          ))}
-                        </div>
-                        <div className="flex items-center text-sm text-gray-500"><Clock className="w-3 h-3 mr-1" />Active today</div>
+                      <div className="text-right">
+                        <div className={`text-2xl font-bold ${getScoreColor(startup.readinessScore)}`}>{startup.readinessScore}</div>
+                        <p className="text-xs text-gray-600">Ready</p>
                       </div>
+                    </div>
+                    
+                    {/* Location & Team */}
+                    <div className="flex items-center space-x-3 text-xs text-gray-500 mb-4">
+                      <span className="flex items-center"><MapPin className="w-3 h-3 mr-1" />{startup.location.city}</span>
+                      <span>•</span>
+                      <span>{startup.teamSize} team</span>
+                      <span>•</span>
+                      <span>{startup.foundedYear}</span>
+                    </div>
+                    
+                    {/* Key Metrics */}
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">MRR</span>
+                        <span className="text-sm font-bold text-black">${((Number(startup.monthlyRevenue || 0)) / 1000).toFixed(0)}k</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Growth</span>
+                        <span className="text-sm font-bold text-green-600">+{Number(startup.metrics?.growth || 0)}%</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Seeking</span>
+                        <span className="text-sm font-bold text-black">${((Number(startup.seeking || 0)) / 1000000).toFixed(1)}M</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Footer */}
+                  <div className="px-6 py-4 border-t border-gray-100">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span className="px-2 py-1 bg-black text-white rounded text-xs">{startup.stage}</span>
+                        <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">{startup.industry}</span>
+                      </div>
+                      <span className="text-xs text-gray-500">Active today</span>
                     </div>
                   </div>
                 </motion.div>

@@ -60,9 +60,9 @@ export async function GET(
       }
     });
 
-    if (!startup) {
+    if (!startup || !startup.isProfilePublic) {
       return NextResponse.json(
-        { error: 'Startup not found' },
+        { error: 'Startup not found or not public' },
         { status: 404 }
       );
     }
@@ -81,34 +81,34 @@ export async function GET(
       });
     }
 
-    // Transform to detailed startup profile
+    // Transform to detailed startup profile with null guards
     const profile = {
       id: startup.id,
-      name: startup.name || businessInfo.founderName || 'Unknown',
-      companyName: startup.company || businessInfo.name || 'Unknown Company',
-      logo: startup.logo || businessInfo.logo,
+      name: startup.name || businessInfo?.founderName || 'Unknown',
+      companyName: startup.company || businessInfo?.name || 'Unknown Company',
+      logo: startup.logo || businessInfo?.logo || null,
       location: {
-        city: businessInfo.city || 'Stockholm',
-        country: businessInfo.country || 'Sweden'
+        city: businessInfo?.city || 'Stockholm',
+        country: businessInfo?.country || 'Sweden'
       },
-      industry: startup.industry || businessInfo.industry || 'Tech',
-      stage: startup.stage || businessInfo.stage || 'Seed',
-      raised: businessInfo.raised || 0,
-      seeking: startup.askAmount || businessInfo.seeking || 1000000,
-      monthlyRevenue: businessInfo.monthlyRevenue || 0,
-      teamSize: businessInfo.teamSize || 1,
-      foundedYear: businessInfo.foundedYear || new Date().getFullYear(),
+      industry: startup.industry || businessInfo?.industry || 'Tech',
+      stage: startup.stage || businessInfo?.stage || 'Seed',
+      raised: businessInfo?.raised || 0,
+      seeking: startup.askAmount || businessInfo?.seeking || 1000000,
+      monthlyRevenue: businessInfo?.monthlyRevenue || 0,
+      teamSize: businessInfo?.teamSize || 1,
+      foundedYear: businessInfo?.foundedYear || new Date().getFullYear(),
       readinessScore: analysis?.investmentReadiness || 50,
       overallScore: analysis?.overallScore || 50,
-      oneLiner: startup.oneLiner || businessInfo.description || 'Building the future',
-      website: startup.website || businessInfo.website,
-      linkedIn: businessInfo.linkedinProfiles?.[0],
-      pitchDeck: startup.pitchDeck,
-      traction: startup.traction || businessInfo.traction,
+      oneLiner: startup.oneLiner || businessInfo?.description || 'Building the future',
+      website: startup.website || businessInfo?.website || null,
+      linkedIn: businessInfo?.linkedinProfiles?.[0] || null,
+      pitchDeck: startup.pitchDeck || null,
+      traction: startup.traction || businessInfo?.traction || {},
       metrics: {
-        growth: getScoreFromDimensions(analysis?.dimensions || [], 'Revenue Growth') || businessInfo.growthRate || 0,
+        growth: getScoreFromDimensions(analysis?.dimensions || [], 'Revenue Growth') || businessInfo?.growthRate || 0,
         retention: getScoreFromDimensions(analysis?.dimensions || [], 'Customer Retention') || 0,
-        burnRate: businessInfo.burnRate || 0,
+        burnRate: businessInfo?.burnRate || 0,
         unitEconomics: getScoreFromDimensions(analysis?.dimensions || [], 'Unit Economics') || 0,
         marketSize: getScoreFromDimensions(analysis?.dimensions || [], 'Market Size') || 0,
         productMarketFit: getScoreFromDimensions(analysis?.dimensions || [], 'Product-Market Fit') || 0
@@ -116,7 +116,7 @@ export async function GET(
       dimensions: analysis?.dimensions || [],
       dimensionsByCategory,
       insights: analysis?.insights || [],
-      analysisCompletedAt: analysis?.completedAt,
+      analysisCompletedAt: analysis?.completedAt || null,
       createdAt: startup.createdAt,
       updatedAt: startup.updatedAt
     };

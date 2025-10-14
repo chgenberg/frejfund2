@@ -171,26 +171,14 @@ export default function Chatbot() {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 1, type: "spring", stiffness: 400 }}
       >
-        {/* Mobile: Just the blinking dot */}
+        {/* Mobile: Freja profile picture */}
         <div className="sm:hidden w-14 h-14 flex items-center justify-center relative">
-          <div className="w-2.5 h-2.5 bg-white rounded-full" />
-          <motion.div
-            className="absolute inset-0 w-2.5 h-2.5 bg-white rounded-full m-auto"
-            animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-          />
+          <img src="/freja.png" alt="Freja" className="w-10 h-10 rounded-full" />
         </div>
         
-        {/* Desktop: CHAT text with blinking dot */}
+        {/* Desktop: CHAT text with Freja picture */}
         <div className="hidden sm:flex items-center space-x-2 px-5 py-3">
-          <div className="relative">
-            <div className="w-2.5 h-2.5 bg-white rounded-full" />
-            <motion.div
-              className="absolute inset-0 w-2.5 h-2.5 bg-white rounded-full"
-              animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-            />
-          </div>
+          <img src="/freja.png" alt="Freja" className="w-7 h-7 rounded-full" />
           <span className="text-white font-medium text-sm tracking-wide">CHAT</span>
         </div>
       </motion.button>
@@ -234,6 +222,9 @@ export default function Chatbot() {
                   animate={{ opacity: 1, y: 0 }}
                   className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
+                  {message.sender === 'bot' && (
+                    <img src="/freja.png" alt="Freja" className="w-8 h-8 rounded-full mr-2 flex-shrink-0" />
+                  )}
                   <div
                     className={`max-w-[85%] sm:max-w-[80%] p-2.5 sm:p-3 rounded-2xl ${
                       message.sender === 'user'
@@ -284,8 +275,9 @@ export default function Chatbot() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="flex justify-start"
+                  className="flex justify-start items-center"
                 >
+                  <img src="/freja.png" alt="Freja" className="w-8 h-8 rounded-full mr-2" />
                   <div className="bg-gray-100 p-3 rounded-2xl rounded-bl-md">
                     <div className="flex gap-1">
                       <motion.div
