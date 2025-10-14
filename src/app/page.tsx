@@ -173,7 +173,7 @@ export default function Home() {
               </div>
             </div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-black mb-3 sm:mb-4 tracking-tight leading-tight">
-              Because great ideas<br className="hidden sm:block" />
+              Because great ideas{' '}<br className="hidden sm:block" />
               <span className="sm:hidden">deserve a chance.</span>
               <span className="hidden sm:inline">deserve a chance.</span>
             </h1>
