@@ -93,7 +93,8 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
             evidence: result.evidence || [],
             analyzed: true,
             analyzedAt: new Date(),
-            prompt: dimensionMeta.prompt?.(businessInfo, scrapedContent),
+            // Avoid saving full prompt to reduce memory/DB usage
+            prompt: undefined,
             modelUsed: getChatModel('complex')
           }
         });
@@ -112,7 +113,7 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
             evidence: result.evidence || [],
             analyzed: true,
             analyzedAt: new Date(),
-            prompt: dimensionMeta.prompt?.(businessInfo, scrapedContent),
+            prompt: undefined,
             modelUsed: getChatModel('complex')
           }
         });
@@ -120,7 +121,8 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
     };
 
     // 3. Run analysis for each dimension in small batches to reduce load
-    const batchSize = 5;
+    // Low-memory mode: 1 at a time in production hosting to avoid OOM
+    const batchSize = process.env.NODE_ENV === 'production' ? 1 : 5;
     for (let idx = 0; idx < dimensionsToAnalyze.length; idx += batchSize) {
       const batch = dimensionsToAnalyze.slice(idx, idx + batchSize);
       for (const dimension of batch) {
@@ -132,7 +134,8 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
             result = await analyzeDimension(
               dimension,
               businessInfo,
-              scrapedContent,
+              // Truncate context to keep memory small
+              scrapedContent: (scrapedContent || '').slice(0, 12000),
               uploadedDocuments
             );
             break;
@@ -143,6 +146,7 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
         }
 
         // Save idempotently
+        // Save idempotently (avoid storing full prompt to reduce DB size)
         await saveDimension(analysis.id, dimension, result);
 
         // Update progress
@@ -189,7 +193,7 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
 
         // Progressive mode: small delay between dimensions to avoid rate limits
         if (mode === 'progressive') {
-          await new Promise(resolve => setTimeout(resolve, 250));
+          await new Promise(resolve => setTimeout(resolve, 350));
         }
 
       } catch (error) {
@@ -199,7 +203,7 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
       }
       // Short pause between batches
       if (mode === 'progressive') {
-        await new Promise(r => setTimeout(r, 1000));
+        await new Promise(r => setTimeout(r, 1200));
       }
     }
 
@@ -256,7 +260,7 @@ ${scrapedContent}
 
 ## Uploaded Documents:
 ${uploadedDocuments.join('\n\n---\n\n')}
-  `.slice(0, 8000);
+  `.slice(0, 6000);
 
   // Build the analysis prompt – optimized for concise, value-dense output
   const analysisPrompt = `${dimension.prompt(businessInfo, fullContent)}
