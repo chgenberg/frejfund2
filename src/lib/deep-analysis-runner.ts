@@ -6,6 +6,7 @@
 import { BusinessInfo } from '@/types/business';
 import { ANALYSIS_DIMENSIONS, DeepAnalysisResult, getCriticalDimensions } from './deep-analysis-framework';
 import { getOpenAIClient, getChatModel } from './ai-client';
+import { fetchGptKnowledgeForCompany } from './gpt-knowledge';
 import { prisma } from './prisma';
 
 interface RunDeepAnalysisOptions {
@@ -57,7 +58,14 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
     await prisma.analysisDimension.deleteMany({ where: { analysisId: analysis.id } });
     await prisma.analysisInsight.deleteMany({ where: { analysisId: analysis.id } });
 
-    // 2. Determine which dimensions to analyze
+    // 2. Fetch GPT public knowledge (low-priority source) in background
+    let gptKnowledgeText = '';
+    try {
+      const knowledge = await fetchGptKnowledgeForCompany(businessInfo);
+      gptKnowledgeText = knowledge.combinedText || '';
+    } catch {}
+
+    // 3. Determine which dimensions to analyze
     let dimensionsToAnalyze = specificDimensions && specificDimensions.length > 0
       ? ANALYSIS_DIMENSIONS.filter(d => specificDimensions.includes(d.name))
       : mode === 'critical-only' 
@@ -120,7 +128,7 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
       }
     };
 
-    // 3. Run analysis for each dimension in small batches to reduce load
+    // 4. Run analysis for each dimension in small batches to reduce load
     // Low-memory mode: 1 at a time in production hosting to avoid OOM
     const batchSize = process.env.NODE_ENV === 'production' ? 1 : 5;
     for (let idx = 0; idx < dimensionsToAnalyze.length; idx += batchSize) {
@@ -135,7 +143,12 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
               dimension,
               businessInfo,
               // Truncate context to keep memory small
-              (scrapedContent || '').slice(0, 12000),
+              // Merge sources: uploaded > scraped > GPT knowledge
+              // The analyzeDimension prompt instructs model to respect only provided text; we bias by ordering
+              ((uploadedDocuments && uploadedDocuments.length > 0) ? '' : '') +
+              (scrapedContent || '').slice(0, 8000) +
+              '\n\n' +
+              (gptKnowledgeText || ''),
               uploadedDocuments
             );
             break;
