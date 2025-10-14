@@ -77,8 +77,8 @@ export async function extractMainContentWithReadability(url: string, html: strin
         pretendToBeVisual: false,
         includeNodeLocations: false
       });
-    } catch (domError) {
-      console.log(`[Scraper] JSDOM failed for ${url}: ${domError.message || 'Unknown error'} - using Cheerio`);
+    } catch (domError: any) {
+      console.log(`[Scraper] JSDOM failed for ${url}: ${domError?.message || 'Unknown error'} - using Cheerio`);
       return null;
     }
 
@@ -101,8 +101,8 @@ export async function extractMainContentWithReadability(url: string, html: strin
       }
       
       console.log(`[Scraper] ✓ Readability extracted ${article.textContent.length} chars from ${url}`);
-    } catch (readabilityError) {
-      console.log(`[Scraper] Readability parsing failed for ${url}: ${readabilityError.message || 'Unknown'} - using Cheerio`);
+    } catch (readabilityError: any) {
+      console.log(`[Scraper] Readability parsing failed for ${url}: ${readabilityError?.message || 'Unknown'} - using Cheerio`);
       try { dom.window.close(); } catch (e) { /* ignore */ }
       return null;
     }
@@ -148,12 +148,14 @@ export async function scrapeUrl(url: string): Promise<ScrapeResult> {
   }
 
   const html = await fetchHtml(url);
-  const readability = await extractMainContentWithReadability(url, html);
+  // Hard clamp HTML to avoid large DOM parsing
+  const safeHtml = html.length > 500_000 ? html.slice(0, 500_000) : html;
+  const readability = await extractMainContentWithReadability(url, safeHtml);
   if (readability && readability.text && readability.text.length > 200) {
     cache.set(url, { text: readability.text, at: Date.now() });
     return readability;
   }
-  const basic = await extractWithCheerio(url, html);
+  const basic = await extractWithCheerio(url, safeHtml);
   cache.set(url, { text: basic.text, at: Date.now() });
   return basic;
 }

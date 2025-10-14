@@ -135,7 +135,7 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
 
     // 4. Run analysis for each dimension in small batches to reduce load
     // Low-memory mode: 1 at a time in production hosting to avoid OOM
-    const batchSize = process.env.NODE_ENV === 'production' ? 1 : 5;
+    const batchSize = process.env.NODE_ENV === 'production' ? 1 : 3;
     for (let idx = 0; idx < dimensionsToAnalyze.length; idx += batchSize) {
       const batch = dimensionsToAnalyze.slice(idx, idx + batchSize);
       for (const dimension of batch) {
@@ -151,9 +151,10 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
               // Merge sources: uploaded > scraped > GPT knowledge
               // The analyzeDimension prompt instructs model to respect only provided text; we bias by ordering
               ((uploadedDocuments && uploadedDocuments.length > 0) ? '' : '') +
-              (scrapedContent || '').slice(0, 8000) +
+              // Keep context small to avoid V8 heap pressure
+              (scrapedContent || '').slice(0, 6000) +
               '\n\n' +
-              (gptKnowledgeText || ''),
+              (gptKnowledgeText || '').slice(0, 2000),
               uploadedDocuments
             );
             break;
@@ -209,10 +210,12 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
           });
         }
 
-        // Progressive mode: small delay between dimensions to avoid rate limits
+        // Progressive mode: small delay + opportunistic GC to avoid rate limits and heap bloat
         if (mode === 'progressive') {
-          await new Promise(resolve => setTimeout(resolve, 350));
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
+        // Explicit best-effort GC if available (ignored in most environments)
+        try { (global as any).gc && (global as any).gc(); } catch {}
 
       } catch (error) {
         console.error(`Error analyzing dimension ${dimension.id}:`, error);
@@ -221,7 +224,8 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
       }
       // Short pause between batches
       if (mode === 'progressive') {
-        await new Promise(r => setTimeout(r, 1200));
+        await new Promise(r => setTimeout(r, 1500));
+        try { (global as any).gc && (global as any).gc(); } catch {}
       }
     }
 

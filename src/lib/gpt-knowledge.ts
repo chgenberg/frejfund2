@@ -76,7 +76,7 @@ Context company: ${businessInfo.companyName || businessInfo.name || 'Unknown'} (
         stream: false,
       }, { signal } as any);
 
-      const text = (resp.choices?.[0]?.message?.content || '').trim().slice(0, 1200);
+      const text = (resp.choices?.[0]?.message?.content || '').trim().slice(0, 900);
       if (text) chunks.push({ category: batch.category, content: text });
     } catch (err) {
       // Skip batch on error; continue others
@@ -86,7 +86,7 @@ Context company: ${businessInfo.companyName || businessInfo.name || 'Unknown'} (
   const combinedText = chunks
     .map((c) => `### ${c.category}\n${c.content}`)
     .join('\n\n')
-    .slice(0, 4000);
+    .slice(0, 2500);
 
   return { combinedText, chunks };
 }
