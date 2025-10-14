@@ -32,9 +32,7 @@ export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
       const data = await response.json();
 
       if (response.ok) {
-        if (typeof window !== 'undefined') {
-          try { localStorage.setItem('vc-token', data.token); } catch {}
-        }
+        // Cookie is set server-side; just navigate
         router.push('/vc');
       } else {
         setError(data.error || 'Login failed');

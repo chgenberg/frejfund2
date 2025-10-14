@@ -720,7 +720,7 @@ export default function AnalysisPage() {
 
       {/* Info Popup Modal */}
       <AnimatePresence>
-        {showInfoPopup && DIMENSION_EXAMPLES[showInfoPopup] && (
+        {showInfoPopup && (
           <>
             <motion.div
               initial={{ opacity: 0 }}

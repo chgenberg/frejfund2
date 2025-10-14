@@ -23,6 +23,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState(0);
   const [showInvestorModal, setShowInvestorModal] = useState(false);
 
+  // Hoist tabs outside any conditional rendering to avoid TDZ/initialization timing issues
   const tabs = [
     { icon: Sparkles, label: "Get Started" },
     { icon: Brain, label: "Deep Analysis" },

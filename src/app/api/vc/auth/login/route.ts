@@ -38,11 +38,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate session token
+    // Generate session token and set HttpOnly cookie
     const token = generateToken();
 
-    // Return user data
-    return NextResponse.json({
+    const res = NextResponse.json({
       success: true,
       token,
       email: vcUser.email,
@@ -57,6 +56,17 @@ export async function POST(request: NextRequest) {
         geographies: vcUser.geographies
       }
     });
+
+    // Set secure, HttpOnly cookie to gate /vc pages server-side
+    res.cookies.set('vc-session', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7 // 7 days
+    });
+
+    return res;
 
   } catch (error) {
     console.error('VC login error:', error);

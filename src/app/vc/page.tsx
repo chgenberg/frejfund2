@@ -70,20 +70,10 @@ export default function VCDashboard() {
   });
 
   useEffect(() => {
-    // Guard for SSR/hydration
-    if (typeof window === 'undefined') return;
-    let token: string | null = null;
-    try {
-      token = localStorage.getItem('vc-token');
-    } catch {}
-    if (!token) {
-      // Soft redirect to avoid render crash loops
-      setTimeout(() => router.push('/vc/login'), 0);
-      return;
-    }
+    // With middleware cookie guard, we can assume access here
     setIsAuthenticated(true);
     loadStartups();
-  }, [router]);
+  }, []);
 
   const loadStartups = async () => {
     setLoading(true);
@@ -167,7 +157,7 @@ export default function VCDashboard() {
   };
 
   if (typeof window === 'undefined') return null;
-  if (!isAuthenticated) return null; // redirect handled in effect
+  if (!isAuthenticated) return null;
 
   return (
     <div className="min-h-screen bg-gray-50">
