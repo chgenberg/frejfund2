@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
@@ -34,18 +35,7 @@ export async function GET(
                 evidence: true
               }
             },
-            insights: {
-              select: {
-                type: true,
-                title: true,
-                description: true,
-                recommendation: true,
-                priority: true,
-                impactScore: true,
-                effortScore: true,
-                category: true
-              }
-            }
+            insights: true
           }
         },
         sessions: {
@@ -60,9 +50,13 @@ export async function GET(
       }
     });
 
-    if (!startup || !startup.isProfilePublic) {
+    // Allow access if profile is public OR caller is an authenticated VC (cookie set by middleware)
+    const vcSession = cookies().get('vc-session');
+    const isVC = Boolean(vcSession?.value);
+
+    if (!startup || (!startup.isProfilePublic && !isVC)) {
       return NextResponse.json(
-        { error: 'Startup not found or not public' },
+        { error: 'Startup not found or not accessible' },
         { status: 404 }
       );
     }
