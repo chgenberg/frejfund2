@@ -37,27 +37,29 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
     });
 
     // 1. Create or reuse DeepAnalysis record (avoid P2002 on re-run)
+    const isCriticalOnly = mode === 'critical-only';
     const analysis = await prisma.deepAnalysis.upsert({
       where: { sessionId },
       create: {
         sessionId,
         userId: session?.userId || null,
-        status: 'analyzing',
-        progress: 0,
+        status: isCriticalOnly ? 'analyzing' : 'analyzing',
+        progress: isCriticalOnly ? 100 : 0,
         businessInfo: businessInfo // Save for VC dashboard
       },
       update: {
         status: 'analyzing',
-        // reset progress if a new run starts
-        progress: 0,
-        startedAt: new Date(),
+        // Do not reset progress on critical-only re-run; keep UI at 100%
+        ...(isCriticalOnly ? {} : { progress: 0, startedAt: new Date() }),
         businessInfo: businessInfo // Update business info
       }
     });
 
-    // If we are re-running for this session, clear prior dimension results/insights to avoid 95/95 at start
-    await prisma.analysisDimension.deleteMany({ where: { analysisId: analysis.id } });
-    await prisma.analysisInsight.deleteMany({ where: { analysisId: analysis.id } });
+    // Only clear previous results on a full run; keep existing dimensions on critical-only re-runs
+    if (!isCriticalOnly) {
+      await prisma.analysisDimension.deleteMany({ where: { analysisId: analysis.id } });
+      await prisma.analysisInsight.deleteMany({ where: { analysisId: analysis.id } });
+    }
 
     // 2. GPT public knowledge (low-priority source)
     // If provided by orchestrator, use it; otherwise harvest now
