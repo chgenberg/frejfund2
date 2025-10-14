@@ -135,7 +135,7 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
               dimension,
               businessInfo,
               // Truncate context to keep memory small
-              scrapedContent: (scrapedContent || '').slice(0, 12000),
+              (scrapedContent || '').slice(0, 12000),
               uploadedDocuments
             );
             break;
