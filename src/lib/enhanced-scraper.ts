@@ -39,12 +39,29 @@ export interface EnhancedScrapingResult {
   dataSources: string[];
 }
 
+const lastRun = new Map<string, number>();
+const DEBOUNCE_MS = 60000; // 60s per key
+
 /**
  * Run enhanced scraping with all available data sources
  */
 export async function runEnhancedScraping(
   businessInfo: BusinessInfo
 ): Promise<EnhancedScrapingResult> {
+  const now = Date.now();
+  const key = (businessInfo.website || businessInfo.name || 'unknown').toLowerCase();
+  const last = lastRun.get(key) || 0;
+  if (now - last < DEBOUNCE_MS) {
+    return {
+      websiteContent: '',
+      websiteSources: [],
+      totalDataPoints: 0,
+      scrapingDuration: 0,
+      dataSources: []
+    };
+  }
+  lastRun.set(key, now);
+
   const startTime = Date.now();
   const dataSources: string[] = ['website'];
   

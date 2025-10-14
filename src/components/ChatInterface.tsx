@@ -429,12 +429,14 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
           };
           connect();
           
-          // Only start analysis if not already triggered in this session
+          // Only start analysis if not already triggered or running/completed via SSE
           const analysisKey = `analysis-triggered-${sessionId}`;
           const alreadyTriggered = sessionStorage.getItem(analysisKey);
+          const sseStatus = (window as any).__ff_analysis_status as ('idle'|'running'|'completed'|undefined);
           
-          if (!alreadyTriggered) {
+          if (!alreadyTriggered && sseStatus !== 'running' && sseStatus !== 'completed') {
             sessionStorage.setItem(analysisKey, 'true');
+            (window as any).__ff_analysis_status = 'running';
             
             const response = await fetch('/api/deep-analysis', {
               method: 'POST',
