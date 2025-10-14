@@ -4,37 +4,8 @@ export const dynamic = 'force-dynamic';
 
 const VCDashboardClient = dynamic(() => import('./VCDashboardClient'), { ssr: false });
 
-export default function VCDashboardPage() {
+export default function Page() {
   return <VCDashboardClient />;
-}
-
-// Keep types here for client component re-export
-export interface Startup {
-  id: string;
-  name: string;
-  companyName: string;
-  logo?: string;
-  location: {
-    city: string;
-    country: string;
-    coordinates: [number, number];
-  };
-  industry: string;
-  stage: string;
-  raised: number;
-  seeking: number;
-  monthlyRevenue: number;
-  teamSize: number;
-  foundedYear: number;
-  readinessScore: number;
-  oneLiner: string;
-  metrics: {
-    growth: number;
-    retention: number;
-    burnRate: number;
-  };
-  tags: string[];
-  lastActive: Date;
 }
 
 export function VCDashboard() {
