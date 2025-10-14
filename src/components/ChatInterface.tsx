@@ -125,7 +125,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                 : `Great work! Your analysis is solid. I found ${data.totalGaps} minor areas where we could gather more data to fine-tune your strategy.\n\nWant to address these, or shall we focus on your main goals?`,
               sender: 'agent',
               timestamp: new Date(),
-              type: 'gap-analysis'
+              type: 'analysis'
             };
             setMessages(prev => [...prev, gapMessage]);
           }, 2000); // Small delay after completion celebration
@@ -301,22 +301,15 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       readinessScore = readiness.score;
     }
     
-    // Generate welcome with correct score
+    // Generate welcome with correct score, then override with custom intro
     const { getWelcomeMessage, calculateReadinessScore } = await import('@/lib/coaching-prompts');
-    const readiness = { score: readinessScore, nextSteps: [], breakdown: {} };
+    const readiness = { score: readinessScore, nextSteps: [], breakdown: [] as any };
     let welcomeContent = getWelcomeMessage(businessInfo, readiness);
-    
-    // Add proactive insights
-    const insights = generateProactiveInsights(businessInfo);
-    if (insights.length > 0) {
-      welcomeContent += '\n\n' + insights[0];
-    }
-    
-    // Add next best action
-    const nextAction = getNextBestAction(businessInfo);
-    if (nextAction.priority === 'high') {
-      welcomeContent += `\n\nNext step: ${nextAction.action}`;
-    }
+
+    // Override with the requested custom intro, personalized
+    const rawFirstName = (businessInfo as any)?.founderName || (businessInfo as any)?.firstName || (businessInfo as any)?.ownerName || (businessInfo as any)?.contactName || '';
+    const firstName = rawFirstName ? String(rawFirstName).split(' ')[0] : (businessInfo.email ? businessInfo.email.split('@')[0] : 'there');
+    welcomeContent = `Hi ${firstName}\n\nI’m Freja — your personal investment coach.\nI’m currently analyzing your startup to understand where you stand on your investment journey. \n\nYou can follow the progress in the black banner above — it updates in real time as I process your data.\nOnce the analysis is complete, I’ll guide you step by step through what’s needed to prepare the perfect investor case — from financials to storytelling and everything in between.\n\nWhile I’m working on your analysis, feel free to chat with me about anything related to business, fundraising, or startup strategy. I’m here to help you get investor-ready.`;
     
     const welcomeMessage: Message = {
       id: `msg-welcome-${Date.now()}`,
