@@ -120,7 +120,8 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
             analyzedAt: new Date(),
             // Avoid saving full prompt to reduce memory/DB usage
             prompt: undefined,
-            modelUsed: getChatModel('complex')
+            // Store actual model used for traceability
+            modelUsed: getChatModel('simple')
           }
         });
       } else {
@@ -139,15 +140,15 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
             analyzed: true,
             analyzedAt: new Date(),
             prompt: undefined,
-            modelUsed: getChatModel('complex')
+            modelUsed: getChatModel('simple')
           }
         });
       }
     };
 
     // 4. Run analysis for each dimension in small batches to reduce load
-    // Low-memory mode: 1 at a time in production hosting to avoid OOM
-    const batchSize = process.env.NODE_ENV === 'production' ? 1 : 3;
+    // Low-memory mode tuned: 2 at a time in production to improve throughput without OOM
+    const batchSize = process.env.NODE_ENV === 'production' ? 2 : 3;
     for (let idx = 0; idx < dimensionsToAnalyze.length; idx += batchSize) {
       const batch = dimensionsToAnalyze.slice(idx, idx + batchSize);
       for (const dimension of batch) {
@@ -224,7 +225,8 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
 
         // Progressive mode: small delay + opportunistic GC to avoid rate limits and heap bloat
         if (mode === 'progressive') {
-          await new Promise(resolve => setTimeout(resolve, 500));
+          // Shorter pacing per-dimension to improve overall latency
+          await new Promise(resolve => setTimeout(resolve, 300));
         }
         // Explicit best-effort GC if available (ignored in most environments)
         try { (global as any).gc && (global as any).gc(); } catch {}
@@ -236,7 +238,8 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
       }
       // Short pause between batches
       if (mode === 'progressive') {
-        await new Promise(r => setTimeout(r, 1500));
+        // Shorter pause between batches to keep momentum while avoiding spikes
+        await new Promise(r => setTimeout(r, 600));
         try { (global as any).gc && (global as any).gc(); } catch {}
       }
     }
@@ -320,8 +323,10 @@ Rules:
 - Do not include any commentary outside JSON.`;
 
   try {
+    // Use mini model for faster deep analysis run
+    const analysisModel = getChatModel('simple'); // gpt-5-mini
     const response = await openai.chat.completions.create({
-      model: getChatModel('complex'), // Use gpt-5 for deep reasoning
+      model: analysisModel,
       messages: [
         {
           role: 'system',
@@ -334,8 +339,8 @@ Output must be valid JSON only.`
           content: analysisPrompt
         }
       ],
-      ...(getChatModel('complex').startsWith('gpt-5') ? {} : { response_format: { type: 'json_object' } }),
-      ...(getChatModel('complex').startsWith('gpt-5') ? { max_completion_tokens: 1500 } : { max_tokens: 1500 })
+      ...(analysisModel.startsWith('gpt-5') ? {} : { response_format: { type: 'json_object' } }),
+      ...(analysisModel.startsWith('gpt-5') ? { max_completion_tokens: 1500 } : { max_tokens: 1500 })
     });
 
     const raw = response.choices?.[0]?.message?.content || '{}';

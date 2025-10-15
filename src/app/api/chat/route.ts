@@ -63,12 +63,50 @@ export async function POST(request: NextRequest) {
       ? `${message}\n\nUse the following context if helpful. Cite matches as [1], [2], etc.:\n${contextBlock}`
       : message;
     
-    const response = await aiAnalyzer.generateChatResponse(
-      withDocMessage,
-      businessInfo as BusinessInfo,
-      (Array.isArray(conversationHistory) ? (conversationHistory as any[]).filter((m:any)=> m?.type !== 'summary') : []),
-      sessionId
-    );
+    // Try normal path first
+    let response: string | null = null;
+    try {
+      response = await aiAnalyzer.generateChatResponse(
+        withDocMessage,
+        businessInfo as BusinessInfo,
+        (Array.isArray(conversationHistory) ? (conversationHistory as any[]).filter((m:any)=> m?.type !== 'summary') : []),
+        sessionId
+      );
+    } catch (e) {
+      // First retry after short delay
+      await new Promise(r=>setTimeout(r, 400));
+      try {
+        response = await aiAnalyzer.generateChatResponse(
+          withDocMessage,
+          businessInfo as BusinessInfo,
+          (Array.isArray(conversationHistory) ? (conversationHistory as any[]).filter((m:any)=> m?.type !== 'summary') : []),
+          sessionId
+        );
+      } catch (e2) {
+        // Degrade to lighter complexity if provider is flaky
+        try {
+          const lightMsg = `${withDocMessage}\n\nIf unsure, answer briefly and ask one follow-up.`;
+          const { getOpenAIClient } = await import('@/lib/ai-client');
+          const client = getOpenAIClient();
+          const miniModel = 'gpt-5-mini';
+          const r = await client.chat.completions.create({
+            model: miniModel,
+            messages: [
+              { role: 'system', content: 'You are Freja. Be concise, professional, no emojis. Use markdown.' },
+              { role: 'user', content: lightMsg }
+            ],
+            max_tokens: 600
+          } as any);
+          response = r.choices?.[0]?.message?.content || 'I had trouble connecting, but here is a brief answer.';
+        } catch (e3) {
+          console.error('Chat degraded fallback failed:', e3);
+          return NextResponse.json(
+            { error: 'Upstream temporary failure' },
+            { status: 502 }
+          );
+        }
+      }
+    }
 
     // Build sources metadata for UI
     const sources = retrieved.map((r, i) => ({

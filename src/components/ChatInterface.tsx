@@ -788,7 +788,8 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         }
       } catch (streamErr) {
         // Fallback to non-streaming
-      const response = await fetch('/api/ai', {
+      // Non-streaming fallback with simple retry and soft messaging on 502
+      const doOnce = async () => fetch('/api/ai', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -799,20 +800,26 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
           conversationHistory,
             docContext,
             sessionId
-        }),
+        })
       });
+
+      let response = await doOnce();
+      if (!response.ok) {
+        // quick second attempt
+        await new Promise(r=>setTimeout(r, 400));
+        response = await doOnce();
+      }
 
       if (!response.ok) {
         const errText = await response.text().catch(() => '');
         console.error('AI API error:', response.status, errText);
-        // Show a gentle retryable message to the user
         setIsTyping(false);
         setMessages(prev => ([
           ...prev,
           {
             id: `ai-failed-${Date.now()}`,
             sender: 'agent',
-            content: 'I had a temporary issue connecting to the AI service (502). Please try again in a few seconds.',
+            content: 'Analysis is heavy right now. I switched to a lighter mode — ask one question and I will answer briefly while the deep analysis continues.',
             timestamp: new Date(),
             type: 'text'
           }

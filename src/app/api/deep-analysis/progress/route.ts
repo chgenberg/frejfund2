@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       // Send initial connection message
       write({ type: 'connected' });
 
-      let lastProgress = 0;
+      let lastProgress = -1;
 
       // Poll for updates from database
       const interval = setInterval(async () => {
@@ -87,13 +87,13 @@ export async function GET(request: NextRequest) {
         } catch (error) {
           console.error('SSE poll error:', error);
         }
-      }, 2000); // Check every 2 seconds
+      }, 2500); // Check every 2.5 seconds to reduce churn
 
       // Heartbeat to keep Safari/Proxies alive
       const keepAlive = setInterval(() => {
         if (closed) return;
         safeEnqueue(':keepalive\n\n');
-      }, 20000);
+      }, 15000); // Slightly more frequent to survive strict proxies
 
       // Clean up on disconnect
       request.signal.addEventListener('abort', () => {
