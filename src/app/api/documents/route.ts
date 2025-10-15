@@ -42,7 +42,9 @@ export async function POST(req: NextRequest) {
       status = 'draft',
       version,
       content,
-      metadata
+      metadata,
+      fileUrl,
+      s3Key
     } = body;
 
     if (!type || !title) {
@@ -58,7 +60,11 @@ export async function POST(req: NextRequest) {
         status,
         version,
         content,
-        metadata,
+        metadata: {
+          ...(metadata || {}),
+          ...(fileUrl ? { fileUrl } : {}),
+          ...(s3Key ? { s3Key } : {})
+        },
         generatedBy: 'gpt-5'
       }
     });
