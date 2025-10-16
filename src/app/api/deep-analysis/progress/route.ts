@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
+import { ANALYSIS_DIMENSIONS } from '@/lib/deep-analysis-framework';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 // Global progress store (in production, use Redis or similar)
 const progressStore = new Map<string, {
@@ -61,7 +65,7 @@ export async function GET(request: NextRequest) {
           
           if (analysis) {
             const completedCount = analysis.dimensions.length;
-            const totalCount = 95; // Total dimensions
+            const totalCount = ANALYSIS_DIMENSIONS.length;
             const completedCategories = [...new Set(analysis.dimensions.map(d => d.category))];
             
             // Only send update if progress changed
@@ -73,7 +77,7 @@ export async function GET(request: NextRequest) {
             }
             
             // Check if complete
-            if (analysis.status === 'completed' && completedCount >= totalCount) {
+            if (completedCount >= totalCount || analysis.status === 'completed') {
               write({ type: 'complete' });
               console.log('📡 SSE: Analysis complete, closing connection');
               clearInterval(interval);
@@ -114,9 +118,10 @@ export async function GET(request: NextRequest) {
 
   return new Response(stream, {
     headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
       'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no'
     },
   });
 }

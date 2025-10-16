@@ -49,4 +49,8 @@
     "tailwindcss": "^4",
     "typescript": "^5"
   }
+  ,
+  "engines": {
+    "node": ">=20.18.1"
+  }
 }

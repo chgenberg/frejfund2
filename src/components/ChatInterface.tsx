@@ -417,16 +417,23 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
             }
           };
 
+          let offline = !navigator.onLine;
           const connect = () => {
             try { eventSource && eventSource.close(); } catch {}
+            if (offline) return;
             eventSource = new EventSource(`/api/deep-analysis/progress?sessionId=${sessionId}`);
             eventSource.onmessage = handleMessage;
             eventSource.onerror = () => {
               try { eventSource && eventSource.close(); } catch {}
+              if (offline) return; // wait for online
               setTimeout(connect, backoff);
               backoff = Math.min(backoff * 2, 30000);
             };
           };
+          const handleOnline = () => { offline = false; backoff = 1000; connect(); };
+          const handleOffline = () => { offline = true; try { eventSource && eventSource.close(); } catch {} };
+          window.addEventListener('online', handleOnline);
+          window.addEventListener('offline', handleOffline);
           connect();
           
           // Only start analysis if not already triggered or running/completed via SSE

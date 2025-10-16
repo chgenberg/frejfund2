@@ -179,6 +179,7 @@ export default function Dashboard() {
         
         let eventSource: EventSource | null = null;
         let retries = 0;
+        let offline = !navigator.onLine;
         
         const connect = () => {
           if ((window as any).__ff_es[sessionId]) {
@@ -186,6 +187,7 @@ export default function Dashboard() {
             return;
           }
           
+          if (offline) return; // don't connect while offline
           eventSource = new EventSource(`/api/deep-analysis/progress?sessionId=${sessionId}`);
           (window as any).__ff_es[sessionId] = eventSource;
           
@@ -210,6 +212,7 @@ export default function Dashboard() {
           eventSource.onerror = () => {
             try { eventSource && eventSource.close(); } catch {}
             (window as any).__ff_es[sessionId] = null;
+            if (offline) return; // wait for online event
             if (retries < 5) {
               retries++;
               setTimeout(connect, 1000 * retries);
@@ -217,6 +220,11 @@ export default function Dashboard() {
           };
         };
         
+        const handleOnline = () => { offline = false; retries = 0; connect(); };
+        const handleOffline = () => { offline = true; try { eventSource && eventSource.close(); } catch {} };
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+
         connect();
 
         return () => { 
@@ -224,6 +232,8 @@ export default function Dashboard() {
             if (eventSource) eventSource.close(); 
             (window as any).__ff_es[sessionId] = null; 
           } catch {} 
+          window.removeEventListener('online', handleOnline);
+          window.removeEventListener('offline', handleOffline);
         };
       } catch (error) {
         console.error('Failed to check analysis status:', error);
