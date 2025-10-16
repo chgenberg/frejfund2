@@ -335,7 +335,7 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
           { role: 'user', content: contextPrompt }
         ],
         temperature: 0.7,
-        complexity: 'simple' // Use mini model for regular chat
+        complexity: 'complex' // Upgrade chat to gpt-5 for richer reasoning
       });
 
       // Clean up excessive line breaks

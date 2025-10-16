@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
           : message;
 
         const openai = getOpenAIClient();
-        const model = getChatModel();
+        const model = getChatModel('complex');
 
         const isGpt5 = model.startsWith('gpt-5');
         const streamResp = await openai.chat.completions.create({

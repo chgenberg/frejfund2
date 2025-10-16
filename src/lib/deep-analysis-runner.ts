@@ -82,12 +82,23 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
       } catch {}
     }
 
-    // 3. Determine which dimensions to analyze
+    // 3. Determine which dimensions to analyze (dynamically filtered by available context)
     let dimensionsToAnalyze = specificDimensions && specificDimensions.length > 0
       ? ANALYSIS_DIMENSIONS.filter(d => specificDimensions.includes(d.name))
       : mode === 'critical-only' 
         ? getCriticalDimensions()
         : ANALYSIS_DIMENSIONS;
+
+    const hasDocs = Array.isArray(uploadedDocuments) && uploadedDocuments.length > 0;
+    const scrapedLen = (scrapedContent || '').trim().length;
+    // If we have very limited context, reduce scope to ensure quality
+    if (!hasDocs && scrapedLen < 500) {
+      // Only run truly critical dimensions when almost no context is available
+      dimensionsToAnalyze = ANALYSIS_DIMENSIONS.filter(d => d.priority === 'critical');
+    } else if (!hasDocs && scrapedLen < 2000) {
+      // Without docs and with small website text, skip low-priority dimensions
+      dimensionsToAnalyze = ANALYSIS_DIMENSIONS.filter(d => d.priority === 'critical' || d.priority === 'high' || d.priority === 'medium');
+    }
 
     // Sort dimensions by priority order: critical -> high -> medium -> low
     const priorityOrder = ['critical', 'high', 'medium', 'low'];
@@ -323,8 +334,9 @@ Rules:
 - Do not include any commentary outside JSON.`;
 
   try {
-    // Use mini model for faster deep analysis run
-    const analysisModel = getChatModel('simple'); // gpt-5-mini
+    // Use full gpt-5 model for deep analysis
+    const analysisModel = getChatModel('complex'); // gpt-5
+    const isGpt5 = analysisModel.startsWith('gpt-5');
     const response = await openai.chat.completions.create({
       model: analysisModel,
       messages: [
@@ -339,8 +351,8 @@ Output must be valid JSON only.`
           content: analysisPrompt
         }
       ],
-      ...(analysisModel.startsWith('gpt-5') ? {} : { response_format: { type: 'json_object' } }),
-      ...(analysisModel.startsWith('gpt-5') ? { max_completion_tokens: 1500 } : { max_tokens: 1500 })
+      ...(isGpt5 ? {} : { response_format: { type: 'json_object' } }),
+      ...(isGpt5 ? { max_completion_tokens: 1500 } : { max_tokens: 1500 })
     });
 
     const raw = response.choices?.[0]?.message?.content || '{}';

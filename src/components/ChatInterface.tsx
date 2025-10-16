@@ -842,8 +842,8 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
           : (docContext ? [{ source: 'website' as const, snippet: String(docContext).slice(0, 200) }] : undefined);
         const newMsgId = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         const latencyMs = Date.now() - startTs;
-        const tokensEstimate = Math.ceil((data.response.length) / 4);
-        const model = getChatModel('simple'); // Regular chat uses mini model
+          const tokensEstimate = Math.ceil((data.response.length) / 4);
+          const model = getChatModel('complex'); // Chat now uses gpt-5
         const { getModelPricing } = await import('@/lib/ai-client');
         const price = getModelPricing(model);
         const mtok = tokensEstimate / 1_000_000;
