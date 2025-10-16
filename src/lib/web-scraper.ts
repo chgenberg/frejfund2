@@ -129,7 +129,8 @@ export async function extractWithCheerio(url: string, html: string): Promise<Scr
   const title = $('title').first().text() || undefined;
   // Remove scripts/styles/nav/footers for less noise
   ['script', 'style', 'noscript', 'nav', 'footer', 'form'].forEach((sel) => $(sel).remove());
-  const bodyText = normalizeWhitespace($('body').text() || '');
+  // Guard extremely large body text to avoid heap pressure
+  const bodyText = normalizeWhitespace(($('body').text() || '').slice(0, 400_000));
   const meta: Record<string, string> = {};
   $('meta').each((_, el) => {
     const name = $(el).attr('name') || $(el).attr('property');
@@ -150,7 +151,7 @@ export async function scrapeUrl(url: string): Promise<ScrapeResult> {
 
   const html = await fetchHtml(url);
   // Hard clamp HTML to avoid large DOM parsing
-  const safeHtml = html.length > 500_000 ? html.slice(0, 500_000) : html;
+  const safeHtml = html.length > 400_000 ? html.slice(0, 400_000) : html;
   const readability = await extractMainContentWithReadability(url, safeHtml);
   if (readability && readability.text && readability.text.length > 200) {
     cache.set(url, { text: readability.text, at: Date.now() });
@@ -175,15 +176,16 @@ export async function scrapeSiteShallow(startUrl: string, maxPages = 5): Promise
     visited.add(url);
     try {
       const html = await fetchHtml(url);
+      const safeHtml = html.length > 350_000 ? html.slice(0, 350_000) : html;
       // Extract text once per page
-      const readability = await extractMainContentWithReadability(url, html);
-      const pageText = readability?.text || (await extractWithCheerio(url, html)).text;
+      const readability = await extractMainContentWithReadability(url, safeHtml);
+      const pageText = readability?.text || (await extractWithCheerio(url, safeHtml)).text;
       if (pageText) {
         combined.push(pageText);
         sources.push({ url, snippet: pageText.slice(0, 200) });
       }
       // discover links (same-origin only) from the same HTML
-      const $ = cheerio.load(html);
+      const $ = cheerio.load(safeHtml);
       $('a[href]').each((_, el) => {
         const href = $(el).attr('href') || '';
         try {
@@ -241,15 +243,16 @@ export async function scrapeSiteDeep(startUrl: string, maxPages = 20, maxDepth =
     visited.add(url);
     try {
       const html = await fetchHtml(url);
-      const readability = await extractMainContentWithReadability(url, html);
-      const pageText = readability?.text || (await extractWithCheerio(url, html)).text;
+      const safeHtml = html.length > 350_000 ? html.slice(0, 350_000) : html;
+      const readability = await extractMainContentWithReadability(url, safeHtml);
+      const pageText = readability?.text || (await extractWithCheerio(url, safeHtml)).text;
       if (pageText) {
         combined.push(pageText);
         sources.push({ url, snippet: pageText.slice(0, 200) });
       }
 
       if (depth < maxDepth) {
-        const $ = cheerio.load(html);
+        const $ = cheerio.load(safeHtml);
         const candidates: Array<{ href: string; score: number }> = [];
         $('a[href]').each((_, el) => {
           const href = $(el).attr('href') || '';
