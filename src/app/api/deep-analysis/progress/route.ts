@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { ANALYSIS_DIMENSIONS } from '@/lib/deep-analysis-framework';
+import { getSub, getProgressChannel } from '@/lib/redis';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -48,7 +49,12 @@ export async function GET(request: NextRequest) {
 
       let lastProgress = -1;
 
-      // Poll for updates from database
+      // Subscribe to Redis progress channel for near-real-time updates
+      const sub = getSub();
+      const channel = getProgressChannel(sessionId);
+      sub.subscribe(channel).catch(()=>{});
+
+      // Poll DB as a fallback (every few seconds)
       const interval = setInterval(async () => {
         if (closed) return;
         try {
@@ -104,10 +110,29 @@ export async function GET(request: NextRequest) {
         console.log('📡 SSE: Client disconnected');
         clearInterval(interval);
         clearInterval(keepAlive);
+        try { sub.unsubscribe(channel); } catch {}
         if (!closed) {
           closed = true;
           try { controller.close(); } catch {}
         }
+      });
+
+      // Handle Redis messages
+      sub.on('message', (_chan, payload) => {
+        if (_chan !== channel) return;
+        try {
+          const data = JSON.parse(payload);
+          if (data?.type === 'progress') {
+            lastProgress = data.current;
+            write(data);
+          } else if (data?.type === 'complete') {
+            write({ type: 'complete' });
+            clearInterval(interval);
+            clearInterval(keepAlive);
+            try { sub.unsubscribe(channel); } catch {}
+            if (!closed) { closed = true; try { controller.close(); } catch {} }
+          }
+        } catch {}
       });
     },
     cancel() {

@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('🚀 Starting deep analysis for session:', sessionId);
-    
+
     // Orchestrate: harvest (mini) + scrape + docs before analysis
     (async () => {
       const { fetchGptKnowledgeForCompany } = await import('@/lib/gpt-knowledge');
@@ -91,15 +91,34 @@ export async function POST(request: NextRequest) {
       const preHarvestText = (harvest && (harvest as any).combinedText) ? (harvest as any).combinedText : '';
       const mergedScraped = (scrapedContent || '') + '\n\n' + ((websiteData as any)?.combinedText || '');
 
-      // Start deep analysis with merged pre-context (phase 1)
-      const phase1 = runDeepAnalysis({
-        sessionId,
-        businessInfo,
-        scrapedContent: mergedScraped,
-        uploadedDocuments: uploadedDocuments || [],
-        mode: 'progressive',
-        preHarvestText
-      });
+      // Enqueue deep analysis with merged pre-context (phase 1) via BullMQ
+      try {
+        const { deepAnalysisQueue } = await import('@/lib/queues/deep-analysis');
+        await deepAnalysisQueue.add('run', {
+          sessionId,
+          businessInfo,
+          scrapedContent: mergedScraped,
+          uploadedDocuments: uploadedDocuments || [],
+          mode: 'progressive',
+          preHarvestText
+        }, {
+          jobId: `deep:${sessionId}:phase1`,
+          removeOnComplete: { age: 3600, count: 1000 },
+          removeOnFail: { age: 86400, count: 1000 },
+          attempts: 3,
+          backoff: { type: 'exponential', delay: 2000 }
+        });
+      } catch (e) {
+        console.error('Failed to enqueue phase1 deep analysis, falling back to in-process:', e);
+        runDeepAnalysis({
+          sessionId,
+          businessInfo,
+          scrapedContent: mergedScraped,
+          uploadedDocuments: uploadedDocuments || [],
+          mode: 'progressive',
+          preHarvestText
+        });
+      }
 
       // Kick off deep scrape in background while phase 1 runs
       const deepResultPromise = businessInfo.website ? (async () => {
@@ -107,24 +126,29 @@ export async function POST(request: NextRequest) {
         try { return await scrapeSiteDeep(businessInfo.website, 20, 2); } catch { return { combinedText: '', sources: [] }; }
       })() : Promise.resolve({ combinedText: '', sources: [] });
 
-      // Wait for phase 1 to finish, then optionally run a targeted re-run with deeper context
-      await phase1;
+      // After deep scrape, optionally enqueue a targeted re-run with deeper context
       const deepResult = await deepResultPromise;
       const hasDeeper = (deepResult?.combinedText || '').length > 0;
       if (hasDeeper) {
         try {
-          await runDeepAnalysis({
+          const { deepAnalysisQueue } = await import('@/lib/queues/deep-analysis');
+          await deepAnalysisQueue.add('run', {
             sessionId,
             businessInfo,
             scrapedContent: (mergedScraped + '\n\n' + (deepResult.combinedText || '')).slice(0, 180000),
             uploadedDocuments: uploadedDocuments || [],
             mode: 'critical-only',
-            // let runner decide critical set; we can pass none or a subset if needed
             specificDimensions: [] as any,
             preHarvestText
+          }, {
+            jobId: `deep:${sessionId}:phase2`,
+            removeOnComplete: { age: 3600, count: 1000 },
+            removeOnFail: { age: 86400, count: 1000 },
+            attempts: 3,
+            backoff: { type: 'exponential', delay: 2000 }
           });
         } catch (err) {
-          console.error('Targeted re-run failed:', err);
+          console.error('Targeted re-run enqueue failed:', err);
         }
       }
     })().then(() => {
