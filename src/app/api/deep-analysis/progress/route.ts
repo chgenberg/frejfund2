@@ -72,18 +72,23 @@ export async function GET(request: NextRequest) {
           if (analysis) {
             const completedCount = analysis.dimensions.length;
             const totalCount = ANALYSIS_DIMENSIONS.length;
+
+            // Compute client-facing progress as max(db.progress, computed)
+            const coarseDbProgress = Math.max(0, Math.min(100, analysis.progress || 0));
+            const computedProgress = Math.round((completedCount / Math.max(1, totalCount)) * 100);
+            const effectiveCount = Math.max(Math.round((coarseDbProgress / 100) * totalCount), completedCount);
             const completedCategories = [...new Set(analysis.dimensions.map(d => d.category))];
             
             // Only send update if progress changed
-            if (completedCount !== lastProgress || completedCount === 0) {
-              lastProgress = completedCount;
-              const data = { type: 'progress', current: completedCount, total: totalCount, completedCategories };
+            if (effectiveCount !== lastProgress || effectiveCount === 0) {
+              lastProgress = effectiveCount;
+              const data = { type: 'progress', current: effectiveCount, total: totalCount, completedCategories, sessionId };
               write(data);
-              console.log(`📡 SSE: Sent progress ${completedCount}/${totalCount} to client`);
+              console.log(`📡 SSE: Sent progress ${effectiveCount}/${totalCount} to client (session ${sessionId})`);
             }
             
             // Check if complete (require both DB status and count to agree)
-            if (analysis.status === 'completed' && completedCount >= totalCount) {
+            if (analysis.status === 'completed' && effectiveCount >= totalCount) {
               write({ type: 'complete' });
               console.log('📡 SSE: Analysis complete, closing connection');
               clearInterval(interval);

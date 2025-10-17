@@ -374,6 +374,12 @@ export default function AnalysisPage() {
   const [isRerunning, setIsRerunning] = useState(false);
 
   useEffect(() => {
+    // Ensure we never regenerate a new session id here; rely on existing one
+    const sid = localStorage.getItem('frejfund-session-id');
+    if (!sid) {
+      router.push('/');
+      return;
+    }
     loadAnalysisData();
   }, []);
 
@@ -423,7 +429,9 @@ export default function AnalysisPage() {
       (window as any).__ff_es[sessionId] = es;
       es.onmessage = (ev) => {
         const data = JSON.parse(ev.data);
-        if (data.type === 'progress') setAnalysisProgress({current:data.current,total:data.total,status:'running'});
+        if (data.type === 'progress') {
+          setAnalysisProgress({current:data.current,total:data.total,status:'running'});
+        }
         if (data.type === 'complete') setAnalysisProgress({current:95,total:95,status:'completed'});
       };
       es.onerror = () => {
