@@ -113,7 +113,7 @@ export default function VCProfilePage() {
         {/* Logo and Basic Info */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
           <h2 className="text-lg font-bold text-black mb-4">Firm Information</h2>
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -218,7 +218,7 @@ export default function VCProfilePage() {
         {/* Contact Information */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
           <h2 className="text-lg font-bold text-black mb-4">Contact Information</h2>
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 <Globe className="inline w-4 h-4 mr-1" />
@@ -261,7 +261,7 @@ export default function VCProfilePage() {
         {/* Investment Criteria */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
           <h2 className="text-lg font-bold text-black mb-4">Investment Criteria</h2>
-          <div className="grid md:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 <DollarSign className="inline w-4 h-4 mr-1" />
@@ -298,7 +298,7 @@ export default function VCProfilePage() {
             </div>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Target className="inline w-4 h-4 mr-1" />
@@ -348,7 +348,7 @@ export default function VCProfilePage() {
         {/* Portfolio */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-lg font-bold text-black mb-4">Portfolio Companies</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {profile.portfolio.map((company, idx) => (
               <div
                 key={idx}

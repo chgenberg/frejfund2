@@ -159,20 +159,21 @@ export default function VCDashboardClient() {
       </header>
 
       {/* Find Your Perfect Investment Button */}
-      <div className="bg-gradient-to-r from-black to-gray-900 text-white px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <div className="bg-gradient-to-r from-black to-gray-900 text-white px-4 sm:px-6 py-4">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-bold">Discover Your Next Unicorn</h2>
-            <p className="text-sm text-gray-300">Tell us your investment criteria and we'll find the perfect matches</p>
+            <h2 className="text-base sm:text-lg font-bold">Discover Your Next Unicorn</h2>
+            <p className="text-xs sm:text-sm text-gray-300">Tell us your investment criteria and we'll find the perfect matches</p>
           </div>
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setShowInvestmentWizard(true)}
-            className="px-6 py-3 bg-white text-black rounded-lg font-medium hover:bg-gray-100 transition-colors flex items-center gap-2"
+            className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-white text-black rounded-lg font-medium hover:bg-gray-100 transition-colors flex items-center justify-center sm:justify-start gap-2 text-sm sm:text-base"
           >
             <Sparkles className="w-4 h-4" />
-            Find Your Perfect Investment
+            <span className="hidden xs:inline">Find Your Perfect Investment</span>
+            <span className="xs:hidden">Find Investment</span>
           </motion.button>
         </div>
       </div>

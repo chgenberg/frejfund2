@@ -617,10 +617,11 @@ export default function AnalysisPage() {
         </div>
 
         {/* Improvement Recommendations Box */}
-        <div className="minimal-box minimal-box-shadow mb-8 p-6 sm:p-8">
-          <h2 className="text-xl font-bold text-black mb-4 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5" />
-            How to Improve Your Score
+        <div className="minimal-box minimal-box-shadow mb-8 p-4 sm:p-6 md:p-8">
+          <h2 className="text-lg sm:text-xl font-bold text-black mb-4 flex items-center gap-2">
+            <TrendingUp className="w-4 sm:w-5 h-4 sm:h-5" />
+            <span className="hidden sm:inline">How to Improve Your Score</span>
+            <span className="sm:hidden">Improve Score</span>
           </h2>
           <div className="space-y-3">
             {getTopImprovements().map((improvement, idx) => (
@@ -631,7 +632,7 @@ export default function AnalysisPage() {
                 transition={{ delay: idx * 0.1 }}
                 className="flex items-start gap-3"
               >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold ${
+                <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-bold flex-shrink-0 ${
                   improvement.priority === 'critical' ? 'bg-red-500' :
                   improvement.priority === 'high' ? 'bg-orange-500' :
                   'bg-yellow-500'
@@ -639,10 +640,10 @@ export default function AnalysisPage() {
                   {idx + 1}
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-black">{improvement.title}</h3>
-                  <p className="text-sm text-gray-600 mt-1">{improvement.description}</p>
-                  <div className="flex items-center gap-3 mt-2">
-                    <span className="text-xs px-2 py-1 bg-gray-100 rounded-full">
+                  <h3 className="font-semibold text-black text-sm sm:text-base">{improvement.title}</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 mt-1">{improvement.description}</p>
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2">
+                    <span className="text-xs px-2 py-0.5 sm:py-1 bg-gray-100 rounded-full">
                       +{improvement.impact} points
                     </span>
                     <span className="text-xs text-gray-500">

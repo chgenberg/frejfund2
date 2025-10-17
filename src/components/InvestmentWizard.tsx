@@ -200,7 +200,7 @@ export default function InvestmentWizard({ isOpen, onClose, onComplete }: Invest
 
                 {/* Multi-select Options */}
                 {question.type === 'multi-select' && (
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {question.options?.map((option) => (
                       <motion.button
                         key={option}
@@ -247,7 +247,7 @@ export default function InvestmentWizard({ isOpen, onClose, onComplete }: Invest
 
                 {/* Boolean Options */}
                 {question.type === 'boolean' && (
-                  <div className="flex gap-4">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
