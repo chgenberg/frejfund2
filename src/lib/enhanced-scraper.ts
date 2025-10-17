@@ -14,6 +14,8 @@ import { scrapeLinkedInCompany, analyzeHiringVelocity, type LinkedInCompanyData 
 import { analyzeGitHubOrg, type GitHubOrgData } from './github-analyzer';
 import { scrapeProductHunt, searchProductHunt, type ProductHuntData } from './producthunt-scraper';
 import { isShopifySite, scrapeShopifySite, shopifyDataToContent } from './shopify-scraper';
+import { isWooCommerceSite, scrapeWooCommerceSite, woocommerceDataToContent } from './woocommerce-scraper';
+import { isSquarespaceSite, scrapeSquarespaceSite, squarespaceDataToContent } from './squarespace-scraper';
 import { BusinessInfo } from '@/types/business';
 
 export interface EnhancedScrapingResult {
@@ -68,12 +70,17 @@ export async function runEnhancedScraping(
   
   console.log('🚀 Starting enhanced scraping for:', businessInfo.name);
 
-  // 1. Website scraping - check if Shopify first
+  // 1. Website scraping - detect e-commerce platform
   let websiteContent = '';
   let websiteSources: string[] = [];
   
   if (businessInfo.website) {
-    const isShopify = await isShopifySite(businessInfo.website);
+    // Check which platform (in priority order: Shopify, WooCommerce, Squarespace)
+    const [isShopify, isWooCommerce, isSquarespace] = await Promise.all([
+      isShopifySite(businessInfo.website),
+      isWooCommerceSite(businessInfo.website),
+      isSquarespaceSite(businessInfo.website)
+    ]);
     
     if (isShopify) {
       console.log('🛍️ Detected Shopify site - using enhanced e-commerce scraper');
@@ -81,8 +88,21 @@ export async function runEnhancedScraping(
       websiteContent = shopifyDataToContent(shopifyData);
       websiteSources = [businessInfo.website, ...shopifyData.products.slice(0, 5).map(p => p.url).filter(Boolean)];
       dataSources.push('shopify');
+    } else if (isWooCommerce) {
+      console.log('🛒 Detected WooCommerce site - using WordPress e-commerce scraper');
+      const wooData = await scrapeWooCommerceSite(businessInfo.website, 12, 8000);
+      websiteContent = woocommerceDataToContent(wooData);
+      websiteSources = [businessInfo.website, ...wooData.products.slice(0, 5).map(p => p.url).filter(Boolean)];
+      dataSources.push('woocommerce');
+    } else if (isSquarespace) {
+      console.log('📐 Detected Squarespace site - using Squarespace scraper');
+      const sqspData = await scrapeSquarespaceSite(businessInfo.website, 12, 8000);
+      websiteContent = squarespaceDataToContent(sqspData);
+      websiteSources = [businessInfo.website, ...sqspData.products.slice(0, 5).map(p => p.url).filter(Boolean)];
+      dataSources.push('squarespace');
     } else {
-      // Use deep scraping for non-Shopify sites
+      // Use deep scraping for generic sites
+      console.log('🌐 Generic site - using deep scraper');
       const websiteData = await scrapeSiteDeep(businessInfo.website, 10, 2);
       websiteContent = websiteData.combinedText;
       websiteSources = websiteData.sources.map(s => s.url);

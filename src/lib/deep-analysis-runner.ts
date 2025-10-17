@@ -84,14 +84,16 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
       } catch {}
     }
 
-    // 3. Determine which dimensions to analyze (dynamically filtered by available context)
+    // 3. Determine which dimensions to analyze based on mode and subscription tier
     let dimensionsToAnalyze = specificDimensions && specificDimensions.length > 0
       ? ANALYSIS_DIMENSIONS.filter(d => specificDimensions.includes(d.name))
       : mode === 'critical-only' 
         ? getCriticalDimensions()
         : mode === 'free-tier'
         ? FREE_TIER_DIMENSIONS
-        : ANALYSIS_DIMENSIONS;
+        : mode === 'full'
+        ? ANALYSIS_DIMENSIONS
+        : FREE_TIER_DIMENSIONS; // Default to free tier for 'progressive' mode
 
     const hasDocs = Array.isArray(uploadedDocuments) && uploadedDocuments.length > 0;
     const scrapedLen = (scrapedContent || '').trim().length;
@@ -325,28 +327,47 @@ ${scrapedContent}
 ${uploadedDocuments.join('\n\n---\n\n')}
   `.slice(0, 6000);
 
-  // Build the analysis prompt – optimized for concise, value-dense output
+  // Build enhanced analysis prompt with better structure
   const analysisPrompt = `${dimension.prompt(businessInfo, fullContent)}
 
-Return ONLY valid compact JSON using this schema (no extra text):
+ANALYSIS FRAMEWORK:
+1. Score (0-100): Rate the dimension based on available evidence
+   - 80-100: Exceptional, clear strength
+   - 60-79: Good, with minor improvements needed
+   - 40-59: Adequate, but significant gaps
+   - 20-39: Concerning, major issues
+   - 0-19: Critical weakness or insufficient data
+
+2. Findings: Factual observations from the content (max 3, <25 words each)
+3. Strengths: Positive signals and advantages (max 3)
+4. Red Flags: Concerns or risks identified (max 3)
+5. Recommendations: Specific, actionable advice (max 3)
+6. Questions: Missing information to ask the founder (max 3)
+7. Evidence: Direct citations from source material (max 2)
+8. Confidence: Your certainty in this assessment (0.0-1.0)
+   - 0.9-1.0: Strong evidence, clear picture
+   - 0.7-0.89: Good data, some assumptions
+   - 0.5-0.69: Limited data, educated guess
+   - <0.5: Insufficient information
+
+Return ONLY valid JSON:
 {
-  "score": number,                       // 0-100
-  "findings": string[],                  // max 3 items, <= 25 words each
-  "redFlags": string[],                  // max 3
-  "strengths": string[],                 // max 3
-  "recommendations": string[],           // max 3, actionable
-  "questionsToAsk": string[],            // max 3
-  "evidence": [                          // up to 2 citations
-    { "source": "website|document|github|producthunt|linkedin", "snippet": string, "url": string }
-  ],
-  "impactTag": "growth|risk|fundraising|product|team|market",
-  "confidence": number                   // 0.0-1.0
+  "score": number,
+  "findings": string[],
+  "redFlags": string[],
+  "strengths": string[],
+  "recommendations": string[],
+  "questionsToAsk": string[],
+  "evidence": [{ "source": string, "snippet": string, "url": string }],
+  "confidence": number
 }
 
-Rules:
-- Use the available content only; if insufficient, set arrays to [] and score to 0.
-- Keep each list item short and specific.
-- Do not include any commentary outside JSON.`;
+RULES:
+- Be specific and concrete, avoid generic statements
+- Base all claims on provided content
+- If data is missing, reflect it in low score and low confidence
+- Each array item must add unique value
+- No commentary outside JSON structure`;
 
   try {
     // Use full gpt-5 model for deep analysis
@@ -357,9 +378,23 @@ Rules:
       messages: [
         {
           role: 'system',
-          content: `You are an expert investment analyst. Be concise, factual, and strictly structured.
-Use only the provided context. If data is missing, set empty arrays and low confidence.
-Output must be valid JSON only.`
+          content: `You are a senior investment analyst with 15+ years of experience evaluating startups for top-tier VC firms.
+
+ANALYSIS PRINCIPLES:
+• Evidence-based: Every claim must be supported by data from the provided content
+• Nuanced: Recognize shades of gray; avoid extreme scores without justification
+• Actionable: Focus on insights that drive investment decisions
+• Honest: Acknowledge data gaps; don't guess or fill in blanks
+
+SCORING CALIBRATION:
+• 90+: Top 1% company in this dimension (rare)
+• 80-89: Strong, competitive advantage
+• 70-79: Above average, on right track
+• 60-69: Market standard, acceptable
+• 50-59: Below expectations, needs work
+• <50: Serious concern or insufficient data
+
+Return ONLY valid JSON. No explanatory text outside the JSON structure.`
         },
         {
           role: 'user',

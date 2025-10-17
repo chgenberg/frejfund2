@@ -50,13 +50,53 @@ model User {
   askAmount       Int? // How much raising (USD)
   traction        Json? // Key metrics
 
+  // Subscription & Payment
+  subscriptionTier   String   @default("free") // 'free' | 'pro' | 'enterprise'
+  subscriptionStatus String   @default("active") // 'active' | 'canceled' | 'past_due'
+  stripeCustomerId   String?  @unique
+  currentPeriodEnd   DateTime?
+
   // Relations
   sessions      Session[]
   integrations  Integration[]
   insights      Insight[]
   deepAnalyses  DeepAnalysis[]
+  subscriptions Subscription[]
 
   @@map("users")
+}
+
+// Subscription & Payment tracking
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Stripe info
+  stripeSubscriptionId String   @unique
+  stripePriceId        String
+  stripeCustomerId     String
+  
+  // Subscription details
+  status               String // 'active' | 'canceled' | 'past_due' | 'trialing'
+  tier                 String // 'pro' | 'enterprise'
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean  @default(false)
+  
+  // Billing
+  amount               Int // Amount in cents
+  currency             String   @default("usd")
+  interval             String // 'month' | 'year'
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([stripeSubscriptionId])
+  @@index([status])
+  @@map("subscriptions")
 }
 
 // VC User for investor access

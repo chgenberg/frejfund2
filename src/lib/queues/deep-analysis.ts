@@ -42,8 +42,12 @@ export function startDeepAnalysisWorker() {
       }, 15000);
 
       try {
-        // Determine analysis mode - free-tier for now (will add pro logic later)
-        const analysisMode = mode || 'free-tier'; // TODO: Check user subscription status
+        // Determine analysis mode based on user subscription
+        const { getUserTierFromSession } = await import('@/lib/subscription-utils');
+        const userTier = await getUserTierFromSession(sessionId);
+        
+        // Map tier to analysis mode
+        let analysisMode = mode || (userTier === 'pro' || userTier === 'enterprise' ? 'full' : 'free-tier');
         
         await runDeepAnalysis({ 
           sessionId, 
