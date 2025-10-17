@@ -39,6 +39,7 @@ export interface Message {
     label: string;
     url?: string;
     action?: string;
+    variant?: 'primary' | 'secondary';
   }>;
 }
 

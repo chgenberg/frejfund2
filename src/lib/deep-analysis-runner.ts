@@ -57,8 +57,8 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
       }
     });
 
-    // Only clear previous results on a full run; keep existing dimensions on critical-only re-runs
-    if (!isCriticalOnly) {
+    // Only clear previous results on a full run; keep existing dimensions on critical-only or specific re-runs
+    if (mode !== 'critical-only' && mode !== 'specific') {
       await prisma.analysisDimension.deleteMany({ where: { analysisId: analysis.id } });
       await prisma.analysisInsight.deleteMany({ where: { analysisId: analysis.id } });
     }
@@ -86,13 +86,15 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
 
     // 3. Determine which dimensions to analyze based on mode and subscription tier
     let dimensionsToAnalyze = specificDimensions && specificDimensions.length > 0
-      ? ANALYSIS_DIMENSIONS.filter(d => specificDimensions.includes(d.name))
+      ? ANALYSIS_DIMENSIONS.filter(d => specificDimensions.includes(d.name) || specificDimensions.includes(d.dimensionId))
       : mode === 'critical-only' 
         ? getCriticalDimensions()
         : mode === 'free-tier'
         ? FREE_TIER_DIMENSIONS
         : mode === 'full'
         ? ANALYSIS_DIMENSIONS
+        : mode === 'specific'
+        ? [] // Will be handled by specificDimensions
         : FREE_TIER_DIMENSIONS; // Default to free tier for 'progressive' mode
 
     const hasDocs = Array.isArray(uploadedDocuments) && uploadedDocuments.length > 0;

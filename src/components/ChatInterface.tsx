@@ -14,6 +14,7 @@ import DeckSummaryModal from './DeckSummaryModal';
 import HelpModal from './HelpModal';
 import MatchChat from './MatchChat';
 import IntelligentSearchModal from './IntelligentSearchModal';
+import GapFillingModal from './GapFillingModal';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { 
@@ -80,6 +81,8 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   const [activeMatchChat, setActiveMatchChat] = useState<any>(null);
   const [showQuickQuestions, setShowQuickQuestions] = useState(false);
   const [showIntelligentSearch, setShowIntelligentSearch] = useState(false);
+  const [showGapFilling, setShowGapFilling] = useState(false);
+  const [gapFillingData, setGapFillingData] = useState<any>(null);
   const [prefetchedContext, setPrefetchedContext] = useState<string | null>(null);
   const [dailyCompass, setDailyCompass] = useState<{ insights: string[]; risks: string[]; actions: string[]; citations?: Array<{label:string; snippet:string}> } | null>(null);
   const [showCompass, setShowCompass] = useState(false);
@@ -107,6 +110,70 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const transformGapsForModal = (gapData: any) => {
+    if (!gapData || !gapData.gaps) return [];
+    
+    return gapData.gaps.slice(0, 9).map((gap: any) => ({
+      id: gap.dimensionId,
+      dimensionId: gap.dimensionId,
+      title: gap.dimensionName,
+      description: gap.suggestedQuestions?.[0] || 'Please provide more information about this aspect',
+      currentScore: gap.currentScore || 0,
+      potentialScore: gap.potentialScore || gap.currentScore + 20,
+      inputType: gap.requiresDocument ? 'file' : 'text' as const,
+      placeholder: gap.placeholder || 'Enter details here...',
+      helpText: gap.explanation || undefined,
+      category: gap.category
+    }));
+  };
+
+  const handleGapSubmit = async (responses: Record<string, any>) => {
+    const sessionId = localStorage.getItem('frejfund-session-id');
+    if (!sessionId) return;
+
+    try {
+      // Submit the gap responses
+      const response = await fetch('/api/gaps', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, answers: responses })
+      });
+
+      if (response.ok) {
+        // Success message
+        addMessage(
+          "Fantastic! I've updated your analysis with the new information. Your investment readiness score is being recalculated now.",
+          'agent',
+          'success'
+        );
+
+        // Trigger a partial re-analysis for the affected dimensions
+        const dimensionIds = Object.keys(responses);
+        await fetch('/api/deep-analysis/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            sessionId, 
+            dimensionIds,
+            newData: responses 
+          })
+        });
+
+        // Reload the analysis data
+        setTimeout(() => {
+          window.location.href = '/analysis';
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Failed to submit gap data:', error);
+      addMessage(
+        "I couldn't save your information right now. Please try again.",
+        'agent',
+        'error'
+      );
+    }
+  };
+
   const loadDataGaps = async () => {
     const sessionId = localStorage.getItem('frejfund-session-id') || localStorage.getItem('sessionId');
     if (!sessionId) return;
@@ -119,26 +186,32 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         
         // If there are gaps, Freja proactively asks for them
         if (data.totalGaps > 0 && data.nextBestAction) {
+          setGapFillingData(data);
           setTimeout(() => {
-            // Short description of the most critical dimension
-            const dim = ANALYSIS_DIMENSIONS.find(d => d.name === data.nextBestAction?.dimensionName);
-            const dimDesc = dim?.description ? `\n\nWhat this step means: ${dim.description}` : '';
-
             const gapMessage: Message = {
               id: Date.now().toString(),
               content: data.criticalGaps > 0
-                ? `Your analysis is complete! I've identified **${data.totalGaps} areas** where additional information could significantly boost your investment readiness.\n\n**Most critical:** ${data.nextBestAction.dimensionName} (currently ${data.nextBestAction.currentScore}%)${dimDesc}\n\n${data.nextBestAction.questions[0]}\n\nYou can share this information by:\n1. Typing your answer below\n2. Dragging & dropping documents (Excel, PDF, etc.)\n3. Asking me to guide you on how to gather this data\n\nCompleting all gaps could increase your score by **+${data.potentialScoreIncrease} points**!`
-                : `Great work! Your analysis is solid. I found ${data.totalGaps} minor areas where we could gather more data to fine-tune your strategy.\n\nWant to address these, or shall we focus on your main goals?`,
+                ? `Amazing! Thank you for all the information. 
+
+I've identified **${data.totalGaps} key areas** where additional information would significantly strengthen your investment case and boost your readiness score.
+
+These are the missing pieces that investors typically look for - filling them in could increase your score by up to **+${data.potentialScoreIncrease} points**!`,
+                : `Great work! Your analysis is looking solid. 
+
+I found ${data.totalGaps} areas where we could gather additional data to fine-tune your investment case even further.`,
               sender: 'agent',
               timestamp: new Date(),
-              type: 'analysis'
+              type: 'analysis',
+              actions: [
+                { 
+                  type: 'button', 
+                  label: 'Fill in Missing Information', 
+                  action: 'openGapFilling',
+                  variant: 'primary'
+                }
+              ]
             };
             setMessages(prev => [...prev, gapMessage]);
-            setLastGap({
-              messageId: gapMessage.id,
-              dimensionName: data.nextBestAction?.dimensionName || 'this topic',
-              question: Array.isArray(data.nextBestAction?.questions) && data.nextBestAction.questions.length > 0 ? data.nextBestAction.questions[0] : 'Can you provide the missing details?'
-            });
           }, 2000); // Small delay after completion celebration
         }
       }
@@ -1599,9 +1672,15 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                               window.location.href = action.url;
                             } else if (action.action === 'show-results' && analysisResult) {
                               setShowResultsModal(true);
+                            } else if (action.action === 'openGapFilling') {
+                              setShowGapFilling(true);
                             }
                           }}
-                          className="inline-flex items-center px-3 py-1 bg-black text-white rounded-lg text-xs font-medium hover:bg-gray-800 transition-colors"
+                          className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            action.variant === 'primary' 
+                              ? 'bg-black text-white hover:bg-gray-800' 
+                              : 'bg-gray-100 text-black hover:bg-gray-200'
+                          }`}
                         >
                           {action.label}
                           {action.type === 'link' && <TrendingUp className="w-3 h-3 ml-1" />}
@@ -2218,6 +2297,16 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
           />
         )}
       </AnimatePresence>
+
+      {/* Gap Filling Modal */}
+      {showGapFilling && gapFillingData && (
+        <GapFillingModal
+          isOpen={showGapFilling}
+          onClose={() => setShowGapFilling(false)}
+          gaps={transformGapsForModal(gapFillingData)}
+          onSubmit={handleGapSubmit}
+        />
+      )}
 
       {/* Completion Celebration */}
       <AnimatePresence>
