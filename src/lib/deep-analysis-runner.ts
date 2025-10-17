@@ -337,7 +337,7 @@ Rules:
     // Use full gpt-5 model for deep analysis
     const analysisModel = getChatModel('complex'); // gpt-5
     const isGpt5 = analysisModel.startsWith('gpt-5');
-    const response = await openai.chat.completions.create({
+    const completionArgs: any = {
       model: analysisModel,
       messages: [
         {
@@ -351,9 +351,15 @@ Output must be valid JSON only.`
           content: analysisPrompt
         }
       ],
-      ...(isGpt5 ? {} : { response_format: { type: 'json_object' } }),
-      ...(isGpt5 ? { max_completion_tokens: 1500 } : { max_tokens: 1500 })
-    });
+      ...(isGpt5 ? {} : { response_format: { type: 'json_object' } })
+    };
+    if (isGpt5) {
+      // gpt-5 uses max_output_tokens; be generous to avoid truncation
+      completionArgs.max_output_tokens = 2200;
+    } else {
+      completionArgs.max_tokens = 1500;
+    }
+    const response = await openai.chat.completions.create(completionArgs);
 
     const raw = response.choices?.[0]?.message?.content || '{}';
     let result: any = {};
