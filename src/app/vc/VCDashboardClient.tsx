@@ -10,6 +10,7 @@ import {
   Clock, CheckCircle2, AlertCircle, Sparkles
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import InvestmentWizard from '@/components/InvestmentWizard';
 
 // Dynamically import map component to avoid SSR issues
 const InteractiveMap = dynamic(() => import('@/components/InteractiveMap'), { 
@@ -54,6 +55,7 @@ export default function VCDashboardClient() {
   const [selectedStartup, setSelectedStartup] = useState<Startup | null>(null);
   const [startups, setStartups] = useState<Startup[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showInvestmentWizard, setShowInvestmentWizard] = useState(false);
   const [filters, setFilters] = useState({
     industry: 'all',
     stage: 'all',
@@ -144,6 +146,10 @@ export default function VCDashboardClient() {
                   <MapIcon className="w-4 h-4" />
                 </button>
               </div>
+              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => router.push('/vc/profile')} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Profile
+              </motion.button>
               <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => router.push('/vc/analytics')} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors">
                 Analytics
               </motion.button>
@@ -151,6 +157,25 @@ export default function VCDashboardClient() {
           </div>
         </div>
       </header>
+
+      {/* Find Your Perfect Investment Button */}
+      <div className="bg-gradient-to-r from-black to-gray-900 text-white px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-bold">Discover Your Next Unicorn</h2>
+            <p className="text-sm text-gray-300">Tell us your investment criteria and we'll find the perfect matches</p>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowInvestmentWizard(true)}
+            className="px-6 py-3 bg-white text-black rounded-lg font-medium hover:bg-gray-100 transition-colors flex items-center gap-2"
+          >
+            <Sparkles className="w-4 h-4" />
+            Find Your Perfect Investment
+          </motion.button>
+        </div>
+      </div>
 
       {/* Search and Filters Bar */}
       <div className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-3">
@@ -314,7 +339,16 @@ export default function VCDashboardClient() {
           </div>
         ) : (
           <div className="h-[calc(100vh-200px)]">
-            <InteractiveMap startups={filteredStartups} onStartupClick={setSelectedStartup} />
+            <InteractiveMap 
+              startups={filteredStartups} 
+              onStartupClick={(mapStartup) => {
+                // Find the full startup object from our data
+                const fullStartup = filteredStartups.find(s => s.id === mapStartup.id);
+                if (fullStartup) {
+                  setSelectedStartup(fullStartup);
+                }
+              }} 
+            />
           </div>
         )}
       </main>
@@ -350,6 +384,41 @@ export default function VCDashboardClient() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Investment Wizard */}
+      <InvestmentWizard
+        isOpen={showInvestmentWizard}
+        onClose={() => setShowInvestmentWizard(false)}
+        onComplete={(preferences) => {
+          // Apply the preferences as filters
+          if (preferences.industries.length > 0) {
+            // In a real app, this would filter by multiple industries
+            setFilters(prev => ({ ...prev, industry: preferences.industries[0] }));
+          }
+          if (preferences.stages.length > 0) {
+            setFilters(prev => ({ ...prev, stage: preferences.stages[0] }));
+          }
+          if (preferences.ticketSize) {
+            setFilters(prev => ({
+              ...prev,
+              minSeeking: preferences.ticketSize.min,
+              maxSeeking: preferences.ticketSize.max
+            }));
+          }
+          if (preferences.minimumTraction !== 'No revenue required') {
+            const mrrMap: Record<string, number> = {
+              '$10k+ MRR': 10000,
+              '$50k+ MRR': 50000,
+              '$100k+ MRR': 100000,
+              '$500k+ MRR': 500000
+            };
+            setFilters(prev => ({ ...prev, minRevenue: mrrMap[preferences.minimumTraction] || 0 }));
+          }
+          setShowInvestmentWizard(false);
+          // Show filters panel to display applied preferences
+          setShowFilters(true);
+        }}
+      />
     </div>
   );
 }

@@ -58,7 +58,7 @@ export default function Header({ showInvestorsButton = false, rightContent }: He
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => router.push('/vc')}
+                        onClick={() => router.push('/vc/login')}
                         className="px-4 sm:px-6 py-2 sm:py-2.5 bg-black text-white rounded-full text-xs sm:text-sm font-medium hover:bg-gray-800 transition-colors"
                       >
                         Investors

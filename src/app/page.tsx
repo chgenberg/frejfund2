@@ -382,18 +382,6 @@ export default function Home() {
                           </ul>
                         </div>
                         
-                        <div className="bg-gray-50 rounded-xl p-4">
-                          <h4 className="font-semibold mb-2 flex items-center gap-2">
-                            <Sparkles className="w-4 h-4" />
-                            Investment Readiness
-                          </h4>
-                          <ul className="text-sm text-gray-600 space-y-1">
-                            <li>• Financial projections</li>
-                            <li>• Use of funds clarity</li>
-                            <li>• Risk mitigation</li>
-                            <li>• Exit strategy</li>
-                          </ul>
-                        </div>
                       </div>
                       
                       <div className="bg-black text-white rounded-xl p-4 mt-6">

@@ -506,6 +506,27 @@ export default function AnalysisPage() {
     }
   };
 
+  const getTopImprovements = () => {
+    // Find dimensions with lowest scores to suggest improvements
+    const lowScoreDimensions = dimensions
+      .filter(dim => dim.score < 70)
+      .sort((a, b) => a.score - b.score)
+      .slice(0, 5);
+
+    return lowScoreDimensions.map(dim => {
+      const impact = Math.round((100 - dim.score) * 0.3); // Potential score improvement
+      const priority = dim.score < 30 ? 'critical' : dim.score < 50 ? 'high' : 'medium';
+      
+      return {
+        title: `Improve ${dim.name}`,
+        description: dim.recommendations?.[0] || dim.suggestions?.[0] || `Focus on strengthening your ${dim.name.toLowerCase()} to boost investor confidence.`,
+        impact,
+        priority,
+        timeframe: priority === 'critical' ? '1-2 weeks' : priority === 'high' ? '1 month' : '2-3 months'
+      };
+    });
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
@@ -593,6 +614,54 @@ export default function AnalysisPage() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Improvement Recommendations Box */}
+        <div className="minimal-box minimal-box-shadow mb-8 p-6 sm:p-8">
+          <h2 className="text-xl font-bold text-black mb-4 flex items-center gap-2">
+            <TrendingUp className="w-5 h-5" />
+            How to Improve Your Score
+          </h2>
+          <div className="space-y-3">
+            {getTopImprovements().map((improvement, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                className="flex items-start gap-3"
+              >
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold ${
+                  improvement.priority === 'critical' ? 'bg-red-500' :
+                  improvement.priority === 'high' ? 'bg-orange-500' :
+                  'bg-yellow-500'
+                }`}>
+                  {idx + 1}
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-black">{improvement.title}</h3>
+                  <p className="text-sm text-gray-600 mt-1">{improvement.description}</p>
+                  <div className="flex items-center gap-3 mt-2">
+                    <span className="text-xs px-2 py-1 bg-gray-100 rounded-full">
+                      +{improvement.impact} points
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {improvement.timeframe}
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => router.push('/chat')}
+            className="mt-6 w-full px-6 py-3 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
+          >
+            <Brain className="w-4 h-4" />
+            Get Personalized Guidance from Freja
+          </motion.button>
         </div>
 
         {/* Category Tabs */}
