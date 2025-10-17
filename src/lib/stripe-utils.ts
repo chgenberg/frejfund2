@@ -1,18 +1,23 @@
 /**
  * Stripe utilities for payment processing
+ * OPTIONAL: Only initialized if STRIPE_SECRET_KEY is set
  */
 
 import Stripe from 'stripe';
 import { prisma } from './prisma';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not defined');
-}
+// Make Stripe optional for testing - only initialize if key is present
+export const stripe = process.env.STRIPE_SECRET_KEY 
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-02-24.acacia',
+      typescript: true,
+    })
+  : null;
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2025-01-27.acacia',
-  typescript: true,
-});
+// Helper to check if Stripe is configured
+export function isStripeConfigured(): boolean {
+  return stripe !== null && !!process.env.STRIPE_SECRET_KEY;
+}
 
 // Stripe Price IDs (set these in your environment or here)
 export const STRIPE_PRICES = {
@@ -30,6 +35,10 @@ export async function createCheckoutSession(
   successUrl: string,
   cancelUrl: string
 ): Promise<Stripe.Checkout.Session> {
+  if (!stripe) {
+    throw new Error('Stripe is not configured. Please set STRIPE_SECRET_KEY.');
+  }
+
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { email: true, stripeCustomerId: true }
@@ -78,6 +87,10 @@ export async function createPortalSession(
   userId: string,
   returnUrl: string
 ): Promise<Stripe.BillingPortal.Session> {
+  if (!stripe) {
+    throw new Error('Stripe is not configured. Please set STRIPE_SECRET_KEY.');
+  }
+
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { stripeCustomerId: true }
@@ -99,6 +112,10 @@ export async function createPortalSession(
  * Handle Stripe webhook events
  */
 export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
+  if (!stripe) {
+    throw new Error('Stripe is not configured. Cannot handle webhook events.');
+  }
+
   switch (event.type) {
     case 'checkout.session.completed':
       await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
@@ -127,6 +144,8 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
 }
 
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session): Promise<void> {
+  if (!stripe) return;
+  
   const userId = session.metadata?.userId;
   if (!userId) return;
 
@@ -166,6 +185,8 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription): Pro
 }
 
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice): Promise<void> {
+  if (!stripe) return;
+  
   const subscriptionId = invoice.subscription as string;
   if (!subscriptionId) return;
 
@@ -177,6 +198,8 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice): Promise<v
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void> {
+  if (!stripe) return;
+  
   const subscriptionId = invoice.subscription as string;
   if (!subscriptionId) return;
 

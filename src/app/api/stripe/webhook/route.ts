@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { stripe, handleWebhookEvent } from '@/lib/stripe-utils';
-import Stripe from 'stripe';
+import { stripe, handleWebhookEvent, isStripeConfigured } from '@/lib/stripe-utils';
 
 // Disable body parsing for webhooks
 export const config = {
@@ -10,6 +9,15 @@ export const config = {
 };
 
 export async function POST(request: NextRequest) {
+  // Check if Stripe is configured
+  if (!isStripeConfigured() || !stripe) {
+    console.log('Stripe webhook called but Stripe is not configured (testing mode)');
+    return NextResponse.json({ 
+      error: 'Stripe not configured',
+      message: 'Payments are disabled for testing'
+    }, { status: 503 });
+  }
+
   const body = await request.text();
   const signature = request.headers.get('stripe-signature');
 

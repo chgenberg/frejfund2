@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createPortalSession } from '@/lib/stripe-utils';
+import { createPortalSession, isStripeConfigured } from '@/lib/stripe-utils';
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Stripe is configured
+    if (!isStripeConfigured()) {
+      return NextResponse.json({ 
+        error: 'Stripe not configured',
+        message: 'Payments are disabled for testing. All users have Pro access.'
+      }, { status: 503 });
+    }
+
     const { userId } = await request.json();
 
     if (!userId) {
