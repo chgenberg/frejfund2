@@ -20,5 +20,6 @@ jobs:
           DATABASE_URL: postgresql://user:pass@localhost:5432/db
           OPENAI_API_KEY: dummy
           NEXT_PUBLIC_APP_URL: http://localhost:3000
+      - run: npm run format:check
       - run: npm run build
 
