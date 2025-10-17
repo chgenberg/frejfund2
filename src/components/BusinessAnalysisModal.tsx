@@ -180,9 +180,10 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={startAnalysis}
-          className="flex-1 px-6 py-3 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 transition-all"
+          disabled={(typeof window !== 'undefined' && (window as any).__ff_analysis_status === 'running')}
+          className="flex-1 px-6 py-3 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Start Analysis
+          {(typeof window !== 'undefined' && (window as any).__ff_analysis_status === 'running') ? 'Analyzing…' : 'Start Analysis'}
         </motion.button>
       </div>
     </motion.div>

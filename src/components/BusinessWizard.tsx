@@ -997,11 +997,13 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleNext}
-              disabled={!canProceed()}
+              disabled={!canProceed() || (typeof window !== 'undefined' && (window as any).__ff_analysis_status === 'running')}
               className="relative px-6 sm:px-8 py-2.5 sm:py-3 bg-black text-white rounded-full text-xs sm:text-sm font-medium overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="relative z-10 flex items-center">
-                {currentStep === steps.length - 1 ? 'Start Analysis' : 'Continue'}
+                {currentStep === steps.length - 1 
+                  ? ((typeof window !== 'undefined' && (window as any).__ff_analysis_status === 'running') ? 'Analyzing…' : 'Start Analysis')
+                  : 'Continue'}
                 <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
               </span>
               <motion.div
