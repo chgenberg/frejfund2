@@ -49,10 +49,13 @@ export async function GET(request: NextRequest) {
 
       let lastProgress = -1;
 
-      // Subscribe to Redis progress channel for near-real-time updates
-      const sub = getSub();
+      // Optionally subscribe to Redis progress channel (only if worker mode enabled)
+      const useBull = process.env.USE_BULLMQ === 'true';
+      const sub = useBull ? getSub() : null;
       const channel = getProgressChannel(sessionId);
-      sub.subscribe(channel).catch(()=>{});
+      if (useBull && sub) {
+        sub.subscribe(channel).catch(()=>{});
+      }
 
       // Poll DB as a fallback (every few seconds)
       const interval = setInterval(async () => {
@@ -115,7 +118,7 @@ export async function GET(request: NextRequest) {
         console.log('📡 SSE: Client disconnected');
         clearInterval(interval);
         clearInterval(keepAlive);
-        try { sub.unsubscribe(channel); } catch {}
+        try { useBull && sub && sub.unsubscribe(channel); } catch {}
         if (!closed) {
           closed = true;
           try { controller.close(); } catch {}
@@ -123,22 +126,24 @@ export async function GET(request: NextRequest) {
       });
 
       // Handle Redis messages
-      sub.on('message', (_chan, payload) => {
-        if (_chan !== channel) return;
-        try {
-          const data = JSON.parse(payload);
-          if (data?.type === 'progress') {
-            lastProgress = data.current;
-            write(data);
-          } else if (data?.type === 'complete') {
-            write({ type: 'complete' });
-            clearInterval(interval);
-            clearInterval(keepAlive);
-            try { sub.unsubscribe(channel); } catch {}
-            if (!closed) { closed = true; try { controller.close(); } catch {} }
-          }
-        } catch {}
-      });
+      if (useBull && sub) {
+        sub.on('message', (_chan, payload) => {
+          if (_chan !== channel) return;
+          try {
+            const data = JSON.parse(payload);
+            if (data?.type === 'progress') {
+              lastProgress = data.current;
+              write(data);
+            } else if (data?.type === 'complete') {
+              write({ type: 'complete' });
+              clearInterval(interval);
+              clearInterval(keepAlive);
+              try { sub.unsubscribe(channel); } catch {}
+              if (!closed) { closed = true; try { controller.close(); } catch {} }
+            }
+          } catch {}
+        });
+      }
     },
     cancel() {
       // Stream consumer cancelled; ensure we stop timers and stop writing

@@ -120,23 +120,28 @@ export async function POST(request: NextRequest) {
       const preHarvestText = (harvest && (harvest as any).combinedText) ? (harvest as any).combinedText : '';
       const mergedScraped = (scrapedContent || '') + '\n\n' + ((websiteData as any)?.combinedText || '');
 
-      // Enqueue deep analysis with merged pre-context (phase 1) via BullMQ
+      // Enqueue deep analysis with merged pre-context (phase 1) via BullMQ if enabled
+      const useBull = process.env.USE_BULLMQ === 'true';
       try {
-        const { deepAnalysisQueue } = await import('@/lib/queues/deep-analysis');
-        await deepAnalysisQueue.add('run', {
-          sessionId,
-          businessInfo,
-          scrapedContent: mergedScraped,
-          uploadedDocuments: uploadedDocuments || [],
-          mode: 'progressive',
-          preHarvestText
-        }, {
-          jobId: `deep:${sessionId}:phase1`,
-          removeOnComplete: { age: 3600, count: 1000 },
-          removeOnFail: { age: 86400, count: 1000 },
-          attempts: 3,
-          backoff: { type: 'exponential', delay: 2000 }
-        });
+        if (useBull) {
+          const { deepAnalysisQueue } = await import('@/lib/queues/deep-analysis');
+          await deepAnalysisQueue.add('run', {
+            sessionId,
+            businessInfo,
+            scrapedContent: mergedScraped,
+            uploadedDocuments: uploadedDocuments || [],
+            mode: 'progressive',
+            preHarvestText
+          }, {
+            jobId: `deep:${sessionId}:phase1`,
+            removeOnComplete: { age: 3600, count: 1000 },
+            removeOnFail: { age: 86400, count: 1000 },
+            attempts: 3,
+            backoff: { type: 'exponential', delay: 2000 }
+          });
+        } else {
+          throw new Error('BullMQ disabled');
+        }
       } catch (e) {
         console.error('Failed to enqueue phase1 deep analysis, falling back to in-process:', e);
         // Fallback: run inline and publish progress via Redis so SSE updates live
