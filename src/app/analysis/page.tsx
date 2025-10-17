@@ -526,7 +526,7 @@ export default function AnalysisPage() {
                 Deep Business Analysis
               </h1>
               <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-                Your business analyzed across 30 critical dimensions using advanced AI reasoning
+                Your business analyzed across 95 dimensions using advanced AI reasoning (gpt-5)
               </p>
             </div>
             {/* Re-run Analysis Button */}

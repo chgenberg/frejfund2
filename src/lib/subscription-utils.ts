@@ -45,8 +45,13 @@ export const TIER_FEATURES: Record<SubscriptionTier, TierFeatures> = {
 
 /**
  * Get user's subscription tier
+ * TEMPORARY: Always return 'pro' for testing (Stripe integration disabled)
  */
 export async function getUserTier(userId: string): Promise<SubscriptionTier> {
+  // For testing: Everyone gets Pro features
+  return 'pro';
+  
+  /* Uncomment when Stripe is ready:
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { subscriptionTier: true, subscriptionStatus: true, currentPeriodEnd: true }
@@ -62,12 +67,18 @@ export async function getUserTier(userId: string): Promise<SubscriptionTier> {
   }
 
   return 'free';
+  */
 }
 
 /**
  * Get user's subscription tier from session
+ * TEMPORARY: Always return 'pro' for testing
  */
 export async function getUserTierFromSession(sessionId: string): Promise<SubscriptionTier> {
+  // For testing: Everyone gets Pro features
+  return 'pro';
+  
+  /* Uncomment when Stripe is ready:
   const session = await prisma.session.findUnique({
     where: { id: sessionId },
     select: { userId: true }
@@ -76,6 +87,7 @@ export async function getUserTierFromSession(sessionId: string): Promise<Subscri
   if (!session || !session.userId) return 'free';
 
   return getUserTier(session.userId);
+  */
 }
 
 /**
@@ -88,8 +100,13 @@ export async function hasFeatureAccess(userId: string, feature: keyof TierFeatur
 
 /**
  * Check if user can run another analysis this month
+ * TEMPORARY: Always allow for testing
  */
 export async function canRunAnalysis(userId: string): Promise<{ allowed: boolean; remaining: number; limit: number }> {
+  // For testing: Unlimited analyses
+  return { allowed: true, remaining: -1, limit: -1 };
+  
+  /* Uncomment when Stripe is ready:
   const tier = await getUserTier(userId);
   const features = TIER_FEATURES[tier];
   
@@ -114,6 +131,7 @@ export async function canRunAnalysis(userId: string): Promise<{ allowed: boolean
   const allowed = analysesThisMonth < features.maxAnalysesPerMonth;
 
   return { allowed, remaining, limit: features.maxAnalysesPerMonth };
+  */
 }
 
 /**

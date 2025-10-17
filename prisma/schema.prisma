@@ -50,8 +50,8 @@ model User {
   askAmount       Int? // How much raising (USD)
   traction        Json? // Key metrics
 
-  // Subscription & Payment
-  subscriptionTier   String   @default("free") // 'free' | 'pro' | 'enterprise'
+  // Subscription & Payment (temporarily all Pro for testing)
+  subscriptionTier   String   @default("pro") // 'free' | 'pro' | 'enterprise' - Default Pro for testing
   subscriptionStatus String   @default("active") // 'active' | 'canceled' | 'past_due'
   stripeCustomerId   String?  @unique
   currentPeriodEnd   DateTime?
