@@ -411,6 +411,16 @@ Return ONLY valid JSON. No explanatory text outside the JSON structure.`
     }
     const response = await openai.chat.completions.create(completionArgs);
 
+    // Cost logging
+    try {
+      const promptTokens = (response as any).usage?.prompt_tokens ?? 0;
+      const completionTokens = (response as any).usage?.completion_tokens ?? 0;
+      const totalTokens = (response as any).usage?.total_tokens ?? (promptTokens + completionTokens);
+      const { estimateCostUsd, logAICost } = await import('@/lib/cost-logger');
+      const costUsd = estimateCostUsd(analysisModel, promptTokens, completionTokens);
+      logAICost({ model: analysisModel, promptTokens, completionTokens, totalTokens, costUsd, route: 'deep-analysis' });
+    } catch {}
+
     const raw = response.choices?.[0]?.message?.content || '{}';
     let result: any = {};
     try {

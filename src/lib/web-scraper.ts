@@ -18,11 +18,65 @@ function normalizeWhitespace(text: string): string {
     .trim();
 }
 
+const ROBOTS_CACHE = new Map<string, { fetchedAt: number; rules: Record<string, string[]> }>();
+
+function getUserAgent(): string {
+  return process.env.SCRAPER_USER_AGENT || 'FrejFundBot/1.0 (+https://www.frejfund.com/bot)';
+}
+
+async function fetchRobots(origin: string): Promise<Record<string, string[]>> {
+  const cached = ROBOTS_CACHE.get(origin);
+  if (cached && Date.now() - cached.fetchedAt < 1000 * 60 * 60) { // 1h
+    return cached.rules;
+  }
+  try {
+    const res = await fetch(`${origin}/robots.txt`, { headers: { 'User-Agent': getUserAgent() }, redirect: 'follow', signal: AbortSignal.timeout(5000) });
+    if (!res.ok) throw new Error(String(res.status));
+    const text = await res.text();
+    const lines = text.split(/\r?\n/);
+    const rules: Record<string, string[]> = {};
+    let currentUA: string | null = null;
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const mUA = trimmed.match(/^User-agent:\s*(.+)/i);
+      if (mUA) { currentUA = mUA[1].trim().toLowerCase(); rules[currentUA] = rules[currentUA] || []; continue; }
+      const mDis = trimmed.match(/^Disallow:\s*(.*)/i);
+      if (mDis) {
+        const path = (mDis[1] || '').trim();
+        if (currentUA) {
+          rules[currentUA] = rules[currentUA] || [];
+          rules[currentUA].push(path);
+        }
+      }
+    }
+    ROBOTS_CACHE.set(origin, { fetchedAt: Date.now(), rules });
+    return rules;
+  } catch {
+    const rules: Record<string, string[]> = {};
+    ROBOTS_CACHE.set(origin, { fetchedAt: Date.now(), rules });
+    return rules;
+  }
+}
+
+function isPathAllowed(origin: string, path: string, rules: Record<string, string[]>): boolean {
+  const ua = getUserAgent().toLowerCase();
+  const agent = (Object.keys(rules).find((k: string) => ua.includes(k)) as string | undefined) || '*';
+  const disallows = (rules[agent] || []).concat(rules['*'] || []);
+  if (disallows.length === 0) return true;
+  for (const rule of disallows) {
+    if (!rule) continue;
+    if (rule === '/') return false;
+    if (path.startsWith(rule)) return false;
+  }
+  return true;
+}
+
 export async function fetchHtml(url: string, timeoutMs = 12000): Promise<string> {
   // Prefer https if http was provided
   const tryUrls = [url.startsWith('http://') ? url.replace('http://', 'https://') : url, url];
   const headers = {
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
+    'User-Agent': getUserAgent(),
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
     'Accept-Language': 'en-US,en;q=0.9,sv;q=0.8',
     'Cache-Control': 'no-cache',
@@ -35,6 +89,17 @@ export async function fetchHtml(url: string, timeoutMs = 12000): Promise<string>
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
       try {
+        // robots.txt respect (best-effort)
+        try {
+          const origin = new URL(u).origin;
+          const path = new URL(u).pathname;
+          const rules = await fetchRobots(origin);
+          if (!isPathAllowed(origin, path, rules)) {
+            console.log(`[Scraper] Blocked by robots.txt: ${u}`);
+            clearTimeout(timer);
+            continue;
+          }
+        } catch {}
         const res = await fetch(u, { headers, redirect: 'follow', signal: controller.signal });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const html = await res.text();

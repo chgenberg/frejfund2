@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     const { prisma } = await import('@/lib/prisma');
     const existing = await prisma.deepAnalysis.findUnique({ 
       where: { sessionId },
-      select: { status: true, progress: true }
+      select: { status: true, progress: true, userId: true }
     });
     
     if (existing && existing.status === 'analyzing') {
@@ -35,6 +35,24 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('🚀 Starting deep analysis for session:', sessionId);
+
+    // Soft daily quota (disabled by default). Enable with SOFT_QUOTA_ENABLED=true and set ANALYSIS_DAILY_LIMIT.
+    try {
+      if (process.env.SOFT_QUOTA_ENABLED === 'true' && existing?.userId) {
+        const limit = Number(process.env.ANALYSIS_DAILY_LIMIT || '5');
+        const startOfDay = new Date();
+        startOfDay.setHours(0,0,0,0);
+        const used = await prisma.deepAnalysis.count({ where: { userId: existing.userId, startedAt: { gte: startOfDay } } });
+        if (used >= limit) {
+          return NextResponse.json({
+            error: 'Daily analysis limit reached',
+            message: `You have reached your daily analysis limit (${limit}). Please try again tomorrow.`
+          }, { status: 429 });
+        }
+      }
+    } catch (qErr) {
+      console.warn('Quota check failed, proceeding:', qErr);
+    }
 
     // Immediately reset status to analyzing so SSE won't emit 'complete' from a previous run
     try {

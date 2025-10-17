@@ -15,6 +15,15 @@ async function chatWithFallback(args: { messages: { role: 'system' | 'user' | 'a
       ...(args.maxTokens ? (isGpt5 ? { max_completion_tokens: args.maxTokens } : { max_tokens: args.maxTokens }) : {})
     });
     console.log('[DEBUG] Chat Completions succeeded');
+    // Cost logging
+    try {
+      const promptTokens = (resp as any).usage?.prompt_tokens ?? 0;
+      const completionTokens = (resp as any).usage?.completion_tokens ?? 0;
+      const totalTokens = (resp as any).usage?.total_tokens ?? (promptTokens + completionTokens);
+      const { estimateCostUsd, logAICost } = await import('@/lib/cost-logger');
+      const costUsd = estimateCostUsd(model, promptTokens, completionTokens);
+      logAICost({ model, promptTokens, completionTokens, totalTokens, costUsd, route: 'chat.completions' });
+    } catch {}
     return resp.choices[0]?.message?.content || '';
   } catch (e) {
     console.error('[DEBUG] Chat Completions failed:', e);
