@@ -354,8 +354,8 @@ Output must be valid JSON only.`
       ...(isGpt5 ? {} : { response_format: { type: 'json_object' } })
     };
     if (isGpt5) {
-      // gpt-5 uses max_output_tokens; be generous to avoid truncation
-      completionArgs.max_output_tokens = 2200;
+      // gpt-5 chat.completions uses max_completion_tokens
+      completionArgs.max_completion_tokens = 2400;
     } else {
       completionArgs.max_tokens = 1500;
     }
