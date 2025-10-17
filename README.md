@@ -36,7 +36,7 @@ An AI-powered business analysis and investment readiness platform designed speci
 ## 🏁 Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 22 (see .nvmrc)
 - npm or yarn
 
 ### Installation
@@ -190,12 +190,17 @@ The `BusinessAnalyzer` class provides:
 
 ## 🚀 Deployment
 
-### Vercel (Recommended)
+### Vercel / Railway
 1. Push code to GitHub
 2. Connect repository to Vercel
 3. Deploy with zero configuration
 
-### Other Platforms
+### Worker (BullMQ)
+Run the background worker in a separate service/process:
+```bash
+npm run worker
+```
+Requires `REDIS_URL`.
 ```bash
 npm run build
 npm start
