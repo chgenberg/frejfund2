@@ -6,7 +6,7 @@
 import { prisma } from '@/lib/prisma';
 import { ANALYSIS_DIMENSIONS } from './deep-analysis-framework';
 import { FREE_TIER_DIMENSIONS } from './free-tier-dimensions';
-import { getChatModel } from './ai-client';
+import { getChatModel, getOpenAIClient } from './ai-client';
 import OpenAI from 'openai';
 
 export interface AnalysisGap {
@@ -211,7 +211,20 @@ export async function generateSmartQuestions(
   gaps: AnalysisGap[],
   businessInfo: any
 ): Promise<GapQuestion[]> {
-  const openai = new OpenAI();
+  // If no key, skip AI path and fall back immediately
+  const hasKey = Boolean((process.env.OPENAI_API_KEY || process.env.OPENAI_KEY || '').trim());
+  if (!hasKey) {
+    return gaps.slice(0, 5).map((gap, i) => ({
+      id: `gap-q-${i}`,
+      dimensionId: gap.dimensionId,
+      question: gap.suggestedQuestions[0] || `Tell us more about ${gap.dimensionName}`,
+      helpText: `This helps us understand ${gap.category.toLowerCase()}`,
+      inputType: 'text' as const,
+      validation: { required: true }
+    }));
+  }
+
+  const openai: OpenAI = getOpenAIClient() as any;
   
   const prompt = `You are helping gather missing information for an investment analysis.
 
