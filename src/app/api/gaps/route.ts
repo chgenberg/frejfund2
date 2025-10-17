@@ -1,35 +1,103 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { analyzeDataGaps } from '@/lib/gap-analysis';
+import { identifyAnalysisGaps, generateSmartQuestions } from '@/lib/gap-qa-system';
+import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
-export const dynamic = 'force-dynamic';
-
-export async function GET(request: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const sessionId = searchParams.get('sessionId');
-
+    const sessionId = req.nextUrl.searchParams.get('sessionId');
+    
     if (!sessionId) {
-      return NextResponse.json(
-        { error: 'Session ID required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
     }
 
-    const gapAnalysis = await analyzeDataGaps(sessionId);
-
-    return NextResponse.json({
-      ...gapAnalysis,
-      message: gapAnalysis.totalGaps === 0 
-        ? 'Your analysis is complete!' 
-        : `${gapAnalysis.totalGaps} data gaps identified. Complete them to improve your investment readiness.`
+    // Get analysis to verify it exists and get business info
+    const analysis = await prisma.deepAnalysis.findUnique({
+      where: { sessionId },
+      select: { businessInfo: true }
     });
 
+    if (!analysis) {
+      return NextResponse.json({ error: 'Analysis not found' }, { status: 404 });
+    }
+
+    // Identify gaps in the analysis
+    const gaps = await identifyAnalysisGaps(sessionId);
+
+    // Generate smart questions based on gaps
+    const questions = await generateSmartQuestions(gaps, analysis.businessInfo);
+
+    return NextResponse.json({
+      gaps,
+      questions,
+      totalGaps: gaps.length,
+      businessInfo: analysis.businessInfo
+    });
   } catch (error) {
-    console.error('Error analyzing gaps:', error);
+    console.error('Error identifying gaps:', error);
     return NextResponse.json(
-      { error: 'Failed to analyze gaps' },
+      { error: 'Failed to identify analysis gaps' },
       { status: 500 }
     );
   }
 }
 
+export async function POST(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    const { sessionId, answers } = await req.json();
+
+    if (!sessionId || !answers) {
+      return NextResponse.json(
+        { error: 'Session ID and answers required' },
+        { status: 400 }
+      );
+    }
+
+    // Save gap answers
+    await prisma.session.update({
+      where: { id: sessionId },
+      data: {
+        metadata: {
+          ...(await prisma.session.findUnique({
+            where: { id: sessionId },
+            select: { metadata: true }
+          }))?.metadata as any,
+          gapAnswers: answers,
+          gapAnsweredAt: new Date()
+        }
+      }
+    });
+
+    // Get dimension IDs from answers
+    const dimensionIds = Object.keys(answers).map(key => {
+      const parts = key.split('-');
+      return parts.slice(0, -1).join('-'); // Remove question suffix
+    }).filter(Boolean);
+
+    // Trigger incremental reanalysis for affected dimensions
+    if (dimensionIds.length > 0) {
+      const { runIncrementalAnalysis } = await import('@/lib/gap-qa-system');
+      
+      // Format answers as additional context
+      const additionalContext = Object.entries(answers)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join('\n\n');
+
+      await runIncrementalAnalysis(sessionId, dimensionIds, additionalContext);
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Answers saved and analysis updated',
+      updatedDimensions: dimensionIds.length
+    });
+  } catch (error) {
+    console.error('Error saving gap answers:', error);
+    return NextResponse.json(
+      { error: 'Failed to save answers' },
+      { status: 500 }
+    );
+  }
+}

@@ -42,7 +42,19 @@ export function startDeepAnalysisWorker() {
       }, 15000);
 
       try {
-        await runDeepAnalysis({ sessionId, businessInfo, scrapedContent, uploadedDocuments, mode, specificDimensions, preHarvestText });
+        // Determine analysis mode - free-tier for now (will add pro logic later)
+        const analysisMode = mode || 'free-tier'; // TODO: Check user subscription status
+        
+        await runDeepAnalysis({ 
+          sessionId, 
+          businessInfo, 
+          scrapedContent, 
+          uploadedDocuments, 
+          mode: analysisMode, 
+          specificDimensions, 
+          preHarvestText,
+          onProgress: reportProgress
+        });
         await pub.publish(getProgressChannel(sessionId), JSON.stringify({ type: 'complete' }));
         return true;
       } finally {

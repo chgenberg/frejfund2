@@ -250,7 +250,8 @@ export async function GET(request: NextRequest) {
         redFlags: parseJsonField(dim.redFlags),
         recommendations: parseJsonField(dim.questions),
         questions: parseJsonField(dim.questions),
-        evidence: parseJsonField(dim.evidence)
+        evidence: parseJsonField(dim.evidence),
+        confidence: dim.confidence || 'low'
       };
     });
 

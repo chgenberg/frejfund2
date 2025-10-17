@@ -9,10 +9,11 @@ if (typeof window !== 'undefined') {
   throw new Error('enhanced-scraper must only be used server-side');
 }
 
-import { scrapeSiteShallow } from './web-scraper';
+import { scrapeSiteShallow, scrapeSiteDeep } from './web-scraper';
 import { scrapeLinkedInCompany, analyzeHiringVelocity, type LinkedInCompanyData } from './linkedin-scraper';
 import { analyzeGitHubOrg, type GitHubOrgData } from './github-analyzer';
 import { scrapeProductHunt, searchProductHunt, type ProductHuntData } from './producthunt-scraper';
+import { isShopifySite, scrapeShopifySite, shopifyDataToContent } from './shopify-scraper';
 import { BusinessInfo } from '@/types/business';
 
 export interface EnhancedScrapingResult {
@@ -67,12 +68,30 @@ export async function runEnhancedScraping(
   
   console.log('🚀 Starting enhanced scraping for:', businessInfo.name);
 
-  // 1. Website scraping (always run)
-  const websiteData = await scrapeSiteShallow(businessInfo.website || '', 5);
+  // 1. Website scraping - check if Shopify first
+  let websiteContent = '';
+  let websiteSources: string[] = [];
+  
+  if (businessInfo.website) {
+    const isShopify = await isShopifySite(businessInfo.website);
+    
+    if (isShopify) {
+      console.log('🛍️ Detected Shopify site - using enhanced e-commerce scraper');
+      const shopifyData = await scrapeShopifySite(businessInfo.website, 12, 8000);
+      websiteContent = shopifyDataToContent(shopifyData);
+      websiteSources = [businessInfo.website, ...shopifyData.products.slice(0, 5).map(p => p.url).filter(Boolean)];
+      dataSources.push('shopify');
+    } else {
+      // Use deep scraping for non-Shopify sites
+      const websiteData = await scrapeSiteDeep(businessInfo.website, 10, 2);
+      websiteContent = websiteData.combinedText;
+      websiteSources = websiteData.sources.map(s => s.url);
+    }
+  }
   
   const result: EnhancedScrapingResult = {
-    websiteContent: websiteData.combinedText,
-    websiteSources: websiteData.sources.map(s => s.url),
+    websiteContent,
+    websiteSources,
     totalDataPoints: 1,
     scrapingDuration: 0,
     dataSources

@@ -5,6 +5,7 @@
 
 import { BusinessInfo } from '@/types/business';
 import { ANALYSIS_DIMENSIONS, DeepAnalysisResult, getCriticalDimensions } from './deep-analysis-framework';
+import { FREE_TIER_DIMENSIONS, isFreeTierDimension } from './free-tier-dimensions';
 import { getOpenAIClient, getChatModel } from './ai-client';
 import { fetchGptKnowledgeForCompany } from './gpt-knowledge';
 import { prisma } from './prisma';
@@ -14,9 +15,10 @@ interface RunDeepAnalysisOptions {
   businessInfo: BusinessInfo;
   scrapedContent: string;
   uploadedDocuments?: string[];
-  mode?: 'full' | 'critical-only' | 'progressive';
+  mode?: 'full' | 'critical-only' | 'progressive' | 'free-tier';
   specificDimensions?: string[]; // Only re-analyze these specific dimensions
   preHarvestText?: string; // optional: provide GPT public knowledge text (skip internal harvest)
+  onProgress?: (current: number, total: number, completedCategories: string[]) => Promise<void>;
 }
 
 /**
@@ -87,17 +89,23 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
       ? ANALYSIS_DIMENSIONS.filter(d => specificDimensions.includes(d.name))
       : mode === 'critical-only' 
         ? getCriticalDimensions()
+        : mode === 'free-tier'
+        ? FREE_TIER_DIMENSIONS
         : ANALYSIS_DIMENSIONS;
 
     const hasDocs = Array.isArray(uploadedDocuments) && uploadedDocuments.length > 0;
     const scrapedLen = (scrapedContent || '').trim().length;
-    // If we have very limited context, reduce scope to ensure quality
-    if (!hasDocs && scrapedLen < 500) {
-      // Only run truly critical dimensions when almost no context is available
-      dimensionsToAnalyze = ANALYSIS_DIMENSIONS.filter(d => d.priority === 'critical');
-    } else if (!hasDocs && scrapedLen < 2000) {
-      // Without docs and with small website text, skip low-priority dimensions
-      dimensionsToAnalyze = ANALYSIS_DIMENSIONS.filter(d => d.priority === 'critical' || d.priority === 'high' || d.priority === 'medium');
+    
+    // In free-tier mode, we always use FREE_TIER_DIMENSIONS
+    if (mode !== 'free-tier') {
+      // If we have very limited context, reduce scope to ensure quality
+      if (!hasDocs && scrapedLen < 500) {
+        // Only run truly critical dimensions when almost no context is available
+        dimensionsToAnalyze = ANALYSIS_DIMENSIONS.filter(d => d.priority === 'critical');
+      } else if (!hasDocs && scrapedLen < 2000) {
+        // Without docs and with small website text, skip low-priority dimensions
+        dimensionsToAnalyze = ANALYSIS_DIMENSIONS.filter(d => d.priority === 'critical' || d.priority === 'high' || d.priority === 'medium');
+      }
     }
 
     // Sort dimensions by priority order: critical -> high -> medium -> low
@@ -127,12 +135,13 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
             strengths: result.strengths,
             questions: result.questionsToAsk,
             evidence: result.evidence || [],
+            confidence: result.confidence,
             analyzed: true,
             analyzedAt: new Date(),
             // Avoid saving full prompt to reduce memory/DB usage
             prompt: undefined,
             // Store actual model used for traceability
-            modelUsed: getChatModel('simple')
+            modelUsed: getChatModel('complex')
           }
         });
       } else {
@@ -148,10 +157,11 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
             strengths: result.strengths,
             questions: result.questionsToAsk,
             evidence: result.evidence || [],
+            confidence: result.confidence,
             analyzed: true,
             analyzedAt: new Date(),
             prompt: undefined,
-            modelUsed: getChatModel('simple')
+            modelUsed: getChatModel('complex')
           }
         });
       }
@@ -213,6 +223,11 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
         });
         
         console.log(`📊 Progress: ${completed}/${totalDimensions} (${progress}%) - ${dimension.name}`);
+        
+        // Call progress callback if provided
+        if (options.onProgress) {
+          await options.onProgress(completed, totalDimensions, completedCategories);
+        }
         
         // Progress is automatically tracked via database
         // SSE endpoint reads directly from DeepAnalysis table
@@ -382,6 +397,15 @@ Output must be valid JSON only.`
       return `${src}: ${snip}${url}`.slice(0, 240);
     });
 
+    // Determine confidence level based on evidence and score
+    const confidenceScore = result.confidence || 0;
+    let confidence: 'high' | 'medium' | 'low' = 'low';
+    if (confidenceScore >= 0.8 || evidenceStrings.length >= 2) {
+      confidence = 'high';
+    } else if (confidenceScore >= 0.5 || evidenceStrings.length >= 1) {
+      confidence = 'medium';
+    }
+
     return {
       dimension: dimension.id,
       score: Number.isFinite(result.score) ? Math.max(0, Math.min(100, Number(result.score))) : 0,
@@ -391,7 +415,8 @@ Output must be valid JSON only.`
       questionsToAsk: Array.isArray(result.questionsToAsk) ? result.questionsToAsk.slice(0, 3) : [],
       suggestions: Array.isArray(result.recommendations) ? result.recommendations.slice(0, 3) : (Array.isArray(result.suggestions) ? result.suggestions.slice(0, 3) : []),
       // store textual evidence in existing field
-      evidence: evidenceStrings
+      evidence: evidenceStrings,
+      confidence
     };
 
   } catch (error) {

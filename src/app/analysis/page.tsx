@@ -23,6 +23,9 @@ interface AnalysisDimension {
   recommendations?: string[];
   suggestions?: string[];
   questions?: string[];
+  evidence?: string[];
+  confidence?: 'high' | 'medium' | 'low';
+  dataSources?: string[];
 }
 
 const CATEGORIES = [
@@ -368,6 +371,7 @@ export default function AnalysisPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [analysisProgress, setAnalysisProgress] = useState<{current:number,total:number,status:'idle'|'running'|'completed'}>({current:0,total:95,status:'idle'});
   const [showInfoPopup, setShowInfoPopup] = useState<string | null>(null);
+  const [isRerunning, setIsRerunning] = useState(false);
 
   useEffect(() => {
     loadAnalysisData();
@@ -458,6 +462,42 @@ export default function AnalysisPage() {
     return AlertCircle;
   };
 
+  const handleRerunAnalysis = async () => {
+    const sessionId = localStorage.getItem('frejfund-session-id');
+    if (!sessionId) return;
+
+    setIsRerunning(true);
+    try {
+      const response = await fetch('/api/deep-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId })
+      });
+
+      if (response.ok) {
+        // Reset dimensions to show loading state
+        setDimensions([]);
+        setAnalysisProgress({ current: 0, total: 95, status: 'running' });
+        // Reload data will happen via SSE updates
+      } else {
+        console.error('Failed to restart analysis');
+      }
+    } catch (error) {
+      console.error('Error restarting analysis:', error);
+    } finally {
+      setIsRerunning(false);
+    }
+  };
+
+  const getConfidenceColor = (confidence?: string) => {
+    switch (confidence) {
+      case 'high': return 'text-green-600 bg-green-50';
+      case 'medium': return 'text-yellow-600 bg-yellow-50';
+      case 'low': return 'text-orange-600 bg-orange-50';
+      default: return 'text-gray-600 bg-gray-50';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
@@ -480,12 +520,38 @@ export default function AnalysisPage() {
       <div className="container mx-auto px-4 sm:px-8 py-6 sm:py-8 max-w-7xl">
         {/* Header with Overall Score */}
         <div className="minimal-box minimal-box-shadow mb-8 p-8 sm:p-12 text-center">
-          <h1 className="text-3xl sm:text-4xl font-bold text-black mb-4">
-            Deep Business Analysis
-          </h1>
-          <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-            Your business analyzed across 95 critical dimensions using advanced AI reasoning
-          </p>
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex-1">
+              <h1 className="text-3xl sm:text-4xl font-bold text-black mb-4">
+                Deep Business Analysis
+              </h1>
+              <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
+                Your business analyzed across 30 critical dimensions using advanced AI reasoning
+              </p>
+            </div>
+            {/* Re-run Analysis Button */}
+            {analysisProgress.status === 'completed' && (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleRerunAnalysis}
+                disabled={isRerunning}
+                className="px-6 py-3 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {isRerunning ? (
+                  <>
+                    <Circle className="w-4 h-4 animate-spin" />
+                    <span>Starting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-4 h-4" />
+                    <span>Re-run Analysis</span>
+                  </>
+                )}
+              </motion.button>
+            )}
+          </div>
           
           {/* Overall Score */}
           <div className="inline-block">
@@ -692,6 +758,24 @@ export default function AnalysisPage() {
                         </div>
                       )}
                     </div>
+
+                    {/* Evidence & Confidence */}
+                    {dimension.confidence && (
+                      <div className="mt-4 flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-gray-500">Confidence:</span>
+                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${getConfidenceColor(dimension.confidence)}`}>
+                            {dimension.confidence}
+                          </span>
+                        </div>
+                        {dimension.evidence && dimension.evidence.length > 0 && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-500">Sources:</span>
+                            <span className="text-xs text-gray-600">{dimension.evidence.length} data points</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* Recommendations */}
                     {(dimension.recommendations && dimension.recommendations.length > 0) || (dimension.suggestions && dimension.suggestions.length > 0) ? (

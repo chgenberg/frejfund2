@@ -546,6 +546,7 @@ model AnalysisDimension {
   redFlags  String[] // Warning signs identified
   strengths String[] // Positive signals
   evidence  String[] // Quotes/data supporting the analysis
+  confidence String? // 'high' | 'medium' | 'low'
 
   // Questions generated for this dimension
   questions String[] // Smart questions to ask founder
