@@ -34,6 +34,12 @@ export interface Message {
     tokensEstimate?: number;
     costUsdEstimate?: number;
   };
+  actions?: Array<{
+    type: 'link' | 'button';
+    label: string;
+    url?: string;
+    action?: string;
+  }>;
 }
 
 export interface BusinessAnalysisResult {

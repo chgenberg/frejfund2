@@ -395,7 +395,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
           let backoff = 1000;
           let eventSource: EventSource | null = null;
 
-          const handleMessage = (event: MessageEvent) => {
+          const handleMessage = async (event: MessageEvent) => {
             const data = JSON.parse(event.data);
             if (data.type === 'progress') {
               setAnalysisProgress({ current: data.current, total: data.total, status: 'running', completedCategories: data.completedCategories || [] });
@@ -403,12 +403,28 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
             } else if (data.type === 'complete') {
               setAnalysisProgress(prev => ({ ...prev, status: 'completed' }));
               try { eventSource && eventSource.close(); } catch {}
+              
+              // Fetch the actual analysis score
+              let scoreMessage = "Deep analysis complete! I now have a comprehensive understanding of your business across 95 dimensions.";
+              try {
+                const analysisRes = await fetch(`/api/deep-analysis?sessionId=${sessionId}`);
+                if (analysisRes.ok) {
+                  const analysisData = await analysisRes.json();
+                  if (analysisData.overallScore !== undefined) {
+                    scoreMessage = `Deep analysis complete! Your overall investment readiness score is ${analysisData.overallScore}/100. I now have a comprehensive understanding of your business across 95 dimensions.`;
+                  }
+                }
+              } catch {}
+              
               const completionMessage: Message = {
                 id: `analysis-complete-${Date.now()}`,
-                content: "Deep analysis complete! I now have a comprehensive understanding of your business across 95 dimensions. Ask me anything!",
+                content: scoreMessage + " Ask me anything!",
                 sender: 'agent',
                 timestamp: new Date(),
-                type: 'analysis'
+                type: 'analysis',
+                actions: [
+                  { type: 'link', label: 'View Full Results', url: '/analysis' }
+                ]
               };
               setMessages(prev => [...prev, completionMessage]);
               setShowCompletionCelebration(true);
@@ -1518,17 +1534,21 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   )}
                   {message.sender === 'agent' && (
                     <div className="relative z-10 mt-2 flex items-center space-x-2 opacity-70 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowEvidence(prev => ({ ...prev, [message.id]: !prev[message.id] }));
-                        }}
-                        className="text-xs text-gray-600 hover:text-black inline-flex items-center cursor-pointer"
-                        title="Toggle evidence"
-                      >
-                        <BookOpen className="w-3 h-3 mr-1" /> Sources
-                      </button>
-                      <span className="text-gray-300">|</span>
+                      {message.evidence && message.evidence.length > 0 && (
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowEvidence(prev => ({ ...prev, [message.id]: !prev[message.id] }));
+                            }}
+                            className="text-xs text-gray-600 hover:text-black inline-flex items-center cursor-pointer"
+                            title="Toggle evidence"
+                          >
+                            <BookOpen className="w-3 h-3 mr-1" /> Sources
+                          </button>
+                          <span className="text-gray-300">|</span>
+                        </>
+                      )}
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1566,22 +1586,28 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                       ))}
                     </div>
                   )}
-                  {message.type === 'analysis' && (
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => {
-                        if (analysisResult) {
-                          setShowResultsModal(true);
-                        } else {
-                          window.location.href = '/analysis';
-                        }
-                      }}
-                      className="mt-3 inline-flex items-center px-3 py-1 bg-black text-white rounded-lg text-xs font-medium hover:bg-gray-800 transition-colors"
-                    >
-                      View Full Results
-                      <TrendingUp className="w-3 h-3 ml-1" />
-                    </motion.button>
+                  {/* Render action buttons */}
+                  {message.actions && message.actions.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {message.actions.map((action, idx) => (
+                        <motion.button
+                          key={idx}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => {
+                            if (action.type === 'link' && action.url) {
+                              window.location.href = action.url;
+                            } else if (action.action === 'show-results' && analysisResult) {
+                              setShowResultsModal(true);
+                            }
+                          }}
+                          className="inline-flex items-center px-3 py-1 bg-black text-white rounded-lg text-xs font-medium hover:bg-gray-800 transition-colors"
+                        >
+                          {action.label}
+                          {action.type === 'link' && <TrendingUp className="w-3 h-3 ml-1" />}
+                        </motion.button>
+                      ))}
+                    </div>
                   )}
                   {message.type === 'analysis' && lastGap && lastGap.messageId === message.id && (
                     <div className="mt-2 flex flex-wrap gap-2">
