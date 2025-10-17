@@ -42,12 +42,15 @@ export function startDeepAnalysisWorker() {
       }, 15000);
 
       try {
-        // Determine analysis mode based on user subscription
+        // Determine analysis mode based on user subscription (override incoming mode)
         const { getUserTierFromSession } = await import('@/lib/subscription-utils');
         const userTier = await getUserTierFromSession(sessionId);
         
-        // Map tier to analysis mode
-        let analysisMode = mode || (userTier === 'pro' || userTier === 'enterprise' ? 'full' : 'free-tier');
+        // Map tier to analysis mode (force full for pro/enterprise during testing)
+        const analysisMode = (userTier === 'pro' || userTier === 'enterprise') ? 'full' : 'free-tier';
+        
+        // Emit initial progress=0 so SSE updates immediately
+        await pub.publish(getProgressChannel(sessionId), JSON.stringify({ type: 'progress', current: 0, total: analysisMode === 'full' ? 95 : 30, started: true }));
         
         await runDeepAnalysis({ 
           sessionId, 

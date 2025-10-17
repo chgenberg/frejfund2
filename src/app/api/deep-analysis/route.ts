@@ -139,13 +139,22 @@ export async function POST(request: NextRequest) {
         });
       } catch (e) {
         console.error('Failed to enqueue phase1 deep analysis, falling back to in-process:', e);
+        // Fallback: run inline and publish progress via Redis so SSE updates live
+        const { getPub, getProgressChannel } = await import('@/lib/redis');
+        const pub = getPub();
+        const channel = getProgressChannel(sessionId);
+        // Emit immediate 0% so UI shows running state
+        try { await pub.publish(channel, JSON.stringify({ type: 'progress', current: 0, total: 95 })); } catch {}
         runDeepAnalysis({
           sessionId,
           businessInfo,
           scrapedContent: mergedScraped,
           uploadedDocuments: uploadedDocuments || [],
           mode: 'progressive',
-          preHarvestText
+          preHarvestText,
+          onProgress: async (current, total, completedCategories) => {
+            try { await pub.publish(channel, JSON.stringify({ type: 'progress', current, total, completedCategories })); } catch {}
+          }
         });
       }
 
