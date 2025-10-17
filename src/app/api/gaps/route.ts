@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { identifyAnalysisGaps, generateSmartQuestions } from '@/lib/gap-qa-system';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 export async function GET(req: NextRequest) {
   try {
@@ -45,7 +43,6 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
     const { sessionId, answers } = await req.json();
 
     if (!sessionId || !answers) {
