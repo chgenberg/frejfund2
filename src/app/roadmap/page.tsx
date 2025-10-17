@@ -85,23 +85,7 @@ export default function RoadmapPage() {
 
       {/* Main Content */}
       <div className="container mx-auto px-6 py-8 max-w-4xl">
-        {/* Success Message */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="minimal-box minimal-box-shadow mb-8 text-center"
-        >
-          <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
-            <Target className="w-8 h-8 text-white" />
-          </div>
-          <h2 className="text-2xl font-bold text-black mb-2">
-            Your Personalized Roadmap is Ready
-          </h2>
-          <p className="text-gray-700 max-w-xl mx-auto">
-            Here's your step-by-step plan to <span className="font-semibold">{roadmap.goalTitle.toLowerCase()}</span>
-          </p>
-        </motion.div>
+        {/* (Removed headline/intro per request) */}
 
         {/* Progress Overview */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-8">

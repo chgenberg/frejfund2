@@ -445,12 +445,38 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
             sessionStorage.setItem(analysisKey, 'true');
             (window as any).__ff_analysis_status = 'running';
             
+            // Enrich businessInfo with user's goal/ambition from localStorage
+            let enrichedBusinessInfo = businessInfo;
+            try {
+              const goalId = localStorage.getItem('frejfund-goal');
+              const customGoal = localStorage.getItem('frejfund-custom-goal');
+              const roadmapStr = localStorage.getItem('frejfund-roadmap');
+              let goalTitle: string | undefined = undefined;
+              if (goalId) {
+                goalTitle = goalId === 'custom' ? (customGoal || 'Custom goal') : goalId;
+              }
+              enrichedBusinessInfo = {
+                ...businessInfo,
+                userAmbition: goalTitle,
+                roadmapSummary: roadmapStr ? (() => {
+                  try {
+                    const r = JSON.parse(roadmapStr);
+                    return {
+                      goalTitle: r?.goalTitle,
+                      targetDate: r?.targetDate,
+                      milestones: Array.isArray(r?.milestones) ? r.milestones.map((m: any) => ({ title: m?.title, timeframe: m?.timeframe })) : []
+                    };
+                  } catch { return undefined; }
+                })() : undefined
+              } as any;
+            } catch {}
+
             const response = await fetch('/api/deep-analysis', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 sessionId,
-                businessInfo,
+                businessInfo: enrichedBusinessInfo,
                 scrapedContent: mergedContext || '',
                 uploadedDocuments: []
               })
