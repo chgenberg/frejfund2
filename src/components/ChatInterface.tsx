@@ -456,12 +456,14 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               })
             });
             
-            const data = await response.json();
-            if (data.already_running) {
-              console.log('Deep analysis already running');
-            } else {
-              console.log('Deep analysis started in background');
-            }
+            try {
+              const data = await response.json();
+              if (data.already_running) {
+                console.log('Deep analysis already running');
+              } else {
+                console.log('Deep analysis started in background');
+              }
+            } catch {}
           }
         } catch (error) {
           console.error('Failed to start deep analysis:', error);
