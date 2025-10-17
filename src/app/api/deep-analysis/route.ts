@@ -36,6 +36,17 @@ export async function POST(request: NextRequest) {
 
     console.log('🚀 Starting deep analysis for session:', sessionId);
 
+    // Immediately reset status to analyzing so SSE won't emit 'complete' from a previous run
+    try {
+      await prisma.deepAnalysis.upsert({
+        where: { sessionId },
+        create: { sessionId, status: 'analyzing', progress: 0, startedAt: new Date(), userId: existing?.userId || null, businessInfo },
+        update: { status: 'analyzing', progress: 0, startedAt: new Date(), businessInfo }
+      });
+    } catch (e) {
+      console.warn('Could not reset analysis row at start:', e);
+    }
+
     // Orchestrate: harvest (mini) + scrape + docs before analysis
     (async () => {
       const { fetchGptKnowledgeForCompany } = await import('@/lib/gpt-knowledge');

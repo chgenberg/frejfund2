@@ -82,8 +82,8 @@ export async function GET(request: NextRequest) {
               console.log(`📡 SSE: Sent progress ${completedCount}/${totalCount} to client`);
             }
             
-            // Check if complete
-            if (completedCount >= totalCount || analysis.status === 'completed') {
+            // Check if complete (require both DB status and count to agree)
+            if (analysis.status === 'completed' && completedCount >= totalCount) {
               write({ type: 'complete' });
               console.log('📡 SSE: Analysis complete, closing connection');
               clearInterval(interval);
