@@ -188,24 +188,19 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         if (data.totalGaps > 0 && data.nextBestAction) {
           setGapFillingData(data);
           setTimeout(() => {
+            const criticalText = `Amazing! Thank you for all the information.\n\nI've identified **${data.totalGaps} key areas** where additional information would significantly strengthen your investment case and boost your readiness score.\n\nThese are the missing pieces that investors typically look for - filling them in could increase your score by up to **+${data.potentialScoreIncrease} points**!`;
+            const minorText = `Great work! Your analysis is looking solid.\n\nI found ${data.totalGaps} areas where we could gather additional data to fine-tune your investment case even further.`;
+
             const gapMessage: Message = {
               id: Date.now().toString(),
-              content: data.criticalGaps > 0
-                ? `Amazing! Thank you for all the information. 
-
-I've identified **${data.totalGaps} key areas** where additional information would significantly strengthen your investment case and boost your readiness score.
-
-These are the missing pieces that investors typically look for - filling them in could increase your score by up to **+${data.potentialScoreIncrease} points**!`,
-                : `Great work! Your analysis is looking solid. 
-
-I found ${data.totalGaps} areas where we could gather additional data to fine-tune your investment case even further.`,
+              content: data.criticalGaps > 0 ? criticalText : minorText,
               sender: 'agent',
               timestamp: new Date(),
               type: 'analysis',
               actions: [
-                { 
-                  type: 'button', 
-                  label: 'Fill in Missing Information', 
+                {
+                  type: 'button',
+                  label: 'Fill in Missing Information',
                   action: 'openGapFilling',
                   variant: 'primary'
                 }
