@@ -94,12 +94,12 @@ export function startDeepAnalysisWorker() {
     {
       connection,
       concurrency: 1,
-      lockDuration: 600000,
-      limiter: { max: 3, duration: 1000 },
+      lockDuration: 1200000, // 20 minutes
+      limiter: { max: 1, duration: 1000 },
       removeOnComplete: { age: 3600, count: 1000 },
       removeOnFail: { age: 86400, count: 1000 },
       backoff,
-      attempts: 3,
+      attempts: 5,
     },
   );
 
