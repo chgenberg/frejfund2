@@ -638,9 +638,7 @@ export default function Dashboard() {
               {/* Recent Activity & Quick Actions */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
-                  <h2 className="text-lg font-semibold text-black mb-4">
-                    {hasDeepAnalysis ? 'Key Insights' : 'Getting Started'}
-                  </h2>
+                  <h2 className="text-lg font-semibold text-black mb-4">Key Insights</h2>
                   {hasDeepAnalysis ? (
                     <div className="space-y-3">
                       <p className="text-sm text-gray-600 mb-4">
@@ -655,32 +653,6 @@ export default function Dashboard() {
                         <Brain className="w-4 h-4" />
                         View All 95 Dimensions
                       </motion.button>
-                    </div>
-                  ) : analysisProgress.status === 'running' ? (
-                    <div className="space-y-3">
-                      <p className="text-sm text-gray-600">
-                        We're analyzing your business across 95 dimensions...
-                      </p>
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs font-medium text-gray-700">
-                            Analysis Progress
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {analysisProgress.current}/{analysisProgress.total}
-                          </span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <motion.div
-                            className="bg-black h-2 rounded-full"
-                            initial={{ width: 0 }}
-                            animate={{
-                              width: `${(analysisProgress.current / analysisProgress.total) * 100}%`,
-                            }}
-                            transition={{ duration: 0.5 }}
-                          />
-                        </div>
-                      </div>
                     </div>
                   ) : (
                     <div className="space-y-3">
