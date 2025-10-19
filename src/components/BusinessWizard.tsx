@@ -271,6 +271,10 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
       );
     }
     if (currentStep === 2) {
+      // Funding & Ownership - only foundingYear and capitalSeeking are required
+      return businessInfo.foundingYear && businessInfo.capitalSeeking;
+    }
+    if (currentStep === 3) {
       return businessInfo.monthlyRevenue && businessInfo.teamSize;
     }
     return true; // File upload is optional
