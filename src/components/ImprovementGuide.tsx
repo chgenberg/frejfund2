@@ -50,7 +50,7 @@ const IMPROVEMENT_TEMPLATES: Record<string, any> = {
   },
   'Team Strength': {
     steps: [
-      'Document each founder's relevant experience and achievements',
+      "Document each founder's relevant experience and achievements",
       'Highlight complementary skills and gaps',
       'List key hires and their backgrounds',
       'Add advisors with credible track records',
