@@ -474,43 +474,90 @@ export default function Dashboard() {
               transition={{ duration: 0.3 }}
               className="space-y-6"
             >
-              {/* Analysis Progress Bar - Show when analysis is running */}
+              {/* Analysis Progress Circle - Show when analysis is running */}
               {analysisProgress.status === 'running' && (
                 <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-gradient-to-r from-black to-gray-800 text-white rounded-2xl p-6 sm:p-8 mb-6"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="bg-white rounded-2xl border border-gray-200 shadow-lg p-8 sm:p-12 mb-6"
                 >
-                  <h2 className="text-xl sm:text-2xl font-bold mb-2">
-                    Analyzing Your Business...
-                  </h2>
-                  <p className="text-gray-300 mb-6">
-                    Freja is conducting a deep analysis across 95 dimensions. This typically takes 2-3 minutes.
-                  </p>
-                  
-                  <div className="space-y-4">
-                    <div className="flex justify-between text-sm">
-                      <span>Progress</span>
-                      <span>{analysisProgress.current} of {analysisProgress.total} dimensions</span>
-                    </div>
-                    
-                <div className="relative h-8 bg-gray-200 rounded-full overflow-hidden">
-                      <motion.div
-                        className="absolute top-0 left-0 h-full bg-white"
-                        initial={{ width: 0 }}
-                        animate={{ 
-                          width: `${(analysisProgress.current / analysisProgress.total) * 100}%` 
-                        }}
-                        transition={{ duration: 0.5, ease: "easeOut" }}
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center font-semibold">
-                        {Math.round((analysisProgress.current / analysisProgress.total) * 100)}%
+                  <div className="flex flex-col items-center">
+                    {/* Circular Progress */}
+                    <div className="relative">
+                      <svg className="w-48 h-48 sm:w-64 sm:h-64 transform -rotate-90">
+                        {/* Background circle */}
+                        <circle
+                          cx="50%"
+                          cy="50%"
+                          r="45%"
+                          stroke="#e5e7eb"
+                          strokeWidth="8"
+                          fill="none"
+                        />
+                        {/* Progress circle */}
+                        <motion.circle
+                          cx="50%"
+                          cy="50%"
+                          r="45%"
+                          stroke="#000000"
+                          strokeWidth="8"
+                          fill="none"
+                          strokeLinecap="round"
+                          strokeDasharray={`${2 * Math.PI * 45} ${2 * Math.PI * 45}`}
+                          initial={{ strokeDashoffset: 2 * Math.PI * 45 }}
+                          animate={{
+                            strokeDashoffset: 2 * Math.PI * 45 * (1 - (analysisProgress.current / analysisProgress.total))
+                          }}
+                          transition={{ duration: 0.5, ease: "easeOut" }}
+                        />
+                      </svg>
+                      
+                      {/* Center content */}
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <motion.div
+                          key={analysisProgress.current}
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ duration: 0.3 }}
+                          className="text-4xl sm:text-5xl font-bold text-black"
+                        >
+                          {Math.round((analysisProgress.current / analysisProgress.total) * 100)}%
+                        </motion.div>
+                        <div className="text-sm sm:text-base text-gray-600 mt-1">
+                          {analysisProgress.current}/{analysisProgress.total}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">dimensions</div>
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-2 text-sm text-gray-400">
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>Analysis in progress...</span>
+                    {/* Text below circle */}
+                    <div className="mt-8 text-center max-w-md">
+                      <h2 className="text-xl sm:text-2xl font-bold text-black mb-2">
+                        Analyzing Your Business
+                      </h2>
+                      <p className="text-gray-600 text-sm sm:text-base">
+                        Freja is conducting a deep analysis across 95 dimensions. This typically takes 2-3 minutes.
+                      </p>
+                      
+                      {/* Animated dots */}
+                      <div className="flex justify-center mt-6 space-x-2">
+                        {[0, 1, 2].map((i) => (
+                          <motion.div
+                            key={i}
+                            className="w-2 h-2 bg-gray-400 rounded-full"
+                            animate={{
+                              y: [0, -8, 0],
+                              backgroundColor: ["#9ca3af", "#000000", "#9ca3af"]
+                            }}
+                            transition={{
+                              duration: 1.5,
+                              repeat: Infinity,
+                              delay: i * 0.2,
+                              ease: "easeInOut"
+                            }}
+                          />
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </motion.div>
