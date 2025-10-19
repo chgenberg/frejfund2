@@ -120,6 +120,14 @@ export default function TermsOfService() {
               Services, you consent to our collection and use of your information as described in
               the Privacy Policy.
             </p>
+            <h3 className="text-xl font-semibold text-black mt-6 mb-3">7.1 Data Processing Addendum (DPA)</h3>
+            <p className="text-gray-700 mb-4">
+              If you are a business customer and require a DPA under applicable data protection laws
+              (e.g., GDPR), our standard DPA applies to your use of the Services and is incorporated
+              by reference. The DPA describes our roles (processor vs controller), data processing
+              instructions, security measures, subprocessors, and international transfer safeguards.
+              See <a href="/dpa" className="underline">/dpa</a> for details.
+            </p>
 
             <h2 className="text-2xl font-bold text-black mt-8 mb-4">8. Fees and Payment</h2>
             <p className="text-gray-700 mb-4">

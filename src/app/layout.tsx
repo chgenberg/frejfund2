@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import Chatbot from '@/components/Chatbot';
-import Script from 'next/script';
+import AnalyticsScripts from '@/components/AnalyticsScripts';
+import CookieBanner from '@/components/CookieBanner';
 import {
   organizationSchema,
   websiteSchema,
@@ -105,35 +106,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Google Tag Manager (guarded) */}
-        {process.env.NODE_ENV === 'production' && (
-          <>
-            <Script
-              id="gtag-src"
-              strategy="afterInteractive"
-              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GTM_ID || 'AW-17103900584'}`}
-            />
-            <Script
-              id="gtag-init"
-              strategy="afterInteractive"
-              dangerouslySetInnerHTML={{
-                __html: `
-                  try {
-                    if (typeof window !== 'undefined') {
-                      window.dataLayer = window.dataLayer || [];
-                      function gtag(){dataLayer.push(arguments);} 
-                      gtag('js', new Date());
-                      gtag('config', '${process.env.NEXT_PUBLIC_GTM_ID || 'AW-17103900584'}');
-                    }
-                  } catch (e) {
-                    // no-op if blocked by ITP/adblock
-                  }
-                `,
-              }}
-            />
-          </>
-        )}
-
         {/* JSON-LD Structured Data for LLMs */}
         {structuredData.map((schema, index) => (
           <script
@@ -144,6 +116,12 @@ export default function RootLayout({
         ))}
       </head>
       <body className={`${inter.variable} font-sans antialiased`}>
+        {/* Cookie Consent Banner */}
+        <CookieBanner />
+
+        {/* Analytics scripts gated by consent */}
+        <AnalyticsScripts />
+
         {children}
         <Chatbot />
       </body>

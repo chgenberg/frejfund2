@@ -83,6 +83,9 @@ export default function Footer() {
             <Link href="/terms" className="hover:text-black transition-colors">
               Terms
             </Link>
+            <Link href="/dpa" className="hover:text-black transition-colors">
+              DPA
+            </Link>
           </div>
         </div>
       </div>
