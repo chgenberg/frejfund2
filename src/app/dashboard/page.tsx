@@ -776,7 +776,7 @@ export default function Dashboard() {
                                   {gap.priority}
                                 </span>
                               </div>
-                              <p className="text-xs text-gray-600">{gap.missingInfo[0]}</p>
+                              <p className="text-xs text-gray-600">{(Array.isArray(gap.missingInfo) && gap.missingInfo[0]) || 'Additional details needed'}</p>
                             </div>
                             <div className="text-xs text-gray-500 ml-2">
                               +{gap.potentialScoreIncrease}%

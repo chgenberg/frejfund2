@@ -276,7 +276,7 @@ Return a JSON array of questions with this structure:
     const response = await openai.chat.completions.create({
       model: getChatModel('simple'),
       messages: [{ role: 'user', content: prompt }],
-      temperature: 0.7,
+      // Some minimal models only support default temperature=1; omit to avoid 400
       response_format: { type: 'json_object' },
     });
 
