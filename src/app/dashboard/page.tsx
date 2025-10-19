@@ -484,26 +484,26 @@ export default function Dashboard() {
                   <div className="flex flex-col items-center">
                     {/* Circular Progress */}
                     <div className="relative">
-                      <svg className="w-48 h-48 sm:w-64 sm:h-64 transform -rotate-90">
+                      <svg className="w-48 h-48 sm:w-64 sm:h-64 transform -rotate-90" viewBox="0 0 100 100">
                         {/* Background circle */}
                         <circle
-                          cx="50%"
-                          cy="50%"
-                          r="45%"
+                          cx="50"
+                          cy="50"
+                          r="45"
                           stroke="#e5e7eb"
                           strokeWidth="8"
                           fill="none"
                         />
                         {/* Progress circle */}
                         <motion.circle
-                          cx="50%"
-                          cy="50%"
-                          r="45%"
+                          cx="50"
+                          cy="50"
+                          r="45"
                           stroke="#000000"
                           strokeWidth="8"
                           fill="none"
                           strokeLinecap="round"
-                          strokeDasharray={`${2 * Math.PI * 45} ${2 * Math.PI * 45}`}
+                          strokeDasharray={`${2 * Math.PI * 45}`}
                           initial={{ strokeDashoffset: 2 * Math.PI * 45 }}
                           animate={{
                             strokeDashoffset: 2 * Math.PI * 45 * (1 - (analysisProgress.current / analysisProgress.total))
@@ -536,7 +536,7 @@ export default function Dashboard() {
                         Analyzing Your Business
                       </h2>
                       <p className="text-gray-600 text-sm sm:text-base">
-                        Freja is conducting a deep analysis across 95 dimensions. This typically takes 2-3 minutes.
+                        Freja is conducting a deep analysis across 95 dimensions. This typically takes 15-25 minutes.
                       </p>
                       
                       {/* Animated dots */}
@@ -628,12 +628,15 @@ export default function Dashboard() {
                         the accuracy of your score.
                       </p>
                       <ul className="text-sm text-gray-700 list-disc pl-5 space-y-1">
-                        {dataGaps.gaps.slice(0, 3).map((g: any) => (
-                          <li key={g.dimensionId}>
-                            <span className="font-medium">{g.dimensionName}:</span>{' '}
-                            {g.missingInfo[0]}
-                          </li>
-                        ))}
+                        {dataGaps.gaps.slice(0, 3).map((g: any) => {
+                          const firstMissing = Array.isArray(g.missingInfo) && g.missingInfo.length > 0 ? g.missingInfo[0] : 'Additional details needed';
+                          return (
+                            <li key={g.dimensionId}>
+                              <span className="font-medium">{g.dimensionName}:</span>{' '}
+                              {firstMissing}
+                            </li>
+                          );
+                        })}
                       </ul>
                       {dataGaps.totalGaps > 3 && (
                         <p className="text-xs text-gray-500 mt-2">
@@ -713,7 +716,7 @@ export default function Dashboard() {
                             <span className="text-sm text-gray-800">Complete your business profile</span>
                           </div>
                           <button
-                            onClick={() => router.push('/dashboard?tab=settings')}
+                            onClick={() => (window.location.href = 'https://www.frejfund.com/dashboard')}
                             className="text-xs font-medium text-black hover:underline"
                           >
                             Click here!

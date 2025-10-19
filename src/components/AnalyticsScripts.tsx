@@ -27,7 +27,8 @@ export default function AnalyticsScripts() {
   if (process.env.NODE_ENV !== 'production') return null;
   if (!allowAnalytics) return null;
 
-  const id = process.env.NEXT_PUBLIC_GTM_ID || 'AW-17103900584';
+  const id = process.env.NEXT_PUBLIC_GTM_ID || '';
+  if (!id) return null; // do not load GA/Ads without an explicit ID and consent
 
   return (
     <>
