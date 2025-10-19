@@ -18,8 +18,10 @@ import {
   HelpCircle,
   FileDown,
   X,
+  Lightbulb,
 } from 'lucide-react';
 import Header from '@/components/Header';
+import ImprovementGuide from '@/components/ImprovementGuide';
 
 export const dynamic = 'force-dynamic';
 
@@ -397,6 +399,8 @@ export default function AnalysisPage() {
   }>({ current: 0, total: 95, status: 'idle' });
   const [showInfoPopup, setShowInfoPopup] = useState<string | null>(null);
   const [isRerunning, setIsRerunning] = useState(false);
+  const [selectedDimensionForGuide, setSelectedDimensionForGuide] =
+    useState<AnalysisDimension | null>(null);
 
   useEffect(() => {
     // Ensure we never regenerate a new session id here; rely on existing one
@@ -902,7 +906,7 @@ export default function AnalysisPage() {
 
                     {/* Evidence & Confidence */}
                     {dimension.confidence && (
-                      <div className="mt-4 flex items-center gap-4">
+                      <div className="mt-4 flex flex-wrap items-center gap-4">
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-gray-500">Confidence:</span>
                           <span
@@ -918,6 +922,17 @@ export default function AnalysisPage() {
                               {dimension.evidence.length} data points
                             </span>
                           </div>
+                        )}
+                        {dimension.score < 70 && (
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => setSelectedDimensionForGuide(dimension)}
+                            className="ml-auto text-xs px-3 py-1.5 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-1"
+                          >
+                            <Lightbulb className="w-3 h-3" />
+                            Get Help
+                          </motion.button>
                         )}
                       </div>
                     )}
@@ -1091,6 +1106,15 @@ ${(DIMENSION_EXAMPLES[showInfoPopup] || getAutoExample(showInfoPopup)).dataNeede
           </>
         )}
       </AnimatePresence>
+
+      {/* Improvement Guide Modal */}
+      {selectedDimensionForGuide && (
+        <ImprovementGuide
+          isOpen={!!selectedDimensionForGuide}
+          onClose={() => setSelectedDimensionForGuide(null)}
+          dimension={selectedDimensionForGuide}
+        />
+      )}
     </div>
   );
 }
