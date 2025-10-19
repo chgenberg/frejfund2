@@ -55,7 +55,19 @@ export default function Chatbot() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [shouldHide, setShouldHide] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Hide chatbot on chat and dashboard pages
+  useEffect(() => {
+    const checkPath = () => {
+      const path = window.location.pathname;
+      setShouldHide(path === '/chat' || path === '/dashboard');
+    };
+    checkPath();
+    window.addEventListener('popstate', checkPath);
+    return () => window.removeEventListener('popstate', checkPath);
+  }, []);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -168,6 +180,8 @@ export default function Chatbot() {
     setInput(action);
     handleSend();
   };
+
+  if (shouldHide) return null;
 
   return (
     <>
