@@ -15,12 +15,55 @@ interface Notification {
   createdAt: string;
 }
 
-export default function NotificationBell({ userId }: { userId?: string }) {
+export default function NotificationBell({ userId: propUserId }: { userId?: string }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const router = useRouter();
+
+  // Auto-fetch userId from session/localStorage
+  useEffect(() => {
+    const fetchUserId = async () => {
+      // Use prop if provided
+      if (propUserId) {
+        setUserId(propUserId);
+        return;
+      }
+
+      // Try to get from session API
+      try {
+        const sessionId = localStorage.getItem('frejfund-session-id');
+        if (sessionId) {
+          const res = await fetch(`/api/session/get?sessionId=${sessionId}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.session?.userId) {
+              setUserId(data.session.userId);
+              return;
+            }
+          }
+        }
+      } catch {}
+
+      // Fallback: check if there's a deep analysis for this session
+      try {
+        const sessionId = localStorage.getItem('frejfund-session-id');
+        if (sessionId) {
+          const res = await fetch(`/api/deep-analysis?sessionId=${sessionId}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.userId) {
+              setUserId(data.userId);
+            }
+          }
+        }
+      } catch {}
+    };
+
+    fetchUserId();
+  }, [propUserId]);
 
   const loadNotifications = async () => {
     if (!userId) return;
