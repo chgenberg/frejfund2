@@ -660,17 +660,29 @@ export default function Dashboard() {
                         Welcome! Complete these steps to get the most out of FrejFund:
                       </p>
                       <div className="space-y-2">
-                        <div className="flex items-center space-x-2">
-                          <Clock className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm text-gray-800">
-                            Complete your business profile
-                          </span>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <Clock className="w-4 h-4 text-gray-400" />
+                            <span className="text-sm text-gray-800">Complete your business profile</span>
+                          </div>
+                          <button
+                            onClick={() => router.push('/dashboard?tab=settings')}
+                            className="text-xs font-medium text-black hover:underline"
+                          >
+                            Click here!
+                          </button>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <Clock className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm text-gray-800">
-                            Upload pitch deck or documents
-                          </span>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <Clock className="w-4 h-4 text-gray-400" />
+                            <span className="text-sm text-gray-800">Upload pitch deck or documents</span>
+                          </div>
+                          <button
+                            onClick={() => router.push('/documents')}
+                            className="text-xs font-medium text-black hover:underline"
+                          >
+                            Click here!
+                          </button>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Clock className="w-4 h-4 text-gray-400" />
