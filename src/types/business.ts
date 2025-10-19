@@ -10,6 +10,10 @@ export interface BusinessInfo {
   businessModel: string;
   monthlyRevenue: string;
   teamSize: string;
+  foundingYear?: string;
+  capitalSeeking?: string;
+  previousRounds?: string;
+  shareholderStructure?: string;
   uploadedFiles?: File[];
   preScrapedText?: string;
   preScrapedSources?: Array<{ url?: string; snippet?: string }>;

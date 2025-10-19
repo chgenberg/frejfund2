@@ -69,6 +69,11 @@ async function upsertStartup({ user, analysis, dimensions, insights = [] }) {
 
   // Insert dimensions
   for (const dim of dimensions) {
+    const normalizedEvidence = Array.isArray(dim.evidence)
+      ? dim.evidence.map((e) =>
+          typeof e === 'string' ? e : (e?.snippet || e?.source || JSON.stringify(e)),
+        )
+      : [];
     await prisma.analysisDimension.create({
       data: {
         analysisId: da.id,
@@ -79,7 +84,7 @@ async function upsertStartup({ user, analysis, dimensions, insights = [] }) {
         findings: dim.findings || [],
         redFlags: dim.redFlags || [],
         strengths: dim.strengths || [],
-        evidence: dim.evidence || [],
+        evidence: normalizedEvidence,
         questions: dim.questions || [],
         confidence: dim.confidence || 'medium',
         analyzed: true,
@@ -145,6 +150,10 @@ async function main() {
           growthRate: 22,
           retentionRate: 92,
           burnRate: 120000,
+          foundingYear: '2023',
+          capitalSeeking: '$1M - $3M',
+          previousRounds: 'Pre-seed $400k from Nordic angels (Q4 2023)',
+          shareholderStructure: 'Founders 78%, Angels 22%',
         },
       },
       dimensions: [
@@ -337,6 +346,10 @@ async function main() {
           growthRate: 16,
           retentionRate: 88,
           burnRate: 160000,
+          foundingYear: '2022',
+          capitalSeeking: '$3M - $5M',
+          previousRounds: 'Bootstrapped to date',
+          shareholderStructure: 'Founders 100%',
         },
       },
       dimensions: [
@@ -440,6 +453,10 @@ async function main() {
           growthRate: 19,
           retentionRate: 95,
           burnRate: 210000,
+          foundingYear: '2021',
+          capitalSeeking: '$5M - $10M',
+          previousRounds: 'Seed $2.5M led by Healthtech Capital (Feb 2023)',
+          shareholderStructure: 'Founders 62%, Seed investors 28%, Employees 10%',
         },
       },
       dimensions: [

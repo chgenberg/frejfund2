@@ -52,6 +52,9 @@ interface StartupProfile {
   website?: string;
   linkedIn?: string;
   pitchDeck?: string;
+  capitalSeeking?: string;
+  previousRounds?: string;
+  shareholderStructure?: string;
   metrics: {
     growth: number;
     retention: number;
@@ -371,7 +374,7 @@ export default function StartupProfilePage() {
                     <div>
                       <div className="text-sm text-gray-600">Seeking</div>
                       <div className="text-xl font-bold text-black">
-                        ${(startup.seeking / 1000000).toFixed(1)}M
+                        {startup.capitalSeeking || `$${(startup.seeking / 1000000).toFixed(1)}M`}
                       </div>
                     </div>
                     {startup.raised > 0 && (
@@ -380,6 +383,18 @@ export default function StartupProfilePage() {
                         <div className="text-xl font-bold text-black">
                           ${(startup.raised / 1000000).toFixed(1)}M
                         </div>
+                      </div>
+                    )}
+                    {startup.previousRounds && (
+                      <div>
+                        <div className="text-sm text-gray-600">Previous Rounds</div>
+                        <div className="text-sm text-black">{startup.previousRounds}</div>
+                      </div>
+                    )}
+                    {startup.shareholderStructure && (
+                      <div>
+                        <div className="text-sm text-gray-600">Ownership</div>
+                        <div className="text-sm text-black">{startup.shareholderStructure}</div>
                       </div>
                     )}
                   </div>

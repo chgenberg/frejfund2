@@ -43,6 +43,11 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
       fields: ['stage', 'industry', 'targetMarket', 'businessModel'],
     },
     {
+      title: 'Funding & Ownership',
+      subtitle: 'Tell us about your funding journey',
+      fields: ['foundingYear', 'capitalSeeking', 'previousRounds', 'shareholderStructure'],
+    },
+    {
       title: 'Scale & Team',
       subtitle: 'Current revenue and team size',
       fields: ['monthlyRevenue', 'teamSize', 'linkedinProfiles'],
@@ -667,6 +672,82 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
             />
             <p className="text-sm text-gray-500 mt-1">
               Comma-separated LinkedIn URLs for team analysis
+            </p>
+          </div>
+        );
+
+      case 'foundingYear':
+        return (
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              When was your company founded? *
+            </label>
+            <input
+              type="number"
+              value={businessInfo.foundingYear || ''}
+              onChange={(e) => handleInputChange('foundingYear', e.target.value)}
+              placeholder="2023"
+              min="1900"
+              max={new Date().getFullYear()}
+              className="minimal-select w-full"
+            />
+          </div>
+        );
+
+      case 'capitalSeeking':
+        return (
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              How much capital are you raising? *
+            </label>
+            <select
+              value={businessInfo.capitalSeeking || ''}
+              onChange={(e) => handleInputChange('capitalSeeking', e.target.value)}
+              className="minimal-select w-full"
+            >
+              <option value="">Select amount</option>
+              <option value="under-500k">Under $500k</option>
+              <option value="500k-1m">$500k - $1M</option>
+              <option value="1m-3m">$1M - $3M</option>
+              <option value="3m-5m">$3M - $5M</option>
+              <option value="5m-10m">$5M - $10M</option>
+              <option value="10m+">$10M+</option>
+            </select>
+          </div>
+        );
+
+      case 'previousRounds':
+        return (
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Previous funding rounds (if any)
+            </label>
+            <textarea
+              value={businessInfo.previousRounds || ''}
+              onChange={(e) => handleInputChange('previousRounds', e.target.value)}
+              placeholder="e.g., Pre-seed $200k from angels (Jan 2023)"
+              rows={3}
+              className="minimal-select w-full resize-none"
+            />
+            <p className="text-xs text-gray-400 mt-1">Brief summary of previous raises, if applicable</p>
+          </div>
+        );
+
+      case 'shareholderStructure':
+        return (
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Current ownership structure
+            </label>
+            <textarea
+              value={businessInfo.shareholderStructure || ''}
+              onChange={(e) => handleInputChange('shareholderStructure', e.target.value)}
+              placeholder="e.g., Founders 85%, Angels 15% (fully diluted)"
+              rows={3}
+              className="minimal-select w-full resize-none"
+            />
+            <p className="text-xs text-gray-400 mt-1">
+              Describe founder/investor split (optional but helpful for due diligence)
             </p>
           </div>
         );

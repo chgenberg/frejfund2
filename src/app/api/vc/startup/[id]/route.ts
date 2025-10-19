@@ -85,7 +85,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       seeking: startup.askAmount || businessInfo?.seeking || 1000000,
       monthlyRevenue: businessInfo?.monthlyRevenue || 0,
       teamSize: businessInfo?.teamSize || 1,
-      foundedYear: businessInfo?.foundedYear || new Date().getFullYear(),
+      foundedYear: businessInfo?.foundingYear || businessInfo?.foundedYear || new Date().getFullYear(),
       readinessScore: analysis?.investmentReadiness || 50,
       overallScore: analysis?.overallScore || 50,
       oneLiner: startup.oneLiner || businessInfo?.description || 'Building the future',
@@ -93,6 +93,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       linkedIn: businessInfo?.linkedinProfiles?.[0] || null,
       pitchDeck: startup.pitchDeck || null,
       traction: startup.traction || businessInfo?.traction || {},
+      capitalSeeking: businessInfo?.capitalSeeking || null,
+      previousRounds: businessInfo?.previousRounds || null,
+      shareholderStructure: businessInfo?.shareholderStructure || null,
       metrics: {
         growth:
           getScoreFromDimensions(analysis?.dimensions || [], 'Revenue Growth') ||
