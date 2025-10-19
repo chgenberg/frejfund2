@@ -116,9 +116,9 @@ export default function FounderMessagesPage() {
 
       <div className="flex-1 flex pt-20">
         {/* Conversations Sidebar */}
-        <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
-          <div className="p-4 border-b border-gray-200">
-            <h2 className="text-lg font-bold text-black">Investor Messages</h2>
+        <div className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col">
+          <div className="p-4 border-b border-gray-200 bg-white">
+            <h2 className="text-xl font-bold text-black">Messages</h2>
             <p className="text-sm text-gray-600 mt-1">
               {conversations.length} active conversation{conversations.length !== 1 ? 's' : ''}
             </p>
@@ -132,32 +132,31 @@ export default function FounderMessagesPage() {
               </div>
             ) : (
               conversations.map((convo) => (
-                <motion.div
-                  key={convo.id}
-                  whileHover={{ backgroundColor: '#f9fafb' }}
-                  onClick={() => setActiveConvo(convo)}
-                  className={`p-4 cursor-pointer border-b border-gray-100 ${
-                    activeConvo?.id === convo.id ? 'bg-gray-100' : ''
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gray-900 rounded-full flex items-center justify-center flex-shrink-0 text-white">
-                      <Building2 className="w-5 h-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-black truncate">{convo.vcFirm}</h3>
-                        {convo.unreadCount > 0 && (
-                          <span className="w-5 h-5 bg-blue-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                            {convo.unreadCount}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-600 truncate">{convo.vcName}</p>
-                      <p className="text-xs text-gray-500 truncate mt-1">{convo.lastMessage}</p>
-                    </div>
+              <motion.div
+                key={convo.id}
+                whileHover={{ backgroundColor: '#ffffff' }}
+                onClick={() => setActiveConvo(convo)}
+                className={`p-4 cursor-pointer border-b border-gray-100 transition-all ${
+                  activeConvo?.id === convo.id ? 'bg-white' : ''
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">
+                    {convo.vcFirm.substring(0, 2).toUpperCase()}
                   </div>
-                </motion.div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="font-semibold text-black truncate text-sm">{convo.vcFirm}</h3>
+                      {convo.unreadCount > 0 && (
+                        <span className="w-5 h-5 bg-black text-white text-xs font-bold rounded-full flex items-center justify-center">
+                          {convo.unreadCount}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 truncate">{convo.lastMessage}</p>
+                  </div>
+                </div>
+              </motion.div>
               ))
             )}
           </div>
@@ -167,37 +166,37 @@ export default function FounderMessagesPage() {
         <div className="flex-1 flex flex-col bg-gray-50">
           {activeConvo ? (
             <>
-              {/* Chat Header */}
-              <div className="p-4 bg-white border-b border-gray-200">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gray-900 rounded-full flex items-center justify-center text-white">
-                    <Building2 className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h2 className="font-bold text-black">{activeConvo.vcFirm}</h2>
-                    <p className="text-sm text-gray-600">{activeConvo.vcName}</p>
-                  </div>
+            {/* Chat Header */}
+            <div className="p-4 bg-white border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  {activeConvo.vcFirm.substring(0, 2).toUpperCase()}
+                </div>
+                <div>
+                  <h2 className="font-semibold text-black text-sm">{activeConvo.vcFirm}</h2>
+                  <p className="text-xs text-gray-500">{activeConvo.vcName}</p>
                 </div>
               </div>
+            </div>
 
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-3 bg-white">
                 {messages.map((msg) => (
                   <div
                     key={msg.id}
                     className={`flex ${msg.senderType === 'founder' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-md px-4 py-2 rounded-2xl ${
+                      className={`max-w-md px-4 py-3 rounded-3xl ${
                         msg.senderType === 'founder'
                           ? 'bg-black text-white'
-                          : 'bg-white border border-gray-200 text-black'
+                          : 'bg-gray-100 text-black'
                       }`}
                     >
-                      <p className="text-sm">{msg.content}</p>
+                      <p className="text-sm leading-relaxed">{msg.content}</p>
                       <div
-                        className={`flex items-center gap-1 mt-1 text-xs ${
-                          msg.senderType === 'founder' ? 'text-gray-300' : 'text-gray-500'
+                        className={`flex items-center gap-1 mt-1.5 text-xs ${
+                          msg.senderType === 'founder' ? 'text-gray-400' : 'text-gray-500'
                         }`}
                       >
                         <span>
@@ -223,25 +222,24 @@ export default function FounderMessagesPage() {
               </div>
 
               {/* Input */}
-              <div className="p-4 bg-white border-t border-gray-200">
-                <div className="flex items-center gap-2">
+              <div className="p-4 bg-white border-t border-gray-100">
+                <div className="flex items-center gap-3">
                   <input
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-                    placeholder="Type a message..."
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                    placeholder="Message..."
+                    className="flex-1 px-4 py-3 bg-gray-50 border-0 rounded-3xl focus:ring-2 focus:ring-gray-200 focus:bg-white transition-all text-sm"
                   />
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={sendMessage}
                     disabled={!inputValue.trim() || sending}
-                    className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    className="w-10 h-10 bg-black text-white rounded-full hover:bg-gray-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center"
                   >
                     <Send className="w-4 h-4" />
-                    Send
                   </motion.button>
                 </div>
               </div>

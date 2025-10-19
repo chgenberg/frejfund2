@@ -2116,13 +2116,9 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   }}
                   transition={{ duration: 2, repeat: Infinity, ease: 'easeOut', delay: 0.5 }}
                 />
-                <motion.div
-                  className="relative w-10 h-10 bg-black rounded-full flex items-center justify-center shadow-lg overflow-hidden"
-                  animate={{ scale: [1, 1.02, 1] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                >
+                <div className="relative w-10 h-10 bg-black rounded-full flex items-center justify-center shadow-lg overflow-hidden">
                   <img src="/freja.png" alt="Freja" className="w-full h-full object-cover" />
-                </motion.div>
+                </div>
               </motion.div>
 
               <motion.div

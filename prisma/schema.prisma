@@ -647,3 +647,21 @@ model AnalysisInsight {
   @@index([priority])
   @@map("analysis_insights")
 }
+
+// Score history for progress tracking
+model ScoreHistory {
+  id            String   @id @default(cuid())
+  userId        String
+  sessionId     String
+  dimensionId   String
+  dimensionName String
+  score         Int
+  overallScore  Int?
+  recordedAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([dimensionId])
+  @@index([recordedAt])
+  @@map("score_history")
+}

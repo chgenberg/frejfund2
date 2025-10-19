@@ -326,7 +326,34 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
       },
     });
 
-    // 6. Trigger automatic matching with VCs (async, non-blocking)
+    // 6. Record score history for progress tracking
+    if (analysis.userId) {
+      try {
+        const allDimensions = await prisma.analysisDimension.findMany({
+          where: { analysisId: analysis.id },
+          select: { dimensionId: true, name: true, score: true },
+        });
+
+        for (const dim of allDimensions) {
+          if (dim.score) {
+            await prisma.scoreHistory.create({
+              data: {
+                userId: analysis.userId,
+                sessionId,
+                dimensionId: dim.dimensionId,
+                dimensionName: dim.name,
+                score: dim.score,
+                overallScore: avgScore,
+              },
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Failed to record score history:', e);
+      }
+    }
+
+    // 7. Trigger automatic matching with VCs (async, non-blocking)
     if (analysis.userId && avgScore >= 60) {
       // Only match if score is decent
       try {
