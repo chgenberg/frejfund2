@@ -1,4 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
+import crypto from 'node:crypto';
 
 export const config = {
   matcher: ['/vc/:path*', '/api/:path*'],
@@ -35,7 +36,11 @@ export function middleware(req: NextRequest) {
     }
   }
 
+  // Generate or propagate request-id
+  const incomingRid = req.headers.get('x-request-id');
+  const rid = incomingRid || crypto.randomUUID();
   const res = NextResponse.next();
+  res.headers.set('x-request-id', rid);
   // Security headers
   res.headers.set('X-Frame-Options', 'DENY');
   res.headers.set('X-Content-Type-Options', 'nosniff');

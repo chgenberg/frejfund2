@@ -3,6 +3,7 @@
  */
 
 import { getModelPricing } from '@/lib/ai-client';
+import { logger } from '@/lib/logger';
 
 export type AICostLog = {
   model: string;
@@ -30,13 +31,10 @@ export function estimateCostUsd(
 
 export function logAICost(log: AICostLog) {
   try {
-    const line = {
-      type: 'ai_cost',
+    logger.info('ai_cost', {
       ts: new Date().toISOString(),
       ...log,
-    };
-    // Console structured log
-    console.log(JSON.stringify(line));
+    });
   } catch (e) {
     console.error('[CostLogger] Failed to log cost:', e);
   }
