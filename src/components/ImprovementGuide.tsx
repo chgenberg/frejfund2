@@ -239,7 +239,8 @@ export default function ImprovementGuide({ isOpen, onClose, dimension }: Improve
               <div className="bg-gradient-to-r from-black to-gray-800 text-white p-4 rounded-xl">
                 <h3 className="font-semibold mb-2">💬 Need personalized guidance?</h3>
                 <p className="text-sm text-gray-300 mb-3">
-                  Chat with Freja for step-by-step coaching on improving {dimension.name.toLowerCase()}.
+                  Chat with Freja for step-by-step coaching on improving{' '}
+                  {dimension.name.toLowerCase()}.
                 </p>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -261,4 +262,3 @@ export default function ImprovementGuide({ isOpen, onClose, dimension }: Improve
     </AnimatePresence>
   );
 }
-

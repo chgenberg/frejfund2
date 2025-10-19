@@ -111,9 +111,7 @@ export async function notifyFounderOfVCInterest(
   interestType: 'swipe' | 'intro_request',
 ) {
   const title =
-    interestType === 'intro_request'
-      ? `${vcFirm} wants to connect!`
-      : `${vcFirm} is interested`;
+    interestType === 'intro_request' ? `${vcFirm} wants to connect!` : `${vcFirm} is interested`;
   const message =
     interestType === 'intro_request'
       ? `${vcName} from ${vcFirm} has requested an introduction. Review and respond.`
@@ -163,4 +161,3 @@ export async function notifyVCOfIntroAcceptance(
     `/vc/messages/${introId}`,
   );
 }
-

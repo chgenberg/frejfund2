@@ -199,10 +199,21 @@ export default function PrivacyPolicy() {
               We use AI to analyze your business and provide insights. Here's how:
             </p>
             <ul className="list-disc pl-6 text-gray-700 mb-4">
-              <li>We process your inputs (including uploaded documents and scraped public data) via third-party AI providers (e.g., OpenAI) to generate assessments.</li>
-              <li>We log token usage and estimated AI costs for transparency and abuse prevention.</li>
-              <li>Analysis results are stored with your profile. You can request deletion or correction at any time.</li>
-              <li>We do not use your private data to train public models. Provider-side policies may apply.</li>
+              <li>
+                We process your inputs (including uploaded documents and scraped public data) via
+                third-party AI providers (e.g., OpenAI) to generate assessments.
+              </li>
+              <li>
+                We log token usage and estimated AI costs for transparency and abuse prevention.
+              </li>
+              <li>
+                Analysis results are stored with your profile. You can request deletion or
+                correction at any time.
+              </li>
+              <li>
+                We do not use your private data to train public models. Provider-side policies may
+                apply.
+              </li>
               <li>You can request human review of AI-generated conclusions or actions.</li>
             </ul>
 
@@ -213,17 +224,26 @@ export default function PrivacyPolicy() {
                 <strong>Essential cookies:</strong> Required for platform functionality
               </li>
               <li>
-                <strong>Analytics cookies:</strong> Help us understand usage (with consent via cookie banner)
+                <strong>Analytics cookies:</strong> Help us understand usage (with consent via
+                cookie banner)
               </li>
               <li>
                 <strong>Preference cookies:</strong> Remember your settings
               </li>
             </ul>
-            <p className="text-gray-700 mb-4">You can manage cookie preferences via our cookie banner and/or in your browser settings.</p>
-
-            <h2 className="text-2xl font-bold text-black mt-8 mb-4">11. Data Storage and Locations</h2>
             <p className="text-gray-700 mb-4">
-              Uploaded files are stored in cloud object storage (e.g., AWS S3) in regions configured by us. We process data in the EU and/or US depending on service provider. We use encryption in transit and at rest where available. For detailed processing locations and subprocessors, see our Data Processing Addendum (DPA).
+              You can manage cookie preferences via our cookie banner and/or in your browser
+              settings.
+            </p>
+
+            <h2 className="text-2xl font-bold text-black mt-8 mb-4">
+              11. Data Storage and Locations
+            </h2>
+            <p className="text-gray-700 mb-4">
+              Uploaded files are stored in cloud object storage (e.g., AWS S3) in regions configured
+              by us. We process data in the EU and/or US depending on service provider. We use
+              encryption in transit and at rest where available. For detailed processing locations
+              and subprocessors, see our Data Processing Addendum (DPA).
             </p>
 
             <h2 className="text-2xl font-bold text-black mt-8 mb-4">12. Changes to This Policy</h2>

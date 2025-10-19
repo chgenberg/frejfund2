@@ -72,12 +72,7 @@ export async function POST(req: NextRequest) {
       if (user?.id) {
         try {
           const { notifyFounderOfVCInterest } = await import('@/lib/notification-service');
-          await notifyFounderOfVCInterest(
-            user.id,
-            vcEmail.split('@')[0],
-            vcFirm,
-            'intro_request',
-          );
+          await notifyFounderOfVCInterest(user.id, vcEmail.split('@')[0], vcFirm, 'intro_request');
         } catch (e) {
           console.error('Failed to notify founder:', e);
         }

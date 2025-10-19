@@ -65,9 +65,7 @@ export function estimateReadiness(businessInfo: any, kpis: NormalizedKPIs): numb
   return readiness;
 }
 
-export async function computeVcAffinity(
-  vcEmail: string,
-): Promise<{
+export async function computeVcAffinity(vcEmail: string): Promise<{
   industry: Record<string, number>;
   stage: Record<string, number>;
   geography: Record<string, number>;
@@ -138,8 +136,7 @@ export function blendMatchScore(params: {
   affinity: { industry?: number; stage?: number; geography?: number };
 }): number {
   const { baseScore, kpiScore, readinessScore, affinity } = params;
-  const blended =
-    baseScore * 0.5 + kpiScore * 0.2 + readinessScore * 0.2 + 100 * 0.1; // affinity applied multiplicatively below
+  const blended = baseScore * 0.5 + kpiScore * 0.2 + readinessScore * 0.2 + 100 * 0.1; // affinity applied multiplicatively below
   const multiplier = (affinity.industry || 1) * (affinity.stage || 1) * (affinity.geography || 1);
   return Math.round(clamp(blended * multiplier, 0, 100));
 }

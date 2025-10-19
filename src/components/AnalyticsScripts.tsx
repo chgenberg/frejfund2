@@ -31,7 +31,11 @@ export default function AnalyticsScripts() {
 
   return (
     <>
-      <Script id="gtag-src" strategy="afterInteractive" src={`https://www.googletagmanager.com/gtag/js?id=${id}`} />
+      <Script
+        id="gtag-src"
+        strategy="afterInteractive"
+        src={`https://www.googletagmanager.com/gtag/js?id=${id}`}
+      />
       <Script
         id="gtag-init"
         strategy="afterInteractive"
@@ -51,5 +55,3 @@ export default function AnalyticsScripts() {
     </>
   );
 }
-
-

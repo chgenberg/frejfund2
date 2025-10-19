@@ -224,4 +224,3 @@ export default function NotificationBell({ userId: propUserId }: { userId?: stri
     </div>
   );
 }
-

@@ -359,9 +359,7 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
       try {
         const { autoMatchStartupWithVCs } = await import('@/lib/auto-matching');
         // Fire and forget – don't block analysis completion
-        autoMatchStartupWithVCs(sessionId).catch((e) =>
-          console.error('Auto-matching failed:', e),
-        );
+        autoMatchStartupWithVCs(sessionId).catch((e) => console.error('Auto-matching failed:', e));
       } catch (e) {
         console.error('Failed to trigger auto-matching:', e);
       }

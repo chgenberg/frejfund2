@@ -37,7 +37,11 @@ export function middleware(req: NextRequest) {
 
   // Generate or propagate request-id
   const incomingRid = req.headers.get('x-request-id');
-  const rid = incomingRid || (globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  const rid =
+    incomingRid ||
+    (globalThis.crypto?.randomUUID
+      ? globalThis.crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
   const res = NextResponse.next();
   res.headers.set('x-request-id', rid);
   // Security headers

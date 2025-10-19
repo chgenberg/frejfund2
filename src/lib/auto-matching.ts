@@ -215,4 +215,3 @@ function isAdjacentStage(stage: string, vcStages: string[]): boolean {
   };
   return vcStages.some((vcStage) => adjacency[stage]?.includes(normalizeStage(vcStage)));
 }
-

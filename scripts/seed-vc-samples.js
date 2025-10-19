@@ -71,7 +71,7 @@ async function upsertStartup({ user, analysis, dimensions, insights = [] }) {
   for (const dim of dimensions) {
     const normalizedEvidence = Array.isArray(dim.evidence)
       ? dim.evidence.map((e) =>
-          typeof e === 'string' ? e : (e?.snippet || e?.source || JSON.stringify(e)),
+          typeof e === 'string' ? e : e?.snippet || e?.source || JSON.stringify(e),
         )
       : [];
     await prisma.analysisDimension.create({
@@ -280,7 +280,7 @@ async function main() {
           title: 'Net revenue retention 115%',
           description: 'Expansion after onboarding shows strong product stickiness.',
           recommendation: 'Package expansion playbooks by segment.',
-          relatedDimensions: ['traction','business-model'],
+          relatedDimensions: ['traction', 'business-model'],
           evidence: ['Stripe exports'],
         },
         {
@@ -290,8 +290,8 @@ async function main() {
           title: 'EU data residency wedge',
           description: 'Public sector accounts want EU-hosted infra.',
           recommendation: 'Target 3 lighthouse municipalities.',
-          relatedDimensions: ['competition','market-size'],
-        }
+          relatedDimensions: ['competition', 'market-size'],
+        },
       ],
       insights: [
         {

@@ -18,14 +18,12 @@ export async function POST(req: NextRequest) {
     const model = getChatModel();
     const hasKey = Boolean(process.env.OPENAI_API_KEY || process.env.AZURE_OPENAI_API_KEY);
     if (!hasKey) {
-      const tips = top
-        .slice(0, 3)
-        .map((t, i) => ({
-          title: `Tip ${i + 1}: ${t.text.slice(0, 60)}`,
-          why: 'Based on recent context',
-          action: 'Follow up within 24h',
-          priority: i === 0 ? 'high' : 'medium',
-        }));
+      const tips = top.slice(0, 3).map((t, i) => ({
+        title: `Tip ${i + 1}: ${t.text.slice(0, 60)}`,
+        why: 'Based on recent context',
+        action: 'Follow up within 24h',
+        priority: i === 0 ? 'high' : 'medium',
+      }));
       return NextResponse.json({ tips });
     }
     const client = getOpenAIClient();

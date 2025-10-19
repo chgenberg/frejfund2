@@ -143,14 +143,20 @@ export default function VCMessagesPage() {
                 <div className="flex items-start gap-3">
                   <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">
                     {convo.founderLogo ? (
-                      <img src={convo.founderLogo} alt="" className="w-full h-full rounded-full object-cover" />
+                      <img
+                        src={convo.founderLogo}
+                        alt=""
+                        className="w-full h-full rounded-full object-cover"
+                      />
                     ) : (
                       convo.founderCompany.substring(0, 2).toUpperCase()
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
-                      <h3 className="font-semibold text-black truncate text-sm">{convo.founderCompany}</h3>
+                      <h3 className="font-semibold text-black truncate text-sm">
+                        {convo.founderCompany}
+                      </h3>
                       {convo.unreadCount > 0 && (
                         <span className="w-5 h-5 bg-black text-white text-xs font-bold rounded-full flex items-center justify-center">
                           {convo.unreadCount}
@@ -170,29 +176,29 @@ export default function VCMessagesPage() {
       <div className="flex-1 flex flex-col">
         {activeConvo ? (
           <>
-              {/* Chat Header */}
-              <div className="p-4 bg-white border-b border-gray-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white font-bold text-sm">
-                    {activeConvo.founderLogo ? (
-                      <img
-                        src={activeConvo.founderLogo}
-                        alt=""
-                        className="w-full h-full rounded-full object-cover"
-                      />
-                    ) : (
-                      activeConvo.founderCompany.substring(0, 2).toUpperCase()
-                    )}
-                  </div>
-                  <div>
-                    <h2 className="font-semibold text-black text-sm">{activeConvo.founderCompany}</h2>
-                    <p className="text-xs text-gray-500">{activeConvo.founderName}</p>
-                  </div>
+            {/* Chat Header */}
+            <div className="p-4 bg-white border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  {activeConvo.founderLogo ? (
+                    <img
+                      src={activeConvo.founderLogo}
+                      alt=""
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    activeConvo.founderCompany.substring(0, 2).toUpperCase()
+                  )}
+                </div>
+                <div>
+                  <h2 className="font-semibold text-black text-sm">{activeConvo.founderCompany}</h2>
+                  <p className="text-xs text-gray-500">{activeConvo.founderName}</p>
                 </div>
               </div>
+            </div>
 
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-3 bg-white">
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-3 bg-white">
               {messages.map((msg) => (
                 <div
                   key={msg.id}
@@ -200,9 +206,7 @@ export default function VCMessagesPage() {
                 >
                   <div
                     className={`max-w-md px-4 py-3 rounded-3xl ${
-                      msg.senderType === 'vc'
-                        ? 'bg-black text-white'
-                        : 'bg-gray-100 text-black'
+                      msg.senderType === 'vc' ? 'bg-black text-white' : 'bg-gray-100 text-black'
                     }`}
                   >
                     <p className="text-sm leading-relaxed">{msg.content}</p>
@@ -218,7 +222,13 @@ export default function VCMessagesPage() {
                         })}
                       </span>
                       {msg.senderType === 'vc' && (
-                        <>{msg.isRead ? <CheckCheck className="w-3 h-3" /> : <Check className="w-3 h-3" />}</>
+                        <>
+                          {msg.isRead ? (
+                            <CheckCheck className="w-3 h-3" />
+                          ) : (
+                            <Check className="w-3 h-3" />
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
@@ -259,4 +269,3 @@ export default function VCMessagesPage() {
     </div>
   );
 }
-

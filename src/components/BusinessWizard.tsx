@@ -733,7 +733,9 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
               rows={3}
               className="minimal-select w-full resize-none"
             />
-            <p className="text-xs text-gray-400 mt-1">Brief summary of previous raises, if applicable</p>
+            <p className="text-xs text-gray-400 mt-1">
+              Brief summary of previous raises, if applicable
+            </p>
           </div>
         );
 

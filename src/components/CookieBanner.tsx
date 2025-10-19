@@ -13,7 +13,11 @@ const STORAGE_KEY = 'ff_cookie_consent_v1';
 
 export default function CookieBanner() {
   const [visible, setVisible] = useState(false);
-  const [consent, setConsent] = useState<Consent>({ necessary: true, analytics: false, marketing: false });
+  const [consent, setConsent] = useState<Consent>({
+    necessary: true,
+    analytics: false,
+    marketing: false,
+  });
 
   useEffect(() => {
     try {
@@ -56,8 +60,8 @@ export default function CookieBanner() {
         <div className="mx-auto max-w-5xl m-4 p-4 sm:p-5 bg-white border border-gray-200 rounded-2xl shadow-xl">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="text-sm text-gray-700">
-              We use cookies to make FrejFund work and to improve it with analytics and marketing (optional).
-              You can change your preferences anytime.
+              We use cookies to make FrejFund work and to improve it with analytics and marketing
+              (optional). You can change your preferences anytime.
             </div>
             <div className="flex items-center gap-2">
               <label className="text-xs text-gray-700 flex items-center gap-2">
@@ -82,10 +86,16 @@ export default function CookieBanner() {
             </div>
           </div>
           <div className="mt-4 flex flex-col sm:flex-row gap-2 justify-end">
-            <button onClick={saveSelection} className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
+            <button
+              onClick={saveSelection}
+              className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
               Save selection
             </button>
-            <button onClick={acceptAll} className="px-4 py-2 text-sm bg-black text-white rounded-lg hover:bg-gray-800">
+            <button
+              onClick={acceptAll}
+              className="px-4 py-2 text-sm bg-black text-white rounded-lg hover:bg-gray-800"
+            >
               Accept all
             </button>
           </div>
@@ -94,5 +104,3 @@ export default function CookieBanner() {
     </AnimatePresence>
   );
 }
-
-

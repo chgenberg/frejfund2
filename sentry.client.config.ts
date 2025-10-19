@@ -8,5 +8,3 @@ Sentry.init({
   release: process.env.SENTRY_RELEASE,
   environment: process.env.NODE_ENV,
 });
-
-

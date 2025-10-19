@@ -132,31 +132,33 @@ export default function FounderMessagesPage() {
               </div>
             ) : (
               conversations.map((convo) => (
-              <motion.div
-                key={convo.id}
-                whileHover={{ backgroundColor: '#ffffff' }}
-                onClick={() => setActiveConvo(convo)}
-                className={`p-4 cursor-pointer border-b border-gray-100 transition-all ${
-                  activeConvo?.id === convo.id ? 'bg-white' : ''
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">
-                    {convo.vcFirm.substring(0, 2).toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <h3 className="font-semibold text-black truncate text-sm">{convo.vcFirm}</h3>
-                      {convo.unreadCount > 0 && (
-                        <span className="w-5 h-5 bg-black text-white text-xs font-bold rounded-full flex items-center justify-center">
-                          {convo.unreadCount}
-                        </span>
-                      )}
+                <motion.div
+                  key={convo.id}
+                  whileHover={{ backgroundColor: '#ffffff' }}
+                  onClick={() => setActiveConvo(convo)}
+                  className={`p-4 cursor-pointer border-b border-gray-100 transition-all ${
+                    activeConvo?.id === convo.id ? 'bg-white' : ''
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">
+                      {convo.vcFirm.substring(0, 2).toUpperCase()}
                     </div>
-                    <p className="text-xs text-gray-500 truncate">{convo.lastMessage}</p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="font-semibold text-black truncate text-sm">
+                          {convo.vcFirm}
+                        </h3>
+                        {convo.unreadCount > 0 && (
+                          <span className="w-5 h-5 bg-black text-white text-xs font-bold rounded-full flex items-center justify-center">
+                            {convo.unreadCount}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-500 truncate">{convo.lastMessage}</p>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
+                </motion.div>
               ))
             )}
           </div>
@@ -166,21 +168,21 @@ export default function FounderMessagesPage() {
         <div className="flex-1 flex flex-col bg-gray-50">
           {activeConvo ? (
             <>
-            {/* Chat Header */}
-            <div className="p-4 bg-white border-b border-gray-100">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white font-bold text-sm">
-                  {activeConvo.vcFirm.substring(0, 2).toUpperCase()}
-                </div>
-                <div>
-                  <h2 className="font-semibold text-black text-sm">{activeConvo.vcFirm}</h2>
-                  <p className="text-xs text-gray-500">{activeConvo.vcName}</p>
+              {/* Chat Header */}
+              <div className="p-4 bg-white border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    {activeConvo.vcFirm.substring(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <h2 className="font-semibold text-black text-sm">{activeConvo.vcFirm}</h2>
+                    <p className="text-xs text-gray-500">{activeConvo.vcName}</p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-3 bg-white">
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-3 bg-white">
                 {messages.map((msg) => (
                   <div
                     key={msg.id}
@@ -256,4 +258,3 @@ export default function FounderMessagesPage() {
     </div>
   );
 }
-
