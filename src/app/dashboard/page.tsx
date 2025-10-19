@@ -460,38 +460,7 @@ export default function Dashboard() {
         </button>
       </nav>
 
-      {/* Deep Analysis Progress Banner */}
-      {(analysisProgress.status === 'running' ||
-        (analysisProgress.current > 0 && analysisProgress.current < analysisProgress.total)) && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          className="bg-black text-white px-3 sm:px-6 py-3"
-        >
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="flex space-x-1">
-                {[0, 1, 2].map((i) => (
-                  <motion.div
-                    key={i}
-                    className="w-1.5 h-1.5 bg-white rounded-full"
-                    animate={{ opacity: [0.3, 1, 0.3] }}
-                    transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.2 }}
-                  />
-                ))}
-              </div>
-              <span className="text-sm">
-                Deep analysis in progress... {analysisProgress.current} of {analysisProgress.total}{' '}
-                dimensions analyzed
-              </span>
-            </div>
-            <span className="text-sm font-medium">
-              {Math.round((analysisProgress.current / analysisProgress.total) * 100)}%
-            </span>
-          </div>
-        </motion.div>
-      )}
+      {/* Slim banner removed to avoid duplicating progress on Dashboard */}
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
@@ -525,9 +494,9 @@ export default function Dashboard() {
                       <span>{analysisProgress.current} of {analysisProgress.total} dimensions</span>
                     </div>
                     
-                    <div className="relative h-8 bg-gray-700 rounded-full overflow-hidden">
+                <div className="relative h-8 bg-gray-200 rounded-full overflow-hidden">
                       <motion.div
-                        className="absolute top-0 left-0 h-full bg-gradient-to-r from-green-400 to-blue-400"
+                        className="absolute top-0 left-0 h-full bg-white"
                         initial={{ width: 0 }}
                         animate={{ 
                           width: `${(analysisProgress.current / analysisProgress.total) * 100}%` 
