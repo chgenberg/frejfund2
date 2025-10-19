@@ -8,7 +8,7 @@ function daysAgo(n) {
   return d;
 }
 
-async function upsertStartup({ user, analysis, dimensions }) {
+async function upsertStartup({ user, analysis, dimensions, insights = [] }) {
   // Upsert user (public profile)
   const dbUser = await prisma.user.upsert({
     where: { email: user.email },
@@ -81,9 +81,28 @@ async function upsertStartup({ user, analysis, dimensions }) {
         strengths: dim.strengths || [],
         evidence: dim.evidence || [],
         questions: dim.questions || [],
+        confidence: dim.confidence || 'medium',
         analyzed: true,
         analyzedAt: daysAgo(analysis.completedDaysAgo || 1),
         modelUsed: 'gpt-5-mini',
+      },
+    });
+  }
+
+  // Insert high-level insights if provided
+  for (const ins of insights) {
+    await prisma.analysisInsight.create({
+      data: {
+        analysisId: da.id,
+        type: ins.type,
+        priority: ins.priority || 'medium',
+        category: ins.category || 'General',
+        title: ins.title,
+        description: ins.description || '',
+        recommendation: ins.recommendation || null,
+        relatedDimensions: ins.relatedDimensions || [],
+        evidence: ins.evidence || [],
+        createdAt: daysAgo(analysis.completedDaysAgo || 1),
       },
     });
   }
@@ -137,6 +156,8 @@ async function main() {
           strengths: ['Clear pain for data teams'],
           findings: ['High data latency costs'],
           questions: ['Biggest customer pain quantified?'],
+          evidence: [{ source: 'customer-interviews', snippet: 'Avg pipeline delays 6–12h' }],
+          confidence: 'high',
         },
         {
           dimensionId: 'solution-fit',
@@ -145,6 +166,9 @@ async function main() {
           score: 80,
           strengths: ['ML pipeline automation reduces time-to-production'],
           findings: ['Clear feature roadmap'],
+          redFlags: ['Limited on-prem connectors'],
+          evidence: [{ source: 'pilot-report', snippet: 'Deployment time cut 8w → 3w' }],
+          confidence: 'medium',
         },
         {
           dimensionId: 'market-size',
@@ -152,6 +176,8 @@ async function main() {
           name: 'Market Size',
           score: 76,
           findings: ['Data infra TAM $50B+'],
+          evidence: [{ source: 'Gartner', snippet: 'Data infra CAGR 19%' }],
+          confidence: 'medium',
         },
         {
           dimensionId: 'competition',
@@ -160,6 +186,8 @@ async function main() {
           score: 72,
           findings: ['Differentiates vs. Fivetran, Airflow'],
           strengths: ['Latency + governance focus'],
+          questions: ['Top 3 substitutes for each buyer segment?'],
+          confidence: 'medium',
         },
         {
           dimensionId: 'business-model',
@@ -167,6 +195,8 @@ async function main() {
           name: 'Business Model Clarity',
           score: 82,
           findings: ['Tiered seat + usage pricing'],
+          strengths: ['Land-and-expand via platform modules'],
+          confidence: 'high',
         },
         {
           dimensionId: 'unit-economics',
@@ -175,6 +205,8 @@ async function main() {
           score: 79,
           findings: ['LTV/CAC 3.8x'],
           strengths: ['Gross margin 86%'],
+          questions: ['Gross margin trend with managed connectors?'],
+          confidence: 'medium',
         },
         {
           dimensionId: 'tech-moat',
@@ -183,6 +215,8 @@ async function main() {
           score: 77,
           findings: ['Proprietary auto-orchestration'],
           strengths: ['SOC2 in progress'],
+          evidence: [{ source: 'audit', snippet: 'SOC2 type I scheduled' }],
+          confidence: 'medium',
         },
         {
           dimensionId: 'team',
@@ -190,6 +224,7 @@ async function main() {
           name: 'Team Strength',
           score: 81,
           strengths: ['Ex-Spotify data platform leads'],
+          confidence: 'high',
         },
         {
           dimensionId: 'traction',
@@ -199,6 +234,8 @@ async function main() {
           findings: ['MRR $85k, MoM 22%'],
           strengths: ['3 enterprise pilots'],
           redFlags: ['Sales cycle 4-6 months'],
+          evidence: [{ source: 'stripe', snippet: 'NRR 115%' }],
+          confidence: 'high',
         },
         {
           dimensionId: 'customer-acquisition',
@@ -207,6 +244,7 @@ async function main() {
           score: 70,
           findings: ['Content + partner-led'],
           redFlags: ['Low paid acquisition data'],
+          confidence: 'medium',
         },
         {
           dimensionId: 'financial-health',
@@ -214,6 +252,7 @@ async function main() {
           name: 'Financial Health',
           score: 68,
           findings: ['Runway 13 months'],
+          confidence: 'medium',
         },
         {
           dimensionId: 'fundraising',
@@ -221,6 +260,47 @@ async function main() {
           name: 'Fundraising Readiness',
           score: 75,
           findings: ['Materials 80% ready'],
+          confidence: 'high',
+        },
+      ],
+      insights: [
+        {
+          type: 'strength',
+          priority: 'high',
+          category: 'Traction & Growth',
+          title: 'Net revenue retention 115%',
+          description: 'Expansion after onboarding shows strong product stickiness.',
+          recommendation: 'Package expansion playbooks by segment.',
+          relatedDimensions: ['traction','business-model'],
+          evidence: ['Stripe exports'],
+        },
+        {
+          type: 'opportunity',
+          priority: 'medium',
+          category: 'Market & Competition',
+          title: 'EU data residency wedge',
+          description: 'Public sector accounts want EU-hosted infra.',
+          recommendation: 'Target 3 lighthouse municipalities.',
+          relatedDimensions: ['competition','market-size'],
+        }
+      ],
+      insights: [
+        {
+          type: 'strength',
+          priority: 'high',
+          category: 'Product & Tech',
+          title: 'Strong clinical validation underway',
+          description: 'Prospective studies de-risk performance claims for GPs.',
+          relatedDimensions: ['regulatory'],
+        },
+        {
+          type: 'threat',
+          priority: 'medium',
+          category: 'Financial Health',
+          title: 'Inventory financing pressure',
+          description: 'Hardware scaling may require credit line to avoid cash dips.',
+          recommendation: 'Explore venture debt/asset-backed facility pre‑A.',
+          relatedDimensions: ['financial-health'],
         },
       ],
     },
