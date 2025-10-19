@@ -8,31 +8,25 @@ export async function POST(request: NextRequest) {
     const { sessionId, isPublic } = await request.json();
 
     if (!sessionId) {
-      return NextResponse.json(
-        { error: 'Session ID required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
     }
 
     // Get user from session
     const session = await prisma.session.findUnique({
       where: { id: sessionId },
-      select: { 
+      select: {
         userId: true,
-        businessInfo: true
-      }
+        businessInfo: true,
+      },
     });
 
     if (!session) {
-      return NextResponse.json(
-        { error: 'Session not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
 
     // Create or update user profile
-    const businessInfo = session.businessInfo as any || {};
-    
+    const businessInfo = (session.businessInfo as any) || {};
+
     if (session.userId) {
       // Update existing user
       const user = await prisma.user.update({
@@ -45,14 +39,14 @@ export async function POST(request: NextRequest) {
           stage: businessInfo.stage,
           website: businessInfo.website,
           oneLiner: businessInfo.description,
-          askAmount: businessInfo.seeking
-        }
+          askAmount: businessInfo.seeking,
+        },
       });
 
-      return NextResponse.json({ 
-        success: true, 
+      return NextResponse.json({
+        success: true,
         isPublic,
-        userId: user.id 
+        userId: user.id,
       });
     } else {
       // Create new user
@@ -66,28 +60,24 @@ export async function POST(request: NextRequest) {
           website: businessInfo.website,
           oneLiner: businessInfo.description,
           askAmount: businessInfo.seeking,
-          isProfilePublic: isPublic
-        }
+          isProfilePublic: isPublic,
+        },
       });
 
       // Link session to user
       await prisma.session.update({
         where: { id: sessionId },
-        data: { userId: user.id }
+        data: { userId: user.id },
       });
 
-      return NextResponse.json({ 
-        success: true, 
+      return NextResponse.json({
+        success: true,
         isPublic,
-        userId: user.id 
+        userId: user.id,
       });
     }
-
   } catch (error) {
     console.error('Error publishing profile:', error);
-    return NextResponse.json(
-      { error: 'Failed to publish profile' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to publish profile' }, { status: 500 });
   }
 }

@@ -4,7 +4,11 @@
  */
 
 import { BusinessInfo } from '@/types/business';
-import { ANALYSIS_DIMENSIONS, DeepAnalysisResult, getCriticalDimensions } from './deep-analysis-framework';
+import {
+  ANALYSIS_DIMENSIONS,
+  DeepAnalysisResult,
+  getCriticalDimensions,
+} from './deep-analysis-framework';
 import { FREE_TIER_DIMENSIONS, isFreeTierDimension } from './free-tier-dimensions';
 import { getOpenAIClient, getChatModel } from './ai-client';
 import { fetchGptKnowledgeForCompany } from './gpt-knowledge';
@@ -26,16 +30,25 @@ interface RunDeepAnalysisOptions {
  * This will be called after initial scraping is complete
  */
 export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<string> {
-  const { sessionId, businessInfo, scrapedContent, uploadedDocuments = [], mode = 'progressive', specificDimensions } = options;
-  
+  const {
+    sessionId,
+    businessInfo,
+    scrapedContent,
+    uploadedDocuments = [],
+    mode = 'progressive',
+    specificDimensions,
+  } = options;
+
   console.log(`🔬 Starting deep analysis for ${businessInfo.name} (${sessionId})`);
-  console.log(`📋 Mode: ${mode}, Content length: ${scrapedContent.length}, Docs: ${uploadedDocuments.length}`);
-  
+  console.log(
+    `📋 Mode: ${mode}, Content length: ${scrapedContent.length}, Docs: ${uploadedDocuments.length}`,
+  );
+
   try {
     // Get session to find userId
     const session = await prisma.session.findUnique({
       where: { id: sessionId },
-      select: { userId: true }
+      select: { userId: true },
     });
 
     // 1. Create or reuse DeepAnalysis record (avoid P2002 on re-run)
@@ -47,14 +60,14 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
         userId: session?.userId || null,
         status: isCriticalOnly ? 'analyzing' : 'analyzing',
         progress: isCriticalOnly ? 100 : 0,
-        businessInfo: businessInfo // Save for VC dashboard
+        businessInfo: businessInfo, // Save for VC dashboard
       },
       update: {
         status: 'analyzing',
         // Do not reset progress on critical-only re-run; keep UI at 100%
         ...(isCriticalOnly ? {} : { progress: 0, startedAt: new Date() }),
-        businessInfo: businessInfo // Update business info
-      }
+        businessInfo: businessInfo, // Update business info
+      },
     });
 
     // Only clear previous results on a full run; keep existing dimensions on critical-only or specific re-runs
@@ -72,43 +85,49 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
         gptKnowledgeText = knowledge.combinedText || '';
         await prisma.deepAnalysis.update({
           where: { id: analysis.id },
-          data: { publicKnowledge: { text: knowledge.combinedText, chunks: knowledge.chunks } }
+          data: { publicKnowledge: { text: knowledge.combinedText, chunks: knowledge.chunks } },
         });
       } catch {}
     } else {
       try {
         await prisma.deepAnalysis.update({
           where: { id: analysis.id },
-          data: { publicKnowledge: { text: gptKnowledgeText } }
+          data: { publicKnowledge: { text: gptKnowledgeText } },
         });
       } catch {}
     }
 
     // 3. Determine which dimensions to analyze based on mode and subscription tier
-    let dimensionsToAnalyze = specificDimensions && specificDimensions.length > 0
-      ? ANALYSIS_DIMENSIONS.filter(d => specificDimensions.includes(d.name) || specificDimensions.includes(d.dimensionId))
-      : mode === 'critical-only' 
-        ? getCriticalDimensions()
-        : mode === 'free-tier'
-        ? FREE_TIER_DIMENSIONS
-        : mode === 'full'
-        ? ANALYSIS_DIMENSIONS
-        : mode === 'specific'
-        ? [] // Will be handled by specificDimensions
-        : FREE_TIER_DIMENSIONS; // Default to free tier for 'progressive' mode
+    let dimensionsToAnalyze =
+      specificDimensions && specificDimensions.length > 0
+        ? ANALYSIS_DIMENSIONS.filter(
+            (d) =>
+              specificDimensions.includes(d.name) || specificDimensions.includes(d.dimensionId),
+          )
+        : mode === 'critical-only'
+          ? getCriticalDimensions()
+          : mode === 'free-tier'
+            ? FREE_TIER_DIMENSIONS
+            : mode === 'full'
+              ? ANALYSIS_DIMENSIONS
+              : mode === 'specific'
+                ? [] // Will be handled by specificDimensions
+                : FREE_TIER_DIMENSIONS; // Default to free tier for 'progressive' mode
 
     const hasDocs = Array.isArray(uploadedDocuments) && uploadedDocuments.length > 0;
     const scrapedLen = (scrapedContent || '').trim().length;
-    
+
     // In free-tier mode, we always use FREE_TIER_DIMENSIONS
     if (mode !== 'free-tier') {
       // If we have very limited context, reduce scope to ensure quality
       if (!hasDocs && scrapedLen < 500) {
         // Only run truly critical dimensions when almost no context is available
-        dimensionsToAnalyze = ANALYSIS_DIMENSIONS.filter(d => d.priority === 'critical');
+        dimensionsToAnalyze = ANALYSIS_DIMENSIONS.filter((d) => d.priority === 'critical');
       } else if (!hasDocs && scrapedLen < 2000) {
         // Without docs and with small website text, skip low-priority dimensions
-        dimensionsToAnalyze = ANALYSIS_DIMENSIONS.filter(d => d.priority === 'critical' || d.priority === 'high' || d.priority === 'medium');
+        dimensionsToAnalyze = ANALYSIS_DIMENSIONS.filter(
+          (d) => d.priority === 'critical' || d.priority === 'high' || d.priority === 'medium',
+        );
       }
     }
 
@@ -125,7 +144,7 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
     // Idempotent saver to avoid duplicates when re-running
     const saveDimension = async (analysisId: string, dimensionMeta: any, result: any) => {
       const existing = await prisma.analysisDimension.findFirst({
-        where: { analysisId, dimensionId: dimensionMeta.id }
+        where: { analysisId, dimensionId: dimensionMeta.id },
       });
       if (existing) {
         await prisma.analysisDimension.update({
@@ -145,8 +164,8 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
             // Avoid saving full prompt to reduce memory/DB usage
             prompt: undefined,
             // Store actual model used for traceability
-            modelUsed: getChatModel('complex')
-          }
+            modelUsed: getChatModel('complex'),
+          },
         });
       } else {
         await prisma.analysisDimension.create({
@@ -165,8 +184,8 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
             analyzed: true,
             analyzedAt: new Date(),
             prompt: undefined,
-            modelUsed: getChatModel('complex')
-          }
+            modelUsed: getChatModel('complex'),
+          },
         });
       }
     };
@@ -177,111 +196,121 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
     for (let idx = 0; idx < dimensionsToAnalyze.length; idx += batchSize) {
       const batch = dimensionsToAnalyze.slice(idx, idx + batchSize);
       for (const dimension of batch) {
-      try {
-        // Analyze with simple retry/backoff
-        let result: any | null = null;
-        for (let attempt = 1; attempt <= 2; attempt++) {
-          try {
-            result = await analyzeDimension(
-              dimension,
-              businessInfo,
-              // Truncate context to keep memory small
-              // Merge sources: uploaded > scraped > GPT knowledge
-              // The analyzeDimension prompt instructs model to respect only provided text; we bias by ordering
-              ((uploadedDocuments && uploadedDocuments.length > 0) ? '' : '') +
-              // Keep context small to avoid V8 heap pressure
-              (scrapedContent || '').slice(0, 6000) +
-              '\n\n' +
-              (gptKnowledgeText || '').slice(0, 2000),
-              uploadedDocuments
-            );
-            break;
-          } catch (e) {
-            if (attempt === 2) throw e;
-            await new Promise(r => setTimeout(r, 1000 * attempt));
-          }
-        }
-
-        // Save idempotently
-        // Save idempotently (avoid storing full prompt to reduce DB size)
-        await saveDimension(analysis.id, dimension, result);
-
-        // Update progress
-        completed++;
-        const progress = Math.round((completed / totalDimensions) * 100);
-        
-        // Track completed categories
-        if (!completedCategories.includes(dimension.priority)) {
-          const categoryDimensions = dimensionsToAnalyze.filter(d => d.priority === dimension.priority);
-          const categoryCompleted = categoryDimensions.every(d => 
-            completed >= dimensionsToAnalyze.indexOf(d) + 1
-          );
-          if (categoryCompleted) {
-            completedCategories.push(dimension.priority);
-          }
-        }
-        
-        await prisma.deepAnalysis.update({
-          where: { id: analysis.id },
-          data: { progress }
-        });
-        
-        console.log(`📊 Progress: ${completed}/${totalDimensions} (${progress}%) - ${dimension.name}`);
-        
-        // Call progress callback if provided
-        if (options.onProgress) {
-          await options.onProgress(completed, totalDimensions, completedCategories);
-        }
-        
-        // Progress is automatically tracked via database
-        // SSE endpoint reads directly from DeepAnalysis table
-
-        // Generate insights from this dimension if critical
-        if (dimension.priority === 'critical' && result.redFlags.length > 0) {
-          await prisma.analysisInsight.create({
-            data: {
-              analysisId: analysis.id,
-              type: 'threat',
-              priority: 'critical',
-              category: dimension.category,
-              title: `Critical Issue: ${dimension.name}`,
-              description: result.redFlags[0],
-              recommendation: result.suggestions[0] || 'Review and address this concern',
-              relatedDimensions: [dimension.id],
-              evidence: result.findings.slice(0, 2)
+        try {
+          // Analyze with simple retry/backoff
+          let result: any | null = null;
+          for (let attempt = 1; attempt <= 2; attempt++) {
+            try {
+              result = await analyzeDimension(
+                dimension,
+                businessInfo,
+                // Truncate context to keep memory small
+                // Merge sources: uploaded > scraped > GPT knowledge
+                // The analyzeDimension prompt instructs model to respect only provided text; we bias by ordering
+                (uploadedDocuments && uploadedDocuments.length > 0 ? '' : '') +
+                  // Keep context small to avoid V8 heap pressure
+                  (scrapedContent || '').slice(0, 6000) +
+                  '\n\n' +
+                  (gptKnowledgeText || '').slice(0, 2000),
+                uploadedDocuments,
+              );
+              break;
+            } catch (e) {
+              if (attempt === 2) throw e;
+              await new Promise((r) => setTimeout(r, 1000 * attempt));
             }
+          }
+
+          // Save idempotently
+          // Save idempotently (avoid storing full prompt to reduce DB size)
+          await saveDimension(analysis.id, dimension, result);
+
+          // Update progress
+          completed++;
+          const progress = Math.round((completed / totalDimensions) * 100);
+
+          // Track completed categories
+          if (!completedCategories.includes(dimension.priority)) {
+            const categoryDimensions = dimensionsToAnalyze.filter(
+              (d) => d.priority === dimension.priority,
+            );
+            const categoryCompleted = categoryDimensions.every(
+              (d) => completed >= dimensionsToAnalyze.indexOf(d) + 1,
+            );
+            if (categoryCompleted) {
+              completedCategories.push(dimension.priority);
+            }
+          }
+
+          await prisma.deepAnalysis.update({
+            where: { id: analysis.id },
+            data: { progress },
           });
-        }
 
-        // Progressive mode: small delay + opportunistic GC to avoid rate limits and heap bloat
-        if (mode === 'progressive') {
-          // Shorter pacing per-dimension to improve overall latency
-          await new Promise(resolve => setTimeout(resolve, 300));
-        }
-        // Explicit best-effort GC if available (ignored in most environments)
-        try { (global as any).gc && (global as any).gc(); } catch {}
+          console.log(
+            `📊 Progress: ${completed}/${totalDimensions} (${progress}%) - ${dimension.name}`,
+          );
 
-      } catch (error) {
-        console.error(`Error analyzing dimension ${dimension.id}:`, error);
-        // Continue with other dimensions
-      }
+          // Call progress callback if provided
+          if (options.onProgress) {
+            await options.onProgress(completed, totalDimensions, completedCategories);
+          }
+
+          // Progress is automatically tracked via database
+          // SSE endpoint reads directly from DeepAnalysis table
+
+          // Generate insights from this dimension if critical
+          if (dimension.priority === 'critical' && result.redFlags.length > 0) {
+            await prisma.analysisInsight.create({
+              data: {
+                analysisId: analysis.id,
+                type: 'threat',
+                priority: 'critical',
+                category: dimension.category,
+                title: `Critical Issue: ${dimension.name}`,
+                description: result.redFlags[0],
+                recommendation: result.suggestions[0] || 'Review and address this concern',
+                relatedDimensions: [dimension.id],
+                evidence: result.findings.slice(0, 2),
+              },
+            });
+          }
+
+          // Progressive mode: small delay + opportunistic GC to avoid rate limits and heap bloat
+          if (mode === 'progressive') {
+            // Shorter pacing per-dimension to improve overall latency
+            await new Promise((resolve) => setTimeout(resolve, 300));
+          }
+          // Explicit best-effort GC if available (ignored in most environments)
+          try {
+            (global as any).gc && (global as any).gc();
+          } catch {}
+        } catch (error) {
+          console.error(`Error analyzing dimension ${dimension.id}:`, error);
+          // Continue with other dimensions
+        }
       }
       // Short pause between batches
       if (mode === 'progressive') {
         // Shorter pause between batches to keep momentum while avoiding spikes
-        await new Promise(r => setTimeout(r, 600));
-        try { (global as any).gc && (global as any).gc(); } catch {}
+        await new Promise((r) => setTimeout(r, 600));
+        try {
+          (global as any).gc && (global as any).gc();
+        } catch {}
       }
     }
 
     // 4. Calculate overall scores
     const allDimensions = await prisma.analysisDimension.findMany({
-      where: { analysisId: analysis.id, analyzed: true }
+      where: { analysisId: analysis.id, analyzed: true },
     });
 
-    const avgScore = allDimensions.length > 0
-      ? Math.round(allDimensions.reduce((sum, d) => sum + (d.score || 0), 0) / allDimensions.length)
-      : 0;
+    const avgScore =
+      allDimensions.length > 0
+        ? Math.round(
+            allDimensions.reduce((sum, d) => sum + (d.score || 0), 0) / allDimensions.length,
+          )
+        : 0;
 
     const investmentReadiness = Math.round(avgScore / 10); // Convert to 0-10 scale
 
@@ -293,12 +322,11 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
         completedAt: new Date(),
         progress: 100,
         overallScore: avgScore,
-        investmentReadiness
-      }
+        investmentReadiness,
+      },
     });
 
     return analysis.id;
-
   } catch (error) {
     console.error('Deep analysis failed:', error);
     throw error;
@@ -312,13 +340,12 @@ async function analyzeDimension(
   dimension: any,
   businessInfo: BusinessInfo,
   scrapedContent: string,
-  uploadedDocuments: string[]
+  uploadedDocuments: string[],
 ): Promise<DeepAnalysisResult> {
-  
   const openai = getOpenAIClient();
-  
+
   // gpt-5 / gpt-5-mini: temperature not used; response_format unsupported on gpt-5*
-  
+
   // Combine all available content (enriched with LinkedIn, GitHub, Product Hunt)
   const fullContent = `
 # Company Intelligence Report
@@ -396,14 +423,14 @@ SCORING CALIBRATION:
 • 50-59: Below expectations, needs work
 • <50: Serious concern or insufficient data
 
-Return ONLY valid JSON. No explanatory text outside the JSON structure.`
+Return ONLY valid JSON. No explanatory text outside the JSON structure.`,
         },
         {
           role: 'user',
-          content: analysisPrompt
-        }
+          content: analysisPrompt,
+        },
       ],
-      ...(isGpt5 ? {} : { response_format: { type: 'json_object' } })
+      ...(isGpt5 ? {} : { response_format: { type: 'json_object' } }),
     };
     if (isGpt5) {
       // gpt-5 chat.completions uses max_completion_tokens
@@ -417,10 +444,17 @@ Return ONLY valid JSON. No explanatory text outside the JSON structure.`
     try {
       const promptTokens = (response as any).usage?.prompt_tokens ?? 0;
       const completionTokens = (response as any).usage?.completion_tokens ?? 0;
-      const totalTokens = (response as any).usage?.total_tokens ?? (promptTokens + completionTokens);
+      const totalTokens = (response as any).usage?.total_tokens ?? promptTokens + completionTokens;
       const { estimateCostUsd, logAICost } = await import('@/lib/cost-logger');
       const costUsd = estimateCostUsd(analysisModel, promptTokens, completionTokens);
-      logAICost({ model: analysisModel, promptTokens, completionTokens, totalTokens, costUsd, route: 'deep-analysis' });
+      logAICost({
+        model: analysisModel,
+        promptTokens,
+        completionTokens,
+        totalTokens,
+        costUsd,
+        route: 'deep-analysis',
+      });
     } catch {}
 
     const raw = response.choices?.[0]?.message?.content || '{}';
@@ -432,10 +466,12 @@ Return ONLY valid JSON. No explanatory text outside the JSON structure.`
       const start = raw.indexOf('{');
       const end = raw.lastIndexOf('}');
       if (start >= 0 && end > start) {
-        try { result = JSON.parse(raw.slice(start, end + 1)); } catch {}
+        try {
+          result = JSON.parse(raw.slice(start, end + 1));
+        } catch {}
       }
     }
-    
+
     const evidenceArray = Array.isArray(result.evidence) ? result.evidence : [];
     const evidenceStrings = evidenceArray.slice(0, 2).map((e: any) => {
       const src = e?.source ? String(e.source) : 'source';
@@ -460,15 +496,18 @@ Return ONLY valid JSON. No explanatory text outside the JSON structure.`
       redFlags: Array.isArray(result.redFlags) ? result.redFlags.slice(0, 3) : [],
       strengths: Array.isArray(result.strengths) ? result.strengths.slice(0, 3) : [],
       questionsToAsk: Array.isArray(result.questionsToAsk) ? result.questionsToAsk.slice(0, 3) : [],
-      suggestions: Array.isArray(result.recommendations) ? result.recommendations.slice(0, 3) : (Array.isArray(result.suggestions) ? result.suggestions.slice(0, 3) : []),
+      suggestions: Array.isArray(result.recommendations)
+        ? result.recommendations.slice(0, 3)
+        : Array.isArray(result.suggestions)
+          ? result.suggestions.slice(0, 3)
+          : [],
       // store textual evidence in existing field
       evidence: evidenceStrings,
-      confidence
+      confidence,
     };
-
   } catch (error) {
     console.error(`Error in GPT analysis for ${dimension.id}:`, error);
-    
+
     // Return default/failed result
     return {
       dimension: dimension.id,
@@ -477,7 +516,7 @@ Return ONLY valid JSON. No explanatory text outside the JSON structure.`
       redFlags: [],
       strengths: [],
       questionsToAsk: [],
-      suggestions: []
+      suggestions: [],
     };
   }
 }
@@ -493,12 +532,9 @@ export async function getDeepAnalysis(sessionId: string) {
       dimensions: true,
       insights: {
         where: { addressed: false },
-        orderBy: [
-          { priority: 'asc' },
-          { createdAt: 'desc' }
-        ]
-      }
-    }
+        orderBy: [{ priority: 'asc' }, { createdAt: 'desc' }],
+      },
+    },
   });
 }
 
@@ -510,7 +546,7 @@ export async function getDimensionsByCategory(sessionId: string) {
   if (!analysis) return null;
 
   const dimensionsByCategory: Record<string, any[]> = {};
-  
+
   for (const dim of analysis.dimensions) {
     if (!dimensionsByCategory[dim.category]) {
       dimensionsByCategory[dim.category] = [];
@@ -529,7 +565,7 @@ export async function getUnansweredQuestions(sessionId: string): Promise<string[
   if (!analysis) return [];
 
   const allQuestions: string[] = [];
-  
+
   for (const dim of analysis.dimensions) {
     if (dim.questions && dim.questions.length > 0) {
       // Prioritize questions from low-scoring dimensions
@@ -557,7 +593,7 @@ export async function getCriticalRedFlags(sessionId: string) {
         category: dim.category,
         dimension: dim.name,
         issue: dim.redFlags[0],
-        questions: dim.questions
+        questions: dim.questions,
       });
     }
   }

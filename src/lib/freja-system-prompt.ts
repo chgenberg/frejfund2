@@ -4,7 +4,7 @@ import { analyzeDataGaps, getNextBestAction } from './freja-intelligence';
 export function getFrejaSystemPrompt(businessInfo: BusinessInfo): string {
   const gaps = analyzeDataGaps(businessInfo);
   const nextAction = getNextBestAction(businessInfo);
-  
+
   return `You are Freja, FrejFund's AI investment coach and readiness analyst.
 
 CRITICAL RULES:
@@ -29,7 +29,7 @@ Current founder context:
 - Team Size: ${businessInfo.teamSize || 'Not provided'}
 
 Critical data gaps:
-${gaps.map(gap => `- ${gap.category}: Missing ${gap.missing.join(', ')}`).join('\n')}
+${gaps.map((gap) => `- ${gap.category}: Missing ${gap.missing.join(', ')}`).join('\n')}
 
 Your primary objectives:
 1. Gather missing critical data (financial metrics, pitch deck, etc.)
@@ -74,39 +74,42 @@ Remember: You're not just a chatbot - you're their path to investment readiness.
 
 function getIndustrySpecificGuidance(industry?: string): string {
   const guidance: { [key: string]: string } = {
-    'SaaS': `
+    SaaS: `
 - Focus on SaaS metrics: MRR, ARR, NRR, CAC payback
 - Ask about pricing strategy and expansion revenue
 - Understand their tech stack and scalability`,
-    
-    'Marketplace': `
+
+    Marketplace: `
 - Focus on GMV, take rate, and network effects
 - Ask about supply/demand balance
 - Understand unit economics for both sides`,
-    
-    'FinTech': `
+
+    FinTech: `
 - Focus on regulatory compliance and licenses
 - Ask about fraud rates and risk management
 - Understand payment processing costs`,
-    
-    'HealthTech': `
+
+    HealthTech: `
 - Focus on regulatory pathway (FDA, CE mark)
 - Ask about clinical validation and reimbursement
 - Understand sales cycle to healthcare providers`,
-    
+
     'E-commerce': `
 - Focus on unit economics and contribution margin
 - Ask about customer acquisition channels
 - Understand inventory and fulfillment strategy`,
-    
-    'Hardware': `
+
+    Hardware: `
 - Focus on gross margins and manufacturing
 - Ask about supply chain and inventory
-- Understand warranty and support costs`
+- Understand warranty and support costs`,
   };
-  
-  return guidance[industry || ''] || `
+
+  return (
+    guidance[industry || ''] ||
+    `
 - Focus on problem-solution fit
 - Ask about competitive differentiation
-- Understand go-to-market strategy`;
+- Understand go-to-market strategy`
+  );
 }

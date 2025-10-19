@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
       const user = await prisma.user.upsert({
         where: { email },
         update: { updatedAt: new Date() },
-        create: { email }
+        create: { email },
       });
       userId = user.id;
     }
@@ -25,13 +25,13 @@ export async function POST(req: NextRequest) {
       update: {
         userId: userId || undefined,
         businessInfo: businessInfo || undefined,
-        lastActivity: new Date()
+        lastActivity: new Date(),
       },
       create: {
         id,
         userId,
-        businessInfo
-      }
+        businessInfo,
+      },
     });
 
     const res = NextResponse.json({ success: true, sessionId: id, ...rest });
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
       secure: true,
       sameSite: 'lax',
       path: '/',
-      maxAge: 60 * 60 * 24 * 30 // 30 days
+      maxAge: 60 * 60 * 24 * 30, // 30 days
     });
     return res;
   } catch (error) {
@@ -70,15 +70,15 @@ export async function GET(req: NextRequest) {
           include: {
             messages: {
               orderBy: { createdAt: 'desc' },
-              take: 1 // Last message for preview
+              take: 1, // Last message for preview
             },
             documents: {
               take: 1,
-              orderBy: { createdAt: 'desc' }
-            }
-          }
-        }
-      }
+              orderBy: { createdAt: 'desc' },
+            },
+          },
+        },
+      },
     });
 
     if (!user) {
@@ -92,26 +92,29 @@ export async function GET(req: NextRequest) {
         name: user.name,
         company: user.company,
         industry: user.industry,
-        stage: user.stage
+        stage: user.stage,
       },
-      sessions: user.sessions.map(s => ({
+      sessions: user.sessions.map((s) => ({
         id: s.id,
         businessInfo: s.businessInfo,
         lastActivity: s.lastActivity,
         messageCount: s.messages.length,
         lastMessage: s.messages[0]?.content?.substring(0, 100),
-        hasDocuments: s.documents.length > 0
-      }))
+        hasDocuments: s.documents.length > 0,
+      })),
     });
   } catch (error) {
     console.error('Session retrieve error:', error);
     console.error('Error details:', {
       message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
+      stack: error instanceof Error ? error.stack : undefined,
     });
-    return NextResponse.json({ 
-      error: 'Failed to retrieve sessions',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Failed to retrieve sessions',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 },
+    );
   }
 }

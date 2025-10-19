@@ -7,35 +7,29 @@ export async function POST(req: NextRequest) {
     const { sessionId, dimensionIds, newData } = await req.json();
 
     if (!sessionId || !dimensionIds || !Array.isArray(dimensionIds)) {
-      return NextResponse.json(
-        { error: 'Session ID and dimension IDs required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Session ID and dimension IDs required' }, { status: 400 });
     }
 
     // Find the analysis
     const analysis = await prisma.deepAnalysis.findUnique({
       where: { sessionId },
-      include: { dimensions: true }
+      include: { dimensions: true },
     });
 
     if (!analysis) {
-      return NextResponse.json(
-        { error: 'Analysis not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Analysis not found' }, { status: 404 });
     }
 
     // Update the analysis status
     await prisma.deepAnalysis.update({
       where: { sessionId },
-      data: { 
+      data: {
         status: 'analyzing',
         additionalContext: JSON.stringify({
           ...JSON.parse(analysis.additionalContext || '{}'),
-          gapResponses: newData
-        })
-      }
+          gapResponses: newData,
+        }),
+      },
     });
 
     // Re-run analysis for specific dimensions with the new data
@@ -43,7 +37,9 @@ export async function POST(req: NextRequest) {
 ${analysis.scrapedContent || ''}
 
 UPDATED INFORMATION FROM USER:
-${Object.entries(newData).map(([key, value]) => `${key}: ${value}`).join('\n')}
+${Object.entries(newData)
+  .map(([key, value]) => `${key}: ${value}`)
+  .join('\n')}
 `;
 
     // Run partial analysis
@@ -53,19 +49,15 @@ ${Object.entries(newData).map(([key, value]) => `${key}: ${value}`).join('\n')}
       scrapedContent: updatedContext,
       uploadedDocuments: [],
       mode: 'specific',
-      specificDimensions: dimensionIds
+      specificDimensions: dimensionIds,
     });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
-      message: 'Analysis update initiated' 
+      message: 'Analysis update initiated',
     });
-
   } catch (error) {
     console.error('Error updating analysis:', error);
-    return NextResponse.json(
-      { error: 'Failed to update analysis' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update analysis' }, { status: 500 });
   }
 }

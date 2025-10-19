@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
 
     // Find magic link
     const magicLink = await prisma.magicLink.findUnique({
-      where: { token }
+      where: { token },
     });
 
     if (!magicLink) {
@@ -31,20 +31,20 @@ export async function GET(req: NextRequest) {
     // Mark as used
     await prisma.magicLink.update({
       where: { token },
-      data: { used: true }
+      data: { used: true },
     });
 
     // Find or create user
     let user = await prisma.user.findUnique({
-      where: { email: magicLink.email }
+      where: { email: magicLink.email },
     });
 
     if (!user) {
       user = await prisma.user.create({
         data: {
           email: magicLink.email,
-          name: magicLink.email.split('@')[0] // Use email prefix as default name
-        }
+          name: magicLink.email.split('@')[0], // Use email prefix as default name
+        },
       });
     }
 
@@ -52,17 +52,17 @@ export async function GET(req: NextRequest) {
     const sessions = await prisma.session.findMany({
       where: { email: magicLink.email },
       orderBy: { lastActivity: 'desc' },
-      take: 10
+      take: 10,
     });
 
     // Create response with redirect
     const response = NextResponse.redirect(
       new URL(
-        sessions.length > 0 
+        sessions.length > 0
           ? `/login?email=${encodeURIComponent(magicLink.email)}&authenticated=true`
           : '/?start=true',
-        req.url
-      )
+        req.url,
+      ),
     );
 
     // Set auth cookie
@@ -70,14 +70,12 @@ export async function GET(req: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 30 // 30 days
+      maxAge: 60 * 60 * 24 * 30, // 30 days
     });
 
     return response;
-
   } catch (error) {
     console.error('Verify error:', error);
     return NextResponse.redirect(new URL('/login?error=server_error', req.url));
   }
 }
-

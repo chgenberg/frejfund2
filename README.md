@@ -5,21 +5,25 @@ An AI-powered business analysis and investment readiness platform designed speci
 ## 🚀 Features
 
 ### AI-Powered Business Analysis
+
 - **Comprehensive Analysis**: Deep dive into 10 key investment criteria including problem-solution fit, market timing, competitive moat, business model, team execution, traction, and financial health
 - **Personalized Insights**: Stage-specific and industry-tailored recommendations based on your business context
 - **Real-time Progress**: Step-by-step analysis with visual progress indicators and timing
 
 ### Chat-Like AI Interface
+
 - **Conversational Design**: Natural language interaction with FrejFund Business Advisor
 - **Agent-Friendly**: Designed for future AI agent compatibility
 - **Real-time Responses**: Intelligent responses based on business context and analysis results
 
 ### Investment Readiness Assessment
+
 - **Scoring System**: Detailed scoring across 7 key dimensions with overall investment readiness score
-- **Risk Assessment**: Identification of key risks with specific mitigation strategies  
+- **Risk Assessment**: Identification of key risks with specific mitigation strategies
 - **Actionable Recommendations**: Concrete next steps with timelines and expected impact
 
 ### Document Analysis
+
 - **Pitch Deck Upload**: Upload and analyze pitch decks, business plans, and financial documents
 - **Website Analysis**: Automatic analysis of company website content
 - **LinkedIn Integration**: Team analysis based on founder LinkedIn profiles
@@ -36,29 +40,34 @@ An AI-powered business analysis and investment readiness platform designed speci
 ## 🏁 Getting Started
 
 ### Prerequisites
+
 - Node.js 22 (see .nvmrc)
 - npm or yarn
 
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone [repository-url]
    cd frejfund-2.0
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
    Create a `.env.local` file in the root directory:
+
    ```bash
    cp .env.example .env.local
    ```
-   
+
    Minimal example:
+
    ```env
    OPENAI_API_KEY=your_openai_api_key_here
    OPENAI_CHAT_MODEL=gpt-4o-mini   # or gpt-5 if available
@@ -68,6 +77,7 @@ An AI-powered business analysis and investment readiness platform designed speci
    ```
 
    Optional overrides:
+
    ```env
    # Pricing (USD per 1M tokens) for cost estimates in UI
    MODEL_PRICE_INPUT_PER_MTOK=3
@@ -86,6 +96,7 @@ An AI-powered business analysis and investment readiness platform designed speci
    ```
 
 4. **Start development server**
+
    ```bash
    npm run dev
    ```
@@ -96,6 +107,7 @@ An AI-powered business analysis and investment readiness platform designed speci
 ## 📖 How to Use
 
 ### 1. Business Information Wizard
+
 - Enter your basic information (name, email, website)
 - Select your business stage (idea, MVP, early-revenue, scaling)
 - Choose your industry and target market
@@ -103,18 +115,21 @@ An AI-powered business analysis and investment readiness platform designed speci
 - Upload business documents (optional)
 
 ### 2. AI Chat Interface
+
 - Start chatting with FrejFund Business Advisor
 - Ask questions about funding strategy, market analysis, team building
 - Request comprehensive business analysis
 - Get personalized recommendations
 
 ### 3. Comprehensive Analysis
+
 - Initiate full business analysis through chat
 - Watch real-time progress as AI analyzes your business
 - View detailed results across multiple dimensions
 - Export and share analysis results
 
 ### 4. Results Dashboard
+
 - **Overview**: Company context and key metrics
 - **Insights**: Actionable recommendations with specific steps
 - **Scores**: Detailed scoring across investment criteria
@@ -123,6 +138,7 @@ An AI-powered business analysis and investment readiness platform designed speci
 ## 🎯 Key Analysis Areas
 
 ### Investment Criteria
+
 1. **Problem-Solution Fit**: Market validation and solution clarity
 2. **Market & Timing**: TAM/SAM analysis and timing catalysts
 3. **Competitive Moat**: Differentiation and defensibility
@@ -132,12 +148,14 @@ An AI-powered business analysis and investment readiness platform designed speci
 7. **Financial Health**: Burn rate, runway, and funding needs
 
 ### Stage-Specific Insights
+
 - **Idea Stage**: Customer discovery and validation frameworks
 - **MVP Stage**: Product-market fit metrics and feedback loops
 - **Early Revenue**: Unit economics optimization and growth strategies
 - **Scaling**: Organizational design and market expansion
 
 ### Industry-Specific Recommendations
+
 - **SaaS**: CAC, LTV, churn, expansion revenue strategies
 - **E-commerce**: Conversion optimization, inventory management
 - **Marketplace**: Supply/demand balance, network effects
@@ -147,12 +165,14 @@ An AI-powered business analysis and investment readiness platform designed speci
 ## 🎨 Design Philosophy
 
 ### AI-Agent Friendly Design
+
 - Clean, conversational interface optimized for AI interactions
 - Minimal cognitive load with clear information hierarchy
 - Responsive design that works across all devices
 - Accessible color scheme and typography
 
 ### User Experience
+
 - **Progressive Disclosure**: Information revealed as needed
 - **Visual Feedback**: Smooth animations and transitions
 - **Error Handling**: Graceful fallbacks and retry mechanisms
@@ -161,6 +181,7 @@ An AI-powered business analysis and investment readiness platform designed speci
 ## 🔧 Development
 
 ### Project Structure
+
 ```
 src/
 ├── app/                 # Next.js app router pages
@@ -176,13 +197,16 @@ src/
 ```
 
 ### Key Components
+
 - **BusinessWizard**: Multi-step form for collecting business information
 - **ChatInterface**: Main chat interface with AI agent
 - **BusinessAnalysisModal**: Real-time analysis with progress tracking
 - **ResultsModal**: Comprehensive results display with tabs and exports
 
 ### Business Analysis Engine
+
 The `BusinessAnalyzer` class provides:
+
 - Comprehensive business evaluation across 10+ criteria
 - Stage and industry-specific insight generation
 - Risk assessment with mitigation strategies
@@ -191,16 +215,21 @@ The `BusinessAnalyzer` class provides:
 ## 🚀 Deployment
 
 ### Vercel / Railway
+
 1. Push code to GitHub
 2. Connect repository to Vercel
 3. Deploy with zero configuration
 
 ### Worker (BullMQ)
+
 Run the background worker in a separate service/process:
+
 ```bash
 npm run worker
 ```
+
 Requires `REDIS_URL`.
+
 ```bash
 npm run build
 npm start
@@ -209,18 +238,21 @@ npm start
 ## 🔮 Future Enhancements
 
 ### AI Integration
+
 - Integration with OpenAI GPT-4 for real-time analysis
 - Document processing with AI for pitch deck analysis
 - Website scraping and content analysis
 - LinkedIn API integration for team analysis
 
 ### Advanced Features
+
 - **Benchmarking**: Compare against industry standards
 - **Scenario Planning**: Model different growth scenarios
 - **Investor Matching**: Connect with relevant investors
 - **Progress Tracking**: Monitor improvement over time
 
 ### Agent Compatibility
+
 - API endpoints for AI agent integration
 - Structured data formats for machine consumption
 - Webhook support for real-time updates

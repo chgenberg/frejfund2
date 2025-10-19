@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: NextRequest) {
   try {
     const sessionId = req.headers.get('x-session-id');
-    
+
     if (!sessionId) {
       return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
     }
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     // Get pending intro requests for this founder
     const session = await prisma.session.findUnique({
       where: { id: sessionId },
-      include: { user: true }
+      include: { user: true },
     });
 
     if (!session || !session.user) {
@@ -25,12 +25,12 @@ export async function GET(req: NextRequest) {
     const introRequests = await prisma.introRequest.findMany({
       where: {
         founderId: session.user.id,
-        status: 'pending'
+        status: 'pending',
       },
-      orderBy: { requestedAt: 'desc' }
+      orderBy: { requestedAt: 'desc' },
     });
 
-    const notifications = introRequests.map(req => ({
+    const notifications = introRequests.map((req) => ({
       id: req.id,
       type: 'intro_request',
       vcName: req.vcName,
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
       vcEmail: req.vcEmail,
       matchScore: req.matchScore,
       requestedAt: req.requestedAt,
-      message: `${req.vcFirm} is interested in meeting you!`
+      message: `${req.vcFirm} is interested in meeting you!`,
     }));
 
     return NextResponse.json({ notifications });
@@ -55,9 +55,12 @@ export async function POST(req: NextRequest) {
     const { requestId, response, message } = body;
 
     if (!requestId || !response) {
-      return NextResponse.json({ 
-        error: 'Request ID and response required' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Request ID and response required',
+        },
+        { status: 400 },
+      );
     }
 
     // Update intro request
@@ -66,8 +69,8 @@ export async function POST(req: NextRequest) {
       data: {
         status: response === 'accept' ? 'accepted' : 'declined',
         founderResponse: message,
-        respondedAt: new Date()
-      }
+        respondedAt: new Date(),
+      },
     });
 
     // If accepted, reveal and send intro emails
@@ -75,15 +78,15 @@ export async function POST(req: NextRequest) {
       // Update intro request status
       await prisma.introRequest.update({
         where: { id: requestId },
-        data: { status: 'intro_sent', introSentAt: new Date() }
+        data: { status: 'intro_sent', introSentAt: new Date() },
       });
 
       // Find the corresponding swipe and reveal
       const swipe = await prisma.vCSwipe.findFirst({
         where: {
           vcEmail: updated.vcEmail,
-          founderId: updated.founderId
-        }
+          founderId: updated.founderId,
+        },
       });
 
       if (swipe) {
@@ -91,19 +94,19 @@ export async function POST(req: NextRequest) {
           where: { id: swipe.id },
           data: {
             isRevealed: true,
-            revealedAt: new Date()
-          }
+            revealedAt: new Date(),
+          },
         });
       }
 
       // Get full details for intro emails
       const founder = await prisma.user.findUnique({
-        where: { id: updated.founderId }
+        where: { id: updated.founderId },
       });
 
       const founderSession = await prisma.session.findFirst({
         where: { userId: updated.founderId },
-        orderBy: { updatedAt: 'desc' }
+        orderBy: { updatedAt: 'desc' },
       });
 
       const businessInfo = founderSession?.businessInfo as any;
@@ -131,15 +134,18 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
-      status: updated.status
+      status: updated.status,
     });
   } catch (error: any) {
     console.error('Error responding to intro request:', error);
-    return NextResponse.json({ 
-      error: 'Failed to respond',
-      details: error.message
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Failed to respond',
+        details: error.message,
+      },
+      { status: 500 },
+    );
   }
 }

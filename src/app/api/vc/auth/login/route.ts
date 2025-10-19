@@ -17,10 +17,7 @@ export async function POST(request: NextRequest) {
     const { email, password } = await request.json();
 
     if (!email || !password) {
-      return NextResponse.json(
-        { error: 'Email and password required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email and password required' }, { status: 400 });
     }
 
     // Hash password
@@ -28,14 +25,11 @@ export async function POST(request: NextRequest) {
 
     // Find VC user
     const vcUser = await prisma.vCUser.findUnique({
-      where: { email }
+      where: { email },
     });
 
     if (!vcUser || vcUser.passwordHash !== passwordHash) {
-      return NextResponse.json(
-        { error: 'Invalid credentials' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
     // Generate session token and set HttpOnly cookie
@@ -53,8 +47,8 @@ export async function POST(request: NextRequest) {
         stages: vcUser.stages,
         minCheckSize: vcUser.minCheckSize,
         maxCheckSize: vcUser.maxCheckSize,
-        geographies: vcUser.geographies
-      }
+        geographies: vcUser.geographies,
+      },
     });
 
     // Set secure, HttpOnly cookie to gate /vc pages server-side
@@ -63,17 +57,12 @@ export async function POST(request: NextRequest) {
       secure: true,
       sameSite: 'lax',
       path: '/',
-      maxAge: 60 * 60 * 24 * 7 // 7 days
+      maxAge: 60 * 60 * 24 * 7, // 7 days
     });
 
     return res;
-
   } catch (error) {
     console.error('VC login error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
-

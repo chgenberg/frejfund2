@@ -12,32 +12,42 @@ interface Message {
 }
 
 const PREDEFINED_RESPONSES = {
-  greeting: "Hello! I'm FrejFund's AI assistant. I can help you understand how we connect founders with investors, answer questions about our platform, or guide you through getting started. What would you like to know?",
-  
-  about: "FrejFund is an AI-powered platform that connects ambitious founders with the right investors. We use advanced matching algorithms to analyze your business and find investors who align with your vision, industry, and funding needs. Our platform is designed specifically for the European startup ecosystem.",
-  
-  howItWorks: "Here's how FrejFund works:\n\n1. **Tell us about your business** - Share your pitch, metrics, and goals\n2. **AI Analysis** - Our AI analyzes your business and readiness\n3. **Smart Matching** - We match you with relevant investors\n4. **Connect & Grow** - Get warm intros and coaching support\n\nThe whole process is designed to save you time and increase your chances of finding the right funding partner.",
-  
-  pricing: "FrejFund offers flexible pricing:\n\n• **Free Tier** - Basic analysis and limited matches\n• **Startup Plan** - Full AI coaching, unlimited matches, and investor insights\n• **Scale Plan** - Everything plus priority support and warm introductions\n\nWe believe in aligning our success with yours. Contact us for detailed pricing.",
-  
-  investors: "We work with 500+ active investors across Europe, including:\n• Angel investors\n• Venture capital firms\n• Corporate VCs\n• Impact investors\n\nOur network spans from early-stage seed investors to growth-stage funds, with a strong presence in Stockholm, London, Berlin, and other major tech hubs.",
-  
-  getStarted: "Getting started is easy!\n\n1. Click 'Get Started Free' on our homepage\n2. Tell us about your business (takes ~5 minutes)\n3. Receive your AI-powered analysis\n4. Start connecting with matched investors\n\nNo credit card required for the free tier!",
-  
-  locations: "FrejFund operates globally with a focus on Europe. We have dedicated pages for 250+ cities and countries, including major tech hubs like Stockholm, London, Berlin, Paris, and Amsterdam. Each location page is tailored to the local startup ecosystem.",
-  
-  success: "Our platform has helped startups:\n• Reduce fundraising time by 60%\n• Increase investor response rates by 4x\n• Get better terms through competitive processes\n• Access exclusive investor networks\n\nWe measure our success by your fundraising success.",
-  
-  security: "We take security seriously:\n• Bank-level encryption for all data\n• GDPR compliant\n• Your data is never shared without permission\n• Investors only see what you choose to share\n• Regular security audits",
-  
-  contact: "You can reach us through:\n• This chat - I'm here 24/7!\n• Email: hello@frejfund.com\n• Book a demo on our website\n• LinkedIn: FrejFund\n\nOur team typically responds within 24 hours."
+  greeting:
+    "Hello! I'm FrejFund's AI assistant. I can help you understand how we connect founders with investors, answer questions about our platform, or guide you through getting started. What would you like to know?",
+
+  about:
+    'FrejFund is an AI-powered platform that connects ambitious founders with the right investors. We use advanced matching algorithms to analyze your business and find investors who align with your vision, industry, and funding needs. Our platform is designed specifically for the European startup ecosystem.',
+
+  howItWorks:
+    "Here's how FrejFund works:\n\n1. **Tell us about your business** - Share your pitch, metrics, and goals\n2. **AI Analysis** - Our AI analyzes your business and readiness\n3. **Smart Matching** - We match you with relevant investors\n4. **Connect & Grow** - Get warm intros and coaching support\n\nThe whole process is designed to save you time and increase your chances of finding the right funding partner.",
+
+  pricing:
+    'FrejFund offers flexible pricing:\n\n• **Free Tier** - Basic analysis and limited matches\n• **Startup Plan** - Full AI coaching, unlimited matches, and investor insights\n• **Scale Plan** - Everything plus priority support and warm introductions\n\nWe believe in aligning our success with yours. Contact us for detailed pricing.',
+
+  investors:
+    'We work with 500+ active investors across Europe, including:\n• Angel investors\n• Venture capital firms\n• Corporate VCs\n• Impact investors\n\nOur network spans from early-stage seed investors to growth-stage funds, with a strong presence in Stockholm, London, Berlin, and other major tech hubs.',
+
+  getStarted:
+    "Getting started is easy!\n\n1. Click 'Get Started Free' on our homepage\n2. Tell us about your business (takes ~5 minutes)\n3. Receive your AI-powered analysis\n4. Start connecting with matched investors\n\nNo credit card required for the free tier!",
+
+  locations:
+    'FrejFund operates globally with a focus on Europe. We have dedicated pages for 250+ cities and countries, including major tech hubs like Stockholm, London, Berlin, Paris, and Amsterdam. Each location page is tailored to the local startup ecosystem.',
+
+  success:
+    'Our platform has helped startups:\n• Reduce fundraising time by 60%\n• Increase investor response rates by 4x\n• Get better terms through competitive processes\n• Access exclusive investor networks\n\nWe measure our success by your fundraising success.',
+
+  security:
+    'We take security seriously:\n• Bank-level encryption for all data\n• GDPR compliant\n• Your data is never shared without permission\n• Investors only see what you choose to share\n• Regular security audits',
+
+  contact:
+    "You can reach us through:\n• This chat - I'm here 24/7!\n• Email: hello@frejfund.com\n• Book a demo on our website\n• LinkedIn: FrejFund\n\nOur team typically responds within 24 hours.",
 };
 
 const QUICK_ACTIONS = [
-  "How does it work?",
-  "Who are your investors?",
-  "Pricing plans",
-  "Get started"
+  'How does it work?',
+  'Who are your investors?',
+  'Pricing plans',
+  'Get started',
 ];
 
 export default function Chatbot() {
@@ -59,7 +69,7 @@ export default function Chatbot() {
     // Listen for custom event to open chatbot
     const handleOpenChatbot = () => setIsOpen(true);
     window.addEventListener('openChatbot', handleOpenChatbot);
-    
+
     return () => {
       window.removeEventListener('openChatbot', handleOpenChatbot);
     };
@@ -78,9 +88,9 @@ export default function Chatbot() {
       id: Date.now().toString(),
       text,
       sender: 'bot',
-      timestamp: new Date()
+      timestamp: new Date(),
     };
-    setMessages(prev => [...prev, newMessage]);
+    setMessages((prev) => [...prev, newMessage]);
   };
 
   const handleSend = async () => {
@@ -90,10 +100,10 @@ export default function Chatbot() {
       id: Date.now().toString(),
       text: input,
       sender: 'user',
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsTyping(true);
 
@@ -169,13 +179,13 @@ export default function Chatbot() {
         className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 bg-black rounded-full flex items-center justify-center shadow-2xl z-[9999] group"
         initial={{ opacity: 0, scale: 0 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 1, type: "spring", stiffness: 400 }}
+        transition={{ delay: 1, type: 'spring', stiffness: 400 }}
       >
         {/* Mobile: Freja profile picture */}
         <div className="sm:hidden w-14 h-14 flex items-center justify-center relative">
           <img src="/freja.png" alt="Freja" className="w-10 h-10 rounded-full" />
         </div>
-        
+
         {/* Desktop: CHAT text with Freja picture */}
         <div className="hidden sm:flex items-center space-x-2 px-5 py-3">
           <img src="/freja.png" alt="Freja" className="w-7 h-7 rounded-full" />
@@ -190,7 +200,7 @@ export default function Chatbot() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
             className="fixed bottom-20 sm:bottom-24 right-4 sm:right-6 left-4 sm:left-auto w-auto sm:w-96 h-[500px] sm:h-[600px] bg-white rounded-2xl shadow-2xl z-[9999] flex flex-col overflow-hidden"
             style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}
           >
@@ -223,7 +233,11 @@ export default function Chatbot() {
                   className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {message.sender === 'bot' && (
-                    <img src="/freja.png" alt="Freja" className="w-8 h-8 rounded-full mr-2 flex-shrink-0" />
+                    <img
+                      src="/freja.png"
+                      alt="Freja"
+                      className="w-8 h-8 rounded-full mr-2 flex-shrink-0"
+                    />
                   )}
                   <div
                     className={`max-w-[85%] sm:max-w-[80%] p-2.5 sm:p-3 rounded-2xl ${
@@ -237,10 +251,10 @@ export default function Chatbot() {
                         // Check if line is a bullet point
                         const isBullet = line.trim().startsWith('•') || line.trim().startsWith('-');
                         const lineContent = isBullet ? line.trim().substring(1).trim() : line;
-                        
+
                         // Parse markdown-style bold text
                         const parts = lineContent.split(/(\*\*[^*]+\*\*)/);
-                        
+
                         const parsedContent = parts.map((part, partIdx) => {
                           if (part.startsWith('**') && part.endsWith('**')) {
                             return (
@@ -251,7 +265,7 @@ export default function Chatbot() {
                           }
                           return part;
                         });
-                        
+
                         if (isBullet) {
                           return (
                             <div key={idx} className={`flex items-start ${idx > 0 ? 'mt-1' : ''}`}>
@@ -260,7 +274,7 @@ export default function Chatbot() {
                             </div>
                           );
                         }
-                        
+
                         return (
                           <p key={idx} className={idx > 0 && !isBullet ? 'mt-3' : ''}>
                             {parsedContent}

@@ -9,23 +9,26 @@ export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const introRequestId = url.searchParams.get('introRequestId');
-    
+
     if (!introRequestId) {
       return NextResponse.json({ error: 'Intro request ID required' }, { status: 400 });
     }
 
     const messages = await prisma.matchMessage.findMany({
       where: { introRequestId },
-      orderBy: { createdAt: 'asc' }
+      orderBy: { createdAt: 'asc' },
     });
 
     return NextResponse.json({ messages });
   } catch (error: any) {
     console.error('Error fetching match messages:', error);
-    return NextResponse.json({ 
-      error: 'Failed to fetch messages',
-      details: error.message
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Failed to fetch messages',
+        details: error.message,
+      },
+      { status: 500 },
+    );
   }
 }
 
@@ -36,14 +39,17 @@ export async function POST(req: NextRequest) {
     const { introRequestId, senderType, senderEmail, content } = body;
 
     if (!introRequestId || !senderType || !senderEmail || !content) {
-      return NextResponse.json({ 
-        error: 'All fields required' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'All fields required',
+        },
+        { status: 400 },
+      );
     }
 
     // Verify the intro request exists and is accepted
     const introRequest = await prisma.introRequest.findUnique({
-      where: { id: introRequestId }
+      where: { id: introRequestId },
     });
 
     if (!introRequest) {
@@ -51,9 +57,12 @@ export async function POST(req: NextRequest) {
     }
 
     if (introRequest.status !== 'accepted' && introRequest.status !== 'intro_sent') {
-      return NextResponse.json({ 
-        error: 'Can only message after intro is accepted' 
-      }, { status: 403 });
+      return NextResponse.json(
+        {
+          error: 'Can only message after intro is accepted',
+        },
+        { status: 403 },
+      );
     }
 
     // Create message
@@ -62,8 +71,8 @@ export async function POST(req: NextRequest) {
         introRequestId,
         senderType,
         senderEmail,
-        content
-      }
+        content,
+      },
     });
 
     // Broadcast over SSE to both parties
@@ -72,9 +81,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message }, { status: 201 });
   } catch (error: any) {
     console.error('Error sending message:', error);
-    return NextResponse.json({ 
-      error: 'Failed to send message',
-      details: error.message
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Failed to send message',
+        details: error.message,
+      },
+      { status: 500 },
+    );
   }
 }

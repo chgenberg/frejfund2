@@ -35,7 +35,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'sessionId required' }, { status: 400 });
     }
 
-    const result = await syncEmailsForSession(sId, { tenantId: tId || undefined, lookbackDays: lb });
+    const result = await syncEmailsForSession(sId, {
+      tenantId: tId || undefined,
+      lookbackDays: lb,
+    });
 
     // TODO triggers: summary + proactive updates can be scheduled/queued
     return NextResponse.json({ ok: true, result });
@@ -48,5 +51,3 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   return NextResponse.json({ status: 'Email Sync API is running' });
 }
-
-

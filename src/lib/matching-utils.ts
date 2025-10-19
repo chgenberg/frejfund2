@@ -8,7 +8,9 @@ export type NormalizedKPIs = {
   composite: number; // 0-100
 };
 
-function clamp(x: number, min = 0, max = 100) { return Math.max(min, Math.min(max, x)); }
+function clamp(x: number, min = 0, max = 100) {
+  return Math.max(min, Math.min(max, x));
+}
 
 export function normalizeKpis(raw: any): NormalizedKPIs {
   // Accepts shapes like { mrr: '$87k', users: '342', growth: '+18% MoM', teamSize: 4 }
@@ -43,29 +45,43 @@ export function normalizeKpis(raw: any): NormalizedKPIs {
   const growthScore = clamp((growthPct + 5) * 3); // -5%→0, 0%→15, 20%→75, 30%→105→clamped 100
   const teamScore = clamp((team / 20) * 100); // 20 ppl → 100
 
-  const composite = clamp(Math.round(
-    mrrScore * 0.35 +
-    growthScore * 0.35 +
-    usersScore * 0.15 +
-    teamScore * 0.15
-  ));
+  const composite = clamp(
+    Math.round(mrrScore * 0.35 + growthScore * 0.35 + usersScore * 0.15 + teamScore * 0.15),
+  );
 
   return { mrrScore, growthScore, usersScore, teamScore, composite };
 }
 
 export function estimateReadiness(businessInfo: any, kpis: NormalizedKPIs): number {
   const stage = String(businessInfo?.stage || '').toLowerCase();
-  const base = stage.includes('pre') ? 40 : stage.includes('seed') ? 60 : stage.includes('series a') ? 75 : 65;
+  const base = stage.includes('pre')
+    ? 40
+    : stage.includes('seed')
+      ? 60
+      : stage.includes('series a')
+        ? 75
+        : 65;
   const readiness = clamp(Math.round(base * 0.6 + kpis.composite * 0.4));
   return readiness;
 }
 
-export async function computeVcAffinity(vcEmail: string): Promise<{ industry: Record<string, number>; stage: Record<string, number>; geography: Record<string, number> }> {
+export async function computeVcAffinity(
+  vcEmail: string,
+): Promise<{
+  industry: Record<string, number>;
+  stage: Record<string, number>;
+  geography: Record<string, number>;
+}> {
   // Look at past swipes and accepted intros to derive affinity multipliers per dimension.
   const swipes = await prisma.vCSwipe.findMany({ where: { vcEmail } });
-  const accepts = await prisma.introRequest.findMany({ where: { vcEmail, status: { in: ['accepted','intro_sent'] } } });
+  const accepts = await prisma.introRequest.findMany({
+    where: { vcEmail, status: { in: ['accepted', 'intro_sent'] } },
+  });
 
-  const inc = (map: Record<string, number>, key: string, val = 1) => { if (!key) return; map[key] = (map[key] || 0) + val; };
+  const inc = (map: Record<string, number>, key: string, val = 1) => {
+    if (!key) return;
+    map[key] = (map[key] || 0) + val;
+  };
 
   const industry: Record<string, number> = {};
   const stage: Record<string, number> = {};
@@ -73,9 +89,21 @@ export async function computeVcAffinity(vcEmail: string): Promise<{ industry: Re
 
   for (const s of swipes) {
     const anon = (s.anonymousData as any) || {};
-    inc(industry, String(anon.industry || '').toLowerCase(), s.action === 'like' || s.action === 'super_like' ? 1 : -0.2);
-    inc(stage, String(anon.stage || '').toLowerCase(), s.action === 'like' || s.action === 'super_like' ? 1 : -0.2);
-    inc(geography, String(anon.geography || '').toLowerCase(), s.action === 'like' || s.action === 'super_like' ? 1 : -0.2);
+    inc(
+      industry,
+      String(anon.industry || '').toLowerCase(),
+      s.action === 'like' || s.action === 'super_like' ? 1 : -0.2,
+    );
+    inc(
+      stage,
+      String(anon.stage || '').toLowerCase(),
+      s.action === 'like' || s.action === 'super_like' ? 1 : -0.2,
+    );
+    inc(
+      geography,
+      String(anon.geography || '').toLowerCase(),
+      s.action === 'like' || s.action === 'super_like' ? 1 : -0.2,
+    );
   }
   // Accepted intros count extra
   for (const a of accepts) {
@@ -99,25 +127,19 @@ export async function computeVcAffinity(vcEmail: string): Promise<{ industry: Re
   return {
     industry: toMultiplier(industry),
     stage: toMultiplier(stage),
-    geography: toMultiplier(geography)
+    geography: toMultiplier(geography),
   };
 }
 
 export function blendMatchScore(params: {
   baseScore: number; // from stage/industry/geo/check
-  kpiScore: number;  // 0-100
+  kpiScore: number; // 0-100
   readinessScore: number; // 0-100
   affinity: { industry?: number; stage?: number; geography?: number };
 }): number {
   const { baseScore, kpiScore, readinessScore, affinity } = params;
-  const blended = (
-    baseScore * 0.5 +
-    kpiScore * 0.2 +
-    readinessScore * 0.2 +
-    100 * 0.1 // affinity applied multiplicatively below
-  );
+  const blended =
+    baseScore * 0.5 + kpiScore * 0.2 + readinessScore * 0.2 + 100 * 0.1; // affinity applied multiplicatively below
   const multiplier = (affinity.industry || 1) * (affinity.stage || 1) * (affinity.geography || 1);
   return Math.round(clamp(blended * multiplier, 0, 100));
 }
-
-

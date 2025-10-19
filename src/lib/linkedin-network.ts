@@ -18,21 +18,21 @@ interface IntroPath {
 
 /**
  * Find warm intro paths to investors via LinkedIn connections
- * 
+ *
  * NOTE: This requires LinkedIn API OAuth integration
  * User must connect their LinkedIn account first
  */
 export async function findWarmIntroPaths(
   userId: string,
-  targetInvestorNames: string[]
+  targetInvestorNames: string[],
 ): Promise<IntroPath[]> {
   // Step 1: Get user's LinkedIn access token
   const integration = await prisma.integration.findFirst({
     where: {
       userId,
       provider: 'linkedin',
-      status: 'connected'
-    }
+      status: 'connected',
+    },
   });
 
   if (!integration || !integration.accessToken) {
@@ -46,11 +46,7 @@ export async function findWarmIntroPaths(
   const introPaths: IntroPath[] = [];
 
   for (const investorName of targetInvestorNames) {
-    const paths = await findPathsToInvestor(
-      connections,
-      investorName,
-      integration.accessToken
-    );
+    const paths = await findPathsToInvestor(connections, investorName, integration.accessToken);
 
     if (paths.length > 0) {
       introPaths.push(...paths);
@@ -69,26 +65,30 @@ export async function findWarmIntroPaths(
 async function fetchLinkedInConnections(accessToken: string): Promise<LinkedInConnection[]> {
   try {
     // LinkedIn API v2: Get connections
-    const response = await fetch('https://api.linkedin.com/v2/connections?q=viewer&projection=(elements*(to~(id,firstName,lastName,headline,publicProfileUrl)))', {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    const response = await fetch(
+      'https://api.linkedin.com/v2/connections?q=viewer&projection=(elements*(to~(id,firstName,lastName,headline,publicProfileUrl)))',
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    );
 
     if (!response.ok) {
       throw new Error('Failed to fetch LinkedIn connections');
     }
 
     const data = await response.json();
-    
+
     // Parse connections
-    const connections: LinkedInConnection[] = data.elements?.map((elem: any) => ({
-      id: elem.to?.id,
-      name: `${elem.to?.firstName} ${elem.to?.lastName}`,
-      headline: elem.to?.headline,
-      profileUrl: elem.to?.publicProfileUrl
-    })) || [];
+    const connections: LinkedInConnection[] =
+      data.elements?.map((elem: any) => ({
+        id: elem.to?.id,
+        name: `${elem.to?.firstName} ${elem.to?.lastName}`,
+        headline: elem.to?.headline,
+        profileUrl: elem.to?.publicProfileUrl,
+      })) || [];
 
     return connections;
   } catch (error) {
@@ -103,14 +103,15 @@ async function fetchLinkedInConnections(accessToken: string): Promise<LinkedInCo
 async function findPathsToInvestor(
   userConnections: LinkedInConnection[],
   investorName: string,
-  accessToken: string
+  accessToken: string,
 ): Promise<IntroPath[]> {
   const paths: IntroPath[] = [];
 
   // Search for investor in user's direct connections (1st degree)
-  const directMatch = userConnections.find(conn => 
-    conn.name.toLowerCase().includes(investorName.toLowerCase()) ||
-    conn.headline?.toLowerCase().includes(investorName.toLowerCase())
+  const directMatch = userConnections.find(
+    (conn) =>
+      conn.name.toLowerCase().includes(investorName.toLowerCase()) ||
+      conn.headline?.toLowerCase().includes(investorName.toLowerCase()),
   );
 
   if (directMatch) {
@@ -119,14 +120,15 @@ async function findPathsToInvestor(
       path: [directMatch],
       strength: 1,
       recommendedConnector: directMatch,
-      introMessage: generateDirectIntroMessage(directMatch, investorName)
+      introMessage: generateDirectIntroMessage(directMatch, investorName),
     });
     return paths; // If we have direct connection, no need to search further
   }
 
   // Search 2nd degree connections
   // For each of user's connections, check their connections
-  for (const connection of userConnections.slice(0, 50)) { // Limit to avoid rate limits
+  for (const connection of userConnections.slice(0, 50)) {
+    // Limit to avoid rate limits
     try {
       // Check if this connection is connected to the investor
       // Note: This requires additional LinkedIn API permissions
@@ -134,16 +136,18 @@ async function findPathsToInvestor(
         `https://api.linkedin.com/v2/connections?q=viewer&projection=(elements*(to~(id,firstName,lastName,headline)))`,
         {
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'X-RestLi-Profile-Id': connection.id // View connections as this person
-          }
-        }
+            Authorization: `Bearer ${accessToken}`,
+            'X-RestLi-Profile-Id': connection.id, // View connections as this person
+          },
+        },
       );
 
       if (secondDegreeConnections.ok) {
         const data = await secondDegreeConnections.json();
-        const match = data.elements?.find((elem: any) => 
-          `${elem.to?.firstName} ${elem.to?.lastName}`.toLowerCase().includes(investorName.toLowerCase())
+        const match = data.elements?.find((elem: any) =>
+          `${elem.to?.firstName} ${elem.to?.lastName}`
+            .toLowerCase()
+            .includes(investorName.toLowerCase()),
         );
 
         if (match) {
@@ -155,12 +159,12 @@ async function findPathsToInvestor(
                 id: match.to.id,
                 name: `${match.to.firstName} ${match.to.lastName}`,
                 headline: match.to.headline,
-                profileUrl: match.to.publicProfileUrl
-              }
+                profileUrl: match.to.publicProfileUrl,
+              },
             ],
             strength: 2,
             recommendedConnector: connection,
-            introMessage: generateWarmIntroMessage(connection, investorName)
+            introMessage: generateWarmIntroMessage(connection, investorName),
           });
         }
       }
@@ -193,7 +197,7 @@ function generateWarmIntroMessage(connector: LinkedInConnection, investorName: s
  */
 export async function checkMutualConnections(
   userId: string,
-  investorLinkedInUrl: string
+  investorLinkedInUrl: string,
 ): Promise<{
   hasMutualConnections: boolean;
   count?: number;
@@ -201,7 +205,7 @@ export async function checkMutualConnections(
 }> {
   try {
     const integration = await prisma.integration.findFirst({
-      where: { userId, provider: 'linkedin', status: 'connected' }
+      where: { userId, provider: 'linkedin', status: 'connected' },
     });
 
     if (!integration?.accessToken) {
@@ -213,19 +217,19 @@ export async function checkMutualConnections(
       `https://api.linkedin.com/v2/connections?q=viewer&facets=List(network:(secondDegree))`,
       {
         headers: {
-          'Authorization': `Bearer ${integration.accessToken}`
-        }
-      }
+          Authorization: `Bearer ${integration.accessToken}`,
+        },
+      },
     );
 
     if (response.ok) {
       const data = await response.json();
       // Parse mutual connections
       // This is simplified - actual implementation depends on LinkedIn API response structure
-      
+
       return {
         hasMutualConnections: true,
-        count: data.mutualConnectionsCount || 0
+        count: data.mutualConnectionsCount || 0,
       };
     }
 
@@ -243,7 +247,7 @@ export async function generateWarmIntroRequest(
   connectorName: string,
   investorName: string,
   investorFirm: string,
-  businessInfo: any
+  businessInfo: any,
 ): Promise<string> {
   return `Hi ${connectorName},
 

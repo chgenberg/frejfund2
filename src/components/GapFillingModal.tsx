@@ -31,8 +31,8 @@ export default function GapFillingModal({ isOpen, onClose, gaps, onSubmit }: Gap
   const fileInputRefs = useRef<Record<string, HTMLInputElement>>({});
 
   const handleFileUpload = (gapId: string, file: File) => {
-    setUploadedFiles(prev => ({ ...prev, [gapId]: file }));
-    setResponses(prev => ({ ...prev, [gapId]: file.name }));
+    setUploadedFiles((prev) => ({ ...prev, [gapId]: file }));
+    setResponses((prev) => ({ ...prev, [gapId]: file.name }));
   };
 
   const handleSubmit = async () => {
@@ -43,7 +43,7 @@ export default function GapFillingModal({ isOpen, onClose, gaps, onSubmit }: Gap
       Object.entries(uploadedFiles).forEach(([gapId, file]) => {
         fullResponses[gapId] = file;
       });
-      
+
       await onSubmit(fullResponses);
       onClose();
     } catch (error) {
@@ -53,8 +53,9 @@ export default function GapFillingModal({ isOpen, onClose, gaps, onSubmit }: Gap
     }
   };
 
-  const totalPotentialImprovement = gaps.reduce((sum, gap) => 
-    sum + (gap.potentialScore - gap.currentScore), 0
+  const totalPotentialImprovement = gaps.reduce(
+    (sum, gap) => sum + (gap.potentialScore - gap.currentScore),
+    0,
   );
 
   const filledGaps = Object.keys(responses).length;
@@ -81,9 +82,12 @@ export default function GapFillingModal({ isOpen, onClose, gaps, onSubmit }: Gap
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h2 className="text-2xl font-bold text-black">Complete Your Investment Profile</h2>
+                  <h2 className="text-2xl font-bold text-black">
+                    Complete Your Investment Profile
+                  </h2>
                   <p className="text-gray-600 mt-1">
-                    Fill in the missing information to increase your readiness score by up to {totalPotentialImprovement} points
+                    Fill in the missing information to increase your readiness score by up to{' '}
+                    {totalPotentialImprovement} points
                   </p>
                 </div>
                 <button
@@ -93,7 +97,7 @@ export default function GapFillingModal({ isOpen, onClose, gaps, onSubmit }: Gap
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              
+
               {/* Progress Bar */}
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <motion.div
@@ -117,8 +121,8 @@ export default function GapFillingModal({ isOpen, onClose, gaps, onSubmit }: Gap
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className={`border rounded-xl p-4 transition-all ${
-                      responses[gap.id] 
-                        ? 'border-green-500 bg-green-50' 
+                      responses[gap.id]
+                        ? 'border-green-500 bg-green-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
@@ -143,7 +147,9 @@ export default function GapFillingModal({ isOpen, onClose, gaps, onSubmit }: Gap
                     {gap.inputType === 'text' && (
                       <textarea
                         value={responses[gap.id] || ''}
-                        onChange={(e) => setResponses(prev => ({ ...prev, [gap.id]: e.target.value }))}
+                        onChange={(e) =>
+                          setResponses((prev) => ({ ...prev, [gap.id]: e.target.value }))
+                        }
                         placeholder={gap.placeholder}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent resize-none text-sm"
                         rows={3}
@@ -154,7 +160,9 @@ export default function GapFillingModal({ isOpen, onClose, gaps, onSubmit }: Gap
                       <input
                         type="number"
                         value={responses[gap.id] || ''}
-                        onChange={(e) => setResponses(prev => ({ ...prev, [gap.id]: e.target.value }))}
+                        onChange={(e) =>
+                          setResponses((prev) => ({ ...prev, [gap.id]: e.target.value }))
+                        }
                         placeholder={gap.placeholder}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-sm"
                       />
@@ -164,7 +172,9 @@ export default function GapFillingModal({ isOpen, onClose, gaps, onSubmit }: Gap
                       <input
                         type="url"
                         value={responses[gap.id] || ''}
-                        onChange={(e) => setResponses(prev => ({ ...prev, [gap.id]: e.target.value }))}
+                        onChange={(e) =>
+                          setResponses((prev) => ({ ...prev, [gap.id]: e.target.value }))
+                        }
                         placeholder={gap.placeholder}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-sm"
                       />
@@ -233,7 +243,8 @@ export default function GapFillingModal({ isOpen, onClose, gaps, onSubmit }: Gap
                 <div className="flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-green-600" />
                   <span className="text-sm text-gray-600">
-                    Potential score increase: <strong className="text-black">+{totalPotentialImprovement} points</strong>
+                    Potential score increase:{' '}
+                    <strong className="text-black">+{totalPotentialImprovement} points</strong>
                   </span>
                 </div>
                 <div className="flex gap-3">

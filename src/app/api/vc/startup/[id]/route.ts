@@ -4,20 +4,17 @@ import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const startup = await prisma.user.findUnique({
       where: { id: params.id },
       include: {
         deepAnalyses: {
           where: {
-            status: 'completed'
+            status: 'completed',
           },
           orderBy: {
-            completedAt: 'desc'
+            completedAt: 'desc',
           },
           take: 1,
           include: {
@@ -32,22 +29,22 @@ export async function GET(
                 strengths: true,
                 redFlags: true,
                 questions: true,
-                evidence: true
-              }
+                evidence: true,
+              },
             },
-            insights: true
-          }
+            insights: true,
+          },
         },
         sessions: {
           select: {
-            businessInfo: true
+            businessInfo: true,
           },
           orderBy: {
-            createdAt: 'desc'
+            createdAt: 'desc',
           },
-          take: 1
-        }
-      }
+          take: 1,
+        },
+      },
     });
 
     // Allow access if profile is public OR caller is an authenticated VC (cookie set by middleware)
@@ -55,19 +52,16 @@ export async function GET(
     const isVC = Boolean(vcSession?.value);
 
     if (!startup || (!startup.isProfilePublic && !isVC)) {
-      return NextResponse.json(
-        { error: 'Startup not found or not accessible' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Startup not found or not accessible' }, { status: 404 });
     }
 
     const analysis = startup.deepAnalyses[0];
-    const businessInfo = startup.sessions[0]?.businessInfo as any || {};
+    const businessInfo = (startup.sessions[0]?.businessInfo as any) || {};
 
     // Group dimensions by category
     const dimensionsByCategory: Record<string, any[]> = {};
     if (analysis?.dimensions) {
-      analysis.dimensions.forEach(dim => {
+      analysis.dimensions.forEach((dim) => {
         if (!dimensionsByCategory[dim.category]) {
           dimensionsByCategory[dim.category] = [];
         }
@@ -83,7 +77,7 @@ export async function GET(
       logo: startup.logo || businessInfo?.logo || null,
       location: {
         city: businessInfo?.city || 'Stockholm',
-        country: businessInfo?.country || 'Sweden'
+        country: businessInfo?.country || 'Sweden',
       },
       industry: startup.industry || businessInfo?.industry || 'Tech',
       stage: startup.stage || businessInfo?.stage || 'Seed',
@@ -100,33 +94,33 @@ export async function GET(
       pitchDeck: startup.pitchDeck || null,
       traction: startup.traction || businessInfo?.traction || {},
       metrics: {
-        growth: getScoreFromDimensions(analysis?.dimensions || [], 'Revenue Growth') || businessInfo?.growthRate || 0,
+        growth:
+          getScoreFromDimensions(analysis?.dimensions || [], 'Revenue Growth') ||
+          businessInfo?.growthRate ||
+          0,
         retention: getScoreFromDimensions(analysis?.dimensions || [], 'Customer Retention') || 0,
         burnRate: businessInfo?.burnRate || 0,
         unitEconomics: getScoreFromDimensions(analysis?.dimensions || [], 'Unit Economics') || 0,
         marketSize: getScoreFromDimensions(analysis?.dimensions || [], 'Market Size') || 0,
-        productMarketFit: getScoreFromDimensions(analysis?.dimensions || [], 'Product-Market Fit') || 0
+        productMarketFit:
+          getScoreFromDimensions(analysis?.dimensions || [], 'Product-Market Fit') || 0,
       },
       dimensions: analysis?.dimensions || [],
       dimensionsByCategory,
       insights: analysis?.insights || [],
       analysisCompletedAt: analysis?.completedAt || null,
       createdAt: startup.createdAt,
-      updatedAt: startup.updatedAt
+      updatedAt: startup.updatedAt,
     };
 
     return NextResponse.json({ startup: profile });
-
   } catch (error) {
     console.error('Error fetching startup profile:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch startup profile' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch startup profile' }, { status: 500 });
   }
 }
 
 function getScoreFromDimensions(dimensions: any[], name: string): number {
-  const dim = dimensions.find(d => d.name === name);
+  const dim = dimensions.find((d) => d.name === name);
   return dim?.score || 0;
 }

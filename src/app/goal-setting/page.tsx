@@ -29,21 +29,21 @@ export default function GoalSettingPage() {
 
     const info = JSON.parse(stored) as BusinessInfo;
     setBusinessInfo(info);
-    
+
     // Trigger deep analysis in background (only once per session)
     const sessionId = localStorage.getItem('frejfund-session-id') || `sess-${Date.now()}`;
     localStorage.setItem('frejfund-session-id', sessionId);
-    
+
     // Check if analysis already triggered for this session
     const analysisTriggered = sessionStorage.getItem(`analysis-triggered-${sessionId}`);
     if (analysisTriggered) {
       console.log('⚠️ Analysis already triggered for this session');
       return;
     }
-    
+
     // Mark as triggered immediately to prevent duplicates
     sessionStorage.setItem(`analysis-triggered-${sessionId}`, 'true');
-    
+
     fetch('/api/deep-analysis', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -51,19 +51,21 @@ export default function GoalSettingPage() {
         sessionId,
         businessInfo: info,
         scrapedContent: info.preScrapedText || '',
-        uploadedDocuments: []
+        uploadedDocuments: [],
+      }),
+    })
+      .then((response) => {
+        if (response.ok) {
+          console.log('✅ Deep analysis started in background');
+        } else {
+          // If it failed, remove the trigger flag so user can retry
+          sessionStorage.removeItem(`analysis-triggered-${sessionId}`);
+        }
       })
-    }).then((response) => {
-      if (response.ok) {
-        console.log('✅ Deep analysis started in background');
-      } else {
-        // If it failed, remove the trigger flag so user can retry
+      .catch((error) => {
+        console.error('❌ Failed to start deep analysis:', error);
         sessionStorage.removeItem(`analysis-triggered-${sessionId}`);
-      }
-    }).catch(error => {
-      console.error('❌ Failed to start deep analysis:', error);
-      sessionStorage.removeItem(`analysis-triggered-${sessionId}`);
-    });
+      });
   }, [router]);
 
   const handleSetGoal = async () => {
@@ -78,7 +80,7 @@ export default function GoalSettingPage() {
         selectedGoal,
         selectedGoal === 'custom' ? customGoalText : undefined,
         businessInfo,
-        5 // Default score until deep analysis is complete
+        5, // Default score until deep analysis is complete
       );
 
       // Save goal and roadmap to database
@@ -92,8 +94,8 @@ export default function GoalSettingPage() {
           businessInfo,
           goal: selectedGoal,
           customGoal: selectedGoal === 'custom' ? customGoalText : undefined,
-          roadmap
-        })
+          roadmap,
+        }),
       });
 
       // Save to localStorage for immediate access
@@ -144,7 +146,8 @@ export default function GoalSettingPage() {
               What's your primary goal?
             </h2>
             <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto font-light px-4 sm:px-0">
-              Choose your main objective and I'll create a personalized roadmap to help you achieve it
+              Choose your main objective and I'll create a personalized roadmap to help you achieve
+              it
             </p>
           </div>
 
@@ -191,11 +194,15 @@ export default function GoalSettingPage() {
                 <div className="flex items-center space-x-2 sm:space-x-3 text-[10px] sm:text-xs text-gray-500">
                   <span>{option.timeline}</span>
                   <span className="text-gray-300">•</span>
-                  <span className={
-                    option.difficulty === 'easy' ? 'text-gray-600' :
-                    option.difficulty === 'medium' ? 'text-gray-700' :
-                    'text-black'
-                  }>
+                  <span
+                    className={
+                      option.difficulty === 'easy'
+                        ? 'text-gray-600'
+                        : option.difficulty === 'medium'
+                          ? 'text-gray-700'
+                          : 'text-black'
+                    }
+                  >
                     {option.difficulty.charAt(0).toUpperCase() + option.difficulty.slice(1)}
                   </span>
                 </div>
@@ -230,7 +237,11 @@ export default function GoalSettingPage() {
           <div className="text-center">
             <motion.button
               onClick={handleSetGoal}
-              disabled={!selectedGoal || (selectedGoal === 'custom' && !customGoalText.trim()) || isGenerating}
+              disabled={
+                !selectedGoal ||
+                (selectedGoal === 'custom' && !customGoalText.trim()) ||
+                isGenerating
+              }
               whileHover={{ scale: selectedGoal ? 1.05 : 1 }}
               whileTap={{ scale: selectedGoal ? 0.95 : 1 }}
               className={`group relative px-8 sm:px-12 py-4 sm:py-5 rounded-full text-base sm:text-lg font-semibold transition-all ${

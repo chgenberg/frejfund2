@@ -14,24 +14,24 @@ export interface GitHubOrgData {
   publicRepos: number;
   totalStars: number;
   totalForks: number;
-  
+
   // Team metrics
   contributors: number;
   activeContributors: number; // Active in last 3 months
-  
+
   // Activity metrics
   commitActivity: {
     last7Days: number;
     last30Days: number;
     last90Days: number;
   };
-  
+
   // Tech stack
   languages: Array<{
     name: string;
     percentage: number;
   }>;
-  
+
   // Code quality signals
   hasTests: boolean;
   hasCI: boolean;
@@ -39,24 +39,24 @@ export interface GitHubOrgData {
   avgIssueResolutionTime?: number; // in days
   openIssues: number;
   closedIssues: number;
-  
+
   // Recent activity
   recentCommits: Array<{
     message: string;
     date: string;
     author: string;
   }>;
-  
+
   recentReleases: Array<{
     name: string;
     date: string;
     description?: string;
   }>;
-  
+
   // Development velocity
   developmentVelocity: 'high' | 'medium' | 'low';
   codeQuality: 'excellent' | 'good' | 'average' | 'poor';
-  
+
   // Metadata
   scrapedAt: Date;
 }
@@ -65,9 +65,7 @@ export interface GitHubOrgData {
  * Analyze GitHub organization using GitHub API
  * Free tier: 60 requests/hour (unauthenticated), 5000/hour (authenticated)
  */
-export async function analyzeGitHubOrg(
-  orgNameOrUrl: string
-): Promise<GitHubOrgData | null> {
+export async function analyzeGitHubOrg(orgNameOrUrl: string): Promise<GitHubOrgData | null> {
   try {
     // Extract org name from URL if needed
     const orgName = orgNameOrUrl.includes('github.com')
@@ -81,8 +79,8 @@ export async function analyzeGitHubOrg(
 
     const githubToken = process.env.GITHUB_TOKEN;
     const headers: HeadersInit = {
-      'Accept': 'application/vnd.github.v3+json',
-      'User-Agent': 'FrejFund-Analyzer'
+      Accept: 'application/vnd.github.v3+json',
+      'User-Agent': 'FrejFund-Analyzer',
     };
 
     if (githubToken) {
@@ -91,7 +89,7 @@ export async function analyzeGitHubOrg(
 
     // Fetch organization data
     const orgResponse = await fetch(`https://api.github.com/orgs/${orgName}`, { headers });
-    
+
     if (!orgResponse.ok) {
       // Try as user instead of org
       const userResponse = await fetch(`https://api.github.com/users/${orgName}`, { headers });
@@ -106,7 +104,7 @@ export async function analyzeGitHubOrg(
     // Fetch repositories
     const reposResponse = await fetch(
       `https://api.github.com/orgs/${orgName}/repos?sort=updated&per_page=100`,
-      { headers }
+      { headers },
     );
 
     if (!reposResponse.ok) {
@@ -118,7 +116,7 @@ export async function analyzeGitHubOrg(
 
     // Analyze repositories
     const repoAnalysis = await Promise.all(
-      repos.slice(0, 10).map((repo: any) => analyzeRepository(repo.full_name, headers))
+      repos.slice(0, 10).map((repo: any) => analyzeRepository(repo.full_name, headers)),
     );
 
     // Aggregate languages
@@ -135,15 +133,21 @@ export async function analyzeGitHubOrg(
     const languages = Object.entries(languageMap)
       .map(([name, bytes]) => ({
         name,
-        percentage: Math.round((bytes / totalLanguageBytes) * 100)
+        percentage: Math.round((bytes / totalLanguageBytes) * 100),
       }))
       .sort((a, b) => b.percentage - a.percentage)
       .slice(0, 5);
 
     // Calculate metrics
-    const totalStars = repos.reduce((sum: number, repo: any) => sum + (repo.stargazers_count || 0), 0);
+    const totalStars = repos.reduce(
+      (sum: number, repo: any) => sum + (repo.stargazers_count || 0),
+      0,
+    );
     const totalForks = repos.reduce((sum: number, repo: any) => sum + (repo.forks_count || 0), 0);
-    const openIssues = repos.reduce((sum: number, repo: any) => sum + (repo.open_issues_count || 0), 0);
+    const openIssues = repos.reduce(
+      (sum: number, repo: any) => sum + (repo.open_issues_count || 0),
+      0,
+    );
 
     // Aggregate commit activity
     const totalCommits7d = repoAnalysis.reduce((sum, r) => sum + (r?.commits7d || 0), 0);
@@ -155,9 +159,9 @@ export async function analyzeGitHubOrg(
     else if (totalCommits7d > 5) developmentVelocity = 'medium';
 
     // Determine code quality
-    const hasTests = repoAnalysis.some(r => r?.hasTests);
-    const hasCI = repoAnalysis.some(r => r?.hasCI);
-    const hasDocs = repoAnalysis.some(r => r?.hasDocs);
+    const hasTests = repoAnalysis.some((r) => r?.hasTests);
+    const hasCI = repoAnalysis.some((r) => r?.hasCI);
+    const hasDocs = repoAnalysis.some((r) => r?.hasDocs);
 
     let codeQuality: 'excellent' | 'good' | 'average' | 'poor' = 'average';
     const qualityScore = (hasTests ? 1 : 0) + (hasCI ? 1 : 0) + (hasDocs ? 1 : 0);
@@ -180,7 +184,7 @@ export async function analyzeGitHubOrg(
       commitActivity: {
         last7Days: totalCommits7d,
         last30Days: totalCommits30d,
-        last90Days: totalCommits30d * 3 // Estimate
+        last90Days: totalCommits30d * 3, // Estimate
       },
       languages,
       hasTests,
@@ -192,9 +196,8 @@ export async function analyzeGitHubOrg(
       recentReleases,
       developmentVelocity,
       codeQuality,
-      scrapedAt: new Date()
+      scrapedAt: new Date(),
     };
-
   } catch (error) {
     console.error('GitHub analysis error:', error);
     return null;
@@ -206,7 +209,7 @@ export async function analyzeGitHubOrg(
  */
 async function analyzeRepository(
   repoFullName: string,
-  headers: HeadersInit
+  headers: HeadersInit,
 ): Promise<{
   commits7d: number;
   commits30d: number;
@@ -216,32 +219,28 @@ async function analyzeRepository(
 } | null> {
   try {
     // Check for test files
-    const contentsResponse = await fetch(
-      `https://api.github.com/repos/${repoFullName}/contents`,
-      { headers }
-    );
-    
+    const contentsResponse = await fetch(`https://api.github.com/repos/${repoFullName}/contents`, {
+      headers,
+    });
+
     let hasTests = false;
     let hasCI = false;
     let hasDocs = false;
 
     if (contentsResponse.ok) {
       const contents = await contentsResponse.json();
-      hasTests = contents.some((file: any) => 
-        file.name === 'test' || 
-        file.name === 'tests' || 
-        file.name === '__tests__' ||
-        file.name.includes('test')
+      hasTests = contents.some(
+        (file: any) =>
+          file.name === 'test' ||
+          file.name === 'tests' ||
+          file.name === '__tests__' ||
+          file.name.includes('test'),
       );
-      hasCI = contents.some((file: any) => 
-        file.name === '.github' || 
-        file.name === '.gitlab-ci.yml' ||
-        file.name === '.circleci'
+      hasCI = contents.some(
+        (file: any) =>
+          file.name === '.github' || file.name === '.gitlab-ci.yml' || file.name === '.circleci',
       );
-      hasDocs = contents.some((file: any) => 
-        file.name === 'docs' || 
-        file.name === 'README.md'
-      );
+      hasDocs = contents.some((file: any) => file.name === 'docs' || file.name === 'README.md');
     }
 
     // Get commit activity (last 30 days)
@@ -250,12 +249,12 @@ async function analyzeRepository(
 
     const commits7dResponse = await fetch(
       `https://api.github.com/repos/${repoFullName}/commits?since=${weekAgo}&per_page=100`,
-      { headers }
+      { headers },
     );
-    
+
     const commits30dResponse = await fetch(
       `https://api.github.com/repos/${repoFullName}/commits?since=${monthAgo}&per_page=100`,
-      { headers }
+      { headers },
     );
 
     const commits7d = commits7dResponse.ok ? (await commits7dResponse.json()).length : 0;
@@ -266,7 +265,7 @@ async function analyzeRepository(
       commits30d,
       hasTests,
       hasCI,
-      hasDocs
+      hasDocs,
     };
   } catch (error) {
     console.error('Repository analysis error:', error);
@@ -279,12 +278,12 @@ async function analyzeRepository(
  */
 async function getRecentCommits(
   repoFullName: string,
-  headers: HeadersInit
+  headers: HeadersInit,
 ): Promise<Array<{ message: string; date: string; author: string }>> {
   try {
     const response = await fetch(
       `https://api.github.com/repos/${repoFullName}/commits?per_page=10`,
-      { headers }
+      { headers },
     );
 
     if (!response.ok) return [];
@@ -293,7 +292,7 @@ async function getRecentCommits(
     return commits.map((commit: any) => ({
       message: commit.commit.message.split('\n')[0], // First line only
       date: commit.commit.author.date,
-      author: commit.commit.author.name
+      author: commit.commit.author.name,
     }));
   } catch (error) {
     return [];
@@ -305,12 +304,12 @@ async function getRecentCommits(
  */
 async function getRecentReleases(
   repoFullName: string,
-  headers: HeadersInit
+  headers: HeadersInit,
 ): Promise<Array<{ name: string; date: string; description?: string }>> {
   try {
     const response = await fetch(
       `https://api.github.com/repos/${repoFullName}/releases?per_page=5`,
-      { headers }
+      { headers },
     );
 
     if (!response.ok) return [];
@@ -319,7 +318,7 @@ async function getRecentReleases(
     return releases.map((release: any) => ({
       name: release.name || release.tag_name,
       date: release.published_at,
-      description: release.body?.substring(0, 200)
+      description: release.body?.substring(0, 200),
     }));
   } catch (error) {
     return [];
@@ -332,8 +331,8 @@ async function getRecentReleases(
 export async function getGitHubTechStack(orgName: string): Promise<string[]> {
   const data = await analyzeGitHubOrg(orgName);
   if (!data) return [];
-  
-  return data.languages.map(lang => lang.name);
+
+  return data.languages.map((lang) => lang.name);
 }
 
 /**
@@ -342,7 +341,6 @@ export async function getGitHubTechStack(orgName: string): Promise<string[]> {
 export async function isActivelyDeveloping(orgName: string): Promise<boolean> {
   const data = await analyzeGitHubOrg(orgName);
   if (!data) return false;
-  
+
   return data.commitActivity.last7Days > 0;
 }
-

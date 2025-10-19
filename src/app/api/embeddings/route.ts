@@ -11,7 +11,10 @@ function isOpenAIConfigured(): boolean {
 
 function generateLocalEmbedding(text: string, dims = 64): number[] {
   const vec = new Array<number>(dims).fill(0);
-  const tokens = (text || '').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+  const tokens = (text || '')
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
   tokens.forEach((tok) => {
     let h = 2166136261;
     for (let i = 0; i < tok.length; i++) {
@@ -56,9 +59,11 @@ export async function POST(req: NextRequest) {
         const client = getOpenAIClient();
         const resp = await client.embeddings.create({
           model: getEmbeddingsModel(),
-          input: batch.map((b) => b.text)
+          input: batch.map((b) => b.text),
         });
-        embeddings = resp.data.map((e) => (e.embedding as unknown as number[]) || generateLocalEmbedding(''));
+        embeddings = resp.data.map(
+          (e) => (e.embedding as unknown as number[]) || generateLocalEmbedding(''),
+        );
       } catch {
         embeddings = batch.map((b) => generateLocalEmbedding(b.text));
       }
@@ -69,7 +74,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       chunks: chunks.map((c) => c.id),
-      embeddings: results
+      embeddings: results,
     });
   } catch (error) {
     console.error('Embeddings API Error:', error);
@@ -80,5 +85,3 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   return NextResponse.json({ status: 'Embeddings API is running' });
 }
-
-

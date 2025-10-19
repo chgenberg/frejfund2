@@ -9,10 +9,7 @@ export async function GET(request: NextRequest) {
     const sessionId = searchParams.get('sessionId');
 
     if (!sessionId) {
-      return NextResponse.json(
-        { error: 'Session ID required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
     }
 
     const session = await prisma.session.findUnique({
@@ -22,15 +19,12 @@ export async function GET(request: NextRequest) {
         userId: true,
         businessInfo: true,
         createdAt: true,
-        updatedAt: true
-      }
+        updatedAt: true,
+      },
     });
 
     if (!session) {
-      return NextResponse.json(
-        { error: 'Session not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -38,15 +32,10 @@ export async function GET(request: NextRequest) {
       userId: session.userId,
       businessInfo: session.businessInfo,
       createdAt: session.createdAt,
-      updatedAt: session.updatedAt
+      updatedAt: session.updatedAt,
     });
-
   } catch (error) {
     console.error('Error fetching session:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch session' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch session' }, { status: 500 });
   }
 }
-

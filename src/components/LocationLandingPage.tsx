@@ -43,29 +43,30 @@ export default function LocationLandingPage({ location }: LocationLandingPagePro
           startups: '10,000+',
           investors: '500+',
           funding: '$10B+',
-          unicorns: '20+'
+          unicorns: '20+',
         };
       case 'growing':
         return {
           startups: '1,000+',
           investors: '100+',
           funding: '$1B+',
-          unicorns: '5+'
+          unicorns: '5+',
         };
       default:
         return {
           startups: '100+',
           investors: '20+',
           funding: '$100M+',
-          unicorns: '1+'
+          unicorns: '1+',
         };
     }
   };
 
   const stats = getLocationStats();
-  const locationTitle = location.type === 'city' && location.country 
-    ? `${location.name}, ${location.country}` 
-    : location.name;
+  const locationTitle =
+    location.type === 'city' && location.country
+      ? `${location.name}, ${location.country}`
+      : location.name;
 
   return (
     <div className="min-h-screen bg-white font-sans antialiased">
@@ -91,10 +92,11 @@ export default function LocationLandingPage({ location }: LocationLandingPagePro
           </motion.div>
 
           <h1 className="text-5xl md:text-6xl font-bold text-black mb-6 tracking-tight leading-tight">
-            Because great ideas from<br />
+            Because great ideas from
+            <br />
             <span className="text-gray-600">{location.name}</span> deserve a chance.
           </h1>
-          
+
           <p className="text-xl md:text-2xl text-gray-600 mb-12 font-light max-w-3xl mx-auto">
             We connect founders and investors who believe in building a better future
           </p>
@@ -218,8 +220,8 @@ export default function LocationLandingPage({ location }: LocationLandingPagePro
               Built for {location.name}'s Entrepreneurs
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Our AI-powered platform understands the unique challenges and opportunities 
-              in the {location.name} startup ecosystem
+              Our AI-powered platform understands the unique challenges and opportunities in the{' '}
+              {location.name} startup ecosystem
             </p>
           </motion.div>
 
@@ -267,9 +269,7 @@ export default function LocationLandingPage({ location }: LocationLandingPagePro
                 <div className="w-2 h-2 bg-white rounded-full" />
               </div>
               <h3 className="text-xl font-semibold text-black mb-2">Global Reach</h3>
-              <p className="text-gray-600">
-                Take your {location.name} startup to the world stage
-              </p>
+              <p className="text-gray-600">Take your {location.name} startup to the world stage</p>
             </motion.div>
           </div>
         </div>
@@ -318,32 +318,72 @@ export default function LocationLandingPage({ location }: LocationLandingPagePro
                 Investment intelligence for {location.name} startups
               </p>
             </div>
-            
+
             <div>
               <h3 className="font-semibold text-black mb-3">For Founders</h3>
               <ul className="space-y-2 text-sm text-gray-600">
-                <li><a href="/pitch" className="hover:text-black">Pitch Analysis</a></li>
-                <li><a href="/analysis" className="hover:text-black">Business Analysis</a></li>
-                <li><a href="/chat" className="hover:text-black">AI Coach</a></li>
+                <li>
+                  <a href="/pitch" className="hover:text-black">
+                    Pitch Analysis
+                  </a>
+                </li>
+                <li>
+                  <a href="/analysis" className="hover:text-black">
+                    Business Analysis
+                  </a>
+                </li>
+                <li>
+                  <a href="/chat" className="hover:text-black">
+                    AI Coach
+                  </a>
+                </li>
               </ul>
             </div>
 
             <div>
               <h3 className="font-semibold text-black mb-3">For Investors</h3>
               <ul className="space-y-2 text-sm text-gray-600">
-                <li><a href="/vc" className="hover:text-black">Deal Flow</a></li>
-                <li><a href="/vc/analytics" className="hover:text-black">Analytics</a></li>
-                <li><a href="/vc/swipe" className="hover:text-black">Smart Matching</a></li>
+                <li>
+                  <a href="/vc" className="hover:text-black">
+                    Deal Flow
+                  </a>
+                </li>
+                <li>
+                  <a href="/vc/analytics" className="hover:text-black">
+                    Analytics
+                  </a>
+                </li>
+                <li>
+                  <a href="/vc/swipe" className="hover:text-black">
+                    Smart Matching
+                  </a>
+                </li>
               </ul>
             </div>
 
             <div>
               <h3 className="font-semibold text-black mb-3">Locations</h3>
               <ul className="space-y-2 text-sm text-gray-600">
-                <li><a href="/san-francisco" className="hover:text-black">San Francisco</a></li>
-                <li><a href="/new-york" className="hover:text-black">New York</a></li>
-                <li><a href="/london" className="hover:text-black">London</a></li>
-                <li><a href="/stockholm" className="hover:text-black">Stockholm</a></li>
+                <li>
+                  <a href="/san-francisco" className="hover:text-black">
+                    San Francisco
+                  </a>
+                </li>
+                <li>
+                  <a href="/new-york" className="hover:text-black">
+                    New York
+                  </a>
+                </li>
+                <li>
+                  <a href="/london" className="hover:text-black">
+                    London
+                  </a>
+                </li>
+                <li>
+                  <a href="/stockholm" className="hover:text-black">
+                    Stockholm
+                  </a>
+                </li>
               </ul>
             </div>
           </div>

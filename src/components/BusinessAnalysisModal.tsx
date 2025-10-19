@@ -12,7 +12,11 @@ interface BusinessAnalysisModalProps {
   onClose: () => void;
 }
 
-export default function BusinessAnalysisModal({ businessInfo, onComplete, onClose }: BusinessAnalysisModalProps) {
+export default function BusinessAnalysisModal({
+  businessInfo,
+  onComplete,
+  onClose,
+}: BusinessAnalysisModalProps) {
   const [analysisState, setAnalysisState] = useState<AnalysisState>(AnalysisState.START);
   const [currentStep, setCurrentStep] = useState('');
   const [progress, setProgress] = useState(0);
@@ -25,11 +29,26 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
   // Extended durations for higher-quality analysis (≈ 2–3 minutes total)
   const analysisSteps = [
     { id: 'context', label: 'Analyzing business context and stage', icon: Target, duration: 20000 },
-    { id: 'market', label: 'Evaluating market opportunity and timing', icon: TrendingUp, duration: 25000 },
+    {
+      id: 'market',
+      label: 'Evaluating market opportunity and timing',
+      icon: TrendingUp,
+      duration: 25000,
+    },
     { id: 'competition', label: 'Assessing competitive landscape', icon: Users, duration: 20000 },
     { id: 'team', label: 'Analyzing team capabilities', icon: Users, duration: 15000 },
-    { id: 'financials', label: 'Reviewing financial metrics and unit economics', icon: DollarSign, duration: 25000 },
-    { id: 'insights', label: 'Generating recommendations and next steps', icon: null, duration: 20000 }
+    {
+      id: 'financials',
+      label: 'Reviewing financial metrics and unit economics',
+      icon: DollarSign,
+      duration: 25000,
+    },
+    {
+      id: 'insights',
+      label: 'Generating recommendations and next steps',
+      icon: null,
+      duration: 20000,
+    },
   ];
 
   const waitingTips = [
@@ -38,7 +57,7 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
     'Tip: Add customer quotes/use-cases on the site for trust.',
     'Tip: Define 90‑day goals with weekly leading indicators.',
     'Tip: Instrument onboarding and measure Day‑7 activation.',
-    'Tip: Draft a lightweight investor FAQ from common questions.'
+    'Tip: Draft a lightweight investor FAQ from common questions.',
   ];
   const [tipIndex, setTipIndex] = useState(0);
 
@@ -46,7 +65,7 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
     let timer: NodeJS.Timeout;
     if (analysisState === AnalysisState.ANALYZING) {
       timer = setInterval(() => {
-        setElapsedTime(prev => prev + 0.1);
+        setElapsedTime((prev) => prev + 0.1);
       }, 100);
     }
     return () => clearInterval(timer);
@@ -54,7 +73,7 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
 
   useEffect(() => {
     if (analysisState !== AnalysisState.ANALYZING) return;
-    const t = setInterval(() => setTipIndex(i => (i + 1) % waitingTips.length), 5000);
+    const t = setInterval(() => setTipIndex((i) => (i + 1) % waitingTips.length), 5000);
     return () => clearInterval(t);
   }, [analysisState]);
 
@@ -78,7 +97,7 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
           const extractRes = await fetch('/api/extract', {
             method: 'POST',
             headers: { 'x-session-id': sessionId },
-            body: formData
+            body: formData,
           });
           if (extractRes.ok) {
             const { documents } = await extractRes.json();
@@ -98,7 +117,7 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
           const res = await fetch('/api/scrape', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url: businessInfo.website, maxPages: 4 })
+            body: JSON.stringify({ url: businessInfo.website, maxPages: 4 }),
           });
           if (res.ok) {
             const { result } = await res.json();
@@ -114,16 +133,15 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
         (step: string, progressValue: number) => {
           setCurrentStep(step);
           setProgress(progressValue);
-        }
+        },
       );
 
       setAnalysisResult(result);
       setAnalysisState(AnalysisState.RESULTS);
-      
+
       setTimeout(() => {
         onComplete(result);
       }, 2000);
-
     } catch (err) {
       setError('Analysis failed. Please try again.');
       setAnalysisState(AnalysisState.ERROR);
@@ -131,7 +149,7 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
   };
 
   const getCurrentStepIcon = () => {
-    const currentStepData = analysisSteps.find(step => step.label === currentStep);
+    const currentStepData = analysisSteps.find((step) => step.label === currentStep);
     return currentStepData?.icon;
   };
 
@@ -144,15 +162,15 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
       <div className="w-20 h-20 bg-black rounded-full mx-auto mb-6 flex items-center justify-center">
         <div className="w-4 h-4 bg-white rounded-full" />
       </div>
-      
-      <h2 className="text-2xl font-bold text-black mb-4">
-        Comprehensive Business Analysis
-      </h2>
-      
+
+      <h2 className="text-2xl font-bold text-black mb-4">Comprehensive Business Analysis</h2>
+
       <p className="text-gray-600 mb-8 leading-relaxed">
-        I'll analyze your <strong>{businessInfo.industry}</strong> business across 10 key investment criteria. 
-        This deep analysis will take about 2-3 minutes and will provide personalized insights based on your 
-        <strong> {businessInfo.stage}</strong> stage and <strong>{businessInfo.targetMarket}</strong> focus.
+        I'll analyze your <strong>{businessInfo.industry}</strong> business across 10 key investment
+        criteria. This deep analysis will take about 2-3 minutes and will provide personalized
+        insights based on your
+        <strong> {businessInfo.stage}</strong> stage and{' '}
+        <strong>{businessInfo.targetMarket}</strong> focus.
       </p>
 
       <div className="bg-gray-50 rounded-xl p-6 mb-8">
@@ -180,10 +198,14 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={startAnalysis}
-          disabled={(typeof window !== 'undefined' && (window as any).__ff_analysis_status === 'running')}
+          disabled={
+            typeof window !== 'undefined' && (window as any).__ff_analysis_status === 'running'
+          }
           className="flex-1 px-6 py-3 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {(typeof window !== 'undefined' && (window as any).__ff_analysis_status === 'running') ? 'Analyzing…' : 'Start Analysis'}
+          {typeof window !== 'undefined' && (window as any).__ff_analysis_status === 'running'
+            ? 'Analyzing…'
+            : 'Start Analysis'}
         </motion.button>
       </div>
     </motion.div>
@@ -192,8 +214,8 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
   const renderAnalyzing = () => {
     const CurrentIcon = getCurrentStepIcon();
     const totalMs = analysisSteps.reduce((s, st) => s + st.duration, 0);
-    const etaSec = Math.max(0, Math.round((totalMs * (1 - (progress/100))) / 1000));
-    
+    const etaSec = Math.max(0, Math.round((totalMs * (1 - progress / 100)) / 1000));
+
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
@@ -201,27 +223,23 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
         className="text-center"
       >
         <motion.div
-          animate={{ 
+          animate={{
             scale: [1, 1.1, 1],
-            rotate: [0, 5, -5, 0]
+            rotate: [0, 5, -5, 0],
           }}
-          transition={{ 
+          transition={{
             duration: 2,
             repeat: Infinity,
-            ease: "easeInOut"
+            ease: 'easeInOut',
           }}
           className="w-20 h-20 bg-black rounded-2xl mx-auto mb-6 flex items-center justify-center"
         >
           <CurrentIcon className="w-10 h-10 text-white" />
         </motion.div>
 
-        <h2 className="text-2xl font-bold text-black mb-2">
-          Analyzing Your Business
-        </h2>
-        
-        <p className="text-gray-600 mb-8">
-          {currentStep || 'Initializing analysis...'}
-        </p>
+        <h2 className="text-2xl font-bold text-black mb-2">Analyzing Your Business</h2>
+
+        <p className="text-gray-600 mb-8">{currentStep || 'Initializing analysis...'}</p>
 
         {/* Progress Bar */}
         <div className="mb-6">
@@ -229,7 +247,7 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
             <span>Progress</span>
             <span>{Math.round(progress)}%</span>
           </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
+          <div className="w-full bg-gray-200 rounded-full h-3">
             <motion.div
               className="bg-black h-3 rounded-full"
               initial={{ width: 0 }}
@@ -240,7 +258,9 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
         </div>
 
         {/* Timer / ETA and rotating tip */}
-        <div className="text-sm text-gray-500">Elapsed: {elapsedTime.toFixed(1)}s • ETA ~{etaSec}s</div>
+        <div className="text-sm text-gray-500">
+          Elapsed: {elapsedTime.toFixed(1)}s • ETA ~{etaSec}s
+        </div>
         <div className="text-xs text-gray-600 mb-8 mt-1">{waitingTips[tipIndex]}</div>
 
         {/* Step Progress */}
@@ -248,7 +268,7 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
           {analysisSteps.map((step, index) => {
             const isCompleted = progress > ((index + 1) / analysisSteps.length) * 100;
             const isCurrent = step.label === currentStep;
-            
+
             return (
               <motion.div
                 key={step.id}
@@ -256,16 +276,18 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
                 className={`flex items-center space-x-3 p-3 rounded-lg transition-all ${
-                  isCurrent ? 'bg-gray-100 border border-gray-300' : 
-                  isCompleted ? 'bg-gray-50 border border-gray-200' : 
-                  'bg-white border border-gray-100'
+                  isCurrent
+                    ? 'bg-gray-100 border border-gray-300'
+                    : isCompleted
+                      ? 'bg-gray-50 border border-gray-200'
+                      : 'bg-white border border-gray-100'
                 }`}
               >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  isCompleted ? 'bg-gray-200' : 
-                  isCurrent ? 'bg-gray-400' : 
-                  'bg-gray-100'
-                }`}>
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    isCompleted ? 'bg-gray-200' : isCurrent ? 'bg-gray-400' : 'bg-gray-100'
+                  }`}
+                >
                   {isCompleted ? (
                     <CheckCircle className="w-4 h-4 text-gray-600" />
                   ) : step.icon ? (
@@ -274,11 +296,11 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
                     <div className="w-2 h-2 bg-gray-600 rounded-full" />
                   )}
                 </div>
-                <span className={`text-sm font-medium ${
-                  isCurrent ? 'text-black' : 
-                  isCompleted ? 'text-gray-700' : 
-                  'text-gray-500'
-                }`}>
+                <span
+                  className={`text-sm font-medium ${
+                    isCurrent ? 'text-black' : isCompleted ? 'text-gray-700' : 'text-gray-500'
+                  }`}
+                >
                   {step.label}
                 </span>
               </motion.div>
@@ -303,9 +325,7 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
         <CheckCircle className="w-10 h-10 text-white" />
       </motion.div>
 
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">
-        Analysis Complete!
-      </h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-4">Analysis Complete!</h2>
 
       {analysisResult && (
         <div className="space-y-4 mb-8">
@@ -318,9 +338,7 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
                 <div className="text-sm text-gray-600">Overall Score</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-purple-600">
-                  {analysisResult.accuracy}%
-                </div>
+                <div className="text-2xl font-bold text-purple-600">{analysisResult.accuracy}%</div>
                 <div className="text-sm text-gray-600">Accuracy</div>
               </div>
               <div>
@@ -333,9 +351,9 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
           </div>
 
           <p className="text-gray-600">
-            I've analyzed your business across {Object.keys(analysisResult.scores).length - 1} key dimensions 
-            and generated {analysisResult.actionableInsights.length} personalized recommendations 
-            to improve your investment readiness.
+            I've analyzed your business across {Object.keys(analysisResult.scores).length - 1} key
+            dimensions and generated {analysisResult.actionableInsights.length} personalized
+            recommendations to improve your investment readiness.
           </p>
         </div>
       )}
@@ -361,9 +379,7 @@ export default function BusinessAnalysisModal({ businessInfo, onComplete, onClos
         <AlertCircle className="w-10 h-10 text-red-600" />
       </div>
 
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">
-        Analysis Failed
-      </h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-4">Analysis Failed</h2>
 
       <p className="text-gray-600 mb-8">
         {error || 'Something went wrong during the analysis. Please try again.'}

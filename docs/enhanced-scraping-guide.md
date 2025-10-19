@@ -76,6 +76,7 @@ Mycket rikare insights!
 ### **Data som samlas in:**
 
 #### **LinkedIn Data:**
+
 ```typescript
 {
   companySize: "51-200 employees",
@@ -90,6 +91,7 @@ Mycket rikare insights!
 ```
 
 #### **GitHub Data:**
+
 ```typescript
 {
   publicRepos: 12,
@@ -111,6 +113,7 @@ Mycket rikare insights!
 ```
 
 #### **Product Hunt Data:**
+
 ```typescript
 {
   productName: "YourProduct",
@@ -130,12 +133,14 @@ Mycket rikare insights!
 ## 🚀 **Integration med Deep Analysis**
 
 ### **Before (Only website):**
+
 ```typescript
 const prompt = `Analyze ${companyName}'s unit economics.
 Content: ${websiteText.slice(0, 2000)}`;
 ```
 
 ### **After (Enriched data):**
+
 ```typescript
 const prompt = `Analyze ${companyName}'s unit economics.
 
@@ -167,12 +172,13 @@ Based on ALL this data, evaluate their unit economics...
 ## 💡 **Användning i kod**
 
 ### **API Call:**
+
 ```typescript
 // Client-side (BusinessWizard.tsx)
 const response = await fetch('/api/scrape/enhanced', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(businessInfo)
+  body: JSON.stringify(businessInfo),
 });
 
 const { enrichedSummary, stats } = await response.json();
@@ -182,6 +188,7 @@ console.log(`Data from: ${stats.dataSources.join(', ')}`);
 ```
 
 ### **Använd i Deep Analysis:**
+
 ```typescript
 // src/lib/deep-analysis-runner.ts
 const enrichedContent = await runEnhancedScraping(businessInfo);
@@ -196,23 +203,29 @@ await analyzeDimension(dimension, businessInfo, summary, uploadedDocs);
 ## 📈 **Impact på Analys-kvalitet**
 
 ### **Dimension: Team & Execution**
+
 **Before:** Gissar baserat på website copy
-**After:** 
+**After:**
+
 - LinkedIn: Exakt team size, recent hires
 - GitHub: Utvecklingshastighet, code quality
 - **Accuracy: 40% → 90%**
 
 ### **Dimension: Traction & Growth**
+
 **Before:** Beror på att företaget delar metrics
 **After:**
+
 - LinkedIn: Follower growth, employee growth
 - GitHub: Star growth, commit velocity
 - Product Hunt: Community validation
 - **Coverage: 30% → 80%**
 
 ### **Dimension: Technical Differentiation**
+
 **Before:** Vag bedömning från marketing copy
 **After:**
+
 - GitHub: Faktisk tech stack, AI/ML repos
 - Code quality metrics (tests, CI)
 - Development velocity
@@ -223,10 +236,11 @@ await analyzeDimension(dimension, businessInfo, summary, uploadedDocs);
 ## 🎯 **Kostnad-nytta analys**
 
 ### **Kostnader:**
+
 ```
 GitHub Token: $0 (gratis)
 Product Hunt API: $0 (gratis tier okej för < 1000/dag)
-LinkedIn Scraping: 
+LinkedIn Scraping:
   - Web scraping: $0 (kan misslyckas ibland)
   - RapidAPI: $0.01/request = $10 för 1000 analyser
 
@@ -234,6 +248,7 @@ Total per analys: $0.00 - $0.01
 ```
 
 ### **Värde:**
+
 ```
 Analys-kvalitet: +60%
 Confidence i insights: +70%
@@ -251,11 +266,13 @@ Med 1000 analyser/månad:
 ## ⚠️ **Considerations & Limitations**
 
 ### **Rate Limits:**
+
 - **GitHub:** 5,000/hour (med token), 60/hour (utan)
 - **Product Hunt:** 500/dag (gratis), 5000/dag (paid)
 - **LinkedIn Web:** Ingen officiell limit, men kan blockeras vid spam
 
 ### **Failure Handling:**
+
 ```typescript
 // Graceful degradation
 const result = await runEnhancedScraping(businessInfo);
@@ -268,6 +285,7 @@ if (result.totalDataPoints === 1) {
 ```
 
 ### **Privacy & Compliance:**
+
 - ✅ All data is **public** (no authentication bypass)
 - ✅ Respects robots.txt
 - ✅ Rate-limited to be respectful
@@ -303,6 +321,7 @@ curl -X POST http://localhost:3000/api/scrape/enhanced \
 ```
 
 Expected response:
+
 ```json
 {
   "success": true,
@@ -321,4 +340,3 @@ Expected response:
 ---
 
 **Status:** Ready to integrate! 🎉
-

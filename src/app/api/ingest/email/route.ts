@@ -30,7 +30,9 @@ export async function POST(req: NextRequest) {
       if (e.body) lines.push(`Body:\n${e.body}`);
       const text = lines.join('\n');
       if (!text) continue;
-      const chunks = await indexContextForSession(sessionId, text, { url: e.subject ? `email:${e.subject}` : 'email' });
+      const chunks = await indexContextForSession(sessionId, text, {
+        url: e.subject ? `email:${e.subject}` : 'email',
+      });
       totalChunks += chunks;
     }
 
@@ -44,5 +46,3 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   return NextResponse.json({ status: 'Email ingest API is running' });
 }
-
-

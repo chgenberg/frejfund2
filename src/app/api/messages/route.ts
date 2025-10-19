@@ -18,17 +18,17 @@ export async function GET(req: NextRequest) {
     const session = await prisma.session.upsert({
       where: { id: sessionId },
       update: { lastActivity: new Date() },
-      create: { id: sessionId }
+      create: { id: sessionId },
     });
 
     // Get messages
     const messages = await prisma.message.findMany({
       where: { sessionId },
-      orderBy: { createdAt: 'asc' }
+      orderBy: { createdAt: 'asc' },
     });
 
-    return NextResponse.json({ 
-      messages: messages.map(m => ({
+    return NextResponse.json({
+      messages: messages.map((m) => ({
         id: m.id,
         role: m.role,
         content: m.content,
@@ -37,9 +37,9 @@ export async function GET(req: NextRequest) {
           tokens: m.tokens,
           latencyMs: m.latencyMs,
           costUsdEstimate: m.cost,
-          model: m.model
-        }
-      }))
+          model: m.model,
+        },
+      })),
     });
   } catch (error) {
     console.error('Messages GET error:', error);
@@ -54,16 +54,19 @@ export async function POST(req: NextRequest) {
     const { sessionId, role, content, tokens, latencyMs, cost, model } = body;
 
     if (!sessionId || !role || !content) {
-      return NextResponse.json({ 
-        error: 'sessionId, role, and content required' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'sessionId, role, and content required',
+        },
+        { status: 400 },
+      );
     }
 
     // Ensure session exists
     await prisma.session.upsert({
       where: { id: sessionId },
       update: { lastActivity: new Date() },
-      create: { id: sessionId }
+      create: { id: sessionId },
     });
 
     // Save message
@@ -75,17 +78,17 @@ export async function POST(req: NextRequest) {
         tokens: tokens || null,
         latencyMs: latencyMs || null,
         cost: cost || null,
-        model: model || null
-      }
+        model: model || null,
+      },
     });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       message: {
         id: message.id,
         role: message.role,
         content: message.content,
-        timestamp: message.createdAt
-      }
+        timestamp: message.createdAt,
+      },
     });
   } catch (error) {
     console.error('Messages POST error:', error);

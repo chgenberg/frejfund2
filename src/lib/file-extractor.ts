@@ -14,14 +14,14 @@ let tesseract: any;
   } catch (e) {
     // ignore; will fallback
   }
-  
+
   try {
     // @ts-ignore
     pptxParser = await import('pptx-parser');
   } catch (e) {
     // ignore
   }
-  
+
   try {
     tesseract = await import('tesseract.js');
   } catch (e) {
@@ -124,12 +124,12 @@ export async function extractFromFile(file: MinimalFile): Promise<ExtractedDoc> 
     try {
       if (!pdfParse) throw new Error('pdf-parse not available in this runtime');
       const data = await pdfParse(Buffer.from(arrayBuffer));
-      
+
       // If no text found (might be scanned), try OCR
       if (!data.text || data.text.trim().length < 50) {
         return await extractWithOCR(arrayBuffer, name, mime);
       }
-      
+
       return { filename: name, mimeType: mime, text: data.text };
     } catch (e) {
       // Try OCR as fallback
@@ -146,36 +146,36 @@ export async function extractFromFile(file: MinimalFile): Promise<ExtractedDoc> 
   ) {
     try {
       if (!pptxParser) throw new Error('pptx-parser not available');
-      
+
       // For .pptx, we can use officegen or manual zip parsing
       // Simplified: Try to extract as text
       const JSZip = (await import('jszip')).default;
       const zip = await JSZip.loadAsync(arrayBuffer);
-      
+
       const slides: string[] = [];
-      
+
       // Find all slide XML files
-      const slideFiles = Object.keys(zip.files).filter(name => 
-        name.match(/ppt\/slides\/slide\d+\.xml/)
+      const slideFiles = Object.keys(zip.files).filter((name) =>
+        name.match(/ppt\/slides\/slide\d+\.xml/),
       );
-      
+
       for (const slideFile of slideFiles) {
         const content = await zip.files[slideFile].async('text');
         // Extract text between XML tags (simple approach)
         const textMatches = content.match(/>([^<]+)</g);
         if (textMatches) {
           const slideText = textMatches
-            .map(m => m.replace(/^>/, '').replace(/<$/, ''))
-            .filter(t => t.trim().length > 0)
+            .map((m) => m.replace(/^>/, '').replace(/<$/, ''))
+            .filter((t) => t.trim().length > 0)
             .join(' ');
           slides.push(slideText);
         }
       }
-      
-      return { 
-        filename: name, 
-        mimeType: mime, 
-        text: slides.join('\n\n') 
+
+      return {
+        filename: name,
+        mimeType: mime,
+        text: slides.join('\n\n'),
       };
     } catch (e) {
       console.error('PowerPoint extraction failed:', e);
@@ -188,23 +188,23 @@ export async function extractFromFile(file: MinimalFile): Promise<ExtractedDoc> 
     try {
       const JSZip = (await import('jszip')).default;
       const zip = await JSZip.loadAsync(arrayBuffer);
-      
+
       // Keynote stores content in index.apxl or presentation.apxl
       const indexFile = zip.files['index.apxl'] || zip.files['presentation.apxl'];
-      
+
       if (indexFile) {
         const content = await indexFile.async('text');
         // Extract text from XML/JSON structure
         const textMatches = content.match(/>([^<]+)</g);
         if (textMatches) {
           const text = textMatches
-            .map(m => m.replace(/^>/, '').replace(/<$/, ''))
-            .filter(t => t.trim().length > 0 && !t.match(/^[\d.]+$/))
+            .map((m) => m.replace(/^>/, '').replace(/<$/, ''))
+            .filter((t) => t.trim().length > 0 && !t.match(/^[\d.]+$/))
             .join(' ');
           return { filename: name, mimeType: mime, text };
         }
       }
-      
+
       // Fallback: Try to extract from any text files in the package
       let allText = '';
       for (const fileName in zip.files) {
@@ -213,19 +213,19 @@ export async function extractFromFile(file: MinimalFile): Promise<ExtractedDoc> 
           const textMatches = content.match(/>([^<]+)</g);
           if (textMatches) {
             const extracted = textMatches
-              .map(m => m.replace(/^>/, '').replace(/<$/, ''))
-              .filter(t => t.trim().length > 0)
+              .map((m) => m.replace(/^>/, '').replace(/<$/, ''))
+              .filter((t) => t.trim().length > 0)
               .join(' ');
             allText += extracted + ' ';
           }
         }
       }
-      
-      return { 
-        filename: name, 
-        mimeType: mime, 
+
+      return {
+        filename: name,
+        mimeType: mime,
         text: allText.trim(),
-        meta: { format: 'keynote' }
+        meta: { format: 'keynote' },
       };
     } catch (e) {
       console.error('Keynote extraction failed:', e);
@@ -238,7 +238,7 @@ export async function extractFromFile(file: MinimalFile): Promise<ExtractedDoc> 
     try {
       const JSZip = (await import('jszip')).default;
       const zip = await JSZip.loadAsync(arrayBuffer);
-      
+
       // Pages stores content in index.xml or similar
       let allText = '';
       for (const fileName in zip.files) {
@@ -247,19 +247,19 @@ export async function extractFromFile(file: MinimalFile): Promise<ExtractedDoc> 
           const textMatches = content.match(/>([^<]+)</g);
           if (textMatches) {
             const extracted = textMatches
-              .map(m => m.replace(/^>/, '').replace(/<$/, ''))
-              .filter(t => t.trim().length > 0)
+              .map((m) => m.replace(/^>/, '').replace(/<$/, ''))
+              .filter((t) => t.trim().length > 0)
               .join(' ');
             allText += extracted + ' ';
           }
         }
       }
-      
-      return { 
-        filename: name, 
-        mimeType: mime, 
+
+      return {
+        filename: name,
+        mimeType: mime,
         text: allText.trim(),
-        meta: { format: 'pages' }
+        meta: { format: 'pages' },
       };
     } catch (e) {
       console.error('Pages extraction failed:', e);
@@ -272,7 +272,7 @@ export async function extractFromFile(file: MinimalFile): Promise<ExtractedDoc> 
     try {
       const JSZip = (await import('jszip')).default;
       const zip = await JSZip.loadAsync(arrayBuffer);
-      
+
       let allText = '';
       for (const fileName in zip.files) {
         if (fileName.endsWith('.xml') || fileName.endsWith('.iwa')) {
@@ -281,19 +281,19 @@ export async function extractFromFile(file: MinimalFile): Promise<ExtractedDoc> 
           const matches = content.match(/[>"]([^<"]+)[<"]/g);
           if (matches) {
             const extracted = matches
-              .map(m => m.replace(/[>"<]/g, ''))
-              .filter(t => t.trim().length > 0)
+              .map((m) => m.replace(/[>"<]/g, ''))
+              .filter((t) => t.trim().length > 0)
               .join(' ');
             allText += extracted + ' ';
           }
         }
       }
-      
-      return { 
-        filename: name, 
-        mimeType: mime, 
+
+      return {
+        filename: name,
+        mimeType: mime,
         text: allText.trim(),
-        meta: { format: 'numbers' }
+        meta: { format: 'numbers' },
       };
     } catch (e) {
       console.error('Numbers extraction failed:', e);
@@ -302,10 +302,7 @@ export async function extractFromFile(file: MinimalFile): Promise<ExtractedDoc> 
   }
 
   // Images (PNG, JPG, JPEG) - Use OCR
-  if (
-    mime.startsWith('image/') ||
-    name.match(/\.(png|jpg|jpeg|gif|bmp|tiff)$/i)
-  ) {
+  if (mime.startsWith('image/') || name.match(/\.(png|jpg|jpeg|gif|bmp|tiff)$/i)) {
     return await extractWithOCR(arrayBuffer, name, mime);
   }
 
@@ -319,7 +316,7 @@ export async function extractFromFile(file: MinimalFile): Promise<ExtractedDoc> 
 async function extractWithOCR(
   arrayBuffer: ArrayBuffer,
   filename: string,
-  mimeType: string
+  mimeType: string,
 ): Promise<ExtractedDoc> {
   try {
     if (!tesseract) {
@@ -330,17 +327,17 @@ async function extractWithOCR(
     const worker = await tesseract.createWorker();
     await worker.loadLanguage('eng');
     await worker.initialize('eng');
-    
+
     const imageBuffer = Buffer.from(arrayBuffer);
     const { data } = await worker.recognize(imageBuffer);
-    
+
     await worker.terminate();
-    
+
     return {
       filename,
       mimeType,
       text: data.text,
-      meta: { ocr: true, confidence: data.confidence }
+      meta: { ocr: true, confidence: data.confidence },
     };
   } catch (error) {
     console.error('OCR extraction failed:', error);

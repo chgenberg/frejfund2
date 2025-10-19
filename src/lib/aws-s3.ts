@@ -4,7 +4,12 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 let s3Client: S3Client | null = null;
 
 function isConfigured() {
-  return Boolean(process.env.AWS_REGION && process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY && process.env.S3_BUCKET);
+  return Boolean(
+    process.env.AWS_REGION &&
+      process.env.AWS_ACCESS_KEY_ID &&
+      process.env.AWS_SECRET_ACCESS_KEY &&
+      process.env.S3_BUCKET,
+  );
 }
 
 export function getS3Client(): S3Client | null {
@@ -14,19 +19,25 @@ export function getS3Client(): S3Client | null {
     region: process.env.AWS_REGION,
     credentials: {
       accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || ''
-    }
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+    },
   });
   return s3Client;
 }
 
-export async function getPresignedPutUrl(params: { key: string; contentType: string; expiresIn?: number; }): Promise<{ url: string; key: string } | null> {
+export async function getPresignedPutUrl(params: {
+  key: string;
+  contentType: string;
+  expiresIn?: number;
+}): Promise<{ url: string; key: string } | null> {
   const client = getS3Client();
   const bucket = process.env.S3_BUCKET;
   if (!client || !bucket) return null;
-  const command = new PutObjectCommand({ Bucket: bucket, Key: params.key, ContentType: params.contentType });
+  const command = new PutObjectCommand({
+    Bucket: bucket,
+    Key: params.key,
+    ContentType: params.contentType,
+  });
   const url = await getSignedUrl(client, command, { expiresIn: params.expiresIn ?? 900 });
   return { url, key: params.key };
 }
-
-

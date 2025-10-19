@@ -45,11 +45,13 @@ CRON_SECRET="local-secret-change-me"
 ### 3. Run Migrations
 
 **Option A: Using Prisma CLI (Recommended)**
+
 ```bash
 npx prisma migrate deploy
 ```
 
 **Option B: Manual SQL (if Prisma fails)**
+
 ```bash
 # Connect to Railway PostgreSQL
 psql "postgresql://postgres:PASSWORD@containers-us-west-123.railway.app:PORT/railway"
@@ -104,8 +106,8 @@ const user = await prisma.user.create({
     name: 'Christopher',
     company: 'FrejFund',
     industry: 'SaaS',
-    stage: 'early-revenue'
-  }
+    stage: 'early-revenue',
+  },
 });
 ```
 
@@ -118,9 +120,9 @@ const session = await prisma.session.create({
     businessInfo: {
       company: 'FrejFund',
       industry: 'SaaS',
-      revenue: '$50K MRR'
-    }
-  }
+      revenue: '$50K MRR',
+    },
+  },
 });
 ```
 
@@ -135,8 +137,8 @@ await prisma.message.create({
     tokens: 150,
     latencyMs: 2500,
     cost: 0.003,
-    model: 'gpt-5-mini'
-  }
+    model: 'gpt-5-mini',
+  },
 });
 ```
 
@@ -152,8 +154,8 @@ await prisma.integration.create({
     refreshToken: encryptedRefreshToken,
     tokenExpiresAt: new Date(Date.now() + 3600000),
     scopes: ['gmail.readonly', 'gmail.metadata'],
-    accountEmail: 'founder@startup.com'
-  }
+    accountEmail: 'founder@startup.com',
+  },
 });
 ```
 
@@ -170,9 +172,9 @@ await prisma.insight.create({
     category: 'revenue',
     data: {
       mrr: 52000,
-      growth: 0.12
-    }
-  }
+      growth: 0.12,
+    },
+  },
 });
 ```
 
@@ -240,15 +242,18 @@ npx prisma format
 ## 🐛 Troubleshooting
 
 ### "Can't reach database server"
+
 - Check if DATABASE_URL is the **public** URL (not `.railway.internal`)
 - Verify Railway service is running
 - Check firewall/network settings
 
 ### "pgvector extension not found"
+
 - Run migration manually: `CREATE EXTENSION IF NOT EXISTS vector;`
 - Contact Railway support to enable pgvector
 
 ### "P2002: Unique constraint failed"
+
 - User/Integration already exists
 - Use `upsert` instead of `create`
 
@@ -266,6 +271,7 @@ const users = await prisma.user.findMany();
 ---
 
 Need help? Check:
+
 - [Prisma Docs](https://www.prisma.io/docs)
 - [Railway Docs](https://docs.railway.app)
 - [pgvector GitHub](https://github.com/pgvector/pgvector)

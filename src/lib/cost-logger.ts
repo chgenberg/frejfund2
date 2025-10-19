@@ -15,7 +15,11 @@ export type AICostLog = {
   meta?: Record<string, any>;
 };
 
-export function estimateCostUsd(model: string, promptTokens: number, completionTokens: number): number {
+export function estimateCostUsd(
+  model: string,
+  promptTokens: number,
+  completionTokens: number,
+): number {
   const pricing = getModelPricing(model);
   // Pricing is per 1M tokens
   const inputCost = (pricing.input / 1_000_000) * promptTokens;
@@ -29,7 +33,7 @@ export function logAICost(log: AICostLog) {
     const line = {
       type: 'ai_cost',
       ts: new Date().toISOString(),
-      ...log
+      ...log,
     };
     // Console structured log
     console.log(JSON.stringify(line));
@@ -37,5 +41,3 @@ export function logAICost(log: AICostLog) {
     console.error('[CostLogger] Failed to log cost:', e);
   }
 }
-
-

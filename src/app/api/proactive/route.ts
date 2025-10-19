@@ -18,7 +18,14 @@ export async function POST(req: NextRequest) {
     const model = getChatModel();
     const hasKey = Boolean(process.env.OPENAI_API_KEY || process.env.AZURE_OPENAI_API_KEY);
     if (!hasKey) {
-      const tips = top.slice(0,3).map((t, i) => ({ title: `Tip ${i+1}: ${t.text.slice(0,60)}`, why: 'Based on recent context', action: 'Follow up within 24h', priority: i === 0 ? 'high' : 'medium' }));
+      const tips = top
+        .slice(0, 3)
+        .map((t, i) => ({
+          title: `Tip ${i + 1}: ${t.text.slice(0, 60)}`,
+          why: 'Based on recent context',
+          action: 'Follow up within 24h',
+          priority: i === 0 ? 'high' : 'medium',
+        }));
       return NextResponse.json({ tips });
     }
     const client = getOpenAIClient();
@@ -43,21 +50,29 @@ ${context}`;
         model,
         messages: [
           { role: 'system', content: 'Return only strict JSON.' },
-          { role: 'user', content: prompt }
+          { role: 'user', content: prompt },
         ],
-        ...(isGpt5 ? {} : { temperature: 0.3 })
+        ...(isGpt5 ? {} : { temperature: 0.3 }),
       });
       content = resp.choices[0]?.message?.content || '';
     } catch (e) {
       // Responses API fallback
       try {
-        const r = await (client as any).responses.create({ model, input: prompt, ...(isGpt5 ? {} : { temperature: 0.3 }) });
+        const r = await (client as any).responses.create({
+          model,
+          input: prompt,
+          ...(isGpt5 ? {} : { temperature: 0.3 }),
+        });
         content = (r as any).output_text || '';
       } catch {}
     }
     if (!content) content = '{}';
     let json: any;
-    try { json = JSON.parse(content); } catch { json = { tips: [] }; }
+    try {
+      json = JSON.parse(content);
+    } catch {
+      json = { tips: [] };
+    }
     return NextResponse.json({ tips: Array.isArray(json.tips) ? json.tips : [] });
   } catch (error) {
     console.error('Proactive Tips Error:', error);
@@ -68,5 +83,3 @@ ${context}`;
 export async function GET() {
   return NextResponse.json({ status: 'Proactive tips API is running' });
 }
-
-

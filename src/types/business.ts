@@ -104,7 +104,7 @@ export enum AnalysisState {
   PERMISSION = 'permission',
   ANALYZING = 'analyzing',
   RESULTS = 'results',
-  ERROR = 'error'
+  ERROR = 'error',
 }
 
 export interface UserProfile {

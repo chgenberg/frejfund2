@@ -3,7 +3,7 @@ import { SEO_LOCATIONS } from '@/lib/seo-locations';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://frejfund.com';
-  
+
   // Main pages
   const mainPages = [
     {

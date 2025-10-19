@@ -25,7 +25,7 @@ export default function ChatPage() {
         console.error('Failed to parse business info:', e);
       }
     }
-    
+
     // Also check if there's a temporary session
     const tempInfo = sessionStorage.getItem('frejfund-temp-business-info');
     if (tempInfo && !savedInfo) {
@@ -60,5 +60,7 @@ export default function ChatPage() {
     return null;
   }
 
-  return <ChatInterface businessInfo={businessInfo} messages={messages} setMessages={setMessages} />;
+  return (
+    <ChatInterface businessInfo={businessInfo} messages={messages} setMessages={setMessages} />
+  );
 }

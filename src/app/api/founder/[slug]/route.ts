@@ -4,16 +4,13 @@ import prisma from '@/lib/prisma';
 export const dynamic = 'force-dynamic';
 
 // GET /api/founder/[slug] - Get public founder profile
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
   try {
     const { slug } = params;
 
     // Find user by profile slug
     const user = await prisma.user.findUnique({
-      where: { profileSlug: slug }
+      where: { profileSlug: slug },
     });
 
     if (!user || !user.isProfilePublic) {
@@ -23,7 +20,7 @@ export async function GET(
     // Get most recent session for business info
     const session = await prisma.session.findFirst({
       where: { userId: user.id },
-      orderBy: { updatedAt: 'desc' }
+      orderBy: { updatedAt: 'desc' },
     });
 
     const businessInfo = session?.businessInfo as any;
@@ -39,7 +36,7 @@ export async function GET(
       askAmount: user.askAmount,
       traction: user.traction,
       pitchDeck: user.pitchDeck,
-      readinessScore: businessInfo?.readinessScore
+      readinessScore: businessInfo?.readinessScore,
     };
 
     return NextResponse.json({ profile });

@@ -3,9 +3,19 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { 
-  ArrowLeft, Upload, Save, Camera, Globe, Linkedin, Twitter,
-  MapPin, DollarSign, Target, Building2, Check
+import {
+  ArrowLeft,
+  Upload,
+  Save,
+  Camera,
+  Globe,
+  Linkedin,
+  Twitter,
+  MapPin,
+  DollarSign,
+  Target,
+  Building2,
+  Check,
 } from 'lucide-react';
 
 export default function VCProfilePage() {
@@ -13,7 +23,7 @@ export default function VCProfilePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  
+
   const [profile, setProfile] = useState({
     firmName: 'Nordic Ventures',
     partnerName: 'Sarah Johnson',
@@ -32,8 +42,8 @@ export default function VCProfilePage() {
     portfolio: [
       { name: 'DataFlow AI', logo: '/placeholder.png' },
       { name: 'GreenPay', logo: '/placeholder.png' },
-      { name: 'CloudMetrics', logo: '/placeholder.png' }
-    ]
+      { name: 'CloudMetrics', logo: '/placeholder.png' },
+    ],
   });
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,7 +60,7 @@ export default function VCProfilePage() {
   const handleSave = async () => {
     setSaving(true);
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
@@ -59,7 +69,7 @@ export default function VCProfilePage() {
   const addPortfolioCompany = () => {
     setProfile({
       ...profile,
-      portfolio: [...profile.portfolio, { name: '', logo: '/placeholder.png' }]
+      portfolio: [...profile.portfolio, { name: '', logo: '/placeholder.png' }],
     });
   };
 
@@ -116,16 +126,18 @@ export default function VCProfilePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Firm Logo
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Firm Logo</label>
                 <div className="flex items-center space-x-4">
-                  <div 
+                  <div
                     className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors overflow-hidden"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     {profile.logoUrl ? (
-                      <img src={profile.logoUrl} alt="Firm logo" className="w-full h-full object-cover" />
+                      <img
+                        src={profile.logoUrl}
+                        alt="Firm logo"
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
                       <Camera className="w-8 h-8 text-gray-400" />
                     )}
@@ -145,12 +157,10 @@ export default function VCProfilePage() {
                   </button>
                 </div>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Firm Name
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Firm Name</label>
                   <input
                     type="text"
                     value={profile.firmName}
@@ -158,11 +168,9 @@ export default function VCProfilePage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Your Name
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
                   <input
                     type="text"
                     value={profile.partnerName}
@@ -170,11 +178,9 @@ export default function VCProfilePage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Role
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
                   <input
                     type="text"
                     value={profile.role}
@@ -184,12 +190,10 @@ export default function VCProfilePage() {
                 </div>
               </div>
             </div>
-            
+
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Bio
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
                 <textarea
                   value={profile.bio}
                   onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
@@ -198,7 +202,7 @@ export default function VCProfilePage() {
                   placeholder="Tell founders about your investment thesis and what you look for..."
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   <MapPin className="inline w-4 h-4 mr-1" />
@@ -286,9 +290,7 @@ export default function VCProfilePage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Sweet Spot
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Sweet Spot</label>
               <input
                 type="text"
                 value={profile.sweetSpot}
@@ -297,7 +299,7 @@ export default function VCProfilePage() {
               />
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -306,21 +308,16 @@ export default function VCProfilePage() {
               </label>
               <div className="flex flex-wrap gap-2">
                 {profile.sectors.map((sector, idx) => (
-                  <span
-                    key={idx}
-                    className="px-3 py-1 bg-black text-white rounded-full text-sm"
-                  >
+                  <span key={idx} className="px-3 py-1 bg-black text-white rounded-full text-sm">
                     {sector}
                   </span>
                 ))}
-                <button
-                  className="px-3 py-1 border border-gray-300 rounded-full text-sm hover:bg-gray-50 transition-colors"
-                >
+                <button className="px-3 py-1 border border-gray-300 rounded-full text-sm hover:bg-gray-50 transition-colors">
                   + Add
                 </button>
               </div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Building2 className="inline w-4 h-4 mr-1" />
@@ -328,16 +325,11 @@ export default function VCProfilePage() {
               </label>
               <div className="flex flex-wrap gap-2">
                 {profile.stages.map((stage, idx) => (
-                  <span
-                    key={idx}
-                    className="px-3 py-1 bg-gray-800 text-white rounded-full text-sm"
-                  >
+                  <span key={idx} className="px-3 py-1 bg-gray-800 text-white rounded-full text-sm">
                     {stage}
                   </span>
                 ))}
-                <button
-                  className="px-3 py-1 border border-gray-300 rounded-full text-sm hover:bg-gray-50 transition-colors"
-                >
+                <button className="px-3 py-1 border border-gray-300 rounded-full text-sm hover:bg-gray-50 transition-colors">
                   + Add
                 </button>
               </div>
@@ -350,10 +342,7 @@ export default function VCProfilePage() {
           <h2 className="text-lg font-bold text-black mb-4">Portfolio Companies</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {profile.portfolio.map((company, idx) => (
-              <div
-                key={idx}
-                className="text-center"
-              >
+              <div key={idx} className="text-center">
                 <div className="w-20 h-20 bg-gray-100 rounded-lg mx-auto mb-2 overflow-hidden">
                   <img
                     src={company.logo}

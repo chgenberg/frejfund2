@@ -3,9 +3,21 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Target, Users, TrendingUp, Zap, Shield, Brain,
-  ArrowLeft, Circle, CheckCircle2, AlertCircle, Info, HelpCircle, FileDown, X
+import {
+  Target,
+  Users,
+  TrendingUp,
+  Zap,
+  Shield,
+  Brain,
+  ArrowLeft,
+  Circle,
+  CheckCircle2,
+  AlertCircle,
+  Info,
+  HelpCircle,
+  FileDown,
+  X,
 } from 'lucide-react';
 import Header from '@/components/Header';
 
@@ -39,59 +51,68 @@ const CATEGORIES = [
   { id: 'Financial Health', label: 'Financial Health', icon: TrendingUp, count: 5 },
   { id: 'Fundraising', label: 'Fundraising', icon: Brain, count: 5 },
   { id: 'Risks', label: 'Risks', icon: Shield, count: 5 },
-  { id: 'All', label: 'All Dimensions', icon: Brain, count: 95 }
+  { id: 'All', label: 'All Dimensions', icon: Brain, count: 95 },
 ];
 
 // Example data (overrides) for specific dimensions
-const DIMENSION_EXAMPLES: Record<string, { description: string; examples: string[]; dataNeeded: string[] }> = {
+const DIMENSION_EXAMPLES: Record<
+  string,
+  { description: string; examples: string[]; dataNeeded: string[] }
+> = {
   'Market Size (TAM/SAM/SOM)': {
-    description: 'Total Addressable Market, Serviceable Addressable Market, and Serviceable Obtainable Market.',
+    description:
+      'Total Addressable Market, Serviceable Addressable Market, and Serviceable Obtainable Market.',
     examples: [
       'TAM: €100M - Total market for all CRM software in Europe',
       'SAM: €20M - SMB segment we can realistically serve',
-      'SOM: €2M - What we can capture in year 3 (10% of SAM)'
+      'SOM: €2M - What we can capture in year 3 (10% of SAM)',
     ],
-    dataNeeded: ['Industry reports', 'Competitor revenues', 'Customer surveys', 'Market research data']
+    dataNeeded: [
+      'Industry reports',
+      'Competitor revenues',
+      'Customer surveys',
+      'Market research data',
+    ],
   },
   'Business Model Clarity': {
     description: 'How you make money - pricing, revenue streams, and unit economics.',
     examples: [
       'SaaS: €99/month per seat, 3-year average customer lifetime',
       'Marketplace: 15% take rate on €500 average transaction',
-      'Freemium: 3% conversion rate, €50/month average revenue per user'
+      'Freemium: 3% conversion rate, €50/month average revenue per user',
     ],
-    dataNeeded: ['Pricing strategy', 'Revenue breakdown', 'Customer segments', 'Cost structure']
+    dataNeeded: ['Pricing strategy', 'Revenue breakdown', 'Customer segments', 'Cost structure'],
   },
   'Monthly Recurring Revenue': {
     description: 'Predictable revenue that comes in every month.',
     examples: [
       'Current MRR: €25,000',
       'Growth rate: 15% month-over-month',
-      'Churn rate: 3% monthly'
+      'Churn rate: 3% monthly',
     ],
-    dataNeeded: ['Subscription data', 'Payment processor exports', 'Customer contracts']
+    dataNeeded: ['Subscription data', 'Payment processor exports', 'Customer contracts'],
   },
   'Team Completeness': {
     description: 'Key roles filled and experience levels.',
     examples: [
       'CEO: 10 years industry experience, 2 exits',
       'CTO: Ex-Google engineer, AI/ML expertise',
-      'Missing: Head of Sales (hiring Q2)'
+      'Missing: Head of Sales (hiring Q2)',
     ],
-    dataNeeded: ['Team bios', 'LinkedIn profiles', 'Org chart', 'Hiring roadmap']
+    dataNeeded: ['Team bios', 'LinkedIn profiles', 'Org chart', 'Hiring roadmap'],
   },
   'Product-Market Fit Signals': {
     description: 'Evidence that customers love and need your product.',
-    examples: [
-      'NPS score: 72',
-      '40% of new users from referrals',
-      'Daily active usage: 65%'
-    ],
-    dataNeeded: ['User surveys', 'Usage analytics', 'Customer testimonials', 'Retention data']
-  }
+    examples: ['NPS score: 72', '40% of new users from referrals', 'Daily active usage: 65%'],
+    dataNeeded: ['User surveys', 'Usage analytics', 'Customer testimonials', 'Retention data'],
+  },
 };
 
-function getAutoExample(dimensionName: string): { description: string; examples: string[]; dataNeeded: string[] } {
+function getAutoExample(dimensionName: string): {
+  description: string;
+  examples: string[];
+  dataNeeded: string[];
+} {
   const n = dimensionName.toLowerCase();
 
   // Market & Competition
@@ -104,9 +125,9 @@ function getAutoExample(dimensionName: string): { description: string; examples:
       examples: [
         'Target market CAGR: 18% (2024-2029)',
         'Segment growth: SMB HR tech +24% YoY',
-        'Key drivers: AI adoption, regulation, remote work'
+        'Key drivers: AI adoption, regulation, remote work',
       ],
-      dataNeeded: ['Industry reports', 'Analyst notes', 'Public company filings']
+      dataNeeded: ['Industry reports', 'Analyst notes', 'Public company filings'],
     };
   }
   if (n.includes('competitive landscape')) {
@@ -115,9 +136,9 @@ function getAutoExample(dimensionName: string): { description: string; examples:
       examples: [
         'Top competitors: Company A, Company B, Company C',
         'Positioning: We serve SMBs; incumbents focus on Enterprise',
-        'Differentiation: 10x faster onboarding, usage-based pricing'
+        'Differentiation: 10x faster onboarding, usage-based pricing',
       ],
-      dataNeeded: ['Competitor websites', 'G2/Capterra', 'Customer interviews']
+      dataNeeded: ['Competitor websites', 'G2/Capterra', 'Customer interviews'],
     };
   }
   if (n.includes('moat') || n.includes('defensibility')) {
@@ -126,9 +147,9 @@ function getAutoExample(dimensionName: string): { description: string; examples:
       examples: [
         'Network effects: each new customer improves recommendations',
         'Data moat: 3 years of proprietary transaction data',
-        'Switching costs: embedded into customers’ workflows'
+        'Switching costs: embedded into customers’ workflows',
       ],
-      dataNeeded: ['Product architecture', 'Usage telemetry', 'Patent filings']
+      dataNeeded: ['Product architecture', 'Usage telemetry', 'Patent filings'],
     };
   }
 
@@ -139,9 +160,9 @@ function getAutoExample(dimensionName: string): { description: string; examples:
       examples: [
         'LTV: €1,800  |  CAC: €300  →  LTV:CAC = 6:1',
         'CAC payback: 5.5 months',
-        'Gross margin: 82%'
+        'Gross margin: 82%',
       ],
-      dataNeeded: ['Cohort retention', 'Pricing/ARPA', 'Paid spend by channel']
+      dataNeeded: ['Cohort retention', 'Pricing/ARPA', 'Paid spend by channel'],
     };
   }
   if (n.includes('revenue predict')) {
@@ -150,9 +171,9 @@ function getAutoExample(dimensionName: string): { description: string; examples:
       examples: [
         'Revenue mix: 92% subscription, 8% services',
         'NRR: 112%, GRR: 94%',
-        '90% of ARR under annual contracts'
+        '90% of ARR under annual contracts',
       ],
-      dataNeeded: ['Billing exports', 'Contract terms', 'Renewal metrics']
+      dataNeeded: ['Billing exports', 'Contract terms', 'Renewal metrics'],
     };
   }
   if (n.includes('pricing')) {
@@ -161,9 +182,9 @@ function getAutoExample(dimensionName: string): { description: string; examples:
       examples: [
         'Plan tiers: €49/€99/€249 per seat',
         'Value metric: tracked projects per month',
-        'Price test: +15% with no impact on conversion'
+        'Price test: +15% with no impact on conversion',
       ],
-      dataNeeded: ['Pricing page history', 'Win/loss data', 'Customer interviews']
+      dataNeeded: ['Pricing page history', 'Win/loss data', 'Customer interviews'],
     };
   }
   if (n.includes('gross margin')) {
@@ -172,9 +193,9 @@ function getAutoExample(dimensionName: string): { description: string; examples:
       examples: [
         'Gross margin: 81% last quarter',
         'COGS: hosting 7%, support 5%, integrations 7%',
-        'Target margin: 85%+'
+        'Target margin: 85%+',
       ],
-      dataNeeded: ['P/L by function', 'COGS breakdown', 'Hosting invoices']
+      dataNeeded: ['P/L by function', 'COGS breakdown', 'Hosting invoices'],
     };
   }
   if (n.includes('profit')) {
@@ -183,9 +204,9 @@ function getAutoExample(dimensionName: string): { description: string; examples:
       examples: [
         'Breakeven at €350k MRR (Q2 2026)',
         'Plan: reduce CAC by 20% and lift ARPA by 10% via packaging',
-        'Hiring plan aligned with unit economics'
+        'Hiring plan aligned with unit economics',
       ],
-      dataNeeded: ['Financial model', 'Hiring plan', 'Pricing strategy']
+      dataNeeded: ['Financial model', 'Hiring plan', 'Pricing strategy'],
     };
   }
 
@@ -196,9 +217,9 @@ function getAutoExample(dimensionName: string): { description: string; examples:
       examples: [
         'Logo churn: 2.8%/mo, Revenue churn: 1.2%/mo',
         'NRR: 118% driven by seat expansion',
-        'Cohort month 6 retention: 72%'
+        'Cohort month 6 retention: 72%',
       ],
-      dataNeeded: ['Cohort tables', 'Subscription events', 'MRR movements']
+      dataNeeded: ['Cohort tables', 'Subscription events', 'MRR movements'],
     };
   }
   if (n.includes('product-market fit')) {
@@ -210,9 +231,9 @@ function getAutoExample(dimensionName: string): { description: string; examples:
       examples: [
         'Magic Number: 0.82 (good)',
         'S&M spend last quarter: €240k; Net new ARR: €197k',
-        'Target: >0.75 sustained over 2+ quarters'
+        'Target: >0.75 sustained over 2+ quarters',
       ],
-      dataNeeded: ['ARR movements', 'S&M spend by month', 'Attribution model']
+      dataNeeded: ['ARR movements', 'S&M spend by month', 'Attribution model'],
     };
   }
 
@@ -223,9 +244,9 @@ function getAutoExample(dimensionName: string): { description: string; examples:
       examples: [
         'CEO: 8 yrs in logistics; built routing engine at prior startup',
         'CTO: ex-Stripe; scaled payments infra',
-        'Advisors: former DHL ops lead'
+        'Advisors: former DHL ops lead',
       ],
-      dataNeeded: ['LinkedIn profiles', 'Past projects', 'Case studies']
+      dataNeeded: ['LinkedIn profiles', 'Past projects', 'Case studies'],
     };
   }
   if (n.includes('team completeness')) {
@@ -239,9 +260,9 @@ function getAutoExample(dimensionName: string): { description: string; examples:
       examples: [
         'Core channels: SEO + outbound SDRs + partner referrals',
         'Playbook: ICP → sequence → demo → pilot → close',
-        'Benchmarks: 22% SQL→Win, 35-day cycle'
+        'Benchmarks: 22% SQL→Win, 35-day cycle',
       ],
-      dataNeeded: ['CRM pipeline', 'Channel performance', 'Playbooks']
+      dataNeeded: ['CRM pipeline', 'Channel performance', 'Playbooks'],
     };
   }
   if (n.includes('icp')) {
@@ -250,9 +271,9 @@ function getAutoExample(dimensionName: string): { description: string; examples:
       examples: [
         'ICP: EU B2B SaaS, 20-200 FTE, rev ops pain, HubSpot stack',
         'Budget: €5k-€50k ARR; Decision-maker: Head of Sales Ops',
-        'Buying triggers: moving from spreadsheets to automation'
+        'Buying triggers: moving from spreadsheets to automation',
       ],
-      dataNeeded: ['Won deals analysis', 'Firmographic data', 'Tech stack data']
+      dataNeeded: ['Won deals analysis', 'Firmographic data', 'Tech stack data'],
     };
   }
 
@@ -263,9 +284,9 @@ function getAutoExample(dimensionName: string): { description: string; examples:
       examples: [
         'Proprietary forecasting model with 15% lower MAPE',
         'Vector search on 10M docs with sub-100ms latency',
-        'Fine-tuned LLM for industry taxonomy'
+        'Fine-tuned LLM for industry taxonomy',
       ],
-      dataNeeded: ['Architecture docs', 'Benchmarks', 'Patents/whitepapers']
+      dataNeeded: ['Architecture docs', 'Benchmarks', 'Patents/whitepapers'],
     };
   }
   if (n.includes('platform') && n.includes('feature')) {
@@ -274,9 +295,9 @@ function getAutoExample(dimensionName: string): { description: string; examples:
       examples: [
         'Breadth: 4 modules integrated (ingest → analyze → act → report)',
         'Ecosystem: 12 integrations; embedded across workflows',
-        'Moat: proprietary datasets only available here'
+        'Moat: proprietary datasets only available here',
       ],
-      dataNeeded: ['Product map', 'Integration list', 'Customer workflows']
+      dataNeeded: ['Product map', 'Integration list', 'Customer workflows'],
     };
   }
 
@@ -287,9 +308,9 @@ function getAutoExample(dimensionName: string): { description: string; examples:
       examples: [
         'Cash: €1.2M; Burn: €120k/mo → Runway: 10 months',
         'Default alive at €180k MRR by Mar 2026',
-        'Plan: reduce burn by €20k with infra savings'
+        'Plan: reduce burn by €20k with infra savings',
       ],
-      dataNeeded: ['Bank balance', 'Monthly burn', 'Hiring plan']
+      dataNeeded: ['Bank balance', 'Monthly burn', 'Hiring plan'],
     };
   }
   if (n.includes('valuation')) {
@@ -297,9 +318,9 @@ function getAutoExample(dimensionName: string): { description: string; examples:
       description: 'Fair valuation range given stage, traction and comps.',
       examples: [
         'Seed valuation range: €8–12M pre (based on €40k MRR, 8x–12x ARR)',
-        'Comps: ACME (€1.2M ARR, €12M pre); Bravo (€800k ARR, €8M pre)'
+        'Comps: ACME (€1.2M ARR, €12M pre); Bravo (€800k ARR, €8M pre)',
       ],
-      dataNeeded: ['ARR/MRR', 'Growth rate', 'Market comps']
+      dataNeeded: ['ARR/MRR', 'Growth rate', 'Market comps'],
     };
   }
 
@@ -310,9 +331,9 @@ function getAutoExample(dimensionName: string): { description: string; examples:
       examples: [
         'NPS: 62 (last 90 days)',
         'CSAT: 4.6/5 over 1,200 tickets',
-        'Testimonials: 25 curated quotes on website'
+        'Testimonials: 25 curated quotes on website',
       ],
-      dataNeeded: ['NPS tool exports', 'Support CSAT', 'Review sites']
+      dataNeeded: ['NPS tool exports', 'Support CSAT', 'Review sites'],
     };
   }
   if (n.includes('press') || n.includes('media')) {
@@ -321,9 +342,9 @@ function getAutoExample(dimensionName: string): { description: string; examples:
       examples: [
         'Featured in Sifted: “Top 10 Nordic AI Startups to watch”',
         'TechCrunch mention (Feb 2025): Seed round coverage',
-        'Category mention in Gartner Market Guide'
+        'Category mention in Gartner Market Guide',
       ],
-      dataNeeded: ['Press links', 'Analyst notes', 'PR summaries']
+      dataNeeded: ['Press links', 'Analyst notes', 'PR summaries'],
     };
   }
 
@@ -334,9 +355,9 @@ function getAutoExample(dimensionName: string): { description: string; examples:
       examples: [
         'Weekly exec dashboard (MRR, NRR, churn, CAC payback)',
         'Monthly board updates with forecast vs actuals',
-        'Single source of truth in BI tool'
+        'Single source of truth in BI tool',
       ],
-      dataNeeded: ['KPI definitions', 'BI screenshots', 'Board decks']
+      dataNeeded: ['KPI definitions', 'BI screenshots', 'Board decks'],
     };
   }
   if (n.includes('regulatory') || n.includes('compliance')) {
@@ -345,9 +366,9 @@ function getAutoExample(dimensionName: string): { description: string; examples:
       examples: [
         'SOC2 Type II in progress (target Q3)',
         'GDPR DPA in place; ISO 27001 planned',
-        'No licensing required for target markets'
+        'No licensing required for target markets',
       ],
-      dataNeeded: ['Compliance roadmap', 'Security policies', 'Vendor audits']
+      dataNeeded: ['Compliance roadmap', 'Security policies', 'Vendor audits'],
     };
   }
 
@@ -357,9 +378,9 @@ function getAutoExample(dimensionName: string): { description: string; examples:
     examples: [
       'State current baseline metric and recent trend',
       'Add one piece of evidence (screenshot, link, export)',
-      'Define your target benchmark for next 1–2 quarters'
+      'Define your target benchmark for next 1–2 quarters',
     ],
-    dataNeeded: ['Internal reports', 'Exports (CSV/PDF)', 'External benchmarks']
+    dataNeeded: ['Internal reports', 'Exports (CSV/PDF)', 'External benchmarks'],
   };
 }
 
@@ -369,7 +390,11 @@ export default function AnalysisPage() {
   const [dimensions, setDimensions] = useState<AnalysisDimension[]>([]);
   const [overallScore, setOverallScore] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [analysisProgress, setAnalysisProgress] = useState<{current:number,total:number,status:'idle'|'running'|'completed'}>({current:0,total:95,status:'idle'});
+  const [analysisProgress, setAnalysisProgress] = useState<{
+    current: number;
+    total: number;
+    status: 'idle' | 'running' | 'completed';
+  }>({ current: 0, total: 95, status: 'idle' });
   const [showInfoPopup, setShowInfoPopup] = useState<string | null>(null);
   const [isRerunning, setIsRerunning] = useState(false);
 
@@ -430,12 +455,15 @@ export default function AnalysisPage() {
       es.onmessage = (ev) => {
         const data = JSON.parse(ev.data);
         if (data.type === 'progress') {
-          setAnalysisProgress({current:data.current,total:data.total,status:'running'});
+          setAnalysisProgress({ current: data.current, total: data.total, status: 'running' });
         }
-        if (data.type === 'complete') setAnalysisProgress({current:95,total:95,status:'completed'});
+        if (data.type === 'complete')
+          setAnalysisProgress({ current: 95, total: 95, status: 'completed' });
       };
       es.onerror = () => {
-        try { es && es.close(); } catch {}
+        try {
+          es && es.close();
+        } catch {}
         if (retries < 5) {
           retries += 1;
           setTimeout(connect, 1000 * retries); // backoff
@@ -443,12 +471,17 @@ export default function AnalysisPage() {
       };
     };
     connect();
-    return () => { try { es && es.close(); (window as any).__ff_es[sessionId] = null; } catch {} };
+    return () => {
+      try {
+        es && es.close();
+        (window as any).__ff_es[sessionId] = null;
+      } catch {}
+    };
   }, []);
 
   const getCategoryDimensions = (categoryId: string) => {
     if (categoryId === 'All') return dimensions;
-    return dimensions.filter(d => d.category === categoryId);
+    return dimensions.filter((d) => d.category === categoryId);
   };
 
   const getCategoryScore = (categoryId: string) => {
@@ -479,7 +512,7 @@ export default function AnalysisPage() {
       const response = await fetch('/api/deep-analysis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId })
+        body: JSON.stringify({ sessionId }),
       });
 
       if (response.ok) {
@@ -499,30 +532,38 @@ export default function AnalysisPage() {
 
   const getConfidenceColor = (confidence?: string) => {
     switch (confidence) {
-      case 'high': return 'text-green-600 bg-green-50';
-      case 'medium': return 'text-yellow-600 bg-yellow-50';
-      case 'low': return 'text-orange-600 bg-orange-50';
-      default: return 'text-gray-600 bg-gray-50';
+      case 'high':
+        return 'text-green-600 bg-green-50';
+      case 'medium':
+        return 'text-yellow-600 bg-yellow-50';
+      case 'low':
+        return 'text-orange-600 bg-orange-50';
+      default:
+        return 'text-gray-600 bg-gray-50';
     }
   };
 
   const getTopImprovements = () => {
     // Find dimensions with lowest scores to suggest improvements
     const lowScoreDimensions = dimensions
-      .filter(dim => dim.score < 70)
+      .filter((dim) => dim.score < 70)
       .sort((a, b) => a.score - b.score)
       .slice(0, 5);
 
-    return lowScoreDimensions.map(dim => {
+    return lowScoreDimensions.map((dim) => {
       const impact = Math.round((100 - dim.score) * 0.3); // Potential score improvement
       const priority = dim.score < 30 ? 'critical' : dim.score < 50 ? 'high' : 'medium';
-      
+
       return {
         title: `Improve ${dim.name}`,
-        description: dim.recommendations?.[0] || dim.suggestions?.[0] || `Focus on strengthening your ${dim.name.toLowerCase()} to boost investor confidence.`,
+        description:
+          dim.recommendations?.[0] ||
+          dim.suggestions?.[0] ||
+          `Focus on strengthening your ${dim.name.toLowerCase()} to boost investor confidence.`,
         impact,
         priority,
-        timeframe: priority === 'critical' ? '1-2 weeks' : priority === 'high' ? '1 month' : '2-3 months'
+        timeframe:
+          priority === 'critical' ? '1-2 weeks' : priority === 'high' ? '1 month' : '2-3 months',
       };
     });
   };
@@ -581,19 +622,12 @@ export default function AnalysisPage() {
               </motion.button>
             )}
           </div>
-          
+
           {/* Overall Score */}
           <div className="inline-block">
             <div className="relative w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-4">
               <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 160 160">
-                <circle
-                  cx="80"
-                  cy="80"
-                  r="70"
-                  fill="none"
-                  stroke="#e5e5e5"
-                  strokeWidth="12"
-                />
+                <circle cx="80" cy="80" r="70" fill="none" stroke="#e5e5e5" strokeWidth="12" />
                 <motion.circle
                   cx="80"
                   cy="80"
@@ -605,7 +639,7 @@ export default function AnalysisPage() {
                   strokeDasharray={440}
                   initial={{ strokeDashoffset: 440 }}
                   animate={{ strokeDashoffset: 440 - (overallScore / 100) * 440 }}
-                  transition={{ duration: 1.5, ease: "easeOut" }}
+                  transition={{ duration: 1.5, ease: 'easeOut' }}
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -632,23 +666,27 @@ export default function AnalysisPage() {
                 transition={{ delay: idx * 0.1 }}
                 className="flex items-start gap-3"
               >
-                <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-bold flex-shrink-0 ${
-                  improvement.priority === 'critical' ? 'bg-red-500' :
-                  improvement.priority === 'high' ? 'bg-orange-500' :
-                  'bg-yellow-500'
-                }`}>
+                <div
+                  className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-bold flex-shrink-0 ${
+                    improvement.priority === 'critical'
+                      ? 'bg-red-500'
+                      : improvement.priority === 'high'
+                        ? 'bg-orange-500'
+                        : 'bg-yellow-500'
+                  }`}
+                >
                   {idx + 1}
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-black text-sm sm:text-base">{improvement.title}</h3>
+                  <h3 className="font-semibold text-black text-sm sm:text-base">
+                    {improvement.title}
+                  </h3>
                   <p className="text-xs sm:text-sm text-gray-600 mt-1">{improvement.description}</p>
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2">
                     <span className="text-xs px-2 py-0.5 sm:py-1 bg-gray-100 rounded-full">
                       +{improvement.impact} points
                     </span>
-                    <span className="text-xs text-gray-500">
-                      {improvement.timeframe}
-                    </span>
+                    <span className="text-xs text-gray-500">{improvement.timeframe}</span>
                   </div>
                 </div>
               </motion.div>
@@ -672,7 +710,7 @@ export default function AnalysisPage() {
               const Icon = category.icon;
               const isActive = activeCategory === category.id;
               const categoryScore = getCategoryScore(category.id);
-              
+
               return (
                 <motion.button
                   key={category.id}
@@ -680,22 +718,24 @@ export default function AnalysisPage() {
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setActiveCategory(category.id)}
                   className={`flex items-center gap-3 px-4 sm:px-6 py-3 rounded-xl transition-all ${
-                    isActive 
-                      ? 'bg-black text-white' 
-                      : 'text-gray-600 hover:bg-gray-50'
+                    isActive ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
                   <span className="font-medium text-sm sm:text-base">{category.label}</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    isActive ? 'bg-white/20' : 'bg-gray-100'
-                  }`}>
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full ${
+                      isActive ? 'bg-white/20' : 'bg-gray-100'
+                    }`}
+                  >
                     {category.count}
                   </span>
                   {categoryScore > 0 && (
-                    <span className={`text-xs font-bold ${
-                      isActive ? 'text-white' : getScoreColor(categoryScore)
-                    }`}>
+                    <span
+                      className={`text-xs font-bold ${
+                        isActive ? 'text-white' : getScoreColor(categoryScore)
+                      }`}
+                    >
                       {categoryScore}%
                     </span>
                   )}
@@ -707,10 +747,18 @@ export default function AnalysisPage() {
 
         {/* Progress Banner (mirrors dashboard) */}
         {analysisProgress && analysisProgress.status === 'running' && (
-          <motion.div initial={{opacity:0,y:-10}} animate={{opacity:1,y:0}} className="bg-black text-white rounded-xl px-4 py-3 mb-4">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-black text-white rounded-xl px-4 py-3 mb-4"
+          >
             <div className="flex items-center justify-between">
-              <span>Deep analysis in progress… {analysisProgress.current}/{analysisProgress.total}</span>
-              <span className="text-sm">{Math.round((analysisProgress.current/analysisProgress.total)*100)}%</span>
+              <span>
+                Deep analysis in progress… {analysisProgress.current}/{analysisProgress.total}
+              </span>
+              <span className="text-sm">
+                {Math.round((analysisProgress.current / analysisProgress.total) * 100)}%
+              </span>
             </div>
           </motion.div>
         )}
@@ -741,7 +789,7 @@ export default function AnalysisPage() {
             ) : (
               getCategoryDimensions(activeCategory).map((dimension, index) => {
                 const ScoreIcon = getScoreIcon(dimension.score);
-                
+
                 return (
                   <motion.div
                     key={dimension.id}
@@ -754,10 +802,9 @@ export default function AnalysisPage() {
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-lg font-semibold text-black">
-                            {dimension.name}
-                          </h3>
-                          {(DIMENSION_EXAMPLES[dimension.name] || getAutoExample(dimension.name)) && (
+                          <h3 className="text-lg font-semibold text-black">{dimension.name}</h3>
+                          {(DIMENSION_EXAMPLES[dimension.name] ||
+                            getAutoExample(dimension.name)) && (
                             <button
                               onClick={() => setShowInfoPopup(dimension.name)}
                               className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -770,11 +817,15 @@ export default function AnalysisPage() {
                           <div className="flex items-center gap-2">
                             <ScoreIcon className={`w-5 h-5 ${getScoreColor(dimension.score)}`} />
                             {dimension.score > 0 ? (
-                              <span className={`text-2xl font-bold ${getScoreColor(dimension.score)}`}>
+                              <span
+                                className={`text-2xl font-bold ${getScoreColor(dimension.score)}`}
+                              >
                                 {dimension.score}%
                               </span>
                             ) : (
-                              <span className="text-sm font-medium text-gray-500">Pending – Not enough data</span>
+                              <span className="text-sm font-medium text-gray-500">
+                                Pending – Not enough data
+                              </span>
                             )}
                           </div>
                           {dimension.status === 'completed' && (
@@ -809,18 +860,30 @@ export default function AnalysisPage() {
                       {/* Red Flags */}
                       {dimension.redFlags.length > 0 && (
                         <div className="space-y-2">
-                      {dimension.score === 0 && dimension.strengths.length === 0 && dimension.redFlags.length === 0 && (
-                        <div className="col-span-2">
-                          <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                            <p className="text-sm text-gray-700 mb-2">What’s needed to assess this:</p>
-                            <div className="flex flex-wrap gap-2">
-                              {(DIMENSION_EXAMPLES[dimension.name] || getAutoExample(dimension.name)).dataNeeded.map((d, i) => (
-                                <span key={i} className="px-2.5 py-1 text-xs bg-white border border-gray-300 rounded-full">{d}</span>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                          {dimension.score === 0 &&
+                            dimension.strengths.length === 0 &&
+                            dimension.redFlags.length === 0 && (
+                              <div className="col-span-2">
+                                <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                  <p className="text-sm text-gray-700 mb-2">
+                                    What’s needed to assess this:
+                                  </p>
+                                  <div className="flex flex-wrap gap-2">
+                                    {(
+                                      DIMENSION_EXAMPLES[dimension.name] ||
+                                      getAutoExample(dimension.name)
+                                    ).dataNeeded.map((d, i) => (
+                                      <span
+                                        key={i}
+                                        className="px-2.5 py-1 text-xs bg-white border border-gray-300 rounded-full"
+                                      >
+                                        {d}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
                             <AlertCircle className="w-4 h-4 text-red-600" />
                             Red Flags
@@ -842,30 +905,37 @@ export default function AnalysisPage() {
                       <div className="mt-4 flex items-center gap-4">
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-gray-500">Confidence:</span>
-                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${getConfidenceColor(dimension.confidence)}`}>
+                          <span
+                            className={`text-xs px-2 py-1 rounded-full font-medium ${getConfidenceColor(dimension.confidence)}`}
+                          >
                             {dimension.confidence}
                           </span>
                         </div>
                         {dimension.evidence && dimension.evidence.length > 0 && (
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-gray-500">Sources:</span>
-                            <span className="text-xs text-gray-600">{dimension.evidence.length} data points</span>
+                            <span className="text-xs text-gray-600">
+                              {dimension.evidence.length} data points
+                            </span>
                           </div>
                         )}
                       </div>
                     )}
 
                     {/* Recommendations */}
-                    {(dimension.recommendations && dimension.recommendations.length > 0) || (dimension.suggestions && dimension.suggestions.length > 0) ? (
+                    {(dimension.recommendations && dimension.recommendations.length > 0) ||
+                    (dimension.suggestions && dimension.suggestions.length > 0) ? (
                       <div className="mt-4 pt-4 border-t border-gray-100">
                         <h4 className="text-sm font-medium text-gray-700 mb-2">Recommendations</h4>
                         <div className="space-y-2">
-                          {(dimension.recommendations || dimension.suggestions || []).map((rec, i) => (
-                            <div key={i} className="flex items-start gap-2">
-                              <div className="w-1 h-1 bg-black rounded-full mt-2" />
-                              <p className="text-sm text-gray-600">{rec}</p>
-                            </div>
-                          ))}
+                          {(dimension.recommendations || dimension.suggestions || []).map(
+                            (rec, i) => (
+                              <div key={i} className="flex items-start gap-2">
+                                <div className="w-1 h-1 bg-black rounded-full mt-2" />
+                                <p className="text-sm text-gray-600">{rec}</p>
+                              </div>
+                            ),
+                          )}
                         </div>
                       </div>
                     ) : null}
@@ -923,7 +993,7 @@ export default function AnalysisPage() {
                     <X className="w-5 h-5" />
                   </button>
                 </div>
-                
+
                 <p className="text-gray-600 mb-6">
                   {(DIMENSION_EXAMPLES[showInfoPopup] || getAutoExample(showInfoPopup)).description}
                 </p>
@@ -931,7 +1001,9 @@ export default function AnalysisPage() {
                 <div className="mb-6">
                   <h4 className="font-semibold text-black mb-3">Perfect Examples:</h4>
                   <div className="space-y-2">
-                    {(DIMENSION_EXAMPLES[showInfoPopup] || getAutoExample(showInfoPopup)).examples.map((example, idx) => (
+                    {(
+                      DIMENSION_EXAMPLES[showInfoPopup] || getAutoExample(showInfoPopup)
+                    ).examples.map((example, idx) => (
                       <div key={idx} className="flex items-start gap-2">
                         <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
                         <p className="text-sm text-gray-700">{example}</p>
@@ -943,8 +1015,13 @@ export default function AnalysisPage() {
                 <div className="mb-6">
                   <h4 className="font-semibold text-black mb-3">Data Sources Needed:</h4>
                   <div className="flex flex-wrap gap-2">
-                    {(DIMENSION_EXAMPLES[showInfoPopup] || getAutoExample(showInfoPopup)).dataNeeded.map((data, idx) => (
-                      <span key={idx} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
+                    {(
+                      DIMENSION_EXAMPLES[showInfoPopup] || getAutoExample(showInfoPopup)
+                    ).dataNeeded.map((data, idx) => (
+                      <span
+                        key={idx}
+                        className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+                      >
                         {data}
                       </span>
                     ))}

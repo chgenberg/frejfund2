@@ -8,7 +8,11 @@ if (typeof (globalThis as any).File === 'undefined') {
     type: string;
     lastModified: number;
     private _buffer: Uint8Array;
-    constructor(parts: Array<ArrayBuffer | Uint8Array>, name: string, options: { type?: string; lastModified?: number } = {}) {
+    constructor(
+      parts: Array<ArrayBuffer | Uint8Array>,
+      name: string,
+      options: { type?: string; lastModified?: number } = {},
+    ) {
       this.name = name;
       this.type = options.type || '';
       this.lastModified = options.lastModified || Date.now();
@@ -16,10 +20,16 @@ if (typeof (globalThis as any).File === 'undefined') {
       const total = buffers.reduce((s, b) => s + b.byteLength, 0);
       this._buffer = new Uint8Array(total);
       let offset = 0;
-      for (const b of buffers) { this._buffer.set(b, offset); offset += b.byteLength; }
+      for (const b of buffers) {
+        this._buffer.set(b, offset);
+        offset += b.byteLength;
+      }
     }
-    async arrayBuffer(): Promise<ArrayBuffer> { return this._buffer.buffer.slice(this._buffer.byteOffset, this._buffer.byteOffset + this._buffer.byteLength); }
+    async arrayBuffer(): Promise<ArrayBuffer> {
+      return this._buffer.buffer.slice(
+        this._buffer.byteOffset,
+        this._buffer.byteOffset + this._buffer.byteLength,
+      );
+    }
   } as any;
 }
-
-

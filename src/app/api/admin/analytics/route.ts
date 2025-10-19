@@ -20,13 +20,19 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       funnel: {
-        signups, qualified, suggested, intros, accepted, meetings
-      }
+        signups,
+        qualified,
+        suggested,
+        intros,
+        accepted,
+        meetings,
+      },
     });
   } catch (error: any) {
     console.error('Admin analytics error:', error);
-    return NextResponse.json({ error: 'Failed to load analytics', details: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to load analytics', details: error.message },
+      { status: 500 },
+    );
   }
 }
-
-

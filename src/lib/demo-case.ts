@@ -30,22 +30,22 @@ export const demoEmails = [
     from: 'anna@flowopt.ai',
     to: 'investors@vcfund.com',
     date: '2025-07-05',
-    body: "We've grown MRR from $12k in April to $21k in July, CAC ~$350, churn ~5% monthly. 72 active customers, ARPA ~$292."
+    body: "We've grown MRR from $12k in April to $21k in July, CAC ~$350, churn ~5% monthly. 72 active customers, ARPA ~$292.",
   },
   {
     subject: 'Scheduling feels clunky',
     from: 'tom@hvacsolutions.com',
     to: 'support@flowopt.ai',
     date: '2025-06-18',
-    body: 'Rescheduling after last-minute cancels sometimes pushes jobs too far; dispatch does manual fixes.'
+    body: 'Rescheduling after last-minute cancels sometimes pushes jobs too far; dispatch does manual fixes.',
   },
   {
     subject: 'Pipeline & Roadmap Q3',
     from: 'anna@flowopt.ai',
     to: 'team@flowopt.ai',
     date: '2025-07-01',
-    body: 'Closed 12 in June (72 total). Mobile app end of July. Q3 goal $30k MRR, churn <5%.'
-  }
+    body: 'Closed 12 in June (72 total). Mobile app end of July. Q3 goal $30k MRR, churn <5%.',
+  },
 ] as const;
 
 export const demoKpiCsv = `date,mrr,new_customers,churned_customers,arpa,cac,marketing_spend
@@ -61,5 +61,3 @@ export const demoKpiCsv = `date,mrr,new_customers,churned_customers,arpa,cac,mar
 2026-01,35000,30,9,299,345,11500
 2026-02,37500,32,9,300,340,11800
 2026-03,40000,34,10,301,350,12000`;
-
-

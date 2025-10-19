@@ -3,7 +3,19 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { FileText, Upload, TrendingUp, Users, DollarSign, Target, Brain, ChevronRight, Sparkles, Download, CheckCircle } from 'lucide-react';
+import {
+  FileText,
+  Upload,
+  TrendingUp,
+  Users,
+  DollarSign,
+  Target,
+  Brain,
+  ChevronRight,
+  Sparkles,
+  Download,
+  CheckCircle,
+} from 'lucide-react';
 import DeckSummaryModal from '@/components/DeckSummaryModal';
 import { BusinessInfo } from '@/types/business';
 
@@ -43,14 +55,15 @@ export default function PitchPage() {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     const files = Array.from(e.dataTransfer.files);
-    const validFile = files.find(file => 
-      file.type === 'application/pdf' || 
-      file.type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
-      file.type === 'application/vnd.ms-powerpoint'
+    const validFile = files.find(
+      (file) =>
+        file.type === 'application/pdf' ||
+        file.type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
+        file.type === 'application/vnd.ms-powerpoint',
     );
-    
+
     if (validFile) {
       setUploadedFile(validFile);
     }
@@ -74,7 +87,7 @@ export default function PitchPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header - Consistent with landing page */}
-      <motion.header 
+      <motion.header
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
@@ -82,16 +95,16 @@ export default function PitchPage() {
       >
         <div className="container mx-auto px-4 sm:px-8 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <motion.div 
+            <motion.div
               className="flex items-center space-x-3 cursor-pointer"
               whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 400 }}
+              transition={{ type: 'spring', stiffness: 400 }}
               onClick={() => router.push('/')}
             >
               <div className="relative">
-                <img 
-                  src="/FREJFUND-logo.png" 
-                  alt="FrejFund" 
+                <img
+                  src="/FREJFUND-logo.png"
+                  alt="FrejFund"
                   className="h-10 sm:h-12 md:h-14 w-auto"
                 />
               </div>
@@ -154,12 +167,8 @@ export default function PitchPage() {
             ) : (
               <>
                 <Upload className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-black mb-2">
-                  Drop your pitch deck here
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  or click to browse (PDF, PPT, PPTX)
-                </p>
+                <h3 className="text-lg font-semibold text-black mb-2">Drop your pitch deck here</h3>
+                <p className="text-gray-600 mb-4">or click to browse (PDF, PPT, PPTX)</p>
                 <input
                   type="file"
                   accept=".pdf,.ppt,.pptx"
@@ -278,10 +287,7 @@ export default function PitchPage() {
 
       {/* Modal */}
       {showDeckModal && businessInfo && (
-        <DeckSummaryModal
-          businessInfo={businessInfo}
-          onClose={() => setShowDeckModal(false)}
-        />
+        <DeckSummaryModal businessInfo={businessInfo} onClose={() => setShowDeckModal(false)} />
       )}
     </div>
   );

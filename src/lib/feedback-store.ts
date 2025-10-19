@@ -26,7 +26,11 @@ export async function appendFeedback(record: FeedbackRecord): Promise<void> {
   await ensureDataFile();
   const buf = await fs.readFile(FILE_PATH, 'utf-8');
   let arr: FeedbackRecord[] = [];
-  try { arr = JSON.parse(buf) as FeedbackRecord[]; } catch { arr = []; }
+  try {
+    arr = JSON.parse(buf) as FeedbackRecord[];
+  } catch {
+    arr = [];
+  }
   arr.push(record);
   await fs.writeFile(FILE_PATH, JSON.stringify(arr, null, 2), 'utf-8');
 }
@@ -41,5 +45,3 @@ export async function getFeedbackCount(): Promise<number> {
     return 0;
   }
 }
-
-

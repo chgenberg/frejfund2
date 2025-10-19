@@ -42,8 +42,8 @@ export async function identifyAnalysisGaps(sessionId: string): Promise<AnalysisG
   const analysis = await prisma.deepAnalysis.findUnique({
     where: { sessionId },
     include: {
-      dimensions: true
-    }
+      dimensions: true,
+    },
   });
 
   if (!analysis) {
@@ -51,11 +51,12 @@ export async function identifyAnalysisGaps(sessionId: string): Promise<AnalysisG
   }
 
   const gaps: AnalysisGap[] = [];
-  const analyzedDimensionIds = new Set(analysis.dimensions.map(d => d.dimensionId));
+  const analyzedDimensionIds = new Set(analysis.dimensions.map((d) => d.dimensionId));
 
   // Check for missing dimensions (not analyzed yet)
-  const allDimensions = analysis.businessInfo?.analysisMode === 'free' ? FREE_TIER_DIMENSIONS : ANALYSIS_DIMENSIONS;
-  
+  const allDimensions =
+    analysis.businessInfo?.analysisMode === 'free' ? FREE_TIER_DIMENSIONS : ANALYSIS_DIMENSIONS;
+
   for (const dimension of allDimensions) {
     if (!analyzedDimensionIds.has(dimension.id)) {
       // This dimension wasn't analyzed - likely due to missing data
@@ -66,11 +67,11 @@ export async function identifyAnalysisGaps(sessionId: string): Promise<AnalysisG
         gapType: 'missing_data',
         requiredSources: (dimension as any).required_sources || [],
         suggestedQuestions: generateQuestionsForDimension(dimension),
-        potentialDocuments: suggestDocumentsForDimension(dimension)
+        potentialDocuments: suggestDocumentsForDimension(dimension),
       });
     } else {
       // Check the quality of analyzed dimensions
-      const analyzedDim = analysis.dimensions.find(d => d.dimensionId === dimension.id);
+      const analyzedDim = analysis.dimensions.find((d) => d.dimensionId === dimension.id);
       if (analyzedDim) {
         // Low score indicates potential gap
         if (analyzedDim.score < 50) {
@@ -81,10 +82,10 @@ export async function identifyAnalysisGaps(sessionId: string): Promise<AnalysisG
             gapType: 'low_confidence',
             requiredSources: (dimension as any).required_sources || [],
             suggestedQuestions: generateClarifyingQuestions(dimension, analyzedDim),
-            potentialDocuments: suggestDocumentsForDimension(dimension)
+            potentialDocuments: suggestDocumentsForDimension(dimension),
           });
         }
-        
+
         // Check if dimension has many questions/red flags
         if (analyzedDim.questions.length > 3 || analyzedDim.redFlags.length > 2) {
           gaps.push({
@@ -94,7 +95,7 @@ export async function identifyAnalysisGaps(sessionId: string): Promise<AnalysisG
             gapType: 'needs_clarification',
             requiredSources: (dimension as any).required_sources || [],
             suggestedQuestions: analyzedDim.questions.slice(0, 3),
-            potentialDocuments: suggestDocumentsForDimension(dimension)
+            potentialDocuments: suggestDocumentsForDimension(dimension),
           });
         }
       }
@@ -104,9 +105,11 @@ export async function identifyAnalysisGaps(sessionId: string): Promise<AnalysisG
   // Sort gaps by priority (critical dimensions first)
   const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
   gaps.sort((a, b) => {
-    const dimA = allDimensions.find(d => d.id === a.dimensionId);
-    const dimB = allDimensions.find(d => d.id === b.dimensionId);
-    return (priorityOrder[dimA?.priority || 'low'] || 3) - (priorityOrder[dimB?.priority || 'low'] || 3);
+    const dimA = allDimensions.find((d) => d.id === a.dimensionId);
+    const dimB = allDimensions.find((d) => d.id === b.dimensionId);
+    return (
+      (priorityOrder[dimA?.priority || 'low'] || 3) - (priorityOrder[dimB?.priority || 'low'] || 3)
+    );
   });
 
   return gaps.slice(0, 10); // Return top 10 gaps
@@ -120,40 +123,42 @@ function generateQuestionsForDimension(dimension: any): string[] {
     'market-size': [
       'What is your total addressable market (TAM) in dollars?',
       'How many potential customers exist in your target market?',
-      'What percentage of the market do you aim to capture in 3 years?'
+      'What percentage of the market do you aim to capture in 3 years?',
     ],
     'unit-economics': [
       'What is your current Customer Acquisition Cost (CAC)?',
       'What is the average customer lifetime value (LTV)?',
-      'What is your gross margin percentage?'
+      'What is your gross margin percentage?',
     ],
     'revenue-growth': [
       'What is your current monthly recurring revenue (MRR)?',
       'What was your MRR 6 months ago?',
-      'How many paying customers do you have today?'
+      'How many paying customers do you have today?',
     ],
     'retention-metrics': [
       'What is your monthly churn rate?',
       'What percentage of customers renew after the first year?',
-      'What is your net revenue retention (NRR)?'
+      'What is your net revenue retention (NRR)?',
     ],
     'founder-background': [
       'How many years of experience do you have in this industry?',
       'Have you built and scaled a company before?',
-      'What unique insight led you to start this company?'
+      'What unique insight led you to start this company?',
     ],
     'runway-burn': [
       'How many months of runway do you have left?',
       'What is your current monthly burn rate?',
-      'When do you expect to reach profitability?'
-    ]
+      'When do you expect to reach profitability?',
+    ],
   };
 
-  return questionMap[dimension.id] || [
-    `Can you provide more details about ${dimension.name}?`,
-    `What evidence supports your approach to ${dimension.name}?`,
-    `How do you measure success for ${dimension.name}?`
-  ];
+  return (
+    questionMap[dimension.id] || [
+      `Can you provide more details about ${dimension.name}?`,
+      `What evidence supports your approach to ${dimension.name}?`,
+      `How do you measure success for ${dimension.name}?`,
+    ]
+  );
 }
 
 /**
@@ -162,14 +167,14 @@ function generateQuestionsForDimension(dimension: any): string[] {
 function generateClarifyingQuestions(dimension: any, analyzedDim: any): string[] {
   // Use the questions identified during analysis
   const analysisQuestions = analyzedDim.questions || [];
-  
+
   // Add specific clarifying questions based on red flags
   const clarifyingQuestions: string[] = [];
-  
+
   if (analyzedDim.redFlags.length > 0) {
     clarifyingQuestions.push(
       `How do you address this concern: ${analyzedDim.redFlags[0]}?`,
-      `What steps are you taking to mitigate risks in ${dimension.name}?`
+      `What steps are you taking to mitigate risks in ${dimension.name}?`,
     );
   }
 
@@ -183,25 +188,42 @@ function suggestDocumentsForDimension(dimension: any): string[] {
   const documentMap: Record<string, string[]> = {
     'market-size': ['Market research report', 'TAM analysis', 'Industry report'],
     'unit-economics': ['Financial model', 'P&L statement', 'Unit economics spreadsheet'],
-    'revenue-growth': ['Revenue dashboard screenshot', 'Stripe/payment processor export', 'Growth metrics deck'],
+    'revenue-growth': [
+      'Revenue dashboard screenshot',
+      'Stripe/payment processor export',
+      'Growth metrics deck',
+    ],
     'retention-metrics': ['Cohort analysis', 'Churn report', 'Customer analytics export'],
-    'founder-background': ['Founder LinkedIn profiles', 'Team bios', 'Previous company case studies'],
-    'competitive-moat': ['Patent filings', 'Technical architecture diagram', 'Competitive analysis'],
+    'founder-background': [
+      'Founder LinkedIn profiles',
+      'Team bios',
+      'Previous company case studies',
+    ],
+    'competitive-moat': [
+      'Patent filings',
+      'Technical architecture diagram',
+      'Competitive analysis',
+    ],
     'customer-love': ['Customer testimonials', 'NPS survey results', 'Case studies'],
-    'funding-stage-appropriate': ['Pitch deck', 'Financial projections', 'Fundraising plan']
+    'funding-stage-appropriate': ['Pitch deck', 'Financial projections', 'Fundraising plan'],
   };
 
   const category = dimension.category.toLowerCase();
   const defaultDocs = {
     'business model': ['Pitch deck', 'Financial model', 'Pricing strategy doc'],
-    'traction': ['Metrics dashboard', 'Growth data export', 'Customer list'],
-    'team': ['Team slide', 'Org chart', 'Hiring plan'],
-    'market': ['Market analysis', 'Competitive landscape', 'Go-to-market strategy']
+    traction: ['Metrics dashboard', 'Growth data export', 'Customer list'],
+    team: ['Team slide', 'Org chart', 'Hiring plan'],
+    market: ['Market analysis', 'Competitive landscape', 'Go-to-market strategy'],
   };
 
-  return documentMap[dimension.id] || 
-         Object.entries(defaultDocs).find(([key]) => category.includes(key))?.[1] ||
-         ['Pitch deck', 'Company overview', 'Relevant metrics'];
+  return (
+    documentMap[dimension.id] ||
+    Object.entries(defaultDocs).find(([key]) => category.includes(key))?.[1] || [
+      'Pitch deck',
+      'Company overview',
+      'Relevant metrics',
+    ]
+  );
 }
 
 /**
@@ -209,7 +231,7 @@ function suggestDocumentsForDimension(dimension: any): string[] {
  */
 export async function generateSmartQuestions(
   gaps: AnalysisGap[],
-  businessInfo: any
+  businessInfo: any,
 ): Promise<GapQuestion[]> {
   // If no key, skip AI path and fall back immediately
   const hasKey = Boolean((process.env.OPENAI_API_KEY || process.env.OPENAI_KEY || '').trim());
@@ -220,19 +242,19 @@ export async function generateSmartQuestions(
       question: gap.suggestedQuestions[0] || `Tell us more about ${gap.dimensionName}`,
       helpText: `This helps us understand ${gap.category.toLowerCase()}`,
       inputType: 'text' as const,
-      validation: { required: true }
+      validation: { required: true },
     }));
   }
 
   const openai: OpenAI = getOpenAIClient() as any;
-  
+
   const prompt = `You are helping gather missing information for an investment analysis.
 
 Business: ${businessInfo.name || 'Unknown'} (${businessInfo.industry || 'Unknown industry'})
 Stage: ${businessInfo.stage || 'Unknown'}
 
 We have identified the following gaps in our analysis:
-${gaps.map(g => `- ${g.dimensionName}: ${g.gapType} (${g.category})`).join('\n')}
+${gaps.map((g) => `- ${g.dimensionName}: ${g.gapType} (${g.category})`).join('\n')}
 
 Generate 3-7 specific, actionable questions that will help fill these gaps.
 Each question should be:
@@ -255,7 +277,7 @@ Return a JSON array of questions with this structure:
       model: getChatModel('simple'),
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.7,
-      response_format: { type: 'json_object' }
+      response_format: { type: 'json_object' },
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{"questions":[]}');
@@ -269,7 +291,7 @@ Return a JSON array of questions with this structure:
       question: gap.suggestedQuestions[0] || `Tell us more about ${gap.dimensionName}`,
       helpText: `This helps us understand ${gap.category.toLowerCase()}`,
       inputType: 'text' as const,
-      validation: { required: true }
+      validation: { required: true },
     }));
   }
 }
@@ -279,7 +301,7 @@ Return a JSON array of questions with this structure:
  */
 export async function saveGapAnswers(
   sessionId: string,
-  answers: Record<string, any>
+  answers: Record<string, any>,
 ): Promise<void> {
   // Store answers in the session or a new GapAnswers table
   await prisma.session.update({
@@ -287,9 +309,9 @@ export async function saveGapAnswers(
     data: {
       metadata: {
         gapAnswers: answers,
-        gapAnsweredAt: new Date()
-      }
-    }
+        gapAnsweredAt: new Date(),
+      },
+    },
   });
 }
 
@@ -299,14 +321,14 @@ export async function saveGapAnswers(
 export async function runIncrementalAnalysis(
   sessionId: string,
   dimensionIds: string[],
-  additionalContext: string
+  additionalContext: string,
 ): Promise<void> {
   const { runDeepAnalysis } = await import('./deep-analysis-runner');
-  
+
   // Get existing analysis data
   const analysis = await prisma.deepAnalysis.findUnique({
     where: { sessionId },
-    include: { dimensions: true }
+    include: { dimensions: true },
   });
 
   if (!analysis) {
@@ -320,6 +342,6 @@ export async function runIncrementalAnalysis(
     scrapedContent: additionalContext, // Use gap answers as additional context
     uploadedDocuments: [],
     mode: 'progressive',
-    specificDimensions: dimensionIds
+    specificDimensions: dimensionIds,
   });
 }

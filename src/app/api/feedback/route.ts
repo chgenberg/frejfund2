@@ -19,9 +19,9 @@ export async function POST(req: NextRequest) {
       rating,
       reason,
       missing,
-      createdAt: Date.now()
+      createdAt: Date.now(),
     });
-    
+
     // Also save to Prisma database
     try {
       await prisma.feedback.create({
@@ -31,8 +31,8 @@ export async function POST(req: NextRequest) {
           rating,
           reason: reason || null,
           missing: missing || null,
-          userAgent: req.headers.get('user-agent') || null
-        }
+          userAgent: req.headers.get('user-agent') || null,
+        },
       });
     } catch (e) {
       console.error('Failed to save feedback to database:', e);
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   const count = await getFeedbackCount();
-  
+
   // Also get count from database
   try {
     const dbCount = await prisma.feedback.count();
@@ -56,5 +56,3 @@ export async function GET() {
     return NextResponse.json({ count });
   }
 }
-
-

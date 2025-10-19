@@ -17,29 +17,29 @@ export async function GET(req: NextRequest) {
     const deepAnalysis = await prisma.deepAnalysis.findFirst({
       where: {
         sessionId,
-        status: 'completed'
+        status: 'completed',
       },
       include: {
-        dimensions: true
-      }
+        dimensions: true,
+      },
     });
 
     if (!deepAnalysis) {
-      return NextResponse.json({ 
+      return NextResponse.json({
         completed: false,
-        message: 'Deep analysis not completed yet'
+        message: 'Deep analysis not completed yet',
       });
     }
 
     // Get business info to calculate readiness score
     const session = await prisma.session.findUnique({
-      where: { id: sessionId }
+      where: { id: sessionId },
     });
 
     if (!session?.businessInfo) {
-      return NextResponse.json({ 
+      return NextResponse.json({
         completed: false,
-        message: 'Business info not found'
+        message: 'Business info not found',
       });
     }
 
@@ -50,14 +50,10 @@ export async function GET(req: NextRequest) {
       completed: true,
       score: readiness.score,
       completedAt: deepAnalysis.completedAt,
-      dimensionsAnalyzed: deepAnalysis.dimensions.length
+      dimensionsAnalyzed: deepAnalysis.dimensions.length,
     });
-
   } catch (error) {
     console.error('Failed to check deep analysis status:', error);
-    return NextResponse.json(
-      { error: 'Failed to check analysis status' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to check analysis status' }, { status: 500 });
   }
 }

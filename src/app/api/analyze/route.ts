@@ -10,17 +10,14 @@ export async function POST(request: NextRequest) {
     const { businessInfo, websiteContent, uploadedDocs } = await request.json();
 
     if (!businessInfo) {
-      return NextResponse.json(
-        { error: 'Business information is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Business information is required' }, { status: 400 });
     }
 
     // Generate AI analysis
     const aiAnalysis = await aiAnalyzer.generateComprehensiveAnalysis(
       businessInfo as BusinessInfo,
       websiteContent,
-      uploadedDocs
+      uploadedDocs,
     );
 
     // Calculate accuracy based on available data
@@ -40,13 +37,13 @@ export async function POST(request: NextRequest) {
         targetMarket: businessInfo.targetMarket,
         businessModel: businessInfo.businessModel,
         revenue: businessInfo.monthlyRevenue,
-        team: businessInfo.teamSize
+        team: businessInfo.teamSize,
       },
       investmentThesis: aiAnalysis.investmentThesis || {
         opportunitySize: 'Market analysis in progress',
         marketValidation: 'Validation assessment needed',
         competitiveAdvantage: 'Competitive analysis required',
-        scalabilityFactor: 6
+        scalabilityFactor: 6,
       },
       actionableInsights: aiAnalysis.actionableInsights || [],
       riskFactors: aiAnalysis.riskFactors || [],
@@ -54,7 +51,7 @@ export async function POST(request: NextRequest) {
         fundingStrategy: 'Funding strategy assessment in progress',
         nextMilestones: ['Complete market validation', 'Build MVP', 'Acquire first customers'],
         teamGaps: ['Sales expertise', 'Technical leadership'],
-        marketApproach: 'Multi-channel approach recommended'
+        marketApproach: 'Multi-channel approach recommended',
       },
       scores: aiAnalysis.scores || {
         problemSolutionFit: 65,
@@ -64,18 +61,15 @@ export async function POST(request: NextRequest) {
         teamExecution: 70,
         traction: businessInfo.monthlyRevenue !== '0' ? 75 : 45,
         financialHealth: 60,
-        overallScore: 65
+        overallScore: 65,
       },
-      followUpQuestions: aiAnalysis.followUpQuestions || []
+      followUpQuestions: aiAnalysis.followUpQuestions || [],
     };
 
     return NextResponse.json(result);
   } catch (error) {
     console.error('Analysis API Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to generate analysis' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to generate analysis' }, { status: 500 });
   }
 }
 

@@ -9,5 +9,3 @@ main().catch((e) => {
   console.error('[worker] fatal error', e);
   process.exit(1);
 });
-
-

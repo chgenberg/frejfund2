@@ -10,12 +10,15 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { introRequestId, readerEmail } = body;
     if (!introRequestId || !readerEmail) {
-      return NextResponse.json({ error: 'introRequestId and readerEmail required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'introRequestId and readerEmail required' },
+        { status: 400 },
+      );
     }
 
     const result = await prisma.matchMessage.updateMany({
       where: { introRequestId, isRead: false, senderEmail: { not: readerEmail } },
-      data: { isRead: true, readAt: new Date() as any }
+      data: { isRead: true, readAt: new Date() as any },
     });
 
     ssePublish(introRequestId, 'read_receipt', { count: result.count, readerEmail });
@@ -23,8 +26,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, updated: result.count });
   } catch (error: any) {
     console.error('Error marking read:', error);
-    return NextResponse.json({ error: 'Failed to mark read', details: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to mark read', details: error.message },
+      { status: 500 },
+    );
   }
 }
-
-

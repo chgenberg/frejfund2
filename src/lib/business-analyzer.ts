@@ -4,17 +4,22 @@ export class BusinessAnalyzer {
   private analysisSteps: AnalysisStep[] = [
     { id: 'context', label: 'Analyzing business context', duration: 3000, completed: false },
     { id: 'market', label: 'Evaluating market opportunity', duration: 4000, completed: false },
-    { id: 'competition', label: 'Assessing competitive landscape', duration: 3000, completed: false },
+    {
+      id: 'competition',
+      label: 'Assessing competitive landscape',
+      duration: 3000,
+      completed: false,
+    },
     { id: 'team', label: 'Analyzing team capabilities', duration: 2000, completed: false },
     { id: 'financials', label: 'Reviewing financial metrics', duration: 3000, completed: false },
-    { id: 'insights', label: 'Generating actionable insights', duration: 2000, completed: false }
+    { id: 'insights', label: 'Generating actionable insights', duration: 2000, completed: false },
   ];
 
   async analyzeBusinessComprehensively(
     businessInfo: BusinessInfo,
     websiteContent?: string,
     uploadedDocs?: string[],
-    onProgress?: (step: string, progress: number) => void
+    onProgress?: (step: string, progress: number) => void,
   ): Promise<BusinessAnalysisResult> {
     const startTime = Date.now();
     let currentProgress = 0;
@@ -22,7 +27,8 @@ export class BusinessAnalyzer {
     // Show progress updates while calling real AI API
     const progressInterval = setInterval(() => {
       if (currentProgress < 90) {
-        const step = this.analysisSteps[Math.floor(currentProgress / (100 / this.analysisSteps.length))];
+        const step =
+          this.analysisSteps[Math.floor(currentProgress / (100 / this.analysisSteps.length))];
         onProgress?.(step?.label || 'Processing...', currentProgress);
         currentProgress += 2;
       }
@@ -38,7 +44,7 @@ export class BusinessAnalyzer {
         body: JSON.stringify({
           businessInfo,
           websiteContent,
-          uploadedDocs
+          uploadedDocs,
         }),
       });
 
@@ -47,15 +53,15 @@ export class BusinessAnalyzer {
       }
 
       const result = await response.json();
-      
+
       clearInterval(progressInterval);
       onProgress?.('Analysis complete', 100);
-      
+
       return result as BusinessAnalysisResult;
     } catch (error) {
       clearInterval(progressInterval);
       console.error('Analysis failed, using fallback:', error);
-      
+
       // Fallback to local analysis if API fails
       const analysisTime = (Date.now() - startTime) / 1000;
       return this.generateAnalysisResult(businessInfo, websiteContent, uploadedDocs, analysisTime);
@@ -63,14 +69,14 @@ export class BusinessAnalyzer {
   }
 
   private async delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private generateAnalysisResult(
     businessInfo: BusinessInfo,
     websiteContent?: string,
     uploadedDocs?: string[],
-    analysisTime: number
+    analysisTime: number,
   ): BusinessAnalysisResult {
     // Calculate accuracy based on available data
     const accuracy = this.calculateAccuracy(businessInfo, websiteContent, uploadedDocs);
@@ -89,26 +95,26 @@ export class BusinessAnalyzer {
         targetMarket: businessInfo.targetMarket,
         businessModel: businessInfo.businessModel,
         revenue: businessInfo.monthlyRevenue,
-        team: businessInfo.teamSize
+        team: businessInfo.teamSize,
       },
       investmentThesis: {
         opportunitySize: this.getOpportunitySize(businessInfo),
         marketValidation: this.getMarketValidation(businessInfo),
         competitiveAdvantage: this.getCompetitiveAdvantage(businessInfo),
-        scalabilityFactor: this.getScalabilityFactor(businessInfo)
+        scalabilityFactor: this.getScalabilityFactor(businessInfo),
       },
       actionableInsights: insights,
       riskFactors: risks,
       recommendations: this.generateRecommendations(businessInfo),
       scores,
-      followUpQuestions: this.generateFollowUpQuestions(businessInfo, accuracy)
+      followUpQuestions: this.generateFollowUpQuestions(businessInfo, accuracy),
     };
   }
 
   private calculateAccuracy(
     businessInfo: BusinessInfo,
     websiteContent?: string,
-    uploadedDocs?: string[]
+    uploadedDocs?: string[],
   ): number {
     let accuracy = 60; // Base accuracy
 
@@ -116,7 +122,7 @@ export class BusinessAnalyzer {
     if (businessInfo.website && websiteContent) accuracy += 15;
     if (uploadedDocs && uploadedDocs.length > 0) accuracy += 15;
     if (businessInfo.linkedinProfiles) accuracy += 10;
-    
+
     // Business stage affects accuracy
     if (businessInfo.stage === 'scaling') accuracy += 5;
     if (businessInfo.monthlyRevenue !== '0') accuracy += 5;
@@ -139,8 +145,8 @@ export class BusinessAnalyzer {
           'Identify 20 potential customers in your target segment',
           'Create interview script focusing on pain points',
           'Schedule and conduct interviews',
-          'Document patterns and validate assumptions'
-        ]
+          'Document patterns and validate assumptions',
+        ],
       });
     }
 
@@ -156,8 +162,8 @@ export class BusinessAnalyzer {
           'Set up analytics tracking (Mixpanel, Amplitude)',
           'Define and track key SaaS metrics',
           'Create monthly metrics dashboard',
-          'Establish cohort analysis reporting'
-        ]
+          'Establish cohort analysis reporting',
+        ],
       });
     }
 
@@ -173,8 +179,8 @@ export class BusinessAnalyzer {
           'Calculate current CAC by channel',
           'Measure customer lifetime value',
           'Identify highest ROI acquisition channels',
-          'Implement retention improvement program'
-        ]
+          'Implement retention improvement program',
+        ],
       });
     }
 
@@ -189,7 +195,7 @@ export class BusinessAnalyzer {
       risks.push({
         risk: 'Market Validation Risk',
         severity: 'high' as const,
-        mitigation: 'Conduct systematic customer discovery and build MVP to validate assumptions'
+        mitigation: 'Conduct systematic customer discovery and build MVP to validate assumptions',
       });
     }
 
@@ -198,7 +204,8 @@ export class BusinessAnalyzer {
       risks.push({
         risk: 'Single Founder Risk',
         severity: 'medium' as const,
-        mitigation: 'Consider bringing on co-founder or building advisory board for complementary skills'
+        mitigation:
+          'Consider bringing on co-founder or building advisory board for complementary skills',
       });
     }
 
@@ -207,7 +214,7 @@ export class BusinessAnalyzer {
       risks.push({
         risk: 'Revenue Generation Risk',
         severity: 'high' as const,
-        mitigation: 'Focus on customer acquisition and monetization strategy validation'
+        mitigation: 'Focus on customer acquisition and monetization strategy validation',
       });
     }
 
@@ -223,7 +230,7 @@ export class BusinessAnalyzer {
       businessModel: 60,
       teamExecution: 65,
       traction: 50,
-      financialHealth: 55
+      financialHealth: 55,
     };
 
     // Adjust scores based on stage
@@ -239,7 +246,7 @@ export class BusinessAnalyzer {
     }
 
     const overallScore = Math.round(
-      Object.values(baseScores).reduce((sum, score) => sum + score, 0) / 7
+      Object.values(baseScores).reduce((sum, score) => sum + score, 0) / 7,
     );
 
     return { ...baseScores, overallScore };
@@ -247,14 +254,16 @@ export class BusinessAnalyzer {
 
   private getOpportunitySize(businessInfo: BusinessInfo): string {
     const industryMultipliers: { [key: string]: string } = {
-      'saas': 'Large - SaaS market growing at 25% annually',
-      'fintech': 'Very Large - Fintech market expected to reach $400B by 2030',
-      'healthtech': 'Large - Digital health market growing at 15% CAGR',
-      'ecommerce': 'Large - E-commerce continues double-digit growth'
+      saas: 'Large - SaaS market growing at 25% annually',
+      fintech: 'Very Large - Fintech market expected to reach $400B by 2030',
+      healthtech: 'Large - Digital health market growing at 15% CAGR',
+      ecommerce: 'Large - E-commerce continues double-digit growth',
     };
 
-    return industryMultipliers[businessInfo.industry.toLowerCase()] || 
-           'Medium - Market size depends on specific niche and execution';
+    return (
+      industryMultipliers[businessInfo.industry.toLowerCase()] ||
+      'Medium - Market size depends on specific niche and execution'
+    );
   }
 
   private getMarketValidation(businessInfo: BusinessInfo): string {
@@ -293,7 +302,7 @@ export class BusinessAnalyzer {
       fundingStrategy: this.getFundingStrategy(businessInfo),
       nextMilestones: this.getNextMilestones(businessInfo),
       teamGaps: this.getTeamGaps(businessInfo),
-      marketApproach: this.getMarketApproach(businessInfo)
+      marketApproach: this.getMarketApproach(businessInfo),
     };
   }
 
@@ -312,7 +321,7 @@ export class BusinessAnalyzer {
 
   private getNextMilestones(businessInfo: BusinessInfo): string[] {
     const milestones = [];
-    
+
     if (businessInfo.stage === 'idea') {
       milestones.push('Complete customer discovery interviews');
       milestones.push('Build and launch MVP');

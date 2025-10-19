@@ -19,7 +19,11 @@ export async function POST(req: NextRequest) {
       try {
         // Index incoming context
         if (sessionId && docContext) {
-          try { await indexContextForSession(sessionId, docContext, { url: (businessInfo as BusinessInfo)?.website }); } catch {}
+          try {
+            await indexContextForSession(sessionId, docContext, {
+              url: (businessInfo as BusinessInfo)?.website,
+            });
+          } catch {}
         }
 
         // Retrieve top-k
@@ -27,14 +31,18 @@ export async function POST(req: NextRequest) {
         if (sessionId) {
           try {
             const top = await retrieveTopK(sessionId, message, 3);
-            retrieved = top.map(t => ({ text: t.text, url: t.url }));
+            retrieved = top.map((t) => ({ text: t.text, url: t.url }));
           } catch {}
         }
 
         const contextBlock = [
           docContext ? `User-provided context:\n${docContext}` : '',
-          retrieved.length ? `Retrieved context (top matches):\n${retrieved.map((r,i)=>`[${i+1}] ${r.text}`).join('\n\n')}` : ''
-        ].filter(Boolean).join('\n\n');
+          retrieved.length
+            ? `Retrieved context (top matches):\n${retrieved.map((r, i) => `[${i + 1}] ${r.text}`).join('\n\n')}`
+            : '',
+        ]
+          .filter(Boolean)
+          .join('\n\n');
 
         const withDocMessage = contextBlock
           ? `${message}\n\nUse the following context if helpful. Cite matches as [1], [2], etc.:\n${contextBlock}`
@@ -47,12 +55,17 @@ export async function POST(req: NextRequest) {
         const streamResp = await openai.chat.completions.create({
           model,
           messages: [
-            { role: 'system', content: (aiAnalyzer as any).systemPrompt || 'You are a helpful assistant.' },
-            ...(Array.isArray(conversationHistory) ? conversationHistory.filter((m:any)=> m?.type !== 'summary') : []),
-            { role: 'user', content: withDocMessage }
+            {
+              role: 'system',
+              content: (aiAnalyzer as any).systemPrompt || 'You are a helpful assistant.',
+            },
+            ...(Array.isArray(conversationHistory)
+              ? conversationHistory.filter((m: any) => m?.type !== 'summary')
+              : []),
+            { role: 'user', content: withDocMessage },
           ],
           ...(isGpt5 ? {} : { temperature: 0.7 }),
-          stream: true
+          stream: true,
         } as any);
 
         for await (const chunk of streamResp as any) {
@@ -61,22 +74,24 @@ export async function POST(req: NextRequest) {
         }
 
         // Finalize with sources sentinel for client
-        const sources = retrieved.map((r, i) => ({ id: i + 1, url: r.url, snippet: r.text.slice(0, 200) }));
+        const sources = retrieved.map((r, i) => ({
+          id: i + 1,
+          url: r.url,
+          snippet: r.text.slice(0, 200),
+        }));
         controller.enqueue(encoder.encode(`\n<<<SOURCES:${JSON.stringify(sources)}>>>`));
         controller.close();
       } catch (e) {
         controller.close();
       }
-    }
+    },
   });
 
   return new Response(stream, {
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
       'Cache-Control': 'no-cache, no-transform',
-      'Connection': 'keep-alive'
-    }
+      Connection: 'keep-alive',
+    },
   });
 }
-
-

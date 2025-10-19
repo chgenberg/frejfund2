@@ -32,7 +32,7 @@ export interface GapAnalysisResult {
  */
 export async function analyzeDataGaps(sessionId: string): Promise<GapAnalysisResult> {
   const analysis = await getDeepAnalysis(sessionId);
-  
+
   if (!analysis || analysis.status !== 'completed') {
     return {
       totalGaps: 0,
@@ -40,7 +40,7 @@ export async function analyzeDataGaps(sessionId: string): Promise<GapAnalysisRes
       potentialScoreIncrease: 0,
       gaps: [],
       nextBestAction: null,
-      estimatedTimeToComplete: 'N/A'
+      estimatedTimeToComplete: 'N/A',
     };
   }
 
@@ -49,7 +49,7 @@ export async function analyzeDataGaps(sessionId: string): Promise<GapAnalysisRes
 
   for (const dimension of analysis.dimensions) {
     const score = dimension.score || 0;
-    
+
     // Only analyze dimensions with score < 80
     if (score >= 80) continue;
 
@@ -68,7 +68,7 @@ export async function analyzeDataGaps(sessionId: string): Promise<GapAnalysisRes
     return b.potentialScoreIncrease - a.potentialScoreIncrease;
   });
 
-  const criticalGaps = gaps.filter(g => g.priority === 'critical').length;
+  const criticalGaps = gaps.filter((g) => g.priority === 'critical').length;
   const estimatedTime = estimateCompletionTime(gaps);
 
   return {
@@ -77,7 +77,7 @@ export async function analyzeDataGaps(sessionId: string): Promise<GapAnalysisRes
     potentialScoreIncrease: totalPotentialIncrease,
     gaps,
     nextBestAction: gaps[0] || null,
-    estimatedTimeToComplete: estimatedTime
+    estimatedTimeToComplete: estimatedTime,
   };
 }
 
@@ -88,13 +88,16 @@ function identifyGapForDimension(dimension: any): DataGap | null {
   const score = dimension.score || 0;
   const name = dimension.name;
   const category = dimension.category;
-  
+
   // Map dimension to required data
-  const gapMapping: Record<string, {
-    missingInfo: string[];
-    documents: string[];
-    questions: string[];
-  }> = {
+  const gapMapping: Record<
+    string,
+    {
+      missingInfo: string[];
+      documents: string[];
+      questions: string[];
+    }
+  > = {
     'Unit Economics': {
       missingInfo: ['CAC', 'LTV', 'Payback period', 'Gross margin'],
       documents: ['Financial model', 'KPI dashboard', 'P&L statement'],
@@ -102,8 +105,8 @@ function identifyGapForDimension(dimension: any): DataGap | null {
         'What is your Customer Acquisition Cost (CAC)?',
         'What is your average Customer Lifetime Value (LTV)?',
         'How long does it take to recover CAC?',
-        'What are your gross margins per customer?'
-      ]
+        'What are your gross margins per customer?',
+      ],
     },
     'Revenue Growth': {
       missingInfo: ['Monthly revenue', 'Growth rate', 'Revenue breakdown'],
@@ -111,8 +114,8 @@ function identifyGapForDimension(dimension: any): DataGap | null {
       questions: [
         'What was your revenue last month vs this month?',
         'What is your month-over-month growth rate?',
-        'Can you share a revenue breakdown by customer segment?'
-      ]
+        'Can you share a revenue breakdown by customer segment?',
+      ],
     },
     'Customer Retention': {
       missingInfo: ['Churn rate', 'Retention cohorts', 'NPS score'],
@@ -120,8 +123,8 @@ function identifyGapForDimension(dimension: any): DataGap | null {
       questions: [
         'What is your monthly churn rate?',
         'Do you track retention by cohort?',
-        'What is your Net Promoter Score?'
-      ]
+        'What is your Net Promoter Score?',
+      ],
     },
     'Product-Market Fit': {
       missingInfo: ['Customer feedback', 'Usage metrics', 'Testimonials'],
@@ -129,8 +132,8 @@ function identifyGapForDimension(dimension: any): DataGap | null {
       questions: [
         'How many customers would be "very disappointed" if you shut down?',
         'What are your daily/weekly active user metrics?',
-        'Can you share customer testimonials or case studies?'
-      ]
+        'Can you share customer testimonials or case studies?',
+      ],
     },
     'Market Size': {
       missingInfo: ['TAM/SAM/SOM', 'Market research', 'Competitor data'],
@@ -138,8 +141,8 @@ function identifyGapForDimension(dimension: any): DataGap | null {
       questions: [
         'What is your Total Addressable Market (TAM)?',
         'What is your Serviceable Addressable Market (SAM)?',
-        'Do you have market research or industry reports?'
-      ]
+        'Do you have market research or industry reports?',
+      ],
     },
     'Competitive Moat': {
       missingInfo: ['Unique advantages', 'Patents', 'Network effects'],
@@ -147,8 +150,8 @@ function identifyGapForDimension(dimension: any): DataGap | null {
       questions: [
         'What prevents competitors from copying your solution?',
         'Do you have any patents or proprietary technology?',
-        'Are there network effects in your business model?'
-      ]
+        'Are there network effects in your business model?',
+      ],
     },
     'Team Composition': {
       missingInfo: ['Team bios', 'Previous experience', 'Advisors'],
@@ -156,8 +159,8 @@ function identifyGapForDimension(dimension: any): DataGap | null {
       questions: [
         'What is your background and previous experience?',
         'Who are your co-founders and what do they bring?',
-        'Do you have advisors or board members?'
-      ]
+        'Do you have advisors or board members?',
+      ],
     },
     'Burn Rate': {
       missingInfo: ['Monthly expenses', 'Cash runway', 'Burn timeline'],
@@ -165,8 +168,8 @@ function identifyGapForDimension(dimension: any): DataGap | null {
       questions: [
         'What are your monthly operating expenses?',
         'How many months of runway do you have?',
-        'What is your biggest expense category?'
-      ]
+        'What is your biggest expense category?',
+      ],
     },
     'Use of Funds': {
       missingInfo: ['Allocation plan', 'Milestones', 'ROI projections'],
@@ -174,8 +177,8 @@ function identifyGapForDimension(dimension: any): DataGap | null {
       questions: [
         'How will you use the capital you raise?',
         'What specific milestones will each $100k unlock?',
-        'What is your expected ROI timeline?'
-      ]
+        'What is your expected ROI timeline?',
+      ],
     },
     'Customer Acquisition Cost': {
       missingInfo: ['CAC by channel', 'Marketing spend', 'Conversion rates'],
@@ -183,8 +186,8 @@ function identifyGapForDimension(dimension: any): DataGap | null {
       questions: [
         'What is your CAC breakdown by acquisition channel?',
         'How much are you spending on marketing monthly?',
-        'What are your conversion rates at each funnel stage?'
-      ]
+        'What are your conversion rates at each funnel stage?',
+      ],
     },
     'Storytelling & Pitch': {
       missingInfo: ['Pitch deck', 'Company story', 'Vision statement'],
@@ -192,8 +195,8 @@ function identifyGapForDimension(dimension: any): DataGap | null {
       questions: [
         'Can you share your pitch deck or investor presentation?',
         'How do you explain your company vision in one sentence?',
-        'What is your origin story - why did you start this?'
-      ]
+        'What is your origin story - why did you start this?',
+      ],
     },
     'Founder Background': {
       missingInfo: ['Previous experience', 'Domain expertise', 'Track record'],
@@ -201,8 +204,8 @@ function identifyGapForDimension(dimension: any): DataGap | null {
       questions: [
         'What is your professional background and relevant experience?',
         'Have you built or exited companies before?',
-        'What makes you uniquely qualified to solve this problem?'
-      ]
+        'What makes you uniquely qualified to solve this problem?',
+      ],
     },
     'Financial Projections': {
       missingInfo: ['3-year forecast', 'Revenue model', 'Cost breakdown'],
@@ -210,31 +213,36 @@ function identifyGapForDimension(dimension: any): DataGap | null {
       questions: [
         'Can you share your 3-year financial projections?',
         'What are your revenue assumptions and growth drivers?',
-        'What is your path to profitability?'
-      ]
+        'What is your path to profitability?',
+      ],
     },
-    'Valuation': {
+    Valuation: {
       missingInfo: ['Valuation rationale', 'Comparables', 'Funding round details'],
       documents: ['Cap table', 'Previous funding docs', 'Valuation analysis'],
       questions: [
         'What valuation are you targeting for this round?',
         'What comparable companies are you using for valuation?',
-        'How much equity are you offering?'
-      ]
+        'How much equity are you offering?',
+      ],
     },
     // Default for any other dimension
-    'default': {
+    default: {
       missingInfo: ['Specific metrics', 'Supporting documentation'],
       documents: ['Relevant business documents'],
-      questions: [`Can you provide more details about your ${name}?`]
-    }
+      questions: [`Can you provide more details about your ${name}?`],
+    },
   };
 
   const mapping = gapMapping[name] || gapMapping['default'];
-  
+
   // Calculate priority based on score and category
   let priority: 'critical' | 'high' | 'medium' | 'low';
-  if (score < 40 && (category.includes('Problem') || category.includes('Market') || category.includes('Business Model'))) {
+  if (
+    score < 40 &&
+    (category.includes('Problem') ||
+      category.includes('Market') ||
+      category.includes('Business Model'))
+  ) {
     priority = 'critical';
   } else if (score < 50) {
     priority = 'high';
@@ -257,7 +265,7 @@ function identifyGapForDimension(dimension: any): DataGap | null {
     suggestedDocuments: mapping.documents,
     priority,
     questions: mapping.questions,
-    potentialScoreIncrease: potentialIncrease
+    potentialScoreIncrease: potentialIncrease,
   };
 }
 
@@ -266,13 +274,13 @@ function identifyGapForDimension(dimension: any): DataGap | null {
  */
 export async function getNextQuestions(sessionId: string, limit: number = 3): Promise<string[]> {
   const gapAnalysis = await analyzeDataGaps(sessionId);
-  
+
   if (gapAnalysis.gaps.length === 0) {
     return []; // No gaps - all good!
   }
 
   const questions: string[] = [];
-  
+
   // Take top questions from critical/high priority gaps
   for (const gap of gapAnalysis.gaps) {
     if (questions.length >= limit) break;
@@ -289,23 +297,23 @@ export async function getNextQuestions(sessionId: string, limit: number = 3): Pr
  */
 export async function getGapSummaryForFreja(sessionId: string): Promise<string> {
   const gapAnalysis = await analyzeDataGaps(sessionId);
-  
+
   if (gapAnalysis.totalGaps === 0) {
     return 'No data gaps identified - excellent coverage! 🎯';
   }
 
   const summary: string[] = [];
-  
+
   summary.push(`=== DATA GAPS IDENTIFIED (${gapAnalysis.totalGaps} areas) ===`);
   summary.push(`Critical gaps: ${gapAnalysis.criticalGaps}`);
   summary.push(`Potential score increase: +${gapAnalysis.potentialScoreIncrease} points`);
   summary.push(`Est. completion time: ${gapAnalysis.estimatedTimeToComplete}\n`);
-  
+
   // List critical gaps
-  const criticalGaps = gapAnalysis.gaps.filter(g => g.priority === 'critical');
+  const criticalGaps = gapAnalysis.gaps.filter((g) => g.priority === 'critical');
   if (criticalGaps.length > 0) {
     summary.push('CRITICAL GAPS (ask for these first):');
-    criticalGaps.forEach(gap => {
+    criticalGaps.forEach((gap) => {
       summary.push(`\n${gap.dimensionName} (${gap.currentScore}% → ${gap.targetScore}%)`);
       summary.push(`  Missing: ${gap.missingInfo.join(', ')}`);
       summary.push(`  Documents needed: ${gap.suggestedDocuments.join(', ')}`);
@@ -314,10 +322,10 @@ export async function getGapSummaryForFreja(sessionId: string): Promise<string> 
   }
 
   // List high-priority gaps
-  const highGaps = gapAnalysis.gaps.filter(g => g.priority === 'high').slice(0, 3);
+  const highGaps = gapAnalysis.gaps.filter((g) => g.priority === 'high').slice(0, 3);
   if (highGaps.length > 0) {
     summary.push('\n\nHIGH PRIORITY GAPS:');
-    highGaps.forEach(gap => {
+    highGaps.forEach((gap) => {
       summary.push(`- ${gap.dimensionName}: ${gap.missingInfo[0]} (ask: "${gap.questions[0]}")`);
     });
   }
@@ -336,14 +344,16 @@ export async function getGapSummaryForFreja(sessionId: string): Promise<string> 
  * Estimate time to complete all gaps
  */
 function estimateCompletionTime(gaps: DataGap[]): string {
-  const criticalCount = gaps.filter(g => g.priority === 'critical').length;
-  const highCount = gaps.filter(g => g.priority === 'high').length;
-  
+  const criticalCount = gaps.filter((g) => g.priority === 'critical').length;
+  const highCount = gaps.filter((g) => g.priority === 'high').length;
+
   // Assume: critical = 10min, high = 5min, medium = 3min, low = 2min
-  const totalMinutes = (criticalCount * 10) + (highCount * 5) + 
-                       (gaps.filter(g => g.priority === 'medium').length * 3) +
-                       (gaps.filter(g => g.priority === 'low').length * 2);
-  
+  const totalMinutes =
+    criticalCount * 10 +
+    highCount * 5 +
+    gaps.filter((g) => g.priority === 'medium').length * 3 +
+    gaps.filter((g) => g.priority === 'low').length * 2;
+
   if (totalMinutes < 15) return '10-15 minutes';
   if (totalMinutes < 30) return '15-30 minutes';
   if (totalMinutes < 60) return '30-60 minutes';
@@ -358,4 +368,3 @@ export async function markGapCompleted(sessionId: string, dimensionId: string): 
   // which will update the score and remove it from gaps
   console.log(`Gap completed for dimension ${dimensionId} in session ${sessionId}`);
 }
-

@@ -10,14 +10,18 @@ interface MetricCollectorProps {
   onSkip: () => void;
 }
 
-export default function MetricCollector({ extractedMetrics, onComplete, onSkip }: MetricCollectorProps) {
+export default function MetricCollector({
+  extractedMetrics,
+  onComplete,
+  onSkip,
+}: MetricCollectorProps) {
   const [metrics, setMetrics] = useState({
     mrr: extractedMetrics?.mrr || '',
     users: extractedMetrics?.users || '',
     growth: extractedMetrics?.growth || '',
     churn: extractedMetrics?.churn || '',
     teamSize: extractedMetrics?.teamSize || '',
-    fundingAsk: extractedMetrics?.fundingAsk || ''
+    fundingAsk: extractedMetrics?.fundingAsk || '',
   });
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -27,57 +31,57 @@ export default function MetricCollector({ extractedMetrics, onComplete, onSkip }
       key: 'mrr',
       icon: DollarSign,
       question: "What's your current MRR or monthly revenue?",
-      placeholder: "e.g., $87k or $87,000",
+      placeholder: 'e.g., $87k or $87,000',
       hint: "Rough number is fine. We'll verify later.",
-      optional: false
+      optional: false,
     },
     {
       key: 'growth',
       icon: TrendingUp,
       question: "What's your month-over-month growth rate?",
-      placeholder: "e.g., +18% MoM",
-      hint: "This helps VCs understand your momentum",
-      optional: false
+      placeholder: 'e.g., +18% MoM',
+      hint: 'This helps VCs understand your momentum',
+      optional: false,
     },
     {
       key: 'users',
       icon: Users,
-      question: "How many paying customers do you have?",
-      placeholder: "e.g., 342",
-      hint: "Helps VCs see your traction",
-      optional: false
+      question: 'How many paying customers do you have?',
+      placeholder: 'e.g., 342',
+      hint: 'Helps VCs see your traction',
+      optional: false,
     },
     {
       key: 'fundingAsk',
       icon: Target,
-      question: "How much are you raising?",
-      placeholder: "e.g., 2000000 (for $2M)",
+      question: 'How much are you raising?',
+      placeholder: 'e.g., 2000000 (for $2M)',
       hint: "We'll match you with VCs who write checks of this size",
-      optional: false
+      optional: false,
     },
     {
       key: 'churn',
       icon: TrendingUp,
       question: "What's your churn rate? (Optional)",
-      placeholder: "e.g., <2% or 1.5%",
-      hint: "Shows retention quality",
-      optional: true
+      placeholder: 'e.g., <2% or 1.5%',
+      hint: 'Shows retention quality',
+      optional: true,
     },
     {
       key: 'teamSize',
       icon: Users,
-      question: "How many people on your team? (Optional)",
-      placeholder: "e.g., 4",
-      hint: "VCs like to know team size",
-      optional: true
-    }
+      question: 'How many people on your team? (Optional)',
+      placeholder: 'e.g., 4',
+      hint: 'VCs like to know team size',
+      optional: true,
+    },
   ];
 
   const currentQ = questions[currentStep];
 
   const handleNext = () => {
     if (currentStep < questions.length - 1) {
-      setCurrentStep(prev => prev + 1);
+      setCurrentStep((prev) => prev + 1);
     } else {
       // Complete!
       onComplete(metrics);
@@ -131,9 +135,7 @@ export default function MetricCollector({ extractedMetrics, onComplete, onSkip }
               <currentQ.icon className="w-6 h-6 text-gray-700" />
             </div>
             <div className="flex-1">
-              <h2 className="text-xl font-bold text-black mb-1">
-                {currentQ.question}
-              </h2>
+              <h2 className="text-xl font-bold text-black mb-1">{currentQ.question}</h2>
               <p className="text-sm text-gray-600">{currentQ.hint}</p>
             </div>
           </div>
@@ -141,7 +143,7 @@ export default function MetricCollector({ extractedMetrics, onComplete, onSkip }
           <input
             type="text"
             value={metrics[currentQ.key as keyof typeof metrics]}
-            onChange={(e) => setMetrics(prev => ({ ...prev, [currentQ.key]: e.target.value }))}
+            onChange={(e) => setMetrics((prev) => ({ ...prev, [currentQ.key]: e.target.value }))}
             onKeyPress={(e) => {
               if (e.key === 'Enter' && metrics[currentQ.key as keyof typeof metrics]) {
                 handleNext();
@@ -159,7 +161,7 @@ export default function MetricCollector({ extractedMetrics, onComplete, onSkip }
             >
               {currentQ.optional ? 'Skip this one' : 'Skip all for now'}
             </button>
-            
+
             <div className="flex items-center space-x-3">
               <span className="text-sm text-gray-500">
                 {currentStep + 1} of {questions.length}
@@ -183,7 +185,9 @@ export default function MetricCollector({ extractedMetrics, onComplete, onSkip }
           <div className="mt-8 p-4 bg-gray-50 rounded-xl border border-gray-200">
             <div className="flex items-center space-x-2 mb-2">
               <Sparkles className="w-4 h-4 text-black" />
-              <span className="text-sm font-semibold text-black">AI-extracted from your documents</span>
+              <span className="text-sm font-semibold text-black">
+                AI-extracted from your documents
+              </span>
             </div>
             <p className="text-xs text-gray-600">
               Pre-filled values were found in your pitch deck. You can edit them above.

@@ -1,6 +1,6 @@
 /**
  * SIMPLIFIED WARM INTRO FINDER
- * 
+ *
  * Instead of scraping LinkedIn (which violates ToS), we:
  * 1. Ask user to paste LinkedIn URLs of their key connections
  * 2. Show visual network map
@@ -28,16 +28,16 @@ interface UserConnection {
  */
 export async function saveConnection(
   userId: string,
-  connection: Omit<UserConnection, 'id' | 'userId' | 'createdAt'>
+  connection: Omit<UserConnection, 'id' | 'userId' | 'createdAt'>,
 ): Promise<UserConnection> {
   // Store in database (we'll add a UserConnection model to Prisma)
   // For now, store in session metadata
-  
+
   return {
     id: `conn_${Date.now()}`,
     userId,
     createdAt: new Date(),
-    ...connection
+    ...connection,
   };
 }
 
@@ -50,7 +50,7 @@ export async function findPotentialIntros(
     name: string;
     firmName: string;
     linkedInUrl?: string;
-  }
+  },
 ): Promise<{
   possibleConnectors: UserConnection[];
   suggestions: string[];
@@ -59,42 +59,53 @@ export async function findPotentialIntros(
   const suggestions: string[] = [];
 
   // Strategy 1: Check if any connection works at the same firm
-  const firmConnections = userConnections.filter(conn => 
-    conn.companies?.some(company => 
-      company.toLowerCase().includes(targetInvestor.firmName.toLowerCase())
-    )
+  const firmConnections = userConnections.filter((conn) =>
+    conn.companies?.some((company) =>
+      company.toLowerCase().includes(targetInvestor.firmName.toLowerCase()),
+    ),
   );
 
   if (firmConnections.length > 0) {
     possibleConnectors.push(...firmConnections);
-    suggestions.push(`💡 ${firmConnections[0].name} works at ${targetInvestor.firmName}! Perfect warm intro.`);
+    suggestions.push(
+      `💡 ${firmConnections[0].name} works at ${targetInvestor.firmName}! Perfect warm intro.`,
+    );
   }
 
   // Strategy 2: Check industry overlap
-  const industryConnections = userConnections.filter(conn => 
-    conn.industries?.some(ind => 
-      targetInvestor.firmName.toLowerCase().includes(ind.toLowerCase())
-    )
+  const industryConnections = userConnections.filter((conn) =>
+    conn.industries?.some((ind) =>
+      targetInvestor.firmName.toLowerCase().includes(ind.toLowerCase()),
+    ),
   );
 
   if (industryConnections.length > 0) {
     possibleConnectors.push(...industryConnections);
-    suggestions.push(`💡 ${industryConnections[0].name} is in the same industry as ${targetInvestor.firmName}`);
+    suggestions.push(
+      `💡 ${industryConnections[0].name} is in the same industry as ${targetInvestor.firmName}`,
+    );
   }
 
   // Strategy 3: Strong connections (strength >= 4)
-  const strongConnections = userConnections.filter(conn => conn.strength >= 4);
-  
+  const strongConnections = userConnections.filter((conn) => conn.strength >= 4);
+
   if (strongConnections.length > 0) {
-    suggestions.push(`💡 Ask your strong connections (${strongConnections.slice(0, 3).map(c => c.name).join(', ')}) if they know anyone at ${targetInvestor.firmName}`);
+    suggestions.push(
+      `💡 Ask your strong connections (${strongConnections
+        .slice(0, 3)
+        .map((c) => c.name)
+        .join(', ')}) if they know anyone at ${targetInvestor.firmName}`,
+    );
   }
 
   // Strategy 4: LinkedIn Sales Navigator suggestion
-  suggestions.push(`🔍 Use LinkedIn Sales Navigator to search "${targetInvestor.name}" and filter by 2nd-degree connections`);
+  suggestions.push(
+    `🔍 Use LinkedIn Sales Navigator to search "${targetInvestor.name}" and filter by 2nd-degree connections`,
+  );
 
   return {
     possibleConnectors: possibleConnectors.slice(0, 5),
-    suggestions
+    suggestions,
   };
 }
 
@@ -116,7 +127,7 @@ export async function generateWarmIntroRequest(
     industry: string;
     stage: string;
     traction?: string;
-  }
+  },
 ): Promise<{
   message: string;
   forwardableBlurb: string;
@@ -165,7 +176,7 @@ Return formatted output.`;
       model: getChatModel('simple'),
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.7,
-      max_tokens: 400
+      max_tokens: 400,
     });
 
     const text = response.choices[0].message.content?.trim() || '';
@@ -182,25 +193,25 @@ Return formatted output.`;
       `✓ Offer to draft the forwardable blurb for them`,
       `✓ Follow up if no response in 3-4 days`,
       `✓ Thank them regardless of outcome`,
-      `✓ Warm intros have 10x higher response rate than cold emails`
+      `✓ Warm intros have 10x higher response rate than cold emails`,
     ];
 
     return {
       message,
       forwardableBlurb,
-      tips
+      tips,
     };
   } catch (error) {
     console.error('Error generating warm intro request:', error);
-    
+
     return {
       message: `Hi ${connector.name},\n\nHope you're doing well! I'm reaching out because I saw you're connected to ${investor.name} at ${investor.firmName}.\n\nI'm raising a seed round for ${businessInfo.name}, and ${investor.firmName}'s focus aligns perfectly with what we're building. Would you be comfortable making a warm introduction?\n\nHappy to send you a forwardable blurb!\n\nThanks!`,
       forwardableBlurb: `${investor.name}, wanted to introduce you to [Your name], founder of ${businessInfo.name}. They're building [description] in the ${businessInfo.industry} space. Worth a conversation?`,
       tips: [
         'Make it easy for your connector',
         'Offer to draft the intro for them',
-        'Thank them regardless of outcome'
-      ]
+        'Thank them regardless of outcome',
+      ],
     };
   }
 }
@@ -211,7 +222,7 @@ Return formatted output.`;
  */
 export async function generateWarmIntroGuidance(
   investorName: string,
-  investorFirm: string
+  investorFirm: string,
 ): Promise<string> {
   return `**Finding a warm intro to ${investorFirm}** 🔗
 

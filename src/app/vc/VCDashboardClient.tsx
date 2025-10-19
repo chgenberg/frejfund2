@@ -4,18 +4,35 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Search, Filter, MapPin, TrendingUp, DollarSign, Users, 
-  Calendar, Target, Building2, X, ChevronDown, Globe,
-  BarChart3, List, Map as MapIcon, Activity, Briefcase,
-  Clock, CheckCircle2, AlertCircle, Sparkles
+  Search,
+  Filter,
+  MapPin,
+  TrendingUp,
+  DollarSign,
+  Users,
+  Calendar,
+  Target,
+  Building2,
+  X,
+  ChevronDown,
+  Globe,
+  BarChart3,
+  List,
+  Map as MapIcon,
+  Activity,
+  Briefcase,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  Sparkles,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import InvestmentWizard from '@/components/InvestmentWizard';
 
 // Dynamically import map component to avoid SSR issues
-const InteractiveMap = dynamic(() => import('@/components/InteractiveMap'), { 
+const InteractiveMap = dynamic(() => import('@/components/InteractiveMap'), {
   ssr: false,
-  loading: () => <div className="w-full h-full bg-gray-100 animate-pulse" />
+  loading: () => <div className="w-full h-full bg-gray-100 animate-pulse" />,
 });
 
 interface Startup {
@@ -64,7 +81,7 @@ export default function VCDashboardClient() {
     minSeeking: 0,
     maxSeeking: 10000000,
     country: 'all',
-    readinessScore: 0
+    readinessScore: 0,
   });
 
   useEffect(() => {
@@ -89,14 +106,19 @@ export default function VCDashboardClient() {
     }
   };
 
-  const filteredStartups = startups.filter(startup => {
+  const filteredStartups = startups.filter((startup) => {
     if (searchQuery) {
       const query = String(searchQuery || '').toLowerCase();
       const company = String(startup.companyName || '').toLowerCase();
       const name = String(startup.name || '').toLowerCase();
       const industry = String(startup.industry || '').toLowerCase();
       const oneLiner = String(startup.oneLiner || '').toLowerCase();
-      if (!company.includes(query) && !name.includes(query) && !industry.includes(query) && !oneLiner.includes(query)) {
+      if (
+        !company.includes(query) &&
+        !name.includes(query) &&
+        !industry.includes(query) &&
+        !oneLiner.includes(query)
+      ) {
         return false;
       }
     }
@@ -105,7 +127,7 @@ export default function VCDashboardClient() {
     const monthlyRevenue = Number(startup.monthlyRevenue || 0);
     const seeking = Number(startup.seeking || 0);
     const readiness = Number(startup.readinessScore || 0);
-    const country = (startup.location && startup.location.country) ? startup.location.country : '';
+    const country = startup.location && startup.location.country ? startup.location.country : '';
     if (monthlyRevenue < filters.minRevenue || monthlyRevenue > filters.maxRevenue) return false;
     if (seeking < filters.minSeeking || seeking > filters.maxSeeking) return false;
     if (filters.country !== 'all' && country !== filters.country) return false;
@@ -134,23 +156,41 @@ export default function VCDashboardClient() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-black">Investment Opportunities</h1>
-                <p className="text-sm text-gray-600">{filteredStartups.length} companies match your criteria</p>
+                <p className="text-sm text-gray-600">
+                  {filteredStartups.length} companies match your criteria
+                </p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
               <div className="bg-gray-100 rounded-lg p-1 flex">
-                <button onClick={() => setViewMode('list')} className={`px-3 py-1.5 rounded ${viewMode === 'list' ? 'bg-white text-black shadow-sm' : 'text-gray-600 hover:text-black'} transition-all`}>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-3 py-1.5 rounded ${viewMode === 'list' ? 'bg-white text-black shadow-sm' : 'text-gray-600 hover:text-black'} transition-all`}
+                >
                   <List className="w-4 h-4" />
                 </button>
-                <button onClick={() => setViewMode('map')} className={`px-3 py-1.5 rounded ${viewMode === 'map' ? 'bg-white text-black shadow-sm' : 'text-gray-600 hover:text-black'} transition-all`}>
+                <button
+                  onClick={() => setViewMode('map')}
+                  className={`px-3 py-1.5 rounded ${viewMode === 'map' ? 'bg-white text-black shadow-sm' : 'text-gray-600 hover:text-black'} transition-all`}
+                >
                   <MapIcon className="w-4 h-4" />
                 </button>
               </div>
-              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => router.push('/vc/profile')} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center gap-2">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => router.push('/vc/profile')}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center gap-2"
+              >
                 <Users className="w-4 h-4" />
                 Profile
               </motion.button>
-              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => router.push('/vc/analytics')} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => router.push('/vc/analytics')}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+              >
                 Analytics
               </motion.button>
             </div>
@@ -163,7 +203,9 @@ export default function VCDashboardClient() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-base sm:text-lg font-bold">Discover Your Next Unicorn</h2>
-            <p className="text-xs sm:text-sm text-gray-300">Tell us your investment criteria and we'll find the perfect matches</p>
+            <p className="text-xs sm:text-sm text-gray-300">
+              Tell us your investment criteria and we'll find the perfect matches
+            </p>
           </div>
           <motion.button
             whileHover={{ scale: 1.02 }}
@@ -183,14 +225,25 @@ export default function VCDashboardClient() {
         <div className="max-w-7xl mx-auto flex items-center space-x-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search by company, founder, industry..." className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by company, founder, industry..."
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+            />
           </div>
-          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setShowFilters(!showFilters)} className="px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors inline-flex items-center space-x-2">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowFilters(!showFilters)}
+            className="px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors inline-flex items-center space-x-2"
+          >
             <Filter className="w-4 h-4" />
             <span>Filters</span>
-            {Object.values(filters).some(v => v !== 'all' && v !== 0 && v !== 1000000 && v !== 10000000) && (
-              <span className="w-2 h-2 bg-white rounded-full" />
-            )}
+            {Object.values(filters).some(
+              (v) => v !== 'all' && v !== 0 && v !== 1000000 && v !== 10000000,
+            ) && <span className="w-2 h-2 bg-white rounded-full" />}
           </motion.button>
         </div>
       </div>
@@ -198,12 +251,22 @@ export default function VCDashboardClient() {
       {/* Filters Panel */}
       <AnimatePresence>
         {showFilters && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="bg-white border-b border-gray-200 overflow-hidden">
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="bg-white border-b border-gray-200 overflow-hidden"
+          >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Industry</label>
-                  <select value={filters.industry} onChange={(e) => setFilters({ ...filters, industry: e.target.value })} className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent appearance-none cursor-pointer hover:border-gray-400 transition-colors">
+                  <select
+                    value={filters.industry}
+                    onChange={(e) => setFilters({ ...filters, industry: e.target.value })}
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent appearance-none cursor-pointer hover:border-gray-400 transition-colors"
+                  >
                     <option value="all">All Industries</option>
                     <option value="B2B SaaS">B2B SaaS</option>
                     <option value="Fintech">Fintech</option>
@@ -214,7 +277,11 @@ export default function VCDashboardClient() {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Stage</label>
-                  <select value={filters.stage} onChange={(e) => setFilters({ ...filters, stage: e.target.value })} className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent appearance-none cursor-pointer hover:border-gray-400 transition-colors">
+                  <select
+                    value={filters.stage}
+                    onChange={(e) => setFilters({ ...filters, stage: e.target.value })}
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent appearance-none cursor-pointer hover:border-gray-400 transition-colors"
+                  >
                     <option value="all">All Stages</option>
                     <option value="Pre-seed">Pre-seed</option>
                     <option value="Seed">Seed</option>
@@ -224,7 +291,11 @@ export default function VCDashboardClient() {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Country</label>
-                  <select value={filters.country} onChange={(e) => setFilters({ ...filters, country: e.target.value })} className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent appearance-none cursor-pointer hover:border-gray-400 transition-colors">
+                  <select
+                    value={filters.country}
+                    onChange={(e) => setFilters({ ...filters, country: e.target.value })}
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent appearance-none cursor-pointer hover:border-gray-400 transition-colors"
+                  >
                     <option value="all">All Countries</option>
                     <option value="Sweden">Sweden</option>
                     <option value="Germany">Germany</option>
@@ -234,16 +305,47 @@ export default function VCDashboardClient() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Min Revenue/mo</label>
-                  <input type="number" value={filters.minRevenue} onChange={(e) => setFilters({ ...filters, minRevenue: parseInt(e.target.value) || 0 })} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent" placeholder="$0" />
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Min Revenue/mo
+                  </label>
+                  <input
+                    type="number"
+                    value={filters.minRevenue}
+                    onChange={(e) =>
+                      setFilters({ ...filters, minRevenue: parseInt(e.target.value) || 0 })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent"
+                    placeholder="$0"
+                  />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Max Seeking</label>
-                  <input type="number" value={filters.maxSeeking} onChange={(e) => setFilters({ ...filters, maxSeeking: parseInt(e.target.value) || 10000000 })} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent" placeholder="$10M" />
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Max Seeking
+                  </label>
+                  <input
+                    type="number"
+                    value={filters.maxSeeking}
+                    onChange={(e) =>
+                      setFilters({ ...filters, maxSeeking: parseInt(e.target.value) || 10000000 })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent"
+                    placeholder="$10M"
+                  />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Min Readiness</label>
-                  <input type="range" value={filters.readinessScore} onChange={(e) => setFilters({ ...filters, readinessScore: parseInt(e.target.value) })} min="0" max="100" className="w-full" />
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Min Readiness
+                  </label>
+                  <input
+                    type="range"
+                    value={filters.readinessScore}
+                    onChange={(e) =>
+                      setFilters({ ...filters, readinessScore: parseInt(e.target.value) })
+                    }
+                    min="0"
+                    max="100"
+                    className="w-full"
+                  />
                   <span className="text-xs text-gray-600">{filters.readinessScore}+</span>
                 </div>
               </div>
@@ -265,14 +367,21 @@ export default function VCDashboardClient() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredStartups.map((startup, index) => (
-                <motion.div key={startup.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }} onClick={() => router.push(`/vc/startup/${startup.id}`)} className="bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all cursor-pointer flex flex-col h-full">
+                <motion.div
+                  key={startup.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  onClick={() => router.push(`/vc/startup/${startup.id}`)}
+                  className="bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all cursor-pointer flex flex-col h-full"
+                >
                   {/* Company Header */}
                   <div className="p-6 flex-1">
                     <div className="flex items-start space-x-4 mb-4">
                       <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        <img 
-                          src={startup.logo || '/placeholder.png'} 
-                          alt={`${startup.companyName} logo`} 
+                        <img
+                          src={startup.logo || '/placeholder.png'}
+                          alt={`${startup.companyName} logo`}
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = '/placeholder.png';
@@ -280,47 +389,68 @@ export default function VCDashboardClient() {
                         />
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-lg font-bold text-black line-clamp-1">{startup.companyName}</h3>
-                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">{startup.oneLiner}</p>
+                        <h3 className="text-lg font-bold text-black line-clamp-1">
+                          {startup.companyName}
+                        </h3>
+                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                          {startup.oneLiner}
+                        </p>
                       </div>
                       <div className="text-right">
-                        <div className={`text-2xl font-bold ${getScoreColor(startup.readinessScore)}`}>{startup.readinessScore}</div>
+                        <div
+                          className={`text-2xl font-bold ${getScoreColor(startup.readinessScore)}`}
+                        >
+                          {startup.readinessScore}
+                        </div>
                         <p className="text-xs text-gray-600">Ready</p>
                       </div>
                     </div>
-                    
+
                     {/* Location & Team */}
                     <div className="flex items-center space-x-3 text-xs text-gray-500 mb-4">
-                      <span className="flex items-center"><MapPin className="w-3 h-3 mr-1" />{startup.location.city}</span>
+                      <span className="flex items-center">
+                        <MapPin className="w-3 h-3 mr-1" />
+                        {startup.location.city}
+                      </span>
                       <span>•</span>
                       <span>{startup.teamSize} team</span>
                       <span>•</span>
                       <span>{startup.foundedYear}</span>
                     </div>
-                    
+
                     {/* Key Metrics */}
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">MRR</span>
-                        <span className="text-sm font-bold text-black">${((Number(startup.monthlyRevenue || 0)) / 1000).toFixed(0)}k</span>
+                        <span className="text-sm font-bold text-black">
+                          ${(Number(startup.monthlyRevenue || 0) / 1000).toFixed(0)}k
+                        </span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">Growth</span>
-                        <span className="text-sm font-bold text-green-600">+{Number(startup.metrics?.growth || 0)}%</span>
+                        <span className="text-sm font-bold text-green-600">
+                          +{Number(startup.metrics?.growth || 0)}%
+                        </span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">Seeking</span>
-                        <span className="text-sm font-bold text-black">${((Number(startup.seeking || 0)) / 1000000).toFixed(1)}M</span>
+                        <span className="text-sm font-bold text-black">
+                          ${(Number(startup.seeking || 0) / 1000000).toFixed(1)}M
+                        </span>
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Footer */}
                   <div className="px-6 py-4 border-t border-gray-100">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
-                        <span className="px-2 py-1 bg-black text-white rounded text-xs">{startup.stage}</span>
-                        <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">{startup.industry}</span>
+                        <span className="px-2 py-1 bg-black text-white rounded text-xs">
+                          {startup.stage}
+                        </span>
+                        <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+                          {startup.industry}
+                        </span>
                       </div>
                       <span className="text-xs text-gray-500">Active today</span>
                     </div>
@@ -333,22 +463,24 @@ export default function VCDashboardClient() {
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Search className="w-8 h-8 text-gray-400" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No companies match your criteria</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No companies match your criteria
+                </h3>
                 <p className="text-gray-600">Try adjusting your filters to see more results</p>
               </div>
             )}
           </div>
         ) : (
           <div className="h-[calc(100vh-200px)]">
-            <InteractiveMap 
-              startups={filteredStartups} 
+            <InteractiveMap
+              startups={filteredStartups}
               onStartupClick={(mapStartup) => {
                 // Find the full startup object from our data
-                const fullStartup = filteredStartups.find(s => s.id === mapStartup.id);
+                const fullStartup = filteredStartups.find((s) => s.id === mapStartup.id);
                 if (fullStartup) {
                   setSelectedStartup(fullStartup);
                 }
-              }} 
+              }}
             />
           </div>
         )}
@@ -356,28 +488,73 @@ export default function VCDashboardClient() {
 
       <AnimatePresence>
         {selectedStartup && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setSelectedStartup(null)}>
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} onClick={(e) => e.stopPropagation()} className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+            onClick={() => setSelectedStartup(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            >
               <div className="p-6">
                 <div className="flex items-start justify-between mb-6">
                   <div>
                     <h2 className="text-2xl font-bold text-black">{selectedStartup.companyName}</h2>
                     <p className="text-gray-600 mt-1">{selectedStartup.oneLiner}</p>
                   </div>
-                  <button onClick={() => setSelectedStartup(null)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors"><X className="w-5 h-5" /></button>
+                  <button
+                    onClick={() => setSelectedStartup(null)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
                 <div className="space-y-6">
                   <div>
                     <h3 className="font-semibold text-black mb-3">Key Metrics</h3>
                     <div className="grid grid-cols-3 gap-4">
-                      <div className="text-center p-4 bg-gray-50 rounded-lg"><div className="text-2xl font-bold text-black">${(selectedStartup.monthlyRevenue / 1000).toFixed(0)}k</div><div className="text-sm text-gray-600">MRR</div></div>
-                      <div className="text-center p-4 bg-gray-50 rounded-lg"><div className="text-2xl font-bold text-green-600">+{selectedStartup.metrics.growth}%</div><div className="text-sm text-gray-600">Monthly Growth</div></div>
-                      <div className="text-center p-4 bg-gray-50 rounded-lg"><div className="text-2xl font-bold text-black">{selectedStartup.metrics.retention}%</div><div className="text-sm text-gray-600">Retention</div></div>
+                      <div className="text-center p-4 bg-gray-50 rounded-lg">
+                        <div className="text-2xl font-bold text-black">
+                          ${(selectedStartup.monthlyRevenue / 1000).toFixed(0)}k
+                        </div>
+                        <div className="text-sm text-gray-600">MRR</div>
+                      </div>
+                      <div className="text-center p-4 bg-gray-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">
+                          +{selectedStartup.metrics.growth}%
+                        </div>
+                        <div className="text-sm text-gray-600">Monthly Growth</div>
+                      </div>
+                      <div className="text-center p-4 bg-gray-50 rounded-lg">
+                        <div className="text-2xl font-bold text-black">
+                          {selectedStartup.metrics.retention}%
+                        </div>
+                        <div className="text-sm text-gray-600">Retention</div>
+                      </div>
                     </div>
                   </div>
                   <div className="flex space-x-4">
-                    <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => router.push(`/vc/startup/${selectedStartup.id}`)} className="flex-1 px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors">View Full Analysis</motion.button>
-                    <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="px-6 py-3 bg-white text-black border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors">Request Introduction</motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => router.push(`/vc/startup/${selectedStartup.id}`)}
+                      className="flex-1 px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+                    >
+                      View Full Analysis
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="px-6 py-3 bg-white text-black border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                    >
+                      Request Introduction
+                    </motion.button>
                   </div>
                 </div>
               </div>
@@ -394,16 +571,16 @@ export default function VCDashboardClient() {
           // Apply the preferences as filters
           if (preferences.industries.length > 0) {
             // In a real app, this would filter by multiple industries
-            setFilters(prev => ({ ...prev, industry: preferences.industries[0] }));
+            setFilters((prev) => ({ ...prev, industry: preferences.industries[0] }));
           }
           if (preferences.stages.length > 0) {
-            setFilters(prev => ({ ...prev, stage: preferences.stages[0] }));
+            setFilters((prev) => ({ ...prev, stage: preferences.stages[0] }));
           }
           if (preferences.ticketSize) {
-            setFilters(prev => ({
+            setFilters((prev) => ({
               ...prev,
               minSeeking: preferences.ticketSize.min,
-              maxSeeking: preferences.ticketSize.max
+              maxSeeking: preferences.ticketSize.max,
             }));
           }
           if (preferences.minimumTraction !== 'No revenue required') {
@@ -411,9 +588,12 @@ export default function VCDashboardClient() {
               '$10k+ MRR': 10000,
               '$50k+ MRR': 50000,
               '$100k+ MRR': 100000,
-              '$500k+ MRR': 500000
+              '$500k+ MRR': 500000,
             };
-            setFilters(prev => ({ ...prev, minRevenue: mrrMap[preferences.minimumTraction] || 0 }));
+            setFilters((prev) => ({
+              ...prev,
+              minRevenue: mrrMap[preferences.minimumTraction] || 0,
+            }));
           }
           setShowInvestmentWizard(false);
           // Show filters panel to display applied preferences
@@ -423,6 +603,3 @@ export default function VCDashboardClient() {
     </div>
   );
 }
-
-
-

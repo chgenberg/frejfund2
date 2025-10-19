@@ -1,9 +1,11 @@
 # Deep Analysis System - 50+ Dimensions
 
 ## Overview
+
 When a founder provides their website URL and uploads documents, FrejFund runs a comprehensive background analysis across **68 distinct dimensions** organized into 15 categories.
 
 This gives Freja deep knowledge to:
+
 - Ask intelligent, probing questions
 - Challenge assumptions with data
 - Identify critical gaps
@@ -12,6 +14,7 @@ This gives Freja deep knowledge to:
 ## The 15 Categories & 68 Dimensions
 
 ### 1. Problem & Solution (6 dimensions)
+
 - Problem Clarity
 - Solution-Problem Fit
 - Unique Insight
@@ -20,6 +23,7 @@ This gives Freja deep knowledge to:
 - Product Magic Moment
 
 ### 2. Market & Competition (8 dimensions)
+
 - Market Size (TAM/SAM/SOM)
 - Market Growth Rate
 - Competitive Landscape
@@ -30,6 +34,7 @@ This gives Freja deep knowledge to:
 - Substitute Product Threats
 
 ### 3. Business Model & Economics (9 dimensions)
+
 - Revenue Model Clarity
 - Unit Economics (LTV/CAC)
 - Revenue Predictability
@@ -41,6 +46,7 @@ This gives Freja deep knowledge to:
 - Economic Scalability
 
 ### 4. Traction & Growth (7 dimensions)
+
 - Revenue Growth Rate
 - Customer Acquisition Momentum
 - Retention & Churn
@@ -50,6 +56,7 @@ This gives Freja deep knowledge to:
 - Market Penetration Rate
 
 ### 5. Team & Execution (6 dimensions)
+
 - Founder-Market Fit
 - Team Completeness
 - Execution Velocity
@@ -58,6 +65,7 @@ This gives Freja deep knowledge to:
 - Founder Commitment Level
 
 ### 6. Go-to-Market (5 dimensions)
+
 - Customer Acquisition Strategy
 - ICP Clarity
 - Sales Cycle Length
@@ -65,6 +73,7 @@ This gives Freja deep knowledge to:
 - Expansion Revenue Potential
 
 ### 7. Product & Technology (5 dimensions)
+
 - Technical Differentiation
 - Product Development Velocity
 - Technical Debt/Architecture
@@ -72,6 +81,7 @@ This gives Freja deep knowledge to:
 - Platform vs Feature Risk
 
 ### 8. Fundraising & Capital (5 dimensions)
+
 - Capital Efficiency
 - Funding Stage Appropriateness
 - Use of Funds Clarity
@@ -79,6 +89,7 @@ This gives Freja deep knowledge to:
 - Valuation Reasonableness
 
 ### 9. Risks & Red FLAGS (5 dimensions)
+
 - Regulatory/Compliance Risk
 - Key Dependency Risk
 - Market Risk
@@ -86,28 +97,33 @@ This gives Freja deep knowledge to:
 - Founder Conflict Risk
 
 ### 10. Customer Validation (4 dimensions)
+
 - Customer Love/NPS
 - Customer Diversity
 - Organic Demand Signals
 - Repeat Purchase/Usage
 
 ### 11. Storytelling & Positioning (3 dimensions)
+
 - Founder Story/Narrative
 - Market Positioning
 - Vision & Ambition Level
 
 ### 12. Social Proof & Traction (4 dimensions)
+
 - Press & Media Coverage
 - Existing Investor Quality
 - Advisor/Board Quality
 - Customer Logo Quality
 
 ### 13. Operational Maturity (3 dimensions)
+
 - Process Maturity
 - Metrics & Dashboard Discipline
 - Stakeholder Communication
 
 ### 14. Strategic Positioning (3 dimensions)
+
 - Acquisition Potential
 - International Expansion Potential
 - Ecosystem Positioning
@@ -115,26 +131,33 @@ This gives Freja deep knowledge to:
 ## How It Works
 
 ### Phase 1: Initial Scraping
+
 1. Scrape website content
 2. Extract text from uploaded documents
 3. Parse LinkedIn profiles
 
 ### Phase 2: Deep Analysis (Background)
+
 For each dimension:
+
 1. Run GPT analysis with specific prompt
 2. Extract structured findings
 3. Identify red flags and strengths
 4. Generate relevant questions to ask founder
 
 ### Phase 3: Knowledge Graph Construction
+
 Build a comprehensive profile with:
+
 - Scores for each dimension (0-100)
 - Findings and evidence
 - Gaps and missing information
 - Intelligent questions to fill gaps
 
 ### Phase 4: Freja Intelligence Activation
+
 Freja can now:
+
 - Reference specific findings: "I noticed your CAC is $500 but LTV is only $300..."
 - Ask targeted questions: "Your website mentions enterprise clients, but what's your actual sales cycle?"
 - Challenge assumptions: "You claim 10% market share, but I only see 100 customers and a $10B TAM..."
@@ -150,29 +173,33 @@ Freja can now:
 ## Example Intelligent Behaviors
 
 ### Scenario 1: Missing Critical Data
+
 ```
-Freja: "I see you have revenue traction, but I'm missing your burn rate 
-and CAC. Without these, I can't assess if your growth is sustainable. 
+Freja: "I see you have revenue traction, but I'm missing your burn rate
+and CAC. Without these, I can't assess if your growth is sustainable.
 Can you share these numbers?"
 ```
 
 ### Scenario 2: Data Contradictions
+
 ```
-Freja: "You mentioned you're growth-stage, but $5K MRR is typically 
-early revenue-stage. Most growth-stage companies have $100K+ MRR. 
+Freja: "You mentioned you're growth-stage, but $5K MRR is typically
+early revenue-stage. Most growth-stage companies have $100K+ MRR.
 Should we recalibrate your stage?"
 ```
 
 ### Scenario 3: Industry-Specific Probing
+
 ```
-Freja: "For a SaaS business, I need to understand: What's your net 
-revenue retention rate? This is critical for investors evaluating SaaS 
+Freja: "For a SaaS business, I need to understand: What's your net
+revenue retention rate? This is critical for investors evaluating SaaS
 companies. Target is 110%+."
 ```
 
 ### Scenario 4: Pitch Deck Quality
+
 ```
-Freja: "I reviewed your deck. Slide 5 talks about 'disrupting the market' 
+Freja: "I reviewed your deck. Slide 5 talks about 'disrupting the market'
 but doesn't show HOW. Can you clarify your specific competitive advantage?"
 ```
 

@@ -20,8 +20,8 @@ export async function POST(req: NextRequest) {
         email: email.toLowerCase(),
         token,
         expiresAt,
-        used: false
-      }
+        used: false,
+      },
     });
 
     // Build magic link URL
@@ -30,17 +30,13 @@ export async function POST(req: NextRequest) {
     // Send email
     await sendMagicLinkEmail(email, magicLinkUrl);
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Magic link sent! Check your email.' 
+    return NextResponse.json({
+      success: true,
+      message: 'Magic link sent! Check your email.',
     });
-
   } catch (error) {
     console.error('Magic link error:', error);
-    return NextResponse.json(
-      { error: 'Failed to send magic link' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to send magic link' }, { status: 500 });
   }
 }
 
@@ -48,6 +44,5 @@ function generateToken(): string {
   // Generate cryptographically secure random token
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
-  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+  return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
-

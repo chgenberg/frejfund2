@@ -13,7 +13,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, preferences: prefs });
   } catch (error: any) {
     console.error('GET /api/vc/preferences error:', error);
-    return NextResponse.json({ error: 'Failed to load preferences', details: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to load preferences', details: error.message },
+      { status: 500 },
+    );
   }
 }
 
@@ -21,7 +24,16 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { vcEmail, vcFirm, stages, industries, geographies, checkSizeMin, checkSizeMax, dealCriteria } = body || {};
+    const {
+      vcEmail,
+      vcFirm,
+      stages,
+      industries,
+      geographies,
+      checkSizeMin,
+      checkSizeMax,
+      dealCriteria,
+    } = body || {};
     if (!vcEmail) return NextResponse.json({ error: 'vcEmail is required' }, { status: 400 });
 
     const prefs = await prisma.vCPreference.upsert({
@@ -34,7 +46,7 @@ export async function POST(req: NextRequest) {
         geographies: Array.isArray(geographies) ? geographies : [],
         checkSizeMin: typeof checkSizeMin === 'number' ? BigInt(checkSizeMin) : null,
         checkSizeMax: typeof checkSizeMax === 'number' ? BigInt(checkSizeMax) : null,
-        dealCriteria: dealCriteria || null
+        dealCriteria: dealCriteria || null,
       },
       update: {
         vcFirm: vcFirm || null,
@@ -43,15 +55,16 @@ export async function POST(req: NextRequest) {
         geographies: Array.isArray(geographies) ? geographies : undefined,
         checkSizeMin: typeof checkSizeMin === 'number' ? BigInt(checkSizeMin) : undefined,
         checkSizeMax: typeof checkSizeMax === 'number' ? BigInt(checkSizeMax) : undefined,
-        dealCriteria: dealCriteria || undefined
-      }
+        dealCriteria: dealCriteria || undefined,
+      },
     });
 
     return NextResponse.json({ success: true, preferences: prefs });
   } catch (error: any) {
     console.error('POST /api/vc/preferences error:', error);
-    return NextResponse.json({ error: 'Failed to save preferences', details: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to save preferences', details: error.message },
+      { status: 500 },
+    );
   }
 }
-
-

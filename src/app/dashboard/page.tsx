@@ -2,11 +2,31 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Activity, Mail, Calendar, Database, Settings, ChevronRight, 
-  TrendingUp, AlertCircle, CheckCircle2, Clock, BarChart3,
-  MessageCircle, Brain, Users, FileText, X, Plus,
-  Link2, Zap, Shield, Key, RefreshCw, Download, Circle
+import {
+  Activity,
+  Mail,
+  Calendar,
+  Database,
+  Settings,
+  ChevronRight,
+  TrendingUp,
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  BarChart3,
+  MessageCircle,
+  Brain,
+  Users,
+  FileText,
+  X,
+  Plus,
+  Link2,
+  Zap,
+  Shield,
+  Key,
+  RefreshCw,
+  Download,
+  Circle,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -23,10 +43,16 @@ interface Integration {
 
 export default function Dashboard() {
   const router = useRouter();
-  const [activeSection, setActiveSection] = useState<'overview' | 'integrations' | 'settings' | 'readiness'>('overview');
+  const [activeSection, setActiveSection] = useState<
+    'overview' | 'integrations' | 'settings' | 'readiness'
+  >('overview');
   const [hasDeepAnalysis, setHasDeepAnalysis] = useState(false);
   const [readinessScore, setReadinessScore] = useState(0);
-  const [analysisProgress, setAnalysisProgress] = useState({ current: 0, total: 95, status: 'idle' });
+  const [analysisProgress, setAnalysisProgress] = useState({
+    current: 0,
+    total: 95,
+    status: 'idle',
+  });
   const [deepAnalysisData, setDeepAnalysisData] = useState<any>(null);
   const [isProfilePublic, setIsProfilePublic] = useState(false);
   const [publishingProfile, setPublishingProfile] = useState(false);
@@ -40,7 +66,7 @@ export default function Dashboard() {
     industry: '',
     stage: '',
     website: '',
-    logo: ''
+    logo: '',
   });
   const [integrations, setIntegrations] = useState<Integration[]>([
     {
@@ -50,8 +76,8 @@ export default function Dashboard() {
       status: 'disconnected',
       stats: [
         { label: 'Emails synced', value: '0' },
-        { label: 'Last 30 days', value: '0' }
-      ]
+        { label: 'Last 30 days', value: '0' },
+      ],
     },
     {
       id: 'calendar',
@@ -60,8 +86,8 @@ export default function Dashboard() {
       status: 'disconnected',
       stats: [
         { label: 'Events tracked', value: '0' },
-        { label: 'Meeting insights', value: '0' }
-      ]
+        { label: 'Meeting insights', value: '0' },
+      ],
     },
     {
       id: 'stripe',
@@ -70,8 +96,8 @@ export default function Dashboard() {
       status: 'disconnected',
       stats: [
         { label: 'MRR', value: '$0' },
-        { label: 'Customers', value: '0' }
-      ]
+        { label: 'Customers', value: '0' },
+      ],
     },
     {
       id: 'hubspot',
@@ -80,18 +106,18 @@ export default function Dashboard() {
       status: 'disconnected',
       stats: [
         { label: 'Contacts', value: '0' },
-        { label: 'Deals in pipeline', value: '0' }
-      ]
-    }
+        { label: 'Deals in pipeline', value: '0' },
+      ],
+    },
   ]);
 
   const [metrics, setMetrics] = useState({
     investmentReadiness: 0,
     dailyActiveScore: 0,
     growthVelocity: 0,
-    riskScore: 'Unknown'
+    riskScore: 'Unknown',
   });
-  
+
   const [showMetrics, setShowMetrics] = useState(false);
 
   const [recentActivity] = useState<any[]>([]);
@@ -117,7 +143,8 @@ export default function Dashboard() {
   // Load user data on mount
   useEffect(() => {
     const loadUserData = async () => {
-      const sessionId = localStorage.getItem('frejfund-session-id') || localStorage.getItem('sessionId');
+      const sessionId =
+        localStorage.getItem('frejfund-session-id') || localStorage.getItem('sessionId');
       if (!sessionId) return;
 
       try {
@@ -125,7 +152,7 @@ export default function Dashboard() {
         if (response.ok) {
           const data = await response.json();
           const businessInfo = data.businessInfo || {};
-          
+
           setUserEmail(businessInfo.email || '');
           setProfileForm({
             name: businessInfo.founderName || '',
@@ -133,7 +160,7 @@ export default function Dashboard() {
             industry: businessInfo.industry || '',
             stage: businessInfo.stage || '',
             website: businessInfo.website || '',
-            logo: businessInfo.logo || ''
+            logo: businessInfo.logo || '',
           });
         }
       } catch (error) {
@@ -160,37 +187,37 @@ export default function Dashboard() {
             setReadinessScore(data.score);
             setAnalysisProgress({ current: 95, total: 95, status: 'completed' });
             setShowMetrics(true);
-            
+
             // Load data gaps when analysis is complete
             loadDataGaps(sessionId);
-            
+
             // Update metrics with real data
             setMetrics({
               investmentReadiness: data.score * 10,
               dailyActiveScore: Math.round(data.score * 12),
               growthVelocity: Math.round(data.score * 0.3 * 10) / 10,
-              riskScore: data.score > 7 ? 'Low' : data.score > 4 ? 'Medium' : 'High'
+              riskScore: data.score > 7 ? 'Low' : data.score > 4 ? 'Medium' : 'High',
             });
           }
         }
 
         // Listen for progress updates (single instance with reconnect)
         if (!(window as any).__ff_es) (window as any).__ff_es = {};
-        
+
         let eventSource: EventSource | null = null;
         let retries = 0;
         let offline = !navigator.onLine;
-        
+
         const connect = () => {
           if ((window as any).__ff_es[sessionId]) {
             eventSource = (window as any).__ff_es[sessionId];
             return;
           }
-          
+
           if (offline) return; // don't connect while offline
           eventSource = new EventSource(`/api/deep-analysis/progress?sessionId=${sessionId}`);
           (window as any).__ff_es[sessionId] = eventSource;
-          
+
           eventSource.onmessage = (event) => {
             const data = JSON.parse(event.data);
             retries = 0; // reset on successful message
@@ -198,19 +225,23 @@ export default function Dashboard() {
               setAnalysisProgress({
                 current: data.current,
                 total: data.total,
-                status: 'running'
+                status: 'running',
               });
             } else if (data.type === 'complete') {
               setHasDeepAnalysis(true);
               setAnalysisProgress({ current: 95, total: 95, status: 'completed' });
-              try { eventSource && eventSource.close(); } catch {}
+              try {
+                eventSource && eventSource.close();
+              } catch {}
               (window as any).__ff_es[sessionId] = null;
               checkAnalysis();
             }
           };
-          
+
           eventSource.onerror = () => {
-            try { eventSource && eventSource.close(); } catch {}
+            try {
+              eventSource && eventSource.close();
+            } catch {}
             (window as any).__ff_es[sessionId] = null;
             if (offline) return; // wait for online event
             if (retries < 5) {
@@ -219,19 +250,28 @@ export default function Dashboard() {
             }
           };
         };
-        
-        const handleOnline = () => { offline = false; retries = 0; connect(); };
-        const handleOffline = () => { offline = true; try { eventSource && eventSource.close(); } catch {} };
+
+        const handleOnline = () => {
+          offline = false;
+          retries = 0;
+          connect();
+        };
+        const handleOffline = () => {
+          offline = true;
+          try {
+            eventSource && eventSource.close();
+          } catch {}
+        };
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
 
         connect();
 
-        return () => { 
-          try { 
-            if (eventSource) eventSource.close(); 
-            (window as any).__ff_es[sessionId] = null; 
-          } catch {} 
+        return () => {
+          try {
+            if (eventSource) eventSource.close();
+            (window as any).__ff_es[sessionId] = null;
+          } catch {}
           window.removeEventListener('online', handleOnline);
           window.removeEventListener('offline', handleOffline);
         };
@@ -245,22 +285,20 @@ export default function Dashboard() {
 
   const handleConnect = async (integrationId: string) => {
     // Simulated connection flow
-    setIntegrations(prev => 
-      prev.map(int => 
-        int.id === integrationId 
+    setIntegrations((prev) =>
+      prev.map((int) =>
+        int.id === integrationId
           ? { ...int, status: 'connected', lastSync: new Date().toISOString() }
-          : int
-      )
+          : int,
+      ),
     );
   };
 
   const handleDisconnect = (integrationId: string) => {
-    setIntegrations(prev => 
-      prev.map(int => 
-        int.id === integrationId 
-          ? { ...int, status: 'disconnected', lastSync: undefined }
-          : int
-      )
+    setIntegrations((prev) =>
+      prev.map((int) =>
+        int.id === integrationId ? { ...int, status: 'disconnected', lastSync: undefined } : int,
+      ),
     );
   };
 
@@ -271,7 +309,7 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16">
             <div className="flex items-center space-x-4">
-              <motion.div 
+              <motion.div
                 className="flex items-center space-x-3 cursor-pointer"
                 whileHover={{ scale: 1.02 }}
                 onClick={() => router.push('/')}
@@ -279,11 +317,13 @@ export default function Dashboard() {
                 <div className="w-8 h-8 sm:w-10 sm:h-10 bg-black rounded-full flex items-center justify-center">
                   <div className="w-1.5 h-1.5 bg-white rounded-full" />
                 </div>
-                <h1 className="text-base sm:text-xl font-semibold text-black hidden sm:block">FrejFund Dashboard</h1>
+                <h1 className="text-base sm:text-xl font-semibold text-black hidden sm:block">
+                  FrejFund Dashboard
+                </h1>
                 <h1 className="text-base font-semibold text-black sm:hidden">Dashboard</h1>
               </motion.div>
             </div>
-            
+
             <nav className="hidden sm:flex items-center space-x-6">
               <button
                 onClick={() => setActiveSection('overview')}
@@ -377,7 +417,8 @@ export default function Dashboard() {
       </nav>
 
       {/* Deep Analysis Progress Banner */}
-      {(analysisProgress.status === 'running' || (analysisProgress.current > 0 && analysisProgress.current < analysisProgress.total)) && (
+      {(analysisProgress.status === 'running' ||
+        (analysisProgress.current > 0 && analysisProgress.current < analysisProgress.total)) && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -397,7 +438,8 @@ export default function Dashboard() {
                 ))}
               </div>
               <span className="text-sm">
-                Deep analysis in progress... {analysisProgress.current} of {analysisProgress.total} dimensions analyzed
+                Deep analysis in progress... {analysisProgress.current} of {analysisProgress.total}{' '}
+                dimensions analyzed
               </span>
             </div>
             <span className="text-sm font-medium">
@@ -422,52 +464,46 @@ export default function Dashboard() {
               {/* Metrics Grid - Only show when analysis is complete */}
               {showMetrics ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    className="minimal-box p-4 sm:p-6"
-                  >
+                  <motion.div whileHover={{ scale: 1.02 }} className="minimal-box p-4 sm:p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="p-1.5 sm:p-2 bg-black rounded-full">
                         <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                       </div>
-                      <span className="text-2xl font-bold text-black">{metrics.investmentReadiness}%</span>
+                      <span className="text-2xl font-bold text-black">
+                        {metrics.investmentReadiness}%
+                      </span>
                     </div>
                     <h3 className="text-sm font-medium text-gray-600">Investment Readiness</h3>
                     <p className="text-xs text-gray-500 mt-1">Based on deep analysis</p>
                   </motion.div>
 
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    className="minimal-box p-4 sm:p-6"
-                  >
+                  <motion.div whileHover={{ scale: 1.02 }} className="minimal-box p-4 sm:p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="p-2 bg-black rounded-full">
                         <Activity className="w-5 h-5 text-white" />
                       </div>
-                      <span className="text-2xl font-bold text-black">{metrics.dailyActiveScore}</span>
+                      <span className="text-2xl font-bold text-black">
+                        {metrics.dailyActiveScore}
+                      </span>
                     </div>
                     <h3 className="text-sm font-medium text-gray-600">Overall Score</h3>
                     <p className="text-xs text-gray-500 mt-1">Across 95 dimensions</p>
                   </motion.div>
 
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    className="minimal-box p-4 sm:p-6"
-                  >
+                  <motion.div whileHover={{ scale: 1.02 }} className="minimal-box p-4 sm:p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="p-2 bg-black rounded-full">
                         <Zap className="w-5 h-5 text-white" />
                       </div>
-                      <span className="text-2xl font-bold text-black">{metrics.growthVelocity}x</span>
+                      <span className="text-2xl font-bold text-black">
+                        {metrics.growthVelocity}x
+                      </span>
                     </div>
                     <h3 className="text-sm font-medium text-gray-600">Growth Potential</h3>
                     <p className="text-xs text-gray-500 mt-1">Projected trajectory</p>
                   </motion.div>
 
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    className="minimal-box p-4 sm:p-6"
-                  >
+                  <motion.div whileHover={{ scale: 1.02 }} className="minimal-box p-4 sm:p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="p-2 bg-black rounded-full">
                         <AlertCircle className="w-5 h-5 text-white" />
@@ -478,44 +514,70 @@ export default function Dashboard() {
                     <p className="text-xs text-gray-500 mt-1">Overall assessment</p>
                   </motion.div>
                 </div>
+              ) : analysisProgress.status === 'completed' && dataGaps ? (
+                <div className="minimal-box p-6 sm:p-8">
+                  <h3 className="text-base sm:text-lg font-semibold text-black mb-2">
+                    Analysis Summary
+                  </h3>
+                  {dataGaps.totalGaps > 0 ? (
+                    <>
+                      <p className="text-sm text-gray-600 mb-3">
+                        We found {dataGaps.totalGaps} missing items that would significantly improve
+                        the accuracy of your score.
+                      </p>
+                      <ul className="text-sm text-gray-700 list-disc pl-5 space-y-1">
+                        {dataGaps.gaps.slice(0, 3).map((g: any) => (
+                          <li key={g.dimensionId}>
+                            <span className="font-medium">{g.dimensionName}:</span>{' '}
+                            {g.missingInfo[0]}
+                          </li>
+                        ))}
+                      </ul>
+                      {dataGaps.totalGaps > 3 && (
+                        <p className="text-xs text-gray-500 mt-2">
+                          +{dataGaps.totalGaps - 3} more gaps
+                        </p>
+                      )}
+                      <div className="mt-4 flex gap-2">
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => router.push('/chat')}
+                          className="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium"
+                        >
+                          Fix Gaps with Freja
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => router.push('/analysis')}
+                          className="px-4 py-2 bg-white border border-gray-300 text-sm rounded-lg hover:border-black"
+                        >
+                          View Full Analysis
+                        </motion.button>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-sm text-gray-600">
+                      Your deep analysis is complete and no critical gaps were detected. Explore all
+                      95 dimensions or chat with Freja for next steps.
+                    </p>
+                  )}
+                </div>
               ) : (
-                analysisProgress.status === 'completed' && dataGaps ? (
-                  <div className="minimal-box p-6 sm:p-8">
-                    <h3 className="text-base sm:text-lg font-semibold text-black mb-2">Analysis Summary</h3>
-                    {dataGaps.totalGaps > 0 ? (
-                      <>
-                        <p className="text-sm text-gray-600 mb-3">We found {dataGaps.totalGaps} missing items that would significantly improve the accuracy of your score.</p>
-                        <ul className="text-sm text-gray-700 list-disc pl-5 space-y-1">
-                          {dataGaps.gaps.slice(0,3).map((g:any) => (
-                            <li key={g.dimensionId}><span className="font-medium">{g.dimensionName}:</span> {g.missingInfo[0]}</li>
-                          ))}
-                        </ul>
-                        {dataGaps.totalGaps > 3 && (
-                          <p className="text-xs text-gray-500 mt-2">+{dataGaps.totalGaps-3} more gaps</p>
-                        )}
-                        <div className="mt-4 flex gap-2">
-                          <motion.button whileHover={{scale:1.02}} whileTap={{scale:0.98}} onClick={() => router.push('/chat')} className="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium">Fix Gaps with Freja</motion.button>
-                          <motion.button whileHover={{scale:1.02}} whileTap={{scale:0.98}} onClick={() => router.push('/analysis')} className="px-4 py-2 bg-white border border-gray-300 text-sm rounded-lg hover:border-black">View Full Analysis</motion.button>
-                        </div>
-                      </>
-                    ) : (
-                      <p className="text-sm text-gray-600">Your deep analysis is complete and no critical gaps were detected. Explore all 95 dimensions or chat with Freja for next steps.</p>
-                    )}
+                <div className="minimal-box p-8 sm:p-12 text-center">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <Brain className="w-8 h-8 text-gray-400" />
                   </div>
-                ) : (
-                  <div className="minimal-box p-8 sm:p-12 text-center">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                      <Brain className="w-8 h-8 text-gray-400" />
-                    </div>
-                    <h3 className="text-xl font-semibold text-black mb-2">Deep Analysis in Progress</h3>
-                    <p className="text-gray-600 mb-4">
-                      Your business is being analyzed across 95 dimensions. Metrics will appear here once complete.
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      This typically takes 15-30 minutes
-                    </p>
-                  </div>
-                )
+                  <h3 className="text-xl font-semibold text-black mb-2">
+                    Deep Analysis in Progress
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Your business is being analyzed across 95 dimensions. Metrics will appear here
+                    once complete.
+                  </p>
+                  <p className="text-sm text-gray-500">This typically takes 15-30 minutes</p>
+                </div>
               )}
 
               {/* Recent Activity & Quick Actions */}
@@ -546,7 +608,9 @@ export default function Dashboard() {
                       </p>
                       <div className="bg-gray-50 rounded-lg p-4">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs font-medium text-gray-700">Analysis Progress</span>
+                          <span className="text-xs font-medium text-gray-700">
+                            Analysis Progress
+                          </span>
                           <span className="text-xs text-gray-500">
                             {analysisProgress.current}/{analysisProgress.total}
                           </span>
@@ -555,7 +619,9 @@ export default function Dashboard() {
                           <motion.div
                             className="bg-black h-2 rounded-full"
                             initial={{ width: 0 }}
-                            animate={{ width: `${(analysisProgress.current / analysisProgress.total) * 100}%` }}
+                            animate={{
+                              width: `${(analysisProgress.current / analysisProgress.total) * 100}%`,
+                            }}
                             transition={{ duration: 0.5 }}
                           />
                         </div>
@@ -569,11 +635,15 @@ export default function Dashboard() {
                       <div className="space-y-2">
                         <div className="flex items-center space-x-2">
                           <Clock className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm text-gray-800">Complete your business profile</span>
+                          <span className="text-sm text-gray-800">
+                            Complete your business profile
+                          </span>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Clock className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm text-gray-800">Upload pitch deck or documents</span>
+                          <span className="text-sm text-gray-800">
+                            Upload pitch deck or documents
+                          </span>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Clock className="w-4 h-4 text-gray-400" />
@@ -596,21 +666,32 @@ export default function Dashboard() {
                       </div>
                       <div className="space-y-2">
                         {dataGaps.gaps.slice(0, 3).map((gap: any) => (
-                          <div key={gap.dimensionId} className="flex items-start justify-between p-3 bg-yellow-50 rounded-lg">
+                          <div
+                            key={gap.dimensionId}
+                            className="flex items-start justify-between p-3 bg-yellow-50 rounded-lg"
+                          >
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xs font-medium text-black">{gap.dimensionName}</span>
-                                <span className={`text-xs px-1.5 py-0.5 rounded ${
-                                  gap.priority === 'critical' ? 'bg-red-100 text-red-700' :
-                                  gap.priority === 'high' ? 'bg-yellow-100 text-yellow-700' :
-                                  'bg-gray-100 text-gray-700'
-                                }`}>
+                                <span className="text-xs font-medium text-black">
+                                  {gap.dimensionName}
+                                </span>
+                                <span
+                                  className={`text-xs px-1.5 py-0.5 rounded ${
+                                    gap.priority === 'critical'
+                                      ? 'bg-red-100 text-red-700'
+                                      : gap.priority === 'high'
+                                        ? 'bg-yellow-100 text-yellow-700'
+                                        : 'bg-gray-100 text-gray-700'
+                                  }`}
+                                >
                                   {gap.priority}
                                 </span>
                               </div>
                               <p className="text-xs text-gray-600">{gap.missingInfo[0]}</p>
                             </div>
-                            <div className="text-xs text-gray-500 ml-2">+{gap.potentialScoreIncrease}%</div>
+                            <div className="text-xs text-gray-500 ml-2">
+                              +{gap.potentialScoreIncrease}%
+                            </div>
                           </div>
                         ))}
                         {dataGaps.totalGaps > 3 && (
@@ -693,17 +774,19 @@ export default function Dashboard() {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-semibold text-black">Integrations</h2>
-                  <p className="text-gray-600 mt-1">Connect your tools to give Freja more context</p>
+                  <p className="text-gray-600 mt-1">
+                    Connect your tools to give Freja more context
+                  </p>
                 </div>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => router.push('/integrations')}
-                    className="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors inline-flex items-center gap-2"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add Integration
-                  </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => router.push('/integrations')}
+                  className="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors inline-flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Integration
+                </motion.button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -721,18 +804,26 @@ export default function Dashboard() {
                         <div>
                           <h3 className="text-lg font-medium text-black">{integration.name}</h3>
                           <div className="flex items-center space-x-2 mt-1">
-                            <div className={`w-2 h-2 rounded-full ${
-                              integration.status === 'connected' ? 'bg-green-500' :
-                              integration.status === 'error' ? 'bg-red-500' : 'bg-gray-300'
-                            }`} />
+                            <div
+                              className={`w-2 h-2 rounded-full ${
+                                integration.status === 'connected'
+                                  ? 'bg-green-500'
+                                  : integration.status === 'error'
+                                    ? 'bg-red-500'
+                                    : 'bg-gray-300'
+                              }`}
+                            />
                             <span className="text-xs text-gray-500">
-                              {integration.status === 'connected' ? 'Connected' :
-                               integration.status === 'error' ? 'Error' : 'Not connected'}
+                              {integration.status === 'connected'
+                                ? 'Connected'
+                                : integration.status === 'error'
+                                  ? 'Error'
+                                  : 'Not connected'}
                             </span>
                           </div>
                         </div>
                       </div>
-                      
+
                       {integration.status === 'connected' ? (
                         <button
                           onClick={() => handleDisconnect(integration.id)}
@@ -765,7 +856,9 @@ export default function Dashboard() {
 
                     {integration.lastSync && (
                       <div className="mt-4 flex items-center justify-between text-xs text-gray-500">
-                        <span>Last synced: {new Date(integration.lastSync).toLocaleDateString()}</span>
+                        <span>
+                          Last synced: {new Date(integration.lastSync).toLocaleDateString()}
+                        </span>
                         <button className="hover:text-black transition-colors inline-flex items-center gap-1">
                           <RefreshCw className="w-3 h-3" />
                           Sync now
@@ -789,21 +882,26 @@ export default function Dashboard() {
             >
               {/* Readiness Score - Enhanced Design */}
               <div className="text-center mb-8 sm:mb-12">
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
+                  transition={{ duration: 0.5, type: 'spring', stiffness: 100 }}
                   className="inline-block minimal-box px-8 sm:px-16 py-8 sm:py-12 relative overflow-hidden"
                 >
                   {/* Background gradient effect */}
                   <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-white opacity-50" />
-                  
-                  <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6 font-light uppercase tracking-wider relative z-10">Investment Readiness</p>
-                  
+
+                  <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6 font-light uppercase tracking-wider relative z-10">
+                    Investment Readiness
+                  </p>
+
                   {/* Circular Progress */}
                   <div className="relative w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-4 sm:mb-6">
                     {/* Background circle */}
-                    <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 160 160">
+                    <svg
+                      className="absolute inset-0 w-full h-full -rotate-90"
+                      viewBox="0 0 160 160"
+                    >
                       <circle
                         cx="80"
                         cy="80"
@@ -824,10 +922,10 @@ export default function Dashboard() {
                         strokeDasharray={440} // 2 * PI * r
                         initial={{ strokeDashoffset: 440 }}
                         animate={{ strokeDashoffset: 440 - (readinessScore / 10) * 440 }}
-                        transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
+                        transition={{ duration: 1.5, ease: 'easeOut', delay: 0.5 }}
                       />
                     </svg>
-                    
+
                     {/* Score display */}
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                       <motion.div
@@ -835,25 +933,33 @@ export default function Dashboard() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.8 }}
                       >
-                        <span className="text-4xl sm:text-6xl font-bold text-black">{readinessScore}</span>
-                        <div className="text-sm sm:text-lg text-gray-500 -mt-1 sm:-mt-2">out of 10</div>
+                        <span className="text-4xl sm:text-6xl font-bold text-black">
+                          {readinessScore}
+                        </span>
+                        <div className="text-sm sm:text-lg text-gray-500 -mt-1 sm:-mt-2">
+                          out of 10
+                        </div>
                       </motion.div>
                     </div>
                   </div>
-                  
+
                   {/* Status message */}
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 1 }}
                     className="text-xs sm:text-sm text-gray-600 relative z-10"
                   >
                     {readinessScore <= 3 && "Early stage - let's build your foundation"}
-                    {readinessScore > 3 && readinessScore <= 6 && "Making progress - keep pushing forward"}
-                    {readinessScore > 6 && readinessScore <= 8 && "Almost there - fine-tune for investors"}
-                    {readinessScore > 8 && "Investment ready - time to connect!"}
+                    {readinessScore > 3 &&
+                      readinessScore <= 6 &&
+                      'Making progress - keep pushing forward'}
+                    {readinessScore > 6 &&
+                      readinessScore <= 8 &&
+                      'Almost there - fine-tune for investors'}
+                    {readinessScore > 8 && 'Investment ready - time to connect!'}
                   </motion.p>
-                  
+
                   {/* Decorative dots */}
                   <motion.div
                     initial={{ opacity: 0 }}
@@ -874,23 +980,23 @@ export default function Dashboard() {
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => router.push('/chat')}
-                className="px-6 py-3 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-colors"
-              >
-                Get Personalized Advice
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => router.push('/analysis')}
-                className="px-6 py-3 bg-white text-black border border-gray-300 rounded-xl font-medium hover:border-black transition-colors inline-flex items-center gap-2"
-              >
-                <Brain className="w-4 h-4" />
-                View All 95 Dimensions
-              </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => router.push('/chat')}
+                  className="px-6 py-3 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-colors"
+                >
+                  Get Personalized Advice
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => router.push('/analysis')}
+                  className="px-6 py-3 bg-white text-black border border-gray-300 rounded-xl font-medium hover:border-black transition-colors inline-flex items-center gap-2"
+                >
+                  <Brain className="w-4 h-4" />
+                  View All 95 Dimensions
+                </motion.button>
               </div>
             </motion.div>
           )}
@@ -905,14 +1011,16 @@ export default function Dashboard() {
               className="space-y-6"
             >
               <h2 className="text-2xl font-semibold text-black mb-6">Settings</h2>
-              
+
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm divide-y divide-gray-100">
                 <div className="p-6">
                   <h3 className="text-lg font-medium text-black mb-4">Profile Visibility</h3>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
-                        <h4 className="font-medium text-black">Make profile visible to investors</h4>
+                        <h4 className="font-medium text-black">
+                          Make profile visible to investors
+                        </h4>
                         <p className="text-sm text-gray-600 mt-1">
                           Allow verified VCs to see your company profile and analysis results
                         </p>
@@ -923,14 +1031,16 @@ export default function Dashboard() {
                         onClick={async () => {
                           setPublishingProfile(true);
                           try {
-                            const sessionId = localStorage.getItem('frejfund-session-id') || localStorage.getItem('sessionId');
+                            const sessionId =
+                              localStorage.getItem('frejfund-session-id') ||
+                              localStorage.getItem('sessionId');
                             const response = await fetch('/api/profile/publish', {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ 
-                                sessionId, 
-                                isPublic: !isProfilePublic 
-                              })
+                              body: JSON.stringify({
+                                sessionId,
+                                isPublic: !isProfilePublic,
+                              }),
                             });
                             if (response.ok) {
                               setIsProfilePublic(!isProfilePublic);
@@ -946,9 +1056,11 @@ export default function Dashboard() {
                           isProfilePublic ? 'bg-black' : 'bg-gray-300'
                         }`}
                       >
-                        <div className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
-                          isProfilePublic ? 'translate-x-7' : 'translate-x-0'
-                        }`} />
+                        <div
+                          className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
+                            isProfilePublic ? 'translate-x-7' : 'translate-x-0'
+                          }`}
+                        />
                       </motion.button>
                     </div>
                     {isProfilePublic && (
@@ -979,11 +1091,13 @@ export default function Dashboard() {
                             />
                             <button
                               onClick={async () => {
-                                const sessionId = localStorage.getItem('frejfund-session-id') || localStorage.getItem('sessionId');
+                                const sessionId =
+                                  localStorage.getItem('frejfund-session-id') ||
+                                  localStorage.getItem('sessionId');
                                 const response = await fetch('/api/user/update-email', {
                                   method: 'POST',
                                   headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ sessionId, newEmail })
+                                  body: JSON.stringify({ sessionId, newEmail }),
                                 });
                                 if (response.ok) {
                                   setUserEmail(newEmail);
@@ -1012,7 +1126,7 @@ export default function Dashboard() {
                             <p className="text-sm font-medium text-gray-800">Email</p>
                             <p className="text-sm text-gray-500">{userEmail || 'Loading...'}</p>
                           </div>
-                          <button 
+                          <button
                             onClick={() => setEditingEmail(true)}
                             className="text-sm text-gray-600 hover:text-black transition-colors"
                           >
@@ -1028,7 +1142,7 @@ export default function Dashboard() {
                         <p className="text-sm font-medium text-gray-800">Authentication</p>
                         <p className="text-sm text-gray-500">Magic link login (passwordless)</p>
                       </div>
-                      <button 
+                      <button
                         onClick={() => router.push('/login')}
                         className="text-sm text-gray-600 hover:text-black transition-colors"
                       >
@@ -1051,7 +1165,7 @@ export default function Dashboard() {
                       </button>
                     )}
                   </div>
-                  
+
                   {editingProfile ? (
                     <div className="space-y-4">
                       <div>
@@ -1059,7 +1173,7 @@ export default function Dashboard() {
                         <input
                           type="text"
                           value={profileForm.name}
-                          onChange={(e) => setProfileForm({...profileForm, name: e.target.value})}
+                          onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent mt-1"
                         />
                       </div>
@@ -1068,7 +1182,9 @@ export default function Dashboard() {
                         <input
                           type="text"
                           value={profileForm.company}
-                          onChange={(e) => setProfileForm({...profileForm, company: e.target.value})}
+                          onChange={(e) =>
+                            setProfileForm({ ...profileForm, company: e.target.value })
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent mt-1"
                         />
                       </div>
@@ -1078,7 +1194,9 @@ export default function Dashboard() {
                           <input
                             type="text"
                             value={profileForm.industry}
-                            onChange={(e) => setProfileForm({...profileForm, industry: e.target.value})}
+                            onChange={(e) =>
+                              setProfileForm({ ...profileForm, industry: e.target.value })
+                            }
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent mt-1"
                           />
                         </div>
@@ -1086,7 +1204,9 @@ export default function Dashboard() {
                           <label className="text-sm font-medium text-gray-700">Stage</label>
                           <select
                             value={profileForm.stage}
-                            onChange={(e) => setProfileForm({...profileForm, stage: e.target.value})}
+                            onChange={(e) =>
+                              setProfileForm({ ...profileForm, stage: e.target.value })
+                            }
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent mt-1"
                           >
                             <option value="">Select stage</option>
@@ -1103,30 +1223,36 @@ export default function Dashboard() {
                         <input
                           type="url"
                           value={profileForm.website}
-                          onChange={(e) => setProfileForm({...profileForm, website: e.target.value})}
+                          onChange={(e) =>
+                            setProfileForm({ ...profileForm, website: e.target.value })
+                          }
                           placeholder="https://yourcompany.com"
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent mt-1"
                         />
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-700">Company Logo URL</label>
+                        <label className="text-sm font-medium text-gray-700">
+                          Company Logo URL
+                        </label>
                         <input
                           type="url"
                           value={profileForm.logo}
-                          onChange={(e) => setProfileForm({...profileForm, logo: e.target.value})}
+                          onChange={(e) => setProfileForm({ ...profileForm, logo: e.target.value })}
                           placeholder="https://yourcompany.com/logo.png"
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent mt-1"
                         />
                       </div>
-                      
+
                       <div className="flex gap-2 pt-2">
                         <button
                           onClick={async () => {
-                            const sessionId = localStorage.getItem('frejfund-session-id') || localStorage.getItem('sessionId');
+                            const sessionId =
+                              localStorage.getItem('frejfund-session-id') ||
+                              localStorage.getItem('sessionId');
                             const response = await fetch('/api/user/update-profile', {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ sessionId, updates: profileForm })
+                              body: JSON.stringify({ sessionId, updates: profileForm }),
                             });
                             if (response.ok) {
                               setEditingProfile(false);
@@ -1150,23 +1276,33 @@ export default function Dashboard() {
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-600">Founder</span>
-                        <span className="font-medium text-black">{profileForm.name || 'Not set'}</span>
+                        <span className="font-medium text-black">
+                          {profileForm.name || 'Not set'}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Company</span>
-                        <span className="font-medium text-black">{profileForm.company || 'Not set'}</span>
+                        <span className="font-medium text-black">
+                          {profileForm.company || 'Not set'}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Industry</span>
-                        <span className="font-medium text-black">{profileForm.industry || 'Not set'}</span>
+                        <span className="font-medium text-black">
+                          {profileForm.industry || 'Not set'}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Stage</span>
-                        <span className="font-medium text-black">{profileForm.stage || 'Not set'}</span>
+                        <span className="font-medium text-black">
+                          {profileForm.stage || 'Not set'}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Website</span>
-                        <span className="font-medium text-black truncate max-w-xs">{profileForm.website || 'Not set'}</span>
+                        <span className="font-medium text-black truncate max-w-xs">
+                          {profileForm.website || 'Not set'}
+                        </span>
                       </div>
                     </div>
                   )}
@@ -1177,7 +1313,9 @@ export default function Dashboard() {
                   <div className="space-y-4">
                     <label className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-800">Two-factor authentication</p>
+                        <p className="text-sm font-medium text-gray-800">
+                          Two-factor authentication
+                        </p>
                         <p className="text-sm text-gray-500">Add an extra layer of security</p>
                       </div>
                       <input type="checkbox" className="w-4 h-4 text-black rounded" />

@@ -5,10 +5,13 @@ export async function POST(request: NextRequest) {
   try {
     // Check if Stripe is configured
     if (!isStripeConfigured()) {
-      return NextResponse.json({ 
-        error: 'Stripe not configured',
-        message: 'Payments are disabled for testing. All users have Pro access.'
-      }, { status: 503 });
+      return NextResponse.json(
+        {
+          error: 'Stripe not configured',
+          message: 'Payments are disabled for testing. All users have Pro access.',
+        },
+        { status: 503 },
+      );
     }
 
     const { userId } = await request.json();
@@ -23,9 +26,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error('Portal error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create portal session' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create portal session' }, { status: 500 });
   }
 }

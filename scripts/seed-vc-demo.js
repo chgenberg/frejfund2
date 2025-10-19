@@ -21,7 +21,7 @@ async function main() {
 
   // Check if user already exists
   const existing = await prisma.vCUser.findUnique({
-    where: { email }
+    where: { email },
   });
 
   if (existing) {
@@ -43,8 +43,8 @@ async function main() {
       stages: ['Seed', 'Series A'],
       minCheckSize: 500000,
       maxCheckSize: 5000000,
-      geographies: ['Sweden', 'Europe', 'USA']
-    }
+      geographies: ['Sweden', 'Europe', 'USA'],
+    },
   });
 
   console.log('✅ Demo VC user created successfully!');
@@ -63,4 +63,3 @@ main()
     await prisma.$disconnect();
     process.exit(1);
   });
-

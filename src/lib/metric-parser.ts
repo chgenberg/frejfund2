@@ -4,7 +4,17 @@
  */
 
 export interface ExtractedMetric {
-  type: 'cac' | 'ltv' | 'churn' | 'revenue' | 'growth' | 'retention' | 'burn' | 'mrr' | 'arr' | 'other';
+  type:
+    | 'cac'
+    | 'ltv'
+    | 'churn'
+    | 'revenue'
+    | 'growth'
+    | 'retention'
+    | 'burn'
+    | 'mrr'
+    | 'arr'
+    | 'other';
   value: number;
   unit?: string;
   rawText: string;
@@ -20,9 +30,9 @@ export function parseMetricsFromText(text: string): ExtractedMetric[] {
   const cacPatterns = [
     /cac\s*(?:is|=|:)?\s*\$?(\d+(?:,\d{3})*(?:\.\d{2})?)/i,
     /customer acquisition cost\s*(?:is|=|:)?\s*\$?(\d+(?:,\d{3})*(?:\.\d{2})?)/i,
-    /cost per customer\s*(?:is|=|:)?\s*\$?(\d+(?:,\d{3})*(?:\.\d{2})?)/i
+    /cost per customer\s*(?:is|=|:)?\s*\$?(\d+(?:,\d{3})*(?:\.\d{2})?)/i,
   ];
-  
+
   for (const pattern of cacPatterns) {
     const match = text.match(pattern);
     if (match) {
@@ -32,7 +42,11 @@ export function parseMetricsFromText(text: string): ExtractedMetric[] {
         unit: 'USD',
         rawText: match[0],
         confidence: 0.9,
-        relatedDimensions: ['Unit Economics', 'Customer Acquisition Cost', 'Customer Acquisition Strategy']
+        relatedDimensions: [
+          'Unit Economics',
+          'Customer Acquisition Cost',
+          'Customer Acquisition Strategy',
+        ],
       });
     }
   }
@@ -41,9 +55,9 @@ export function parseMetricsFromText(text: string): ExtractedMetric[] {
   const ltvPatterns = [
     /ltv\s*(?:is|=|:)?\s*\$?(\d+(?:,\d{3})*(?:\.\d{2})?)/i,
     /lifetime value\s*(?:is|=|:)?\s*\$?(\d+(?:,\d{3})*(?:\.\d{2})?)/i,
-    /customer lifetime value\s*(?:is|=|:)?\s*\$?(\d+(?:,\d{3})*(?:\.\d{2})?)/i
+    /customer lifetime value\s*(?:is|=|:)?\s*\$?(\d+(?:,\d{3})*(?:\.\d{2})?)/i,
   ];
-  
+
   for (const pattern of ltvPatterns) {
     const match = text.match(pattern);
     if (match) {
@@ -53,7 +67,7 @@ export function parseMetricsFromText(text: string): ExtractedMetric[] {
         unit: 'USD',
         rawText: match[0],
         confidence: 0.9,
-        relatedDimensions: ['Unit Economics', 'Revenue Model Clarity']
+        relatedDimensions: ['Unit Economics', 'Revenue Model Clarity'],
       });
     }
   }
@@ -62,9 +76,9 @@ export function parseMetricsFromText(text: string): ExtractedMetric[] {
   const churnPatterns = [
     /churn\s*(?:rate|is)?\s*(?:is|=|:)?\s*(\d+(?:\.\d+)?)\s*%/i,
     /(\d+(?:\.\d+)?)\s*%\s*churn/i,
-    /losing\s*(\d+(?:\.\d+)?)\s*%\s*(?:of)?\s*customers/i
+    /losing\s*(\d+(?:\.\d+)?)\s*%\s*(?:of)?\s*customers/i,
   ];
-  
+
   for (const pattern of churnPatterns) {
     const match = text.match(pattern);
     if (match) {
@@ -74,7 +88,7 @@ export function parseMetricsFromText(text: string): ExtractedMetric[] {
         unit: 'percent',
         rawText: match[0],
         confidence: 0.85,
-        relatedDimensions: ['Retention & Churn', 'Customer Retention', 'Churn Analysis']
+        relatedDimensions: ['Retention & Churn', 'Customer Retention', 'Churn Analysis'],
       });
     }
   }
@@ -82,9 +96,9 @@ export function parseMetricsFromText(text: string): ExtractedMetric[] {
   // Revenue patterns (MRR/ARR)
   const mrrPatterns = [
     /mrr\s*(?:is|=|:)?\s*\$?(\d+(?:,\d{3})*(?:k|K)?)/i,
-    /monthly (?:recurring )?revenue\s*(?:is|=|:)?\s*\$?(\d+(?:,\d{3})*(?:k|K)?)/i
+    /monthly (?:recurring )?revenue\s*(?:is|=|:)?\s*\$?(\d+(?:,\d{3})*(?:k|K)?)/i,
   ];
-  
+
   for (const pattern of mrrPatterns) {
     const match = text.match(pattern);
     if (match) {
@@ -98,7 +112,7 @@ export function parseMetricsFromText(text: string): ExtractedMetric[] {
         unit: 'USD',
         rawText: match[0],
         confidence: 0.9,
-        relatedDimensions: ['Revenue', 'Revenue Growth Rate', 'Revenue Predictability']
+        relatedDimensions: ['Revenue', 'Revenue Growth Rate', 'Revenue Predictability'],
       });
     }
   }
@@ -106,9 +120,9 @@ export function parseMetricsFromText(text: string): ExtractedMetric[] {
   // Growth patterns
   const growthPatterns = [
     /(?:growth|growing)\s*(?:at|by|is)?\s*(\d+(?:\.\d+)?)\s*%/i,
-    /(\d+(?:\.\d+)?)\s*%\s*(?:monthly|month-over-month|mom|m\/m)\s*growth/i
+    /(\d+(?:\.\d+)?)\s*%\s*(?:monthly|month-over-month|mom|m\/m)\s*growth/i,
   ];
-  
+
   for (const pattern of growthPatterns) {
     const match = text.match(pattern);
     if (match) {
@@ -118,7 +132,7 @@ export function parseMetricsFromText(text: string): ExtractedMetric[] {
         unit: 'percent',
         rawText: match[0],
         confidence: 0.8,
-        relatedDimensions: ['Revenue Growth Rate', 'User/Customer Growth', 'Growth Drivers']
+        relatedDimensions: ['Revenue Growth Rate', 'User/Customer Growth', 'Growth Drivers'],
       });
     }
   }
@@ -127,9 +141,9 @@ export function parseMetricsFromText(text: string): ExtractedMetric[] {
   const retentionPatterns = [
     /retention\s*(?:rate|is)?\s*(?:is|=|:)?\s*(\d+(?:\.\d+)?)\s*%/i,
     /(\d+(?:\.\d+)?)\s*%\s*(?:of)?\s*customers\s*stay/i,
-    /keeping\s*(\d+(?:\.\d+)?)\s*%/i
+    /keeping\s*(\d+(?:\.\d+)?)\s*%/i,
   ];
-  
+
   for (const pattern of retentionPatterns) {
     const match = text.match(pattern);
     if (match) {
@@ -139,7 +153,7 @@ export function parseMetricsFromText(text: string): ExtractedMetric[] {
         unit: 'percent',
         rawText: match[0],
         confidence: 0.85,
-        relatedDimensions: ['Customer Retention', 'Retention & Churn']
+        relatedDimensions: ['Customer Retention', 'Retention & Churn'],
       });
     }
   }
@@ -147,9 +161,9 @@ export function parseMetricsFromText(text: string): ExtractedMetric[] {
   // Burn rate patterns
   const burnPatterns = [
     /burn(?:ing)?\s*(?:rate|is)?\s*(?:is|=|:)?\s*\$?(\d+(?:,\d{3})*(?:k|K)?)/i,
-    /spending\s*\$?(\d+(?:,\d{3})*(?:k|K)?)\s*(?:per month|monthly|\/month)/i
+    /spending\s*\$?(\d+(?:,\d{3})*(?:k|K)?)\s*(?:per month|monthly|\/month)/i,
   ];
-  
+
   for (const pattern of burnPatterns) {
     const match = text.match(pattern);
     if (match) {
@@ -163,7 +177,7 @@ export function parseMetricsFromText(text: string): ExtractedMetric[] {
         unit: 'USD',
         rawText: match[0],
         confidence: 0.85,
-        relatedDimensions: ['Runway & Burn Rate', 'Burn Rate', 'Financial Health']
+        relatedDimensions: ['Runway & Burn Rate', 'Burn Rate', 'Financial Health'],
       });
     }
   }
@@ -205,4 +219,3 @@ export function mergeMetricsIntoBusinessInfo(businessInfo: any, metrics: Extract
 
   return updated;
 }
-

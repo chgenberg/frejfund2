@@ -26,11 +26,16 @@ function getUserAgent(): string {
 
 async function fetchRobots(origin: string): Promise<Record<string, string[]>> {
   const cached = ROBOTS_CACHE.get(origin);
-  if (cached && Date.now() - cached.fetchedAt < 1000 * 60 * 60) { // 1h
+  if (cached && Date.now() - cached.fetchedAt < 1000 * 60 * 60) {
+    // 1h
     return cached.rules;
   }
   try {
-    const res = await fetch(`${origin}/robots.txt`, { headers: { 'User-Agent': getUserAgent() }, redirect: 'follow', signal: AbortSignal.timeout(5000) });
+    const res = await fetch(`${origin}/robots.txt`, {
+      headers: { 'User-Agent': getUserAgent() },
+      redirect: 'follow',
+      signal: AbortSignal.timeout(5000),
+    });
     if (!res.ok) throw new Error(String(res.status));
     const text = await res.text();
     const lines = text.split(/\r?\n/);
@@ -40,7 +45,11 @@ async function fetchRobots(origin: string): Promise<Record<string, string[]>> {
       const trimmed = line.trim();
       if (!trimmed || trimmed.startsWith('#')) continue;
       const mUA = trimmed.match(/^User-agent:\s*(.+)/i);
-      if (mUA) { currentUA = mUA[1].trim().toLowerCase(); rules[currentUA] = rules[currentUA] || []; continue; }
+      if (mUA) {
+        currentUA = mUA[1].trim().toLowerCase();
+        rules[currentUA] = rules[currentUA] || [];
+        continue;
+      }
       const mDis = trimmed.match(/^Disallow:\s*(.*)/i);
       if (mDis) {
         const path = (mDis[1] || '').trim();
@@ -61,7 +70,8 @@ async function fetchRobots(origin: string): Promise<Record<string, string[]>> {
 
 function isPathAllowed(origin: string, path: string, rules: Record<string, string[]>): boolean {
   const ua = getUserAgent().toLowerCase();
-  const agent = (Object.keys(rules).find((k: string) => ua.includes(k)) as string | undefined) || '*';
+  const agent =
+    (Object.keys(rules).find((k: string) => ua.includes(k)) as string | undefined) || '*';
   const disallows = (rules[agent] || []).concat(rules['*'] || []);
   if (disallows.length === 0) return true;
   for (const rule of disallows) {
@@ -77,11 +87,11 @@ export async function fetchHtml(url: string, timeoutMs = 12000): Promise<string>
   const tryUrls = [url.startsWith('http://') ? url.replace('http://', 'https://') : url, url];
   const headers = {
     'User-Agent': getUserAgent(),
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
     'Accept-Language': 'en-US,en;q=0.9,sv;q=0.8',
     'Cache-Control': 'no-cache',
-    'Pragma': 'no-cache',
-    'Upgrade-Insecure-Requests': '1'
+    Pragma: 'no-cache',
+    'Upgrade-Insecure-Requests': '1',
   } as Record<string, string>;
 
   for (const u of tryUrls) {
@@ -105,7 +115,7 @@ export async function fetchHtml(url: string, timeoutMs = 12000): Promise<string>
         const html = await res.text();
         if (html && html.length > 0) return html;
       } catch (e) {
-        await new Promise(r => setTimeout(r, 300 * (attempt + 1)));
+        await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
       } finally {
         clearTimeout(timer);
       }
@@ -114,16 +124,21 @@ export async function fetchHtml(url: string, timeoutMs = 12000): Promise<string>
   return '';
 }
 
-export async function extractMainContentWithReadability(url: string, html: string): Promise<ScrapeResult | null> {
+export async function extractMainContentWithReadability(
+  url: string,
+  html: string,
+): Promise<ScrapeResult | null> {
   try {
     // Guard: skip heavy Readability on very large pages to avoid OOM
     if (!html || html.trim().length === 0) {
       console.log(`[Scraper] Empty HTML for ${url} - will use Cheerio fallback`);
       return null;
     }
-    
+
     if (html.length > 300_000) {
-      console.log(`[Scraper] HTML too large (${(html.length / 1000).toFixed(0)}KB) for ${url} - using Cheerio instead`);
+      console.log(
+        `[Scraper] HTML too large (${(html.length / 1000).toFixed(0)}KB) for ${url} - using Cheerio instead`,
+      );
       return null;
     }
     // Lazy-require to avoid bundler resolving at build time
@@ -131,60 +146,82 @@ export async function extractMainContentWithReadability(url: string, html: strin
     const { JSDOM } = require('jsdom');
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { Readability } = require('@mozilla/readability');
-    
+
     // Create DOM with resource limits
     let dom;
     try {
-      dom = new JSDOM(html, { 
+      dom = new JSDOM(html, {
         url,
         resources: 'usable',
         runScripts: 'outside-only',
         pretendToBeVisual: false,
-        includeNodeLocations: false
+        includeNodeLocations: false,
       });
     } catch (domError: any) {
-      console.log(`[Scraper] JSDOM failed for ${url}: ${domError?.message || 'Unknown error'} - using Cheerio`);
+      console.log(
+        `[Scraper] JSDOM failed for ${url}: ${domError?.message || 'Unknown error'} - using Cheerio`,
+      );
       return null;
     }
 
     // Verify document exists
     if (!dom?.window?.document) {
       console.log(`[Scraper] JSDOM document not available for ${url} - using Cheerio`);
-      try { dom?.window?.close(); } catch (e) { /* ignore */ }
+      try {
+        dom?.window?.close();
+      } catch (e) {
+        /* ignore */
+      }
       return null;
     }
-    
+
     let article = null;
     try {
       const reader = new Readability(dom.window.document);
       article = reader.parse();
-      
+
       if (!article || !article.textContent || article.textContent.length < 100) {
-        console.log(`[Scraper] Readability extracted too little content from ${url} (${article?.textContent?.length || 0} chars) - using Cheerio`);
-        try { dom.window.close(); } catch (e) { /* ignore */ }
+        console.log(
+          `[Scraper] Readability extracted too little content from ${url} (${article?.textContent?.length || 0} chars) - using Cheerio`,
+        );
+        try {
+          dom.window.close();
+        } catch (e) {
+          /* ignore */
+        }
         return null;
       }
-      
-      console.log(`[Scraper] ✓ Readability extracted ${article.textContent.length} chars from ${url}`);
+
+      console.log(
+        `[Scraper] ✓ Readability extracted ${article.textContent.length} chars from ${url}`,
+      );
     } catch (readabilityError: any) {
-      console.log(`[Scraper] Readability parsing failed for ${url}: ${readabilityError?.message || 'Unknown'} - using Cheerio`);
-      try { dom.window.close(); } catch (e) { /* ignore */ }
+      console.log(
+        `[Scraper] Readability parsing failed for ${url}: ${readabilityError?.message || 'Unknown'} - using Cheerio`,
+      );
+      try {
+        dom.window.close();
+      } catch (e) {
+        /* ignore */
+      }
       return null;
     }
-    
+
     // Clean up DOM to free memory
     try {
       dom.window.close();
     } catch (e) {
       // Ignore close errors
     }
-    
+
     if (!article || !article.textContent) return null;
     const text = normalizeWhitespace(article.textContent).slice(0, 50000); // Limit text to 50k chars
     return { url, title: article.title || undefined, text };
   } catch (error: any) {
     // Quieter logging: one-line fallback only
-    console.log(`[Scraper] Readability extraction failed: ${error?.message || 'Unknown'} – using Cheerio`);
+    console.log(
+      `[Scraper] Readability extraction failed: ${error?.message || 'Unknown'} – using Cheerio`,
+    );
     return null;
   }
 }
@@ -202,7 +239,7 @@ export async function extractWithCheerio(url: string, html: string): Promise<Scr
     const content = $(el).attr('content');
     if (name && content) meta[name] = content;
   });
-  
+
   console.log(`[Scraper] ✓ Cheerio extracted ${bodyText.length} chars from ${url}`);
   return { url, title, text: bodyText, meta };
 }
@@ -227,7 +264,10 @@ export async function scrapeUrl(url: string): Promise<ScrapeResult> {
   return basic;
 }
 
-export async function scrapeSiteShallow(startUrl: string, maxPages = 5): Promise<{ combinedText: string; sources: { url: string; snippet: string }[] }> {
+export async function scrapeSiteShallow(
+  startUrl: string,
+  maxPages = 5,
+): Promise<{ combinedText: string; sources: { url: string; snippet: string }[] }> {
   const u = new URL(startUrl);
   const origin = u.origin;
   const visited = new Set<string>();
@@ -255,7 +295,11 @@ export async function scrapeSiteShallow(startUrl: string, maxPages = 5): Promise
         const href = $(el).attr('href') || '';
         try {
           const link = new URL(href, url);
-          if (link.origin === origin && !visited.has(link.href) && queue.length + visited.size < maxPages) {
+          if (
+            link.origin === origin &&
+            !visited.has(link.href) &&
+            queue.length + visited.size < maxPages
+          ) {
             // pick likely relevant pages
             if (/about|pricing|product|solutions|case|blog/i.test(link.pathname)) {
               queue.push(link.href);
@@ -282,7 +326,11 @@ function relevanceScore(pathname: string): number {
   return score;
 }
 
-export async function scrapeSiteDeep(startUrl: string, maxPages = 20, maxDepth = 2): Promise<{ combinedText: string; sources: { url: string; snippet: string }[] }> {
+export async function scrapeSiteDeep(
+  startUrl: string,
+  maxPages = 20,
+  maxDepth = 2,
+): Promise<{ combinedText: string; sources: { url: string; snippet: string }[] }> {
   const u = new URL(startUrl);
   const origin = u.origin;
   const visited = new Set<string>();
@@ -293,8 +341,10 @@ export async function scrapeSiteDeep(startUrl: string, maxPages = 20, maxDepth =
   // Try to seed from sitemap.xml if available
   try {
     const sm = await fetchHtml(`${origin}/sitemap.xml`, 5000);
-    const locs = Array.from(sm.matchAll(/<loc>\s*([^<]+)\s*<\/loc>/gi)).map(m => m[1]).slice(0, 20);
-    locs.forEach(href => {
+    const locs = Array.from(sm.matchAll(/<loc>\s*([^<]+)\s*<\/loc>/gi))
+      .map((m) => m[1])
+      .slice(0, 20);
+    locs.forEach((href) => {
       try {
         const link = new URL(href);
         if (link.origin === origin) queue.push({ url: link.href, depth: 0 });
@@ -332,12 +382,10 @@ export async function scrapeSiteDeep(startUrl: string, maxPages = 20, maxDepth =
         candidates
           .sort((a, b) => b.score - a.score)
           .slice(0, Math.max(0, maxPages - visited.size))
-          .forEach(c => queue.push({ url: c.href, depth: depth + 1 }));
+          .forEach((c) => queue.push({ url: c.href, depth: depth + 1 }));
       }
     } catch {}
   }
 
   return { combinedText: combined.join('\n\n'), sources };
 }
-
-

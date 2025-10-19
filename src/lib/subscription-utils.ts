@@ -23,7 +23,7 @@ export const TIER_FEATURES: Record<SubscriptionTier, TierFeatures> = {
     gapQA: false,
     prioritySupport: false,
     customReports: false,
-    apiAccess: false
+    apiAccess: false,
   },
   pro: {
     maxDimensions: 95,
@@ -31,7 +31,7 @@ export const TIER_FEATURES: Record<SubscriptionTier, TierFeatures> = {
     gapQA: true,
     prioritySupport: true,
     customReports: true,
-    apiAccess: false
+    apiAccess: false,
   },
   enterprise: {
     maxDimensions: 95,
@@ -39,8 +39,8 @@ export const TIER_FEATURES: Record<SubscriptionTier, TierFeatures> = {
     gapQA: true,
     prioritySupport: true,
     customReports: true,
-    apiAccess: true
-  }
+    apiAccess: true,
+  },
 };
 
 /**
@@ -50,7 +50,7 @@ export const TIER_FEATURES: Record<SubscriptionTier, TierFeatures> = {
 export async function getUserTier(userId: string): Promise<SubscriptionTier> {
   // For testing: Everyone gets Pro features
   return 'pro';
-  
+
   /* Uncomment when Stripe is ready:
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -77,7 +77,7 @@ export async function getUserTier(userId: string): Promise<SubscriptionTier> {
 export async function getUserTierFromSession(sessionId: string): Promise<SubscriptionTier> {
   // For testing: Everyone gets Pro features
   return 'pro';
-  
+
   /* Uncomment when Stripe is ready:
   const session = await prisma.session.findUnique({
     where: { id: sessionId },
@@ -93,7 +93,10 @@ export async function getUserTierFromSession(sessionId: string): Promise<Subscri
 /**
  * Check if user has access to a feature
  */
-export async function hasFeatureAccess(userId: string, feature: keyof TierFeatures): Promise<boolean> {
+export async function hasFeatureAccess(
+  userId: string,
+  feature: keyof TierFeatures,
+): Promise<boolean> {
   const tier = await getUserTier(userId);
   return TIER_FEATURES[tier][feature] as boolean;
 }
@@ -102,10 +105,12 @@ export async function hasFeatureAccess(userId: string, feature: keyof TierFeatur
  * Check if user can run another analysis this month
  * TEMPORARY: Always allow for testing
  */
-export async function canRunAnalysis(userId: string): Promise<{ allowed: boolean; remaining: number; limit: number }> {
+export async function canRunAnalysis(
+  userId: string,
+): Promise<{ allowed: boolean; remaining: number; limit: number }> {
   // For testing: Unlimited analyses
   return { allowed: true, remaining: -1, limit: -1 };
-  
+
   /* Uncomment when Stripe is ready:
   const tier = await getUserTier(userId);
   const features = TIER_FEATURES[tier];
@@ -145,7 +150,10 @@ export async function getMaxDimensions(userId: string): Promise<number> {
 /**
  * Check if user needs to upgrade for a feature
  */
-export function needsUpgrade(currentTier: SubscriptionTier, requiredFeature: keyof TierFeatures): boolean {
+export function needsUpgrade(
+  currentTier: SubscriptionTier,
+  requiredFeature: keyof TierFeatures,
+): boolean {
   return !TIER_FEATURES[currentTier][requiredFeature];
 }
 

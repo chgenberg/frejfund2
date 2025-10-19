@@ -7,7 +7,7 @@ import Stripe from 'stripe';
 import { prisma } from './prisma';
 
 // Make Stripe optional for testing - only initialize if key is present
-export const stripe = process.env.STRIPE_SECRET_KEY 
+export const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: '2025-02-24.acacia',
       typescript: true,
@@ -23,7 +23,7 @@ export function isStripeConfigured(): boolean {
 export const STRIPE_PRICES = {
   pro_monthly: process.env.STRIPE_PRO_MONTHLY_PRICE_ID || 'price_pro_monthly',
   pro_yearly: process.env.STRIPE_PRO_YEARLY_PRICE_ID || 'price_pro_yearly',
-  enterprise: process.env.STRIPE_ENTERPRISE_PRICE_ID || 'price_enterprise'
+  enterprise: process.env.STRIPE_ENTERPRISE_PRICE_ID || 'price_enterprise',
 };
 
 /**
@@ -33,7 +33,7 @@ export async function createCheckoutSession(
   userId: string,
   priceId: string,
   successUrl: string,
-  cancelUrl: string
+  cancelUrl: string,
 ): Promise<Stripe.Checkout.Session> {
   if (!stripe) {
     throw new Error('Stripe is not configured. Please set STRIPE_SECRET_KEY.');
@@ -41,25 +41,25 @@ export async function createCheckoutSession(
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { email: true, stripeCustomerId: true }
+    select: { email: true, stripeCustomerId: true },
   });
 
   if (!user) throw new Error('User not found');
 
   // Create or retrieve Stripe customer
   let customerId = user.stripeCustomerId;
-  
+
   if (!customerId) {
     const customer = await stripe.customers.create({
       email: user.email,
-      metadata: { userId }
+      metadata: { userId },
     });
     customerId = customer.id;
-    
+
     // Save customer ID
     await prisma.user.update({
       where: { id: userId },
-      data: { stripeCustomerId: customerId }
+      data: { stripeCustomerId: customerId },
     });
   }
 
@@ -73,8 +73,8 @@ export async function createCheckoutSession(
     cancel_url: cancelUrl,
     metadata: { userId },
     subscription_data: {
-      metadata: { userId }
-    }
+      metadata: { userId },
+    },
   });
 
   return session;
@@ -85,7 +85,7 @@ export async function createCheckoutSession(
  */
 export async function createPortalSession(
   userId: string,
-  returnUrl: string
+  returnUrl: string,
 ): Promise<Stripe.BillingPortal.Session> {
   if (!stripe) {
     throw new Error('Stripe is not configured. Please set STRIPE_SECRET_KEY.');
@@ -93,7 +93,7 @@ export async function createPortalSession(
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { stripeCustomerId: true }
+    select: { stripeCustomerId: true },
   });
 
   if (!user?.stripeCustomerId) {
@@ -102,7 +102,7 @@ export async function createPortalSession(
 
   const session = await stripe.billingPortal.sessions.create({
     customer: user.stripeCustomerId,
-    return_url: returnUrl
+    return_url: returnUrl,
   });
 
   return session;
@@ -120,24 +120,24 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
     case 'checkout.session.completed':
       await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
       break;
-      
+
     case 'customer.subscription.created':
     case 'customer.subscription.updated':
       await handleSubscriptionUpdate(event.data.object as Stripe.Subscription);
       break;
-      
+
     case 'customer.subscription.deleted':
       await handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
       break;
-      
+
     case 'invoice.payment_succeeded':
       await handleInvoicePaymentSucceeded(event.data.object as Stripe.Invoice);
       break;
-      
+
     case 'invoice.payment_failed':
       await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
       break;
-      
+
     default:
       console.log(`Unhandled event type: ${event.type}`);
   }
@@ -145,7 +145,7 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
 
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session): Promise<void> {
   if (!stripe) return;
-  
+
   const userId = session.metadata?.userId;
   if (!userId) return;
 
@@ -173,20 +173,20 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription): Pro
     data: {
       subscriptionTier: 'free',
       subscriptionStatus: 'canceled',
-      currentPeriodEnd: null
-    }
+      currentPeriodEnd: null,
+    },
   });
 
   // Mark subscription record as canceled
   await prisma.subscription.updateMany({
     where: { stripeSubscriptionId: subscription.id },
-    data: { status: 'canceled' }
+    data: { status: 'canceled' },
   });
 }
 
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice): Promise<void> {
   if (!stripe) return;
-  
+
   const subscriptionId = invoice.subscription as string;
   if (!subscriptionId) return;
 
@@ -199,7 +199,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice): Promise<v
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void> {
   if (!stripe) return;
-  
+
   const subscriptionId = invoice.subscription as string;
   if (!subscriptionId) return;
 
@@ -210,12 +210,12 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void
   // Mark as past_due
   await prisma.user.update({
     where: { id: userId },
-    data: { subscriptionStatus: 'past_due' }
+    data: { subscriptionStatus: 'past_due' },
   });
 
   await prisma.subscription.updateMany({
     where: { stripeSubscriptionId: subscription.id },
-    data: { status: 'past_due' }
+    data: { status: 'past_due' },
   });
 }
 
@@ -239,8 +239,8 @@ async function syncSubscription(subscription: Stripe.Subscription, userId: strin
       subscriptionTier: tier,
       subscriptionStatus: subscription.status,
       stripeCustomerId: subscription.customer as string,
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000)
-    }
+      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+    },
   });
 
   // Upsert subscription record
@@ -258,13 +258,13 @@ async function syncSubscription(subscription: Stripe.Subscription, userId: strin
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       amount: price.unit_amount || 0,
       currency: price.currency,
-      interval: price.recurring?.interval || 'month'
+      interval: price.recurring?.interval || 'month',
     },
     update: {
       status: subscription.status,
       currentPeriodStart: new Date(subscription.current_period_start * 1000),
       currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-      cancelAtPeriodEnd: subscription.cancel_at_period_end
-    }
+      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+    },
   });
 }

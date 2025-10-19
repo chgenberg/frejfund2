@@ -13,7 +13,7 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-white font-sans antialiased">
       <Header />
-      
+
       <main className="pt-24">
         {/* Hero Section */}
         <section className="px-6 py-20">
@@ -27,20 +27,26 @@ export default function AboutPage() {
               <Users className="w-4 h-4" />
               <span className="text-sm font-medium text-gray-700">Our Story</span>
             </div>
-            
+
             <h1 className="text-5xl md:text-6xl font-bold text-black mb-8 tracking-tight leading-tight">
-              Built by founders,<br />for founders
+              Built by founders,
+              <br />
+              for founders
             </h1>
-            
+
             <div className="max-w-3xl mx-auto">
               <p className="text-xl text-gray-600 mb-6 leading-relaxed">
-                We&apos;re Jakob and Christopher — two founders who&apos;ve been on both sides of the table.
+                We&apos;re Jakob and Christopher — two founders who&apos;ve been on both sides of
+                the table.
               </p>
               <p className="text-xl text-gray-600 mb-6 leading-relaxed">
-                After building several companies ourselves, we know how hard it can be to turn a great idea into reality. That&apos;s why we started FrejFund — to give every truly good idea a fair chance.
+                After building several companies ourselves, we know how hard it can be to turn a
+                great idea into reality. That&apos;s why we started FrejFund — to give every truly
+                good idea a fair chance.
               </p>
               <p className="text-xl text-gray-600 leading-relaxed">
-                Our vision is simple: use AI to make it easier for entrepreneurs and investors around the world to find each other — faster, smarter, and more human.
+                Our vision is simple: use AI to make it easier for entrepreneurs and investors
+                around the world to find each other — faster, smarter, and more human.
               </p>
             </div>
           </motion.div>
@@ -73,7 +79,8 @@ export default function AboutPage() {
                 </div>
                 <h3 className="text-xl font-semibold text-black mb-2">Innovation First</h3>
                 <p className="text-gray-600">
-                  We believe great ideas can come from anywhere. Our technology ensures they get the attention they deserve.
+                  We believe great ideas can come from anywhere. Our technology ensures they get the
+                  attention they deserve.
                 </p>
               </motion.div>
 
@@ -89,7 +96,8 @@ export default function AboutPage() {
                 </div>
                 <h3 className="text-xl font-semibold text-black mb-2">Human Connection</h3>
                 <p className="text-gray-600">
-                  AI enhances but never replaces human judgment. We focus on creating meaningful connections between people.
+                  AI enhances but never replaces human judgment. We focus on creating meaningful
+                  connections between people.
                 </p>
               </motion.div>
 
@@ -105,7 +113,8 @@ export default function AboutPage() {
                 </div>
                 <h3 className="text-xl font-semibold text-black mb-2">Global Impact</h3>
                 <p className="text-gray-600">
-                  From Stockholm to San Francisco, we&apos;re building a global network where geography doesn&apos;t limit opportunity.
+                  From Stockholm to San Francisco, we&apos;re building a global network where
+                  geography doesn&apos;t limit opportunity.
                 </p>
               </motion.div>
             </div>
@@ -124,7 +133,8 @@ export default function AboutPage() {
             >
               <h2 className="text-3xl font-bold text-black mb-6">Our Mission</h2>
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                To democratize access to capital and make fundraising a fair, transparent, and efficient process for every entrepreneur with a vision worth pursuing.
+                To democratize access to capital and make fundraising a fair, transparent, and
+                efficient process for every entrepreneur with a vision worth pursuing.
               </p>
               <motion.button
                 whileHover={{ scale: 1.02 }}

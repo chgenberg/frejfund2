@@ -22,16 +22,31 @@ export function startDeepAnalysisWorker() {
   const worker = new Worker<DeepAnalysisJob>(
     'deep-analysis',
     async (job: Job<DeepAnalysisJob>) => {
-      const { sessionId, businessInfo, scrapedContent, uploadedDocuments = [], mode = 'progressive', specificDimensions, preHarvestText } = job.data;
+      const {
+        sessionId,
+        businessInfo,
+        scrapedContent,
+        uploadedDocuments = [],
+        mode = 'progressive',
+        specificDimensions,
+        preHarvestText,
+      } = job.data;
 
       // Wrap run with progress hooks via pub/sub
       const pub = getPub();
       let lastEmitted = -1;
-      const reportProgress = async (current: number, total: number, completedCategories?: string[]) => {
+      const reportProgress = async (
+        current: number,
+        total: number,
+        completedCategories?: string[],
+      ) => {
         if (current === lastEmitted) return;
         lastEmitted = current;
         const channel = getProgressChannel(sessionId);
-        await pub.publish(channel, JSON.stringify({ type: 'progress', current, total, completedCategories }));
+        await pub.publish(
+          channel,
+          JSON.stringify({ type: 'progress', current, total, completedCategories }),
+        );
         await job.updateProgress(Math.round((current / Math.max(1, total)) * 100));
       };
 
@@ -45,22 +60,30 @@ export function startDeepAnalysisWorker() {
         // Determine analysis mode based on user subscription (override incoming mode)
         const { getUserTierFromSession } = await import('@/lib/subscription-utils');
         const userTier = await getUserTierFromSession(sessionId);
-        
+
         // Map tier to analysis mode (force full for pro/enterprise during testing)
-        const analysisMode = (userTier === 'pro' || userTier === 'enterprise') ? 'full' : 'free-tier';
-        
+        const analysisMode = userTier === 'pro' || userTier === 'enterprise' ? 'full' : 'free-tier';
+
         // Emit initial progress=0 so SSE updates immediately
-        await pub.publish(getProgressChannel(sessionId), JSON.stringify({ type: 'progress', current: 0, total: analysisMode === 'full' ? 95 : 30, started: true }));
-        
-        await runDeepAnalysis({ 
-          sessionId, 
-          businessInfo, 
-          scrapedContent, 
-          uploadedDocuments, 
-          mode: analysisMode, 
-          specificDimensions, 
+        await pub.publish(
+          getProgressChannel(sessionId),
+          JSON.stringify({
+            type: 'progress',
+            current: 0,
+            total: analysisMode === 'full' ? 95 : 30,
+            started: true,
+          }),
+        );
+
+        await runDeepAnalysis({
+          sessionId,
+          businessInfo,
+          scrapedContent,
+          uploadedDocuments,
+          mode: analysisMode,
+          specificDimensions,
           preHarvestText,
-          onProgress: reportProgress
+          onProgress: reportProgress,
         });
         await pub.publish(getProgressChannel(sessionId), JSON.stringify({ type: 'complete' }));
         return true;
@@ -76,8 +99,8 @@ export function startDeepAnalysisWorker() {
       removeOnComplete: { age: 3600, count: 1000 },
       removeOnFail: { age: 86400, count: 1000 },
       backoff,
-      attempts: 3
-    }
+      attempts: 3,
+    },
   );
 
   worker.on('failed', (job, err) => {
@@ -86,5 +109,3 @@ export function startDeepAnalysisWorker() {
 
   return worker;
 }
-
-

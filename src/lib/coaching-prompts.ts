@@ -1,6 +1,6 @@
 /**
  * Coaching Prompts for FrejFund
- * 
+ *
  * FrejFund = Personal Fundraising & Growth Coach
  * Mission: Help founders go from idea → investment-ready → funded
  */
@@ -36,9 +36,10 @@ export function calculateReadinessScore(businessInfo: BusinessInfo): {
     category: 'Business Model',
     score: businessModelScore,
     maxScore: 2,
-    feedback: businessModelScore >= 1.5 
-      ? 'Clear business model ✓' 
-      : 'Need clearer business model description'
+    feedback:
+      businessModelScore >= 1.5
+        ? 'Clear business model ✓'
+        : 'Need clearer business model description',
   });
   totalScore += businessModelScore;
 
@@ -48,18 +49,19 @@ export function calculateReadinessScore(businessInfo: BusinessInfo): {
   if (revenue > 0) tractionScore += 1;
   if (revenue > 10000) tractionScore += 1;
   if (revenue > 50000) tractionScore += 1;
-  
+
   breakdown.push({
     category: 'Traction',
     score: tractionScore,
     maxScore: 3,
-    feedback: revenue === 0 
-      ? 'No revenue yet - focus on first customers'
-      : revenue < 10000
-      ? 'Early traction - aim for $10k MRR'
-      : revenue < 50000
-      ? 'Good traction - scale to $50k MRR'
-      : 'Strong traction ✓'
+    feedback:
+      revenue === 0
+        ? 'No revenue yet - focus on first customers'
+        : revenue < 10000
+          ? 'Early traction - aim for $10k MRR'
+          : revenue < 50000
+            ? 'Good traction - scale to $50k MRR'
+            : 'Strong traction ✓',
   });
   totalScore += tractionScore;
 
@@ -73,16 +75,17 @@ export function calculateReadinessScore(businessInfo: BusinessInfo): {
   } else if (teamSize === '1') {
     teamScore = 0.5;
   }
-  
+
   breakdown.push({
     category: 'Team',
     score: teamScore,
     maxScore: 2,
-    feedback: teamScore < 1 
-      ? 'Solo founder - consider finding co-founder'
-      : teamScore < 1.5
-      ? 'Small team - plan key hires'
-      : 'Team in place ✓'
+    feedback:
+      teamScore < 1
+        ? 'Solo founder - consider finding co-founder'
+        : teamScore < 1.5
+          ? 'Small team - plan key hires'
+          : 'Team in place ✓',
   });
   totalScore += teamScore;
 
@@ -94,16 +97,17 @@ export function calculateReadinessScore(businessInfo: BusinessInfo): {
   if (businessInfo.preScrapedText && businessInfo.preScrapedText.length > 200) {
     materialsScore += 1;
   }
-  
+
   breakdown.push({
     category: 'Pitch Materials',
     score: materialsScore,
     maxScore: 2,
-    feedback: materialsScore === 0 
-      ? 'No pitch deck yet - create one ASAP'
-      : materialsScore === 1
-      ? 'Basic materials - refine your pitch deck'
-      : 'Materials ready ✓'
+    feedback:
+      materialsScore === 0
+        ? 'No pitch deck yet - create one ASAP'
+        : materialsScore === 1
+          ? 'Basic materials - refine your pitch deck'
+          : 'Materials ready ✓',
   });
   totalScore += materialsScore;
 
@@ -112,21 +116,19 @@ export function calculateReadinessScore(businessInfo: BusinessInfo): {
   if (businessInfo.targetMarket && businessInfo.targetMarket.length > 5) {
     marketScore = 1;
   }
-  
+
   breakdown.push({
     category: 'Market Understanding',
     score: marketScore,
     maxScore: 1,
-    feedback: marketScore === 0 
-      ? 'Define your target market clearly'
-      : 'Market defined ✓'
+    feedback: marketScore === 0 ? 'Define your target market clearly' : 'Market defined ✓',
   });
   totalScore += marketScore;
 
   // Generate next steps based on weakest areas
   const nextSteps: string[] = [];
-  const sortedByWeakest = [...breakdown].sort((a, b) => 
-    (a.score / a.maxScore) - (b.score / b.maxScore)
+  const sortedByWeakest = [...breakdown].sort(
+    (a, b) => a.score / a.maxScore - b.score / b.maxScore,
   );
 
   for (const item of sortedByWeakest.slice(0, 3)) {
@@ -138,11 +140,14 @@ export function calculateReadinessScore(businessInfo: BusinessInfo): {
   return {
     score: Math.round(totalScore * 10) / 10,
     breakdown,
-    nextSteps: nextSteps.length > 0 ? nextSteps : [
-      'You\'re on track! Focus on growing revenue',
-      'Practice your pitch',
-      'Build your investor list'
-    ]
+    nextSteps:
+      nextSteps.length > 0
+        ? nextSteps
+        : [
+            "You're on track! Focus on growing revenue",
+            'Practice your pitch',
+            'Build your investor list',
+          ],
   };
 }
 
@@ -153,19 +158,21 @@ export function getCoachingSystemPrompt(
   businessInfo: BusinessInfo,
   readinessScore: number,
   userGoal?: string,
-  currentMilestone?: string
+  currentMilestone?: string,
 ): string {
   const revenue = parseInt(businessInfo.monthlyRevenue || '0');
   const stage = businessInfo.stage || 'idea';
-  
+
   // Import our new intelligence system
   const { getFrejaSystemPrompt } = require('./freja-system-prompt');
-  
+
   // Get the enhanced system prompt
   const enhancedPrompt = getFrejaSystemPrompt(businessInfo);
-  
+
   // Combine with original coaching context
-  return enhancedPrompt + `
+  return (
+    enhancedPrompt +
+    `
 
 ADDITIONAL COACHING CONTEXT:
 
@@ -230,34 +237,42 @@ Freja: "Okay, let's make a concrete plan for the next 2 weeks:
 - If stagnation: "I notice you're stuck here. What's holding you back?"
 
 🎯 COACHING FOCUS:
-${userGoal && currentMilestone ? `
+${
+  userGoal && currentMilestone
+    ? `
 **Keep user focused on their goal and current milestone!**
 - Goal: ${userGoal}
 - Current milestone: ${currentMilestone}
 - ALWAYS relate advice back to their roadmap
 - Ask: "Have you completed [task] from your milestone yet?"
 - Push them to stay on track with deadlines
-` : readinessScore < 4 ? `
+`
+    : readinessScore < 4
+      ? `
 - Score <4: FOCUS ON FUNDAMENTALS
   - Fix business model
   - Create pitch deck
   - Get first customers
   - "You're not ready for VCs yet - let's build the foundation first"
-` : readinessScore < 7 ? `
+`
+      : readinessScore < 7
+        ? `
 - Score 4-7: PREPARING FOR FUNDRAISING  
   - Polish pitch
   - Build traction
   - Create financial model
   - Identify right investors
   - "You're on the right track - let's make you investment-ready"
-` : `
+`
+        : `
 - Score 7+: ACTIVE FUNDRAISING
   - Find warm intros
   - Book meetings
   - Negotiate terms
   - Create FOMO
   - "You're ready - let's find the right investors"
-`}
+`
+}
 
 💡 ALWAYS SET CLEAR DEADLINES:
 - "Do this before Friday"
@@ -270,7 +285,8 @@ ${userGoal && currentMilestone ? `
 - Multiple questions in same response (max 1 question)
 - Giving too many options (max 3)
 
-IMPORTANT: ALWAYS respond in ENGLISH. Be warm but professional. You're here to help the user succeed.`;
+IMPORTANT: ALWAYS respond in ENGLISH. Be warm but professional. You're here to help the user succeed.`
+  );
 }
 
 /**
@@ -279,36 +295,33 @@ IMPORTANT: ALWAYS respond in ENGLISH. Be warm but professional. You're here to h
 export function generateNextStepSuggestions(
   businessInfo: BusinessInfo,
   readinessScore: number,
-  conversationContext?: string
+  conversationContext?: string,
 ): string[] {
   const suggestions: string[] = [];
 
   // Based on readiness score
   if (readinessScore < 4) {
     suggestions.push(
-      "Help me create an investor-ready pitch deck",
-      "Which KPIs should I focus on?",
-      "How do I find my first customers?"
+      'Help me create an investor-ready pitch deck',
+      'Which KPIs should I focus on?',
+      'How do I find my first customers?',
     );
   } else if (readinessScore < 7) {
     suggestions.push(
-      "Can we practice my pitch?",
-      "How much should I try to raise?",
-      "Help me write an investor email"
+      'Can we practice my pitch?',
+      'How much should I try to raise?',
+      'Help me write an investor email',
     );
   } else {
     suggestions.push(
-      "Which VCs fit my company?",
-      "What should I prepare for investor meetings?",
-      "How do I negotiate a term sheet?"
+      'Which VCs fit my company?',
+      'What should I prepare for investor meetings?',
+      'How do I negotiate a term sheet?',
     );
   }
 
   // Always include generic helpful options
-  suggestions.push(
-    "Analyze my business deeper",
-    "Set goals for next week"
-  );
+  suggestions.push('Analyze my business deeper', 'Set goals for next week');
 
   return suggestions.slice(0, 5); // Max 5 suggestions
 }
@@ -318,7 +331,7 @@ export function generateNextStepSuggestions(
  */
 export function getWelcomeMessage(
   businessInfo: BusinessInfo,
-  readiness: ReturnType<typeof calculateReadinessScore>
+  readiness: ReturnType<typeof calculateReadinessScore>,
 ): string {
   const { score, nextSteps } = readiness;
   const name = businessInfo.name || 'your company';
@@ -380,30 +393,30 @@ export function getStageAdvice(stage: string): {
   timeline: string;
 } {
   const stages: Record<string, any> = {
-    'idea': {
+    idea: {
       typical_raise: '$50k-$150k',
       investor_types: ['Friends & Family', 'Angel investors', 'Incubators'],
       key_metrics: ['Team', 'Market size', 'Problem validation'],
-      timeline: '1-3 months'
+      timeline: '1-3 months',
     },
     'early-revenue': {
       typical_raise: '$150k-$500k (Pre-seed)',
       investor_types: ['Angel investors', 'Micro-VCs', 'Accelerators'],
       key_metrics: ['MRR', 'Customer count', 'Unit economics'],
-      timeline: '2-4 months'
+      timeline: '2-4 months',
     },
-    'scaling': {
+    scaling: {
       typical_raise: '$500k-$2M (Seed)',
       investor_types: ['VCs (a16z, Sequoia)', 'Angel syndicates'],
       key_metrics: ['ARR', 'Growth rate', 'CAC/LTV', 'Churn'],
-      timeline: '3-6 months'
+      timeline: '3-6 months',
     },
-    'growth': {
+    growth: {
       typical_raise: '$2M-$15M (Series A)',
       investor_types: ['Growth VCs', 'Corporate VCs'],
       key_metrics: ['ARR >$1M', 'Team size', 'Market leadership'],
-      timeline: '4-8 months'
-    }
+      timeline: '4-8 months',
+    },
   };
 
   return stages[stage] || stages['early-revenue'];

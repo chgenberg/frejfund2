@@ -26,7 +26,12 @@ function getChannel(channelId: string): Channel {
   return ch;
 }
 
-export function sseSubscribe(channelId: string, subscriberId: string, send: (data: string) => void, onClose: () => void) {
+export function sseSubscribe(
+  channelId: string,
+  subscriberId: string,
+  send: (data: string) => void,
+  onClose: () => void,
+) {
   const ch = getChannel(channelId);
   ch.subscribers.set(subscriberId, { id: subscriberId, send, close: onClose });
 }
@@ -35,7 +40,9 @@ export function sseUnsubscribe(channelId: string, subscriberId: string) {
   const ch = getChannel(channelId);
   const sub = ch.subscribers.get(subscriberId);
   if (sub) {
-    try { sub.close(); } catch {}
+    try {
+      sub.close();
+    } catch {}
     ch.subscribers.delete(subscriberId);
   }
 }
@@ -44,8 +51,8 @@ export function ssePublish(channelId: string, event: string, payload: any) {
   const ch = getChannel(channelId);
   const data = `event: ${event}\n` + `data: ${JSON.stringify(payload)}\n\n`;
   for (const [, sub] of ch.subscribers) {
-    try { sub.send(data); } catch {}
+    try {
+      sub.send(data);
+    } catch {}
   }
 }
-
-

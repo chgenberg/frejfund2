@@ -9,49 +9,49 @@ export async function GET(req: NextRequest) {
     // Get all counts
     const totalFounders = await prisma.user.count();
     const publicProfiles = await prisma.user.count({
-      where: { isProfilePublic: true }
+      where: { isProfilePublic: true },
     });
 
     const totalSessions = await prisma.session.count();
-    
+
     const totalSwipes = await prisma.vCSwipe.count();
     const totalLikes = await prisma.vCSwipe.count({
       where: {
-        action: { in: ['like', 'super_like'] }
-      }
+        action: { in: ['like', 'super_like'] },
+      },
     });
 
     // Get unique VCs
     const uniqueVCs = await prisma.vCSwipe.groupBy({
-      by: ['vcEmail']
+      by: ['vcEmail'],
     });
     const totalVCs = uniqueVCs.length;
 
     // Get active VCs (swiped in last 7 days)
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    
+
     const activeVCs = await prisma.vCSwipe.groupBy({
       by: ['vcEmail'],
       where: {
-        createdAt: { gte: oneWeekAgo }
-      }
+        createdAt: { gte: oneWeekAgo },
+      },
     });
 
     // Swipes this week
     const swipesThisWeek = await prisma.vCSwipe.count({
       where: {
-        createdAt: { gte: oneWeekAgo }
-      }
+        createdAt: { gte: oneWeekAgo },
+      },
     });
 
     // Intro requests
     const totalIntros = await prisma.introRequest.count();
     const acceptedIntros = await prisma.introRequest.count({
-      where: { status: 'accepted' }
+      where: { status: 'accepted' },
     });
     const meetingsScheduled = await prisma.introRequest.count({
-      where: { meetingScheduled: true }
+      where: { meetingScheduled: true },
     });
 
     // Calculate revenue potential
@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
 
     // Platform health metrics
     const avgSwipesPerVC = totalVCs > 0 ? Math.round(totalSwipes / totalVCs) : 0;
-    
+
     const stats = {
       // Core metrics
       totalFounders,
@@ -69,38 +69,41 @@ export async function GET(req: NextRequest) {
       totalSessions,
       totalVCs,
       activeVCs: activeVCs.length,
-      
+
       // Engagement
       totalSwipes,
       totalLikes,
       swipesThisWeek,
-      
+
       // Conversions
       totalIntros,
       acceptedIntros,
       meetingsScheduled,
-      
+
       // Revenue
       mrr,
       arr,
-      
+
       // Health
       avgSwipesPerVC,
       avgProfileCompletion: Math.round((publicProfiles / totalFounders) * 100),
       dailyActiveUsers: activeVCs.length, // Simplified
-      
+
       // Rates
       likeRate: totalSwipes > 0 ? Math.round((totalLikes / totalSwipes) * 100) : 0,
       acceptanceRate: totalIntros > 0 ? Math.round((acceptedIntros / totalIntros) * 100) : 0,
-      meetingRate: acceptedIntros > 0 ? Math.round((meetingsScheduled / acceptedIntros) * 100) : 0
+      meetingRate: acceptedIntros > 0 ? Math.round((meetingsScheduled / acceptedIntros) * 100) : 0,
     };
 
     return NextResponse.json({ stats });
   } catch (error: any) {
     console.error('Error fetching admin stats:', error);
-    return NextResponse.json({ 
-      error: 'Failed to fetch stats',
-      details: error.message
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Failed to fetch stats',
+        details: error.message,
+      },
+      { status: 500 },
+    );
   }
 }

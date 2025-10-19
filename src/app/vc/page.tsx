@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 export { default } from './VCDashboardClient';
 
@@ -11,7 +11,7 @@ export function VCDashboard() {
   const [selectedStartup, setSelectedStartup] = useState<Startup | null>(null);
   const [startups, setStartups] = useState<Startup[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Filter states
   const [filters, setFilters] = useState({
     industry: 'all',
@@ -21,7 +21,7 @@ export function VCDashboard() {
     minSeeking: 0,
     maxSeeking: 10000000,
     country: 'all',
-    readinessScore: 0
+    readinessScore: 0,
   });
 
   useEffect(() => {
@@ -41,43 +41,44 @@ export function VCDashboard() {
         console.error('Failed to fetch startups');
         // Use mock data as fallback
         const mockStartups: Startup[] = [
-      {
-        id: '1',
+          {
+            id: '1',
             name: 'Emma Chen',
             companyName: 'DataFlow AI',
             location: {
               city: 'Stockholm',
               country: 'Sweden',
-              coordinates: [59.3293, 18.0686]
+              coordinates: [59.3293, 18.0686],
             },
-        industry: 'B2B SaaS',
-        stage: 'Seed',
+            industry: 'B2B SaaS',
+            stage: 'Seed',
             raised: 500000,
             seeking: 2000000,
             monthlyRevenue: 85000,
             teamSize: 12,
             foundedYear: 2022,
             readinessScore: 87,
-            oneLiner: 'Real-time data pipelines for enterprise AI - making ML deployment 10x faster',
+            oneLiner:
+              'Real-time data pipelines for enterprise AI - making ML deployment 10x faster',
             metrics: {
               growth: 25,
               retention: 92,
-              burnRate: 120000
+              burnRate: 120000,
             },
             tags: ['AI/ML', 'Infrastructure', 'Developer Tools'],
-            lastActive: new Date()
-          }
+            lastActive: new Date(),
+          },
         ];
         setStartups(mockStartups);
       }
     } catch (error) {
       console.error('Error loading startups:', error);
     } finally {
-    setLoading(false);
+      setLoading(false);
     }
   };
 
-  const filteredStartups = startups.filter(startup => {
+  const filteredStartups = startups.filter((startup) => {
     // Search filter
     if (searchQuery) {
       const query = String(searchQuery || '').toLowerCase();
@@ -85,23 +86,28 @@ export function VCDashboard() {
       const name = String(startup.name || '').toLowerCase();
       const industry = String(startup.industry || '').toLowerCase();
       const oneLiner = String(startup.oneLiner || '').toLowerCase();
-      if (!company.includes(query) && !name.includes(query) && !industry.includes(query) && !oneLiner.includes(query)) {
+      if (
+        !company.includes(query) &&
+        !name.includes(query) &&
+        !industry.includes(query) &&
+        !oneLiner.includes(query)
+      ) {
         return false;
       }
     }
-    
+
     // Apply other filters
     if (filters.industry !== 'all' && startup.industry !== filters.industry) return false;
     if (filters.stage !== 'all' && startup.stage !== filters.stage) return false;
     const monthlyRevenue = Number(startup.monthlyRevenue || 0);
     const seeking = Number(startup.seeking || 0);
     const readiness = Number(startup.readinessScore || 0);
-    const country = (startup.location && startup.location.country) ? startup.location.country : '';
+    const country = startup.location && startup.location.country ? startup.location.country : '';
     if (monthlyRevenue < filters.minRevenue || monthlyRevenue > filters.maxRevenue) return false;
     if (seeking < filters.minSeeking || seeking > filters.maxSeeking) return false;
     if (filters.country !== 'all' && country !== filters.country) return false;
     if (readiness < filters.readinessScore) return false;
-    
+
     return true;
   });
 
@@ -126,18 +132,20 @@ export function VCDashboard() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-black">Investment Opportunities</h1>
-                <p className="text-sm text-gray-600">{filteredStartups.length} companies match your criteria</p>
+                <p className="text-sm text-gray-600">
+                  {filteredStartups.length} companies match your criteria
+                </p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               {/* View Mode Toggle */}
               <div className="bg-gray-100 rounded-lg p-1 flex">
                 <button
                   onClick={() => setViewMode('list')}
                   className={`px-3 py-1.5 rounded ${
-                    viewMode === 'list' 
-                      ? 'bg-white text-black shadow-sm' 
+                    viewMode === 'list'
+                      ? 'bg-white text-black shadow-sm'
                       : 'text-gray-600 hover:text-black'
                   } transition-all`}
                 >
@@ -146,15 +154,15 @@ export function VCDashboard() {
                 <button
                   onClick={() => setViewMode('map')}
                   className={`px-3 py-1.5 rounded ${
-                    viewMode === 'map' 
-                      ? 'bg-white text-black shadow-sm' 
+                    viewMode === 'map'
+                      ? 'bg-white text-black shadow-sm'
                       : 'text-gray-600 hover:text-black'
                   } transition-all`}
                 >
                   <MapIcon className="w-4 h-4" />
                 </button>
               </div>
-              
+
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -182,7 +190,7 @@ export function VCDashboard() {
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
             />
           </div>
-          
+
           {/* Filter Button */}
           <motion.button
             whileHover={{ scale: 1.02 }}
@@ -192,9 +200,9 @@ export function VCDashboard() {
           >
             <Filter className="w-4 h-4" />
             <span>Filters</span>
-            {Object.values(filters).some(v => v !== 'all' && v !== 0 && v !== 1000000 && v !== 10000000) && (
-              <span className="w-2 h-2 bg-white rounded-full" />
-            )}
+            {Object.values(filters).some(
+              (v) => v !== 'all' && v !== 0 && v !== 1000000 && v !== 10000000,
+            ) && <span className="w-2 h-2 bg-white rounded-full" />}
           </motion.button>
         </div>
       </div>
@@ -216,7 +224,7 @@ export function VCDashboard() {
                   <label className="block text-xs font-medium text-gray-700 mb-1">Industry</label>
                   <select
                     value={filters.industry}
-                    onChange={(e) => setFilters({...filters, industry: e.target.value})}
+                    onChange={(e) => setFilters({ ...filters, industry: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent"
                   >
                     <option value="all">All Industries</option>
@@ -231,25 +239,25 @@ export function VCDashboard() {
                 {/* Stage Filter */}
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Stage</label>
-          <select
+                  <select
                     value={filters.stage}
-                    onChange={(e) => setFilters({...filters, stage: e.target.value})}
+                    onChange={(e) => setFilters({ ...filters, stage: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent"
-          >
-            <option value="all">All Stages</option>
-            <option value="Pre-seed">Pre-seed</option>
-            <option value="Seed">Seed</option>
-            <option value="Series A">Series A</option>
+                  >
+                    <option value="all">All Stages</option>
+                    <option value="Pre-seed">Pre-seed</option>
+                    <option value="Seed">Seed</option>
+                    <option value="Series A">Series A</option>
                     <option value="Series B">Series B</option>
-          </select>
+                  </select>
                 </div>
 
                 {/* Country Filter */}
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Country</label>
-          <select
+                  <select
                     value={filters.country}
-                    onChange={(e) => setFilters({...filters, country: e.target.value})}
+                    onChange={(e) => setFilters({ ...filters, country: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent"
                   >
                     <option value="all">All Countries</option>
@@ -258,16 +266,20 @@ export function VCDashboard() {
                     <option value="UK">United Kingdom</option>
                     <option value="France">France</option>
                     <option value="USA">United States</option>
-          </select>
-        </div>
+                  </select>
+                </div>
 
                 {/* Min Revenue */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Min Revenue/mo</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Min Revenue/mo
+                  </label>
                   <input
                     type="number"
                     value={filters.minRevenue}
-                    onChange={(e) => setFilters({...filters, minRevenue: parseInt(e.target.value) || 0})}
+                    onChange={(e) =>
+                      setFilters({ ...filters, minRevenue: parseInt(e.target.value) || 0 })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent"
                     placeholder="$0"
                   />
@@ -275,23 +287,31 @@ export function VCDashboard() {
 
                 {/* Seeking Amount */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Max Seeking</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Max Seeking
+                  </label>
                   <input
                     type="number"
                     value={filters.maxSeeking}
-                    onChange={(e) => setFilters({...filters, maxSeeking: parseInt(e.target.value) || 10000000})}
+                    onChange={(e) =>
+                      setFilters({ ...filters, maxSeeking: parseInt(e.target.value) || 10000000 })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent"
                     placeholder="$10M"
                   />
-      </div>
+                </div>
 
                 {/* Readiness Score */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Min Readiness</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Min Readiness
+                  </label>
                   <input
                     type="range"
                     value={filters.readinessScore}
-                    onChange={(e) => setFilters({...filters, readinessScore: parseInt(e.target.value)})}
+                    onChange={(e) =>
+                      setFilters({ ...filters, readinessScore: parseInt(e.target.value) })
+                    }
                     min="0"
                     max="100"
                     className="w-full"
@@ -316,16 +336,16 @@ export function VCDashboard() {
         ) : viewMode === 'list' ? (
           /* List View */
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="space-y-4">
+            <div className="space-y-4">
               {filteredStartups.map((startup, index) => (
-              <motion.div
+                <motion.div
                   key={startup.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
                   onClick={() => router.push(`/vc/startup/${startup.id}`)}
                   className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all cursor-pointer"
-              >
+                >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       {/* Company Header */}
@@ -334,8 +354,8 @@ export function VCDashboard() {
                           {/* Company Logo */}
                           <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
                             {startup.logo ? (
-                              <img 
-                                src={startup.logo} 
+                              <img
+                                src={startup.logo}
                                 alt={`${startup.companyName} logo`}
                                 className="w-full h-full object-cover"
                               />
@@ -344,7 +364,7 @@ export function VCDashboard() {
                                 <div className="w-2 h-2 bg-white rounded-full" />
                               </div>
                             )}
-                      </div>
+                          </div>
                           <div className="flex-1">
                             <h3 className="text-xl font-bold text-black">{startup.companyName}</h3>
                             <p className="text-gray-600 mt-1">{startup.oneLiner}</p>
@@ -352,22 +372,24 @@ export function VCDashboard() {
                               <span className="flex items-center">
                                 <MapPin className="w-3 h-3 mr-1" />
                                 {startup.location.city}, {startup.location.country}
-                        </span>
+                              </span>
                               <span className="flex items-center">
                                 <Users className="w-3 h-3 mr-1" />
                                 {startup.teamSize} team members
-                        </span>
+                              </span>
                               <span className="flex items-center">
                                 <Calendar className="w-3 h-3 mr-1" />
                                 Founded {startup.foundedYear}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
 
                         {/* Readiness Score */}
                         <div className="text-center ml-6">
-                          <div className={`text-3xl font-bold ${getScoreColor(startup.readinessScore)}`}>
+                          <div
+                            className={`text-3xl font-bold ${getScoreColor(startup.readinessScore)}`}
+                          >
                             {startup.readinessScore}
                           </div>
                           <p className="text-xs text-gray-600">Readiness</p>
@@ -378,38 +400,39 @@ export function VCDashboard() {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                         <div className="bg-gray-50 rounded-lg p-3">
                           <div className="text-xs text-gray-600 mb-1">Monthly Revenue</div>
-                        <div className="text-lg font-bold text-black">
-                          ${((Number(startup.monthlyRevenue || 0)) / 1000).toFixed(0)}k
+                          <div className="text-lg font-bold text-black">
+                            ${(Number(startup.monthlyRevenue || 0) / 1000).toFixed(0)}k
                           </div>
                         </div>
                         <div className="bg-gray-50 rounded-lg p-3">
                           <div className="text-xs text-gray-600 mb-1">Growth</div>
-                        <div className="text-lg font-bold text-green-600">
-                          +{Number(startup.metrics?.growth || 0)}%
+                          <div className="text-lg font-bold text-green-600">
+                            +{Number(startup.metrics?.growth || 0)}%
                           </div>
                         </div>
                         <div className="bg-gray-50 rounded-lg p-3">
                           <div className="text-xs text-gray-600 mb-1">Seeking</div>
-                        <div className="text-lg font-bold text-black">
-                          ${((Number(startup.seeking || 0)) / 1000000).toFixed(1)}M
+                          <div className="text-lg font-bold text-black">
+                            ${(Number(startup.seeking || 0) / 1000000).toFixed(1)}M
                           </div>
                         </div>
                         <div className="bg-gray-50 rounded-lg p-3">
                           <div className="text-xs text-gray-600 mb-1">Stage</div>
-                          <div className="text-lg font-bold text-black">
-                            {startup.stage}
-                          </div>
-                    </div>
-                    </div>
-                    
+                          <div className="text-lg font-bold text-black">{startup.stage}</div>
+                        </div>
+                      </div>
+
                       {/* Tags and Info */}
                       <div className="flex items-center justify-between">
                         <div className="flex flex-wrap gap-2">
                           <span className="px-2 py-1 bg-black text-white rounded text-xs">
                             {startup.industry}
                           </span>
-                          {startup.tags.map(tag => (
-                            <span key={tag} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+                          {startup.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
+                            >
                               {tag}
                             </span>
                           ))}
@@ -418,11 +441,11 @@ export function VCDashboard() {
                           <Clock className="w-3 h-3 mr-1" />
                           Active today
                         </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              ))}
             </div>
 
             {filteredStartups.length === 0 && (
@@ -430,7 +453,9 @@ export function VCDashboard() {
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Search className="w-8 h-8 text-gray-400" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No companies match your criteria</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No companies match your criteria
+                </h3>
                 <p className="text-gray-600">Try adjusting your filters to see more results</p>
               </div>
             )}
@@ -438,10 +463,7 @@ export function VCDashboard() {
         ) : (
           /* Map View */
           <div className="h-[calc(100vh-200px)]">
-            <InteractiveMap 
-              startups={filteredStartups}
-              onStartupClick={setSelectedStartup}
-            />
+            <InteractiveMap startups={filteredStartups} onStartupClick={setSelectedStartup} />
           </div>
         )}
       </main>
@@ -522,8 +544,8 @@ export function VCDashboard() {
                       Request Introduction
                     </motion.button>
                   </div>
-          </div>
-        </div>
+                </div>
+              </div>
             </motion.div>
           </motion.div>
         )}

@@ -5,7 +5,7 @@ if (process.env.NODE_ENV === 'development') {
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const mod = require('./local-secrets');
-    DEV_SECRETS_LOCAL = (mod && mod.DEV_SECRETS) ? mod.DEV_SECRETS : null;
+    DEV_SECRETS_LOCAL = mod && mod.DEV_SECRETS ? mod.DEV_SECRETS : null;
   } catch {}
 }
 
@@ -14,7 +14,12 @@ function isAzureConfigured(): boolean {
 }
 
 function resolveOpenAIKey(): string | undefined {
-  const raw = (process.env.OPENAI_API_KEY || process.env.OPENAI_KEY || process.env.OPENAI_TOKEN || '').trim();
+  const raw = (
+    process.env.OPENAI_API_KEY ||
+    process.env.OPENAI_KEY ||
+    process.env.OPENAI_TOKEN ||
+    ''
+  ).trim();
   return raw || undefined;
 }
 
@@ -30,7 +35,7 @@ export function getOpenAIClient(): OpenAI {
       apiKey,
       baseURL: `${endpoint}/openai/deployments/${deployment}`,
       defaultHeaders: { 'api-key': apiKey },
-      defaultQuery: { 'api-version': apiVersion }
+      defaultQuery: { 'api-version': apiVersion },
     });
   }
 
@@ -39,7 +44,7 @@ export function getOpenAIClient(): OpenAI {
     apiKey: dev?.apiKey || resolveOpenAIKey(),
     baseURL: dev?.baseURL || process.env.OPENAI_BASE_URL || process.env.OPENAI_API_BASE,
     organization: process.env.OPENAI_ORG,
-    project: dev?.project || process.env.OPENAI_PROJECT
+    project: dev?.project || process.env.OPENAI_PROJECT,
   });
 }
 
@@ -53,7 +58,7 @@ export function getChatModel(complexity: TaskComplexity = 'simple'): string {
   // Note: gpt-5 (o1) doesn't support temperature or response_format
   const simpleModel = process.env.OPENAI_CHAT_MODEL_MINI || 'gpt-5-mini';
   const complexModel = process.env.OPENAI_CHAT_MODEL || 'gpt-5';
-  
+
   return complexity === 'simple' ? simpleModel : complexModel;
 }
 
@@ -66,8 +71,8 @@ export function getEmbeddingsModel(): string {
  * Source: OpenAI Pricing (January 2025)
  */
 const MODEL_PRICING: Record<string, { input: number; output: number }> = {
-  'gpt-5': { input: 15.0, output: 60.0 },  // o1 model - premium reasoning
-  'gpt-5-mini': { input: 3.0, output: 12.0 },  // o1-mini - faster reasoning
+  'gpt-5': { input: 15.0, output: 60.0 }, // o1 model - premium reasoning
+  'gpt-5-mini': { input: 3.0, output: 12.0 }, // o1-mini - faster reasoning
   'gpt-4o': { input: 2.5, output: 10.0 },
   'gpt-4o-mini': { input: 0.15, output: 0.6 },
   'gpt-4-turbo': { input: 10.0, output: 30.0 },
@@ -79,5 +84,3 @@ const MODEL_PRICING: Record<string, { input: number; output: number }> = {
 export function getModelPricing(model: string) {
   return MODEL_PRICING[model] || { input: 0, output: 0 };
 }
-
-

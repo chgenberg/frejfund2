@@ -56,7 +56,7 @@ export default function GapQAModal({ isOpen, onClose, sessionId, onComplete }: G
     try {
       const response = await fetch(`/api/gaps?sessionId=${sessionId}`);
       if (!response.ok) throw new Error('Failed to load gaps');
-      
+
       const data = await response.json();
       setGaps(data.gaps || []);
       setQuestions(data.questions || []);
@@ -69,18 +69,18 @@ export default function GapQAModal({ isOpen, onClose, sessionId, onComplete }: G
   };
 
   const handleAnswer = (questionId: string, value: any) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }));
+    setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
 
   const handleNext = () => {
     if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
+      setCurrentQuestionIndex((prev) => prev + 1);
     }
   };
 
   const handlePrevious = () => {
     if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(prev => prev - 1);
+      setCurrentQuestionIndex((prev) => prev - 1);
     }
   };
 
@@ -91,14 +91,14 @@ export default function GapQAModal({ isOpen, onClose, sessionId, onComplete }: G
       const response = await fetch('/api/gaps', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, answers })
+        body: JSON.stringify({ sessionId, answers }),
       });
 
       if (!response.ok) throw new Error('Failed to save answers');
 
       const data = await response.json();
       console.log('Answers saved:', data);
-      
+
       onComplete?.();
       onClose();
     } catch (err) {
@@ -134,7 +134,7 @@ export default function GapQAModal({ isOpen, onClose, sessionId, onComplete }: G
               <div>
                 <h2 className="text-2xl font-bold text-black">Complete Your Analysis</h2>
                 <p className="text-sm text-gray-600">
-                  {questions.length > 0 
+                  {questions.length > 0
                     ? `Answer ${questions.length} questions to unlock deeper insights`
                     : 'Loading questions...'}
                 </p>
@@ -152,7 +152,9 @@ export default function GapQAModal({ isOpen, onClose, sessionId, onComplete }: G
           {questions.length > 0 && (
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Question {currentQuestionIndex + 1} of {questions.length}</span>
+                <span className="text-gray-600">
+                  Question {currentQuestionIndex + 1} of {questions.length}
+                </span>
                 <span className="font-medium text-black">{Math.round(progress)}%</span>
               </div>
               <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -212,7 +214,9 @@ export default function GapQAModal({ isOpen, onClose, sessionId, onComplete }: G
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                      <span className="text-sm font-bold text-gray-700">{currentQuestionIndex + 1}</span>
+                      <span className="text-sm font-bold text-gray-700">
+                        {currentQuestionIndex + 1}
+                      </span>
                     </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold text-black mb-2">
@@ -271,19 +275,22 @@ export default function GapQAModal({ isOpen, onClose, sessionId, onComplete }: G
                 </div>
 
                 {/* Suggested Documents */}
-                {gaps[currentQuestionIndex]?.potentialDocuments && gaps[currentQuestionIndex].potentialDocuments.length > 0 && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                    <div className="flex items-start gap-2 mb-2">
-                      <FileText className="w-4 h-4 text-blue-600 mt-0.5" />
-                      <p className="text-sm font-medium text-blue-900">Helpful documents:</p>
+                {gaps[currentQuestionIndex]?.potentialDocuments &&
+                  gaps[currentQuestionIndex].potentialDocuments.length > 0 && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                      <div className="flex items-start gap-2 mb-2">
+                        <FileText className="w-4 h-4 text-blue-600 mt-0.5" />
+                        <p className="text-sm font-medium text-blue-900">Helpful documents:</p>
+                      </div>
+                      <ul className="space-y-1 ml-6">
+                        {gaps[currentQuestionIndex].potentialDocuments.map((doc, i) => (
+                          <li key={i} className="text-sm text-blue-700">
+                            • {doc}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <ul className="space-y-1 ml-6">
-                      {gaps[currentQuestionIndex].potentialDocuments.map((doc, i) => (
-                        <li key={i} className="text-sm text-blue-700">• {doc}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                  )}
               </motion.div>
             </AnimatePresence>
           )}

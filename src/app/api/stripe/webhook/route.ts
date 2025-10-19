@@ -12,10 +12,13 @@ export async function POST(request: NextRequest) {
   // Check if Stripe is configured
   if (!isStripeConfigured() || !stripe) {
     console.log('Stripe webhook called but Stripe is not configured (testing mode)');
-    return NextResponse.json({ 
-      error: 'Stripe not configured',
-      message: 'Payments are disabled for testing'
-    }, { status: 503 });
+    return NextResponse.json(
+      {
+        error: 'Stripe not configured',
+        message: 'Payments are disabled for testing',
+      },
+      { status: 503 },
+    );
   }
 
   const body = await request.text();
@@ -33,11 +36,7 @@ export async function POST(request: NextRequest) {
 
   try {
     // Verify webhook signature
-    const event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      webhookSecret
-    );
+    const event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
 
     // Handle the event
     await handleWebhookEvent(event);
@@ -45,9 +44,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   } catch (error) {
     console.error('Webhook error:', error);
-    return NextResponse.json(
-      { error: 'Webhook handler failed' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Webhook handler failed' }, { status: 400 });
   }
 }

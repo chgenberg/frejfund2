@@ -73,13 +73,13 @@ export default function InteractiveMap({ startups, onStartupClick }: Interactive
     if (!mapRef.current || !window.L) return;
 
     // Initialize map centered on Europe
-    const map = window.L.map(mapRef.current).setView([54.5260, 15.2551], 4);
+    const map = window.L.map(mapRef.current).setView([54.526, 15.2551], 4);
     mapInstanceRef.current = map;
 
     // Add tile layer
     window.L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       attribution: '© OpenStreetMap contributors',
-      maxZoom: 19
+      maxZoom: 19,
     }).addTo(map);
 
     updateMarkers();
@@ -89,11 +89,11 @@ export default function InteractiveMap({ startups, onStartupClick }: Interactive
     if (!mapInstanceRef.current || !window.L) return;
 
     // Clear existing markers
-    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current.forEach((marker) => marker.remove());
     markersRef.current = [];
 
     // Add new markers
-    startups.forEach(startup => {
+    startups.forEach((startup) => {
       const getMarkerColor = (score: number) => {
         if (score >= 80) return '#10b981'; // green
         if (score >= 60) return '#f59e0b'; // yellow
@@ -123,12 +123,12 @@ export default function InteractiveMap({ startups, onStartupClick }: Interactive
           </div>
         `,
         iconSize: [40, 40],
-        iconAnchor: [20, 20]
+        iconAnchor: [20, 20],
       });
 
-      const marker = window.L.marker(startup.location.coordinates, { icon })
-        .addTo(mapInstanceRef.current)
-        .bindPopup(`
+      const marker = window.L.marker(startup.location.coordinates, { icon }).addTo(
+        mapInstanceRef.current,
+      ).bindPopup(`
           <div style="min-width: 250px;">
             <h3 style="margin: 0 0 8px 0; font-weight: bold;">${startup.companyName}</h3>
             <p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">
@@ -156,7 +156,7 @@ export default function InteractiveMap({ startups, onStartupClick }: Interactive
 
     // Set up global click handler
     window.mapStartupClick = (id: string) => {
-      const startup = startups.find(s => s.id === id);
+      const startup = startups.find((s) => s.id === id);
       if (startup) onStartupClick(startup);
     };
   };
@@ -164,7 +164,7 @@ export default function InteractiveMap({ startups, onStartupClick }: Interactive
   return (
     <div className="relative w-full h-full">
       <div ref={mapRef} className="w-full h-full" />
-      
+
       {/* Map Legend */}
       <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-lg p-4">
         <h4 className="font-semibold text-sm mb-2">Readiness Score</h4>

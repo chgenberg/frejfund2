@@ -26,9 +26,7 @@ export default function GlobalError({
             <div className="w-2 h-2 bg-white rounded-full" />
           </div>
           <h1 className="text-lg font-semibold mb-2">Something went wrong</h1>
-          <p className="text-sm text-gray-600 mb-4">
-            The page failed to render. Please try again.
-          </p>
+          <p className="text-sm text-gray-600 mb-4">The page failed to render. Please try again.</p>
           <div className="flex items-center justify-center gap-2">
             <button
               onClick={() => reset()}
@@ -51,5 +49,3 @@ export default function GlobalError({
     </html>
   );
 }
-
-

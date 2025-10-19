@@ -48,7 +48,7 @@ const SHOPIFY_PRIORITY_PATHS = [
   '/pages/shipping-policy',
   '/pages/refund-policy',
   '/pages/privacy-policy',
-  '/pages/terms-of-service'
+  '/pages/terms-of-service',
 ];
 
 // Detect if it's a Shopify site
@@ -56,7 +56,7 @@ export async function isShopifySite(url: string): Promise<boolean> {
   try {
     const html = await fetchHtml(url, 5000);
     const $ = cheerio.load(html);
-    
+
     // Check for Shopify indicators
     const shopifyIndicators = [
       'script[src*="cdn.shopify.com"]',
@@ -65,18 +65,18 @@ export async function isShopifySite(url: string): Promise<boolean> {
       'meta[name="shopify-checkout-api-token"]',
       '#shopify-features',
       '.shopify-section',
-      'form[action*="/cart/add"]'
+      'form[action*="/cart/add"]',
     ];
-    
+
     for (const indicator of shopifyIndicators) {
       if ($(indicator).length > 0) {
         return true;
       }
     }
-    
+
     // Check response headers (if available in the future)
     // Look for X-ShopId header
-    
+
     return false;
   } catch {
     return false;
@@ -85,9 +85,9 @@ export async function isShopifySite(url: string): Promise<boolean> {
 
 // Scrape a Shopify site with priority patterns
 export async function scrapeShopifySite(
-  startUrl: string, 
+  startUrl: string,
   maxPages = 12,
-  timeout = 8000
+  timeout = 8000,
 ): Promise<ShopifyScrapingResult> {
   const u = new URL(startUrl);
   const origin = u.origin;
@@ -103,18 +103,18 @@ export async function scrapeShopifySite(
   let currency = 'USD';
 
   // Build priority queue
-  const priorityQueue: string[] = SHOPIFY_PRIORITY_PATHS.map(path => `${origin}${path}`);
-  
+  const priorityQueue: string[] = SHOPIFY_PRIORITY_PATHS.map((path) => `${origin}${path}`);
+
   // Also try to fetch products.json (Shopify API)
   try {
-    const productsJson = await fetch(`${origin}/products.json`).then(r => r.json());
+    const productsJson = await fetch(`${origin}/products.json`).then((r) => r.json());
     if (productsJson.products) {
       productsJson.products.slice(0, 20).forEach((p: any) => {
         products.push({
           name: p.title,
           price: p.variants?.[0]?.price || '',
           description: p.body_html?.replace(/<[^>]*>/g, '').slice(0, 200) || '',
-          url: `${origin}/products/${p.handle}`
+          url: `${origin}/products/${p.handle}`,
         });
         const price = parseFloat(p.variants?.[0]?.price || '0');
         if (price > 0) prices.push(price);
@@ -135,9 +135,14 @@ export async function scrapeShopifySite(
       // Extract products
       $('.product-item, .grid-product, .product-card, article[data-product-id]').each((_, el) => {
         const $el = $(el);
-        const name = $el.find('.product-title, .product-name, h3, h2').first().text().trim() ||
-                    $el.find('a[href*="/products/"]').first().text().trim();
-        const priceText = $el.find('.price, .product-price, [class*="price"]').first().text().trim();
+        const name =
+          $el.find('.product-title, .product-name, h3, h2').first().text().trim() ||
+          $el.find('a[href*="/products/"]').first().text().trim();
+        const priceText = $el
+          .find('.price, .product-price, [class*="price"]')
+          .first()
+          .text()
+          .trim();
         const price = priceText.match(/[\d,]+\.?\d*/)?.[0] || '';
         const link = $el.find('a[href*="/products/"]').first().attr('href');
         const productUrl = link ? new URL(link, url).href : '';
@@ -146,8 +151,9 @@ export async function scrapeShopifySite(
           products.push({
             name,
             price,
-            description: $el.find('.product-description, .product-excerpt').first().text().slice(0, 200) || '',
-            url: productUrl
+            description:
+              $el.find('.product-description, .product-excerpt').first().text().slice(0, 200) || '',
+            url: productUrl,
           });
           const numPrice = parseFloat(price.replace(/,/g, ''));
           if (numPrice > 0) prices.push(numPrice);
@@ -169,9 +175,13 @@ export async function scrapeShopifySite(
         if (mainContent.length > aboutContent.length) {
           aboutContent = mainContent.slice(0, 2000);
         }
-        
+
         // Look for brand story
-        const storySection = $('*:contains("our story"), *:contains("brand story"), *:contains("founded")').closest('section, div').text();
+        const storySection = $(
+          '*:contains("our story"), *:contains("brand story"), *:contains("founded")',
+        )
+          .closest('section, div')
+          .text();
         if (storySection && storySection.length > 100) {
           brandStory = storySection.slice(0, 1000);
         }
@@ -191,7 +201,7 @@ export async function scrapeShopifySite(
       // Extract location
       const locationPatterns = [
         /(?:located in|based in|from)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/i,
-        /([A-Z][a-z]+(?:,\s*[A-Z]{2})?)\s*(?:\d{5})?$/m // City, State pattern
+        /([A-Z][a-z]+(?:,\s*[A-Z]{2})?)\s*(?:\d{5})?$/m, // City, State pattern
       ];
       for (const pattern of locationPatterns) {
         const match = $('body').text().match(pattern);
@@ -202,13 +212,17 @@ export async function scrapeShopifySite(
       }
 
       // Extract social links
-      $('a[href*="facebook.com"], a[href*="instagram.com"], a[href*="twitter.com"], a[href*="pinterest.com"], a[href*="youtube.com"]').each((_, el) => {
+      $(
+        'a[href*="facebook.com"], a[href*="instagram.com"], a[href*="twitter.com"], a[href*="pinterest.com"], a[href*="youtube.com"]',
+      ).each((_, el) => {
         const href = $(el).attr('href');
         if (href) socialLinks.add(href);
       });
 
       // Detect currency
-      const currencyMatch = $('body').text().match(/([A-Z]{3})\s*\$|£|€|¥|₹/);
+      const currencyMatch = $('body')
+        .text()
+        .match(/([A-Z]{3})\s*\$|£|€|¥|₹/);
       if (currencyMatch) {
         currency = currencyMatch[1] || 'USD';
       }
@@ -227,7 +241,6 @@ export async function scrapeShopifySite(
           }
         });
       }
-
     } catch (error) {
       console.error(`Error scraping ${url}:`, error);
     }
@@ -237,7 +250,7 @@ export async function scrapeShopifySite(
   const priceRange = {
     min: prices.length > 0 ? Math.min(...prices) : 0,
     max: prices.length > 0 ? Math.max(...prices) : 0,
-    currency
+    currency,
   };
 
   return {
@@ -248,10 +261,10 @@ export async function scrapeShopifySite(
     businessInfo: {
       brandStory: brandStory || aboutContent.slice(0, 500),
       location,
-      socialLinks: Array.from(socialLinks)
+      socialLinks: Array.from(socialLinks),
     },
     totalProducts: products.length,
-    priceRange
+    priceRange,
   };
 }
 
@@ -271,11 +284,16 @@ export function shopifyDataToContent(data: ShopifyScrapingResult): string {
   // Product information
   if (data.products.length > 0) {
     sections.push(`\nPRODUCTS (${data.totalProducts} total):`);
-    sections.push(`Price range: ${data.priceRange.currency} ${data.priceRange.min}-${data.priceRange.max}`);
-    
-    const productList = data.products.slice(0, 10).map(p => 
-      `- ${p.name}: ${data.priceRange.currency} ${p.price}${p.description ? ' - ' + p.description.slice(0, 100) : ''}`
+    sections.push(
+      `Price range: ${data.priceRange.currency} ${data.priceRange.min}-${data.priceRange.max}`,
     );
+
+    const productList = data.products
+      .slice(0, 10)
+      .map(
+        (p) =>
+          `- ${p.name}: ${data.priceRange.currency} ${p.price}${p.description ? ' - ' + p.description.slice(0, 100) : ''}`,
+      );
     sections.push(productList.join('\n'));
   }
 

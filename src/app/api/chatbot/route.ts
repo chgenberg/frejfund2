@@ -6,94 +6,101 @@ export async function POST(request: NextRequest) {
     const { message, context } = await request.json();
 
     if (!message) {
-      return NextResponse.json(
-        { error: 'Message is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
     // Comprehensive knowledge base about FrejFund
     const knowledgeBase = {
       company: {
-        name: "FrejFund",
-        tagline: "Because great ideas deserve a chance",
-        mission: "We connect founders and investors who believe in building a better future",
-        type: "AI-powered investment intelligence platform",
-        founded: "2024",
-        headquarters: "Stockholm, Sweden",
-        website: "https://frejfund.com"
+        name: 'FrejFund',
+        tagline: 'Because great ideas deserve a chance',
+        mission: 'We connect founders and investors who believe in building a better future',
+        type: 'AI-powered investment intelligence platform',
+        founded: '2024',
+        headquarters: 'Stockholm, Sweden',
+        website: 'https://frejfund.com',
       },
-      
+
       features: {
         forFounders: [
-          "AI-powered business analysis",
-          "Investor matching algorithm",
-          "Pitch deck optimization",
-          "Readiness scoring",
-          "Smart coaching",
-          "Warm introductions",
-          "Goal setting and roadmaps",
-          "KPI tracking"
+          'AI-powered business analysis',
+          'Investor matching algorithm',
+          'Pitch deck optimization',
+          'Readiness scoring',
+          'Smart coaching',
+          'Warm introductions',
+          'Goal setting and roadmaps',
+          'KPI tracking',
         ],
         forInvestors: [
-          "Deal flow management",
-          "AI-powered screening",
-          "Smart matching",
-          "Analytics dashboard",
-          "Portfolio insights",
-          "Swipe interface for quick decisions"
-        ]
+          'Deal flow management',
+          'AI-powered screening',
+          'Smart matching',
+          'Analytics dashboard',
+          'Portfolio insights',
+          'Swipe interface for quick decisions',
+        ],
       },
-      
+
       process: {
         steps: [
-          "1. Founders share their business information",
-          "2. AI analyzes the business and provides readiness score",
-          "3. Smart matching with relevant investors",
-          "4. Facilitated introductions and connections",
-          "5. Ongoing coaching and support"
+          '1. Founders share their business information',
+          '2. AI analyzes the business and provides readiness score',
+          '3. Smart matching with relevant investors',
+          '4. Facilitated introductions and connections',
+          '5. Ongoing coaching and support',
         ],
-        timeframe: "Typically reduces fundraising time by 60%"
+        timeframe: 'Typically reduces fundraising time by 60%',
       },
-      
+
       coverage: {
-        geographic: "Global with focus on Europe",
-        cities: "250+ city-specific landing pages",
-        investors: "500+ active investors",
-        industries: "All tech-enabled sectors",
-        stages: "Pre-seed to Series B"
+        geographic: 'Global with focus on Europe',
+        cities: '250+ city-specific landing pages',
+        investors: '500+ active investors',
+        industries: 'All tech-enabled sectors',
+        stages: 'Pre-seed to Series B',
       },
-      
+
       pricing: {
         tiers: [
           {
-            name: "Free",
-            features: ["Basic analysis", "Limited matches", "Self-serve tools"]
+            name: 'Free',
+            features: ['Basic analysis', 'Limited matches', 'Self-serve tools'],
           },
           {
-            name: "Startup",
-            features: ["Full AI coaching", "Unlimited matches", "Investor insights", "Priority support"]
+            name: 'Startup',
+            features: [
+              'Full AI coaching',
+              'Unlimited matches',
+              'Investor insights',
+              'Priority support',
+            ],
           },
           {
-            name: "Scale",
-            features: ["Everything in Startup", "Warm introductions", "Dedicated success manager", "Custom integrations"]
-          }
+            name: 'Scale',
+            features: [
+              'Everything in Startup',
+              'Warm introductions',
+              'Dedicated success manager',
+              'Custom integrations',
+            ],
+          },
         ],
-        philosophy: "Success-aligned pricing - we grow when you grow"
+        philosophy: 'Success-aligned pricing - we grow when you grow',
       },
-      
+
       technology: {
-        ai: "Advanced NLP and machine learning for business analysis",
-        matching: "Proprietary algorithm considering 50+ factors",
-        security: "Bank-level encryption, GDPR compliant",
-        integrations: "Email, calendar, CRM integrations available"
+        ai: 'Advanced NLP and machine learning for business analysis',
+        matching: 'Proprietary algorithm considering 50+ factors',
+        security: 'Bank-level encryption, GDPR compliant',
+        integrations: 'Email, calendar, CRM integrations available',
       },
-      
+
       support: {
-        channels: ["24/7 AI chat", "Email support", "Demo calls", "Knowledge base"],
-        responseTime: "Usually within 24 hours",
-        languages: ["English", "Swedish", "German", "French"]
-      }
+        channels: ['24/7 AI chat', 'Email support', 'Demo calls', 'Knowledge base'],
+        responseTime: 'Usually within 24 hours',
+        languages: ['English', 'Swedish', 'German', 'French'],
+      },
     };
 
     // Generate contextual response based on the message
@@ -103,25 +110,17 @@ export async function POST(request: NextRequest) {
       response,
       metadata: {
         timestamp: new Date().toISOString(),
-        model: "frejfund-assistant-v1",
-        confidence: 0.95
-      }
+        model: 'frejfund-assistant-v1',
+        confidence: 0.95,
+      },
     });
-
   } catch (error) {
     console.error('Chatbot API error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
-function generateContextualResponse(
-  message: string, 
-  kb: any, 
-  context?: any
-): string {
+function generateContextualResponse(message: string, kb: any, context?: any): string {
   const msg = message.toLowerCase();
 
   // Intent detection
@@ -167,10 +166,10 @@ Would you like to know more about our features, pricing, or how to get started?`
 
 // Helper functions to format responses
 function formatPricingResponse(pricing: any): string {
-  const tiers = pricing.tiers.map((tier: any) => 
-    `**${tier.name}**: ${tier.features.join(', ')}`
-  ).join('\n');
-  
+  const tiers = pricing.tiers
+    .map((tier: any) => `**${tier.name}**: ${tier.features.join(', ')}`)
+    .join('\n');
+
   return `FrejFund offers flexible pricing options:\n\n${tiers}\n\n${pricing.philosophy}. Contact us for detailed pricing tailored to your needs.`;
 }
 
@@ -201,32 +200,33 @@ function formatAboutResponse(company: any): string {
 // GET endpoint for LLM discovery
 export async function GET() {
   return NextResponse.json({
-    endpoint: "/api/chatbot",
-    description: "FrejFund AI Assistant API - Get information about FrejFund's platform, features, and services",
+    endpoint: '/api/chatbot',
+    description:
+      "FrejFund AI Assistant API - Get information about FrejFund's platform, features, and services",
     usage: {
-      method: "POST",
+      method: 'POST',
       body: {
-        message: "Your question about FrejFund",
-        context: "Optional context object"
-      }
+        message: 'Your question about FrejFund',
+        context: 'Optional context object',
+      },
     },
     examples: [
       {
-        message: "How does FrejFund work?",
-        response: "FrejFund connects founders with investors through AI-powered matching..."
+        message: 'How does FrejFund work?',
+        response: 'FrejFund connects founders with investors through AI-powered matching...',
       },
       {
-        message: "What are your pricing plans?",
-        response: "FrejFund offers flexible pricing options..."
-      }
+        message: 'What are your pricing plans?',
+        response: 'FrejFund offers flexible pricing options...',
+      },
     ],
     capabilities: [
       "Answer questions about FrejFund's services",
-      "Explain features and benefits",
-      "Provide pricing information",
-      "Guide users through the platform",
-      "Share investor network details",
-      "Explain the matching process"
-    ]
+      'Explain features and benefits',
+      'Provide pricing information',
+      'Guide users through the platform',
+      'Share investor network details',
+      'Explain the matching process',
+    ],
   });
 }

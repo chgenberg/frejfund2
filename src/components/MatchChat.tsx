@@ -21,7 +21,13 @@ interface Message {
   isRead: boolean;
 }
 
-export default function MatchChat({ introRequestId, userEmail, userType, matchName, onClose }: MatchChatProps) {
+export default function MatchChat({
+  introRequestId,
+  userEmail,
+  userType,
+  matchName,
+  onClose,
+}: MatchChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(true);
@@ -31,7 +37,9 @@ export default function MatchChat({ introRequestId, userEmail, userType, matchNa
     loadMessages();
     // Subscribe via SSE
     const subId = Math.random().toString(36).slice(2);
-    const es = new EventSource(`/api/messages/match/stream?introRequestId=${introRequestId}&subId=${subId}`);
+    const es = new EventSource(
+      `/api/messages/match/stream?introRequestId=${introRequestId}&subId=${subId}`,
+    );
     es.onmessage = (ev) => {
       try {
         const parsed = JSON.parse(ev.data);
@@ -52,7 +60,9 @@ export default function MatchChat({ introRequestId, userEmail, userType, matchNa
       // Fallback silently; SSE may not work in some environments
     };
     return () => {
-      try { es.close(); } catch {}
+      try {
+        es.close();
+      } catch {}
     };
   }, [introRequestId]);
 
@@ -83,10 +93,10 @@ export default function MatchChat({ introRequestId, userEmail, userType, matchNa
       senderEmail: userEmail,
       content: inputValue,
       createdAt: new Date().toISOString(),
-      isRead: false
+      isRead: false,
     };
 
-    setMessages(prev => [...prev, tempMessage]);
+    setMessages((prev) => [...prev, tempMessage]);
     setInputValue('');
 
     try {
@@ -97,8 +107,8 @@ export default function MatchChat({ introRequestId, userEmail, userType, matchNa
           introRequestId,
           senderType: userType,
           senderEmail: userEmail,
-          content: inputValue
-        })
+          content: inputValue,
+        }),
       });
     } catch (error) {
       console.error('Error sending message:', error);
@@ -107,13 +117,13 @@ export default function MatchChat({ introRequestId, userEmail, userType, matchNa
 
   // Mark messages as read when opened or updated
   useEffect(() => {
-    const unreadFromOther = messages.some(m => !m.isRead && m.senderEmail !== userEmail);
+    const unreadFromOther = messages.some((m) => !m.isRead && m.senderEmail !== userEmail);
     if (unreadFromOther) {
       fetch('/api/messages/match/read', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ introRequestId, readerEmail: userEmail })
-      }).catch(()=>{});
+        body: JSON.stringify({ introRequestId, readerEmail: userEmail }),
+      }).catch(() => {});
     }
   }, [messages, introRequestId, userEmail]);
 
@@ -142,10 +152,7 @@ export default function MatchChat({ introRequestId, userEmail, userType, matchNa
             <h3 className="font-semibold text-white">Chat with {matchName}</h3>
             <p className="text-xs text-gray-400">Matched conversation</p>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
             <X className="w-5 h-5 text-white" />
           </button>
         </div>
@@ -180,13 +187,15 @@ export default function MatchChat({ introRequestId, userEmail, userType, matchNa
                     <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                     <div className="flex items-center justify-between mt-1">
                       <p className={`text-xs ${isMe ? 'text-gray-400' : 'text-gray-500'}`}>
-                        {new Date(message.createdAt).toLocaleTimeString([], { 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
+                        {new Date(message.createdAt).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
                         })}
                       </p>
                       {isMe && (
-                        <span className={`text-[10px] ${message.isRead ? 'text-green-600' : 'text-gray-400'}`}>
+                        <span
+                          className={`text-[10px] ${message.isRead ? 'text-green-600' : 'text-gray-400'}`}
+                        >
                           {message.isRead ? 'Seen' : 'Sent'}
                         </span>
                       )}

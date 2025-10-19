@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     let dataCount = 0;
     let sampleInvestor = null;
     let importError = null;
-    
+
     try {
       const { INVESTOR_SEED_DATA_EN } = await import('@/lib/investor-data');
       dataImported = true;
@@ -20,22 +20,22 @@ export async function GET(req: NextRequest) {
     } catch (e: any) {
       importError = e.message;
     }
-    
+
     // Check database connection
     let dbConnected = false;
     let existingCount = 0;
     let dbError = null;
-    
+
     try {
       existingCount = await prisma.investor.count();
       dbConnected = true;
     } catch (e: any) {
       dbError = e.message;
     }
-    
+
     // Try to create one investor manually
     let testCreateError = null;
-    
+
     if (dataImported && sampleInvestor && dbConnected) {
       try {
         await prisma.investor.create({
@@ -60,39 +60,44 @@ export async function GET(req: NextRequest) {
             website: sampleInvestor.website,
             linkedIn: sampleInvestor.linkedIn,
             twitter: sampleInvestor.twitter,
-            email: sampleInvestor.email
-          }
+            email: sampleInvestor.email,
+          },
         });
       } catch (e: any) {
         testCreateError = e.message;
       }
     }
-    
+
     return NextResponse.json({
       dataImport: {
         success: dataImported,
         count: dataCount,
         error: importError,
-        sample: sampleInvestor ? {
-          name: sampleInvestor.name,
-          firmName: sampleInvestor.firmName,
-          hasAllFields: !!(sampleInvestor.stage && sampleInvestor.industries)
-        } : null
+        sample: sampleInvestor
+          ? {
+              name: sampleInvestor.name,
+              firmName: sampleInvestor.firmName,
+              hasAllFields: !!(sampleInvestor.stage && sampleInvestor.industries),
+            }
+          : null,
       },
       database: {
         connected: dbConnected,
         existingInvestors: existingCount,
-        error: dbError
+        error: dbError,
       },
       testCreate: {
         error: testCreateError,
-        success: !testCreateError
-      }
+        success: !testCreateError,
+      },
     });
   } catch (error: any) {
-    return NextResponse.json({
-      error: 'Debug failed',
-      details: error.message
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Debug failed',
+        details: error.message,
+      },
+      { status: 500 },
+    );
   }
 }

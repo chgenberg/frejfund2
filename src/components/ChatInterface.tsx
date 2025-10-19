@@ -3,7 +3,27 @@
 import { useState, useRef, useEffect } from 'react';
 import { ANALYSIS_DIMENSIONS } from '@/lib/deep-analysis-framework';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Bot, User, TrendingUp, FileText, Brain, BarChart3, ThumbsUp, ThumbsDown, BookOpen, MoreVertical, Info, Lightbulb, X, HelpCircle, Bell, Circle, Paperclip, Upload } from 'lucide-react';
+import {
+  Send,
+  Bot,
+  User,
+  TrendingUp,
+  FileText,
+  Brain,
+  BarChart3,
+  ThumbsUp,
+  ThumbsDown,
+  BookOpen,
+  MoreVertical,
+  Info,
+  Lightbulb,
+  X,
+  HelpCircle,
+  Bell,
+  Circle,
+  Paperclip,
+  Upload,
+} from 'lucide-react';
 import { BusinessInfo, Message, BusinessAnalysisResult } from '@/types/business';
 import { getChatModel, TaskComplexity } from '@/lib/ai-client';
 import BusinessAnalysisModal from './BusinessAnalysisModal';
@@ -17,11 +37,11 @@ import IntelligentSearchModal from './IntelligentSearchModal';
 import GapFillingModal from './GapFillingModal';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { 
-  analyzeDataGaps, 
-  generateSmartQuestions, 
+import {
+  analyzeDataGaps,
+  generateSmartQuestions,
   generateProactiveInsights,
-  getNextBestAction 
+  getNextBestAction,
 } from '@/lib/freja-intelligence';
 
 interface ChatInterfaceProps {
@@ -36,16 +56,26 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const [showResultsModal, setShowResultsModal] = useState(false);
-  const [lastGap, setLastGap] = useState<{ messageId: string; dimensionName: string; question: string } | null>(null);
+  const [lastGap, setLastGap] = useState<{
+    messageId: string;
+    dimensionName: string;
+    question: string;
+  } | null>(null);
   const [analysisResult, setAnalysisResult] = useState<BusinessAnalysisResult | null>(null);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showKpiModal, setShowKpiModal] = useState(false);
   const [showDeckModal, setShowDeckModal] = useState(false);
   const [showDataMenu, setShowDataMenu] = useState(false);
   const [showInfoPopup, setShowInfoPopup] = useState(false);
-  const [insightCard, setInsightCard] = useState<{text: string; type: 'success' | 'warning' | 'info'} | null>(null);
+  const [insightCard, setInsightCard] = useState<{
+    text: string;
+    type: 'success' | 'warning' | 'info';
+  } | null>(null);
   const [showEvidence, setShowEvidence] = useState<Record<string, boolean>>({});
-  const [pendingFeedback, setPendingFeedback] = useState<{ messageId: string; rating: 'up' | 'down' | null } | null>(null);
+  const [pendingFeedback, setPendingFeedback] = useState<{
+    messageId: string;
+    rating: 'up' | 'down' | null;
+  } | null>(null);
   const [feedbackReason, setFeedbackReason] = useState('');
   const [feedbackMissing, setFeedbackMissing] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -54,15 +84,17 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   const [isDragging, setIsDragging] = useState(false);
   const [sessionId] = useState<string>(() => {
     // Try to restore session from localStorage
-    const savedSession = typeof window !== 'undefined' ? localStorage.getItem('frejfund-session-id') : null;
-    const savedTimestamp = typeof window !== 'undefined' ? localStorage.getItem('frejfund-session-timestamp') : null;
+    const savedSession =
+      typeof window !== 'undefined' ? localStorage.getItem('frejfund-session-id') : null;
+    const savedTimestamp =
+      typeof window !== 'undefined' ? localStorage.getItem('frejfund-session-timestamp') : null;
     const now = Date.now();
-    
+
     // Use existing session if less than 24 hours old
-    if (savedSession && savedTimestamp && (now - parseInt(savedTimestamp)) < 24 * 60 * 60 * 1000) {
+    if (savedSession && savedTimestamp && now - parseInt(savedTimestamp) < 24 * 60 * 60 * 1000) {
       return savedSession;
     }
-    
+
     // Create new session
     const newSession = `sess-${Math.random().toString(36).slice(2)}-${now}`;
     if (typeof window !== 'undefined') {
@@ -72,7 +104,9 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
     return newSession;
   });
   const abortRef = useRef<AbortController | null>(null);
-  const [tips, setTips] = useState<Array<{ title: string; why?: string; action?: string; priority?: string }>>([]);
+  const [tips, setTips] = useState<
+    Array<{ title: string; why?: string; action?: string; priority?: string }>
+  >([]);
   const [showTips, setShowTips] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -84,13 +118,18 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   const [showGapFilling, setShowGapFilling] = useState(false);
   const [gapFillingData, setGapFillingData] = useState<any>(null);
   const [prefetchedContext, setPrefetchedContext] = useState<string | null>(null);
-  const [dailyCompass, setDailyCompass] = useState<{ insights: string[]; risks: string[]; actions: string[]; citations?: Array<{label:string; snippet:string}> } | null>(null);
+  const [dailyCompass, setDailyCompass] = useState<{
+    insights: string[];
+    risks: string[];
+    actions: string[];
+    citations?: Array<{ label: string; snippet: string }>;
+  } | null>(null);
   const [showCompass, setShowCompass] = useState(false);
   const [loadingCompass, setLoadingCompass] = useState(false);
   const [syncingInbox, setSyncingInbox] = useState(false);
   // Thin top progress bar while "thinking"
   const [thinkingProgress, setThinkingProgress] = useState(0);
-  
+
   // Deep analysis progress tracking
   const [analysisProgress, setAnalysisProgress] = useState<{
     current: number;
@@ -101,7 +140,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
     current: 0,
     total: 95,
     status: 'idle',
-    completedCategories: []
+    completedCategories: [],
   });
   const [dataGaps, setDataGaps] = useState<any>(null);
   const [showCompletionCelebration, setShowCompletionCelebration] = useState(false);
@@ -112,18 +151,19 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
 
   const transformGapsForModal = (gapData: any) => {
     if (!gapData || !gapData.gaps) return [];
-    
+
     return gapData.gaps.slice(0, 9).map((gap: any) => ({
       id: gap.dimensionId,
       dimensionId: gap.dimensionId,
       title: gap.dimensionName,
-      description: gap.suggestedQuestions?.[0] || 'Please provide more information about this aspect',
+      description:
+        gap.suggestedQuestions?.[0] || 'Please provide more information about this aspect',
       currentScore: gap.currentScore || 0,
       potentialScore: gap.potentialScore || gap.currentScore + 20,
-      inputType: gap.requiresDocument ? 'file' : 'text' as const,
+      inputType: gap.requiresDocument ? 'file' : ('text' as const),
       placeholder: gap.placeholder || 'Enter details here...',
       helpText: gap.explanation || undefined,
-      category: gap.category
+      category: gap.category,
     }));
   };
 
@@ -136,7 +176,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       const response = await fetch('/api/gaps', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, answers: responses })
+        body: JSON.stringify({ sessionId, answers: responses }),
       });
 
       if (response.ok) {
@@ -144,7 +184,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         addMessage(
           "Fantastic! I've updated your analysis with the new information. Your investment readiness score is being recalculated now.",
           'agent',
-          'success'
+          'success',
         );
 
         // Trigger a partial re-analysis for the affected dimensions
@@ -152,11 +192,11 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         await fetch('/api/deep-analysis/update', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            sessionId, 
+          body: JSON.stringify({
+            sessionId,
             dimensionIds,
-            newData: responses 
-          })
+            newData: responses,
+          }),
         });
 
         // Reload the analysis data
@@ -166,16 +206,13 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       }
     } catch (error) {
       console.error('Failed to submit gap data:', error);
-      addMessage(
-        "I couldn't save your information right now. Please try again.",
-        'agent',
-        'error'
-      );
+      addMessage("I couldn't save your information right now. Please try again.", 'agent', 'error');
     }
   };
 
   const loadDataGaps = async () => {
-    const sessionId = localStorage.getItem('frejfund-session-id') || localStorage.getItem('sessionId');
+    const sessionId =
+      localStorage.getItem('frejfund-session-id') || localStorage.getItem('sessionId');
     if (!sessionId) return;
 
     try {
@@ -183,7 +220,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       if (response.ok) {
         const data = await response.json();
         setDataGaps(data);
-        
+
         // If there are gaps, Freja proactively asks for them
         if (data.totalGaps > 0 && data.nextBestAction) {
           setGapFillingData(data);
@@ -202,11 +239,11 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   type: 'button',
                   label: 'Fill in Missing Information',
                   action: 'openGapFilling',
-                  variant: 'primary'
-                }
-              ]
+                  variant: 'primary',
+                },
+              ],
             };
-            setMessages(prev => [...prev, gapMessage]);
+            setMessages((prev) => [...prev, gapMessage]);
           }, 2000); // Small delay after completion celebration
         }
       }
@@ -237,7 +274,10 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       setThinkingProgress((p) => (p > 0 ? 100 : 0));
       timeoutDone = setTimeout(() => setThinkingProgress(0), 400);
     }
-    return () => { if (interval) clearInterval(interval); if (timeoutDone) clearTimeout(timeoutDone); };
+    return () => {
+      if (interval) clearInterval(interval);
+      if (timeoutDone) clearTimeout(timeoutDone);
+    };
   }, [isTyping]);
 
   // Save message to database
@@ -253,8 +293,8 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
           tokens: message.metrics?.tokensEstimate,
           latencyMs: message.metrics?.latencyMs,
           cost: message.metrics?.costUsdEstimate,
-          model: getChatModel('simple')
-        })
+          model: getChatModel('simple'),
+        }),
       });
     } catch (error) {
       console.error('Failed to save message:', error);
@@ -263,10 +303,10 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
 
   // Update message in state and save to database
   const updateMessageWithMetrics = (messageId: string, updates: Partial<Message>) => {
-    setMessages(prev => {
-      const updated = prev.map(m => m.id === messageId ? { ...m, ...updates } : m);
+    setMessages((prev) => {
+      const updated = prev.map((m) => (m.id === messageId ? { ...m, ...updates } : m));
       // Find and save the updated message
-      const updatedMessage = updated.find(m => m.id === messageId);
+      const updatedMessage = updated.find((m) => m.id === messageId);
       if (updatedMessage) {
         saveMessageToDb(updatedMessage);
       }
@@ -280,7 +320,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
-    
+
     // Load messages from database first
     (async () => {
       try {
@@ -288,27 +328,29 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         if (res.ok) {
           const data = await res.json();
           if (data.messages && data.messages.length > 0) {
-            setMessages(data.messages.map((m: any) => ({
-              id: m.id,
-              content: m.content,
-              sender: m.role === 'user' ? 'user' : 'agent',
-              timestamp: new Date(m.timestamp),
-              type: 'text',
-              metrics: m.metrics
-            })));
+            setMessages(
+              data.messages.map((m: any) => ({
+                id: m.id,
+                content: m.content,
+                sender: m.role === 'user' ? 'user' : 'agent',
+                timestamp: new Date(m.timestamp),
+                type: 'text',
+                metrics: m.metrics,
+              })),
+            );
             return; // Don't show welcome message if we have history
           }
         }
       } catch (error) {
         console.error('Failed to load message history:', error);
       }
-      
+
       // If no history, show welcome message
       showWelcomeMessage();
     })();
-    
+
     setIsLoadingHistory(false);
-    
+
     // Load notifications
     loadNotifications();
   }, [sessionId, setMessages]);
@@ -317,8 +359,8 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
     try {
       const response = await fetch('/api/notifications', {
         headers: {
-          'x-session-id': sessionId
-        }
+          'x-session-id': sessionId,
+        },
       });
 
       if (response.ok) {
@@ -346,20 +388,21 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
             vcEmail: 'demo@vc.com',
             matchScore: 92,
             requestedAt: new Date().toISOString(),
-            message: 'Demo Capital is interested in meeting you!'
-          }
+            message: 'Demo Capital is interested in meeting you!',
+          },
         ]);
       }
     } catch {}
   };
 
   const showWelcomeMessage = async () => {
-    const sessionId = typeof window !== 'undefined' ? localStorage.getItem('frejfund-session-id') : null;
-    
+    const sessionId =
+      typeof window !== 'undefined' ? localStorage.getItem('frejfund-session-id') : null;
+
     // Try to get readiness from completed deep analysis first
     let readinessScore = 5;
     let useDeepAnalysis = false;
-    
+
     if (sessionId) {
       try {
         const res = await fetch(`/api/deep-analysis?sessionId=${sessionId}`);
@@ -372,38 +415,47 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         }
       } catch {}
     }
-    
+
     // Fallback to calculated score if deep analysis not available
     if (!useDeepAnalysis) {
       const { calculateReadinessScore } = await import('@/lib/coaching-prompts');
       const readiness = calculateReadinessScore(businessInfo);
       readinessScore = readiness.score;
     }
-    
+
     // Generate welcome with correct score, then override with custom intro
     const { getWelcomeMessage, calculateReadinessScore } = await import('@/lib/coaching-prompts');
     const readiness = { score: readinessScore, nextSteps: [], breakdown: [] as any };
     let welcomeContent = getWelcomeMessage(businessInfo, readiness);
 
     // Override with the requested custom intro, personalized
-    const rawFirstName = (businessInfo as any)?.founderName || (businessInfo as any)?.firstName || (businessInfo as any)?.ownerName || (businessInfo as any)?.contactName || '';
-    const firstName = rawFirstName ? String(rawFirstName).split(' ')[0] : (businessInfo.email ? businessInfo.email.split('@')[0] : 'there');
+    const rawFirstName =
+      (businessInfo as any)?.founderName ||
+      (businessInfo as any)?.firstName ||
+      (businessInfo as any)?.ownerName ||
+      (businessInfo as any)?.contactName ||
+      '';
+    const firstName = rawFirstName
+      ? String(rawFirstName).split(' ')[0]
+      : businessInfo.email
+        ? businessInfo.email.split('@')[0]
+        : 'there';
     welcomeContent = `Hi ${firstName}\n\nI’m Freja — your personal investment coach.\nI’m currently analyzing your startup to understand where you stand on your investment journey. \n\nYou can follow the progress in the black banner above — it updates in real time as I process your data.\nOnce the analysis is complete, I’ll guide you step by step through what’s needed to prepare the perfect investor case — from financials to storytelling and everything in between.\n\nWhile I’m working on your analysis, feel free to chat with me about anything related to business, fundraising, or startup strategy. I’m here to help you get investor-ready.`;
-    
+
     const welcomeMessage: Message = {
       id: `msg-welcome-${Date.now()}`,
       content: welcomeContent,
       sender: 'agent',
       timestamp: new Date(),
-      type: 'text'
+      type: 'text',
     };
     setMessages([welcomeMessage]);
-    
+
     // Save welcome message and readiness score to localStorage for session
     if (typeof window !== 'undefined') {
       localStorage.setItem('frejfund-readiness-score', readinessScore.toString());
     }
-    
+
     // Save welcome message to database
     saveMessageToDb(welcomeMessage);
   };
@@ -413,13 +465,19 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
     (async () => {
       try {
         // Prefetch uploaded files (PDF, DOCX, XLSX, CSV, TXT) → text
-        let mergedContext: string | null = businessInfo.preScrapedText ? String(businessInfo.preScrapedText) : null;
+        let mergedContext: string | null = businessInfo.preScrapedText
+          ? String(businessInfo.preScrapedText)
+          : null;
         try {
           const files = (businessInfo as any).uploadedFiles as File[] | undefined;
           if (files && files.length > 0) {
             const formData = new FormData();
             files.slice(0, 5).forEach((f, idx) => formData.append(`file_${idx}`, f, f.name));
-            const res = await fetch('/api/extract', { method: 'POST', headers: { 'x-session-id': sessionId }, body: formData });
+            const res = await fetch('/api/extract', {
+              method: 'POST',
+              headers: { 'x-session-id': sessionId },
+              body: formData,
+            });
             if (res.ok) {
               const { documents } = await res.json();
               const combined = (documents || []).map((d: { text: string }) => d.text).join('\n\n');
@@ -434,7 +492,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         const res = await fetch('/api/proactive', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId, businessInfo })
+          body: JSON.stringify({ sessionId, businessInfo }),
         });
         if (res.ok) {
           const data = await res.json();
@@ -446,34 +504,50 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
           const dcRes = await fetch('/api/cron/daily?ui=1', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId })
+            body: JSON.stringify({ sessionId }),
           });
           if (dcRes.ok) {
             const dc = await dcRes.json();
-            if (dc && (Array.isArray(dc.insights) || Array.isArray(dc.risks) || Array.isArray(dc.actions))) {
-              setDailyCompass({ insights: dc.insights || [], risks: dc.risks || [], actions: dc.actions || [], citations: dc.citations });
+            if (
+              dc &&
+              (Array.isArray(dc.insights) || Array.isArray(dc.risks) || Array.isArray(dc.actions))
+            ) {
+              setDailyCompass({
+                insights: dc.insights || [],
+                risks: dc.risks || [],
+                actions: dc.actions || [],
+                citations: dc.citations,
+              });
               setShowCompass(false);
             }
           }
         } catch {}
         // Trigger deep analysis in background with SSE progress
         try {
-          setAnalysisProgress(prev => ({ ...prev, status: 'running' }));
-          
+          setAnalysisProgress((prev) => ({ ...prev, status: 'running' }));
+
           let backoff = 1000;
           let eventSource: EventSource | null = null;
 
           const handleMessage = async (event: MessageEvent) => {
             const data = JSON.parse(event.data);
             if (data.type === 'progress') {
-              setAnalysisProgress({ current: data.current, total: data.total, status: 'running', completedCategories: data.completedCategories || [] });
+              setAnalysisProgress({
+                current: data.current,
+                total: data.total,
+                status: 'running',
+                completedCategories: data.completedCategories || [],
+              });
               backoff = 1000; // reset on data
             } else if (data.type === 'complete') {
-              setAnalysisProgress(prev => ({ ...prev, status: 'completed' }));
-              try { eventSource && eventSource.close(); } catch {}
-              
+              setAnalysisProgress((prev) => ({ ...prev, status: 'completed' }));
+              try {
+                eventSource && eventSource.close();
+              } catch {}
+
               // Fetch the actual analysis score
-              let scoreMessage = "Deep analysis complete! I now have a comprehensive understanding of your business across 95 dimensions.";
+              let scoreMessage =
+                'Deep analysis complete! I now have a comprehensive understanding of your business across 95 dimensions.';
               try {
                 const analysisRes = await fetch(`/api/deep-analysis?sessionId=${sessionId}`);
                 if (analysisRes.ok) {
@@ -483,18 +557,16 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   }
                 }
               } catch {}
-              
+
               const completionMessage: Message = {
                 id: `analysis-complete-${Date.now()}`,
-                content: scoreMessage + " Ask me anything!",
+                content: scoreMessage + ' Ask me anything!',
                 sender: 'agent',
                 timestamp: new Date(),
                 type: 'analysis',
-                actions: [
-                  { type: 'link', label: 'View Full Results', url: '/analysis' }
-                ]
+                actions: [{ type: 'link', label: 'View Full Results', url: '/analysis' }],
               };
-              setMessages(prev => [...prev, completionMessage]);
+              setMessages((prev) => [...prev, completionMessage]);
               setShowCompletionCelebration(true);
               setTimeout(() => setShowCompletionCelebration(false), 5000);
               loadDataGaps();
@@ -503,32 +575,49 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
 
           let offline = !navigator.onLine;
           const connect = () => {
-            try { eventSource && eventSource.close(); } catch {}
+            try {
+              eventSource && eventSource.close();
+            } catch {}
             if (offline) return;
             eventSource = new EventSource(`/api/deep-analysis/progress?sessionId=${sessionId}`);
             eventSource.onmessage = handleMessage;
             eventSource.onerror = () => {
-              try { eventSource && eventSource.close(); } catch {}
+              try {
+                eventSource && eventSource.close();
+              } catch {}
               if (offline) return; // wait for online
               setTimeout(connect, backoff);
               backoff = Math.min(backoff * 2, 30000);
             };
           };
-          const handleOnline = () => { offline = false; backoff = 1000; connect(); };
-          const handleOffline = () => { offline = true; try { eventSource && eventSource.close(); } catch {} };
+          const handleOnline = () => {
+            offline = false;
+            backoff = 1000;
+            connect();
+          };
+          const handleOffline = () => {
+            offline = true;
+            try {
+              eventSource && eventSource.close();
+            } catch {}
+          };
           window.addEventListener('online', handleOnline);
           window.addEventListener('offline', handleOffline);
           connect();
-          
+
           // Only start analysis if not already triggered or running/completed via SSE
           const analysisKey = `analysis-triggered-${sessionId}`;
           const alreadyTriggered = sessionStorage.getItem(analysisKey);
-          const sseStatus = (window as any).__ff_analysis_status as ('idle'|'running'|'completed'|undefined);
-          
+          const sseStatus = (window as any).__ff_analysis_status as
+            | 'idle'
+            | 'running'
+            | 'completed'
+            | undefined;
+
           if (!alreadyTriggered && sseStatus !== 'running' && sseStatus !== 'completed') {
             sessionStorage.setItem(analysisKey, 'true');
             (window as any).__ff_analysis_status = 'running';
-            
+
             // Enrich businessInfo with user's goal/ambition from localStorage
             let enrichedBusinessInfo = businessInfo;
             try {
@@ -537,21 +626,30 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               const roadmapStr = localStorage.getItem('frejfund-roadmap');
               let goalTitle: string | undefined = undefined;
               if (goalId) {
-                goalTitle = goalId === 'custom' ? (customGoal || 'Custom goal') : goalId;
+                goalTitle = goalId === 'custom' ? customGoal || 'Custom goal' : goalId;
               }
               enrichedBusinessInfo = {
                 ...businessInfo,
                 userAmbition: goalTitle,
-                roadmapSummary: roadmapStr ? (() => {
-                  try {
-                    const r = JSON.parse(roadmapStr);
-                    return {
-                      goalTitle: r?.goalTitle,
-                      targetDate: r?.targetDate,
-                      milestones: Array.isArray(r?.milestones) ? r.milestones.map((m: any) => ({ title: m?.title, timeframe: m?.timeframe })) : []
-                    };
-                  } catch { return undefined; }
-                })() : undefined
+                roadmapSummary: roadmapStr
+                  ? (() => {
+                      try {
+                        const r = JSON.parse(roadmapStr);
+                        return {
+                          goalTitle: r?.goalTitle,
+                          targetDate: r?.targetDate,
+                          milestones: Array.isArray(r?.milestones)
+                            ? r.milestones.map((m: any) => ({
+                                title: m?.title,
+                                timeframe: m?.timeframe,
+                              }))
+                            : [],
+                        };
+                      } catch {
+                        return undefined;
+                      }
+                    })()
+                  : undefined,
               } as any;
             } catch {}
 
@@ -562,10 +660,10 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                 sessionId,
                 businessInfo: enrichedBusinessInfo,
                 scrapedContent: mergedContext || '',
-                uploadedDocuments: []
-              })
+                uploadedDocuments: [],
+              }),
             });
-            
+
             try {
               const data = await response.json();
               if (data.already_running) {
@@ -577,20 +675,25 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
           }
         } catch (error) {
           console.error('Failed to start deep analysis:', error);
-          setAnalysisProgress(prev => ({ ...prev, status: 'idle' }));
+          setAnalysisProgress((prev) => ({ ...prev, status: 'idle' }));
         }
 
         // Fetch one-shot summary to seed context (include prefetched docs). Keep it hidden.
         const summaryRes = await fetch('/api/summary', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             businessInfo,
             websiteText: mergedContext || businessInfo.preScrapedText,
             emails: [],
-            kpiPreview: null
-          })
+            kpiPreview: null,
+          }),
         });
-         if (summaryRes.ok) { try { await summaryRes.json(); } catch {} }
+        if (summaryRes.ok) {
+          try {
+            await summaryRes.json();
+          } catch {}
+        }
       } catch {}
     })();
   }, [businessInfo, sessionId]);
@@ -598,10 +701,19 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   const runDailyCompassNow = async () => {
     setLoadingCompass(true);
     try {
-      const res = await fetch('/api/cron/daily?ui=1', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId }) });
+      const res = await fetch('/api/cron/daily?ui=1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId }),
+      });
       if (res.ok) {
         const dc = await res.json();
-        setDailyCompass({ insights: dc.insights || [], risks: dc.risks || [], actions: dc.actions || [], citations: dc.citations });
+        setDailyCompass({
+          insights: dc.insights || [],
+          risks: dc.risks || [],
+          actions: dc.actions || [],
+          citations: dc.citations,
+        });
         setShowCompass(false);
       }
     } catch {}
@@ -615,25 +727,50 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       const res = await fetch(`/api/email/sync?sessionId=${encodeURIComponent(sessionId)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId })
+        body: JSON.stringify({ sessionId }),
       });
-      let indexedEmails = 0; let indexedChunks = 0;
+      let indexedEmails = 0;
+      let indexedChunks = 0;
       if (res.ok) {
         const data = await res.json().catch(() => ({}));
         indexedEmails = Number(data?.result?.indexedEmails || 0);
         indexedChunks = Number(data?.result?.indexedChunks || 0);
-        setInsightCard({ text: `New email analyzed: ${indexedEmails} email(s), ${indexedChunks} chunks`, type: 'success' });
+        setInsightCard({
+          text: `New email analyzed: ${indexedEmails} email(s), ${indexedChunks} chunks`,
+          type: 'success',
+        });
         setTimeout(() => setInsightCard(null), 3500);
       }
       // Refresh tips
       try {
-        const tipsRes = await fetch('/api/proactive', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ sessionId, businessInfo }) });
-        if (tipsRes.ok) { const d = await tipsRes.json(); if (Array.isArray(d.tips)) setTips(d.tips); setShowTips(true); }
+        const tipsRes = await fetch('/api/proactive', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId, businessInfo }),
+        });
+        if (tipsRes.ok) {
+          const d = await tipsRes.json();
+          if (Array.isArray(d.tips)) setTips(d.tips);
+          setShowTips(true);
+        }
       } catch {}
       // Refresh Daily Compass (with citations)
       try {
-        const dcRes = await fetch('/api/cron/daily?ui=1', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ sessionId }) });
-        if (dcRes.ok) { const dc = await dcRes.json(); setDailyCompass({ insights: dc.insights || [], risks: dc.risks || [], actions: dc.actions || [], citations: dc.citations }); setShowCompass(false); }
+        const dcRes = await fetch('/api/cron/daily?ui=1', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId }),
+        });
+        if (dcRes.ok) {
+          const dc = await dcRes.json();
+          setDailyCompass({
+            insights: dc.insights || [],
+            risks: dc.risks || [],
+            actions: dc.actions || [],
+            citations: dc.citations,
+          });
+          setShowCompass(false);
+        }
       } catch {}
     } catch (e) {
       console.error('Sync inbox failed', e);
@@ -641,16 +778,20 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
     setSyncingInbox(false);
   };
 
-  const addMessage = (content: string, sender: 'user' | 'agent', type: 'text' | 'analysis' | 'summary' = 'text') => {
+  const addMessage = (
+    content: string,
+    sender: 'user' | 'agent',
+    type: 'text' | 'analysis' | 'summary' = 'text',
+  ) => {
     const newMessage: Message = {
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       content,
       sender,
       timestamp: new Date(),
-      type
+      type,
     };
-    setMessages(prev => [...prev, newMessage]);
-    
+    setMessages((prev) => [...prev, newMessage]);
+
     // Save to database
     saveMessageToDb(newMessage);
   };
@@ -674,9 +815,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
     if (!hasKpis && !hasPlan && !hasSummary) return null;
     return (
       <div className="mt-2 space-y-3">
-        {hasSummary && (
-          <div className="text-sm text-gray-800 leading-relaxed">{data.summary}</div>
-        )}
+        {hasSummary && <div className="text-sm text-gray-800 leading-relaxed">{data.summary}</div>}
         {hasKpis && (
           <div className="overflow-x-auto">
             <div className="flex justify-end mb-2 gap-2">
@@ -684,26 +823,47 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                 className="text-xs border border-gray-300 rounded px-2 py-1 hover:bg-gray-50"
                 onClick={() => {
                   try {
-                    const rows = [['KPI','Definition','Target'], ...data.kpis.map((k: any) => [k.name, k.definition, k.target])];
-                    const csv = rows.map((r: any[]) => r.map((x: any) => '"'+String(x??'').replace(/"/g,'""')+'"').join(',')).join('\n');
+                    const rows = [
+                      ['KPI', 'Definition', 'Target'],
+                      ...data.kpis.map((k: any) => [k.name, k.definition, k.target]),
+                    ];
+                    const csv = rows
+                      .map((r: any[]) =>
+                        r
+                          .map((x: any) => '"' + String(x ?? '').replace(/"/g, '""') + '"')
+                          .join(','),
+                      )
+                      .join('\n');
                     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
-                    a.href = url; a.download = 'kpis.csv'; a.click(); URL.revokeObjectURL(url);
+                    a.href = url;
+                    a.download = 'kpis.csv';
+                    a.click();
+                    URL.revokeObjectURL(url);
                   } catch {}
                 }}
-              >Export CSV</button>
+              >
+                Export CSV
+              </button>
               <button
                 className="text-xs border border-gray-300 rounded px-2 py-1 hover:bg-gray-50"
                 onClick={() => {
                   try {
-                    const blob = new Blob([JSON.stringify({ kpis: data.kpis }, null, 2)], { type: 'application/json' });
+                    const blob = new Blob([JSON.stringify({ kpis: data.kpis }, null, 2)], {
+                      type: 'application/json',
+                    });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
-                    a.href = url; a.download = 'kpis.json'; a.click(); URL.revokeObjectURL(url);
+                    a.href = url;
+                    a.download = 'kpis.json';
+                    a.click();
+                    URL.revokeObjectURL(url);
                   } catch {}
                 }}
-              >Export JSON</button>
+              >
+                Export JSON
+              </button>
             </div>
             <table className="w-full text-xs text-left border border-gray-200 rounded-lg overflow-hidden">
               <thead className="bg-gray-100 text-gray-700">
@@ -718,7 +878,9 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   <tr key={i} className="odd:bg-white even:bg-gray-50">
                     <td className="px-3 py-2 border-b align-top text-gray-900">{k.name}</td>
                     <td className="px-3 py-2 border-b text-gray-700">{k.definition}</td>
-                    <td className="px-3 py-2 border-b text-gray-700 whitespace-nowrap">{k.target}</td>
+                    <td className="px-3 py-2 border-b text-gray-700 whitespace-nowrap">
+                      {k.target}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -736,7 +898,9 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   {p.timeline && <span className="text-gray-600"> • Timeline: {p.timeline}</span>}
                   {Array.isArray(p.actions) && p.actions.length > 0 && (
                     <ul className="list-disc ml-5 text-gray-700">
-                      {p.actions.map((a: string, j: number) => <li key={j}>{a}</li>)}
+                      {p.actions.map((a: string, j: number) => (
+                        <li key={j}>{a}</li>
+                      ))}
                     </ul>
                   )}
                 </li>
@@ -786,7 +950,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
 
   const simulateTyping = async (message: string) => {
     setIsTyping(true);
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+    await new Promise((resolve) => setTimeout(resolve, 1000 + Math.random() * 2000));
     setIsTyping(false);
     addMessage(message, 'agent');
   };
@@ -794,25 +958,30 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   const getAIResponse = async (userMessage: string) => {
     setIsTyping(true);
     const startTs = Date.now();
-    
+
     try {
       const conversationHistory = messages
-        .filter(m => m.type !== 'summary')
+        .filter((m) => m.type !== 'summary')
         .slice(-6)
-        .map(msg => ({
-        role: msg.sender === 'user' ? 'user' as const : 'assistant' as const,
-        content: msg.content
-      }));
+        .map((msg) => ({
+          role: msg.sender === 'user' ? ('user' as const) : ('assistant' as const),
+          content: msg.content,
+        }));
 
       // Attach short context from extracted docs if available in businessInfo
       let docContext: string | undefined = businessInfo.preScrapedText || undefined;
-      let scrapedSources: Array<{ url?: string; snippet?: string }> = businessInfo.preScrapedSources || [];
+      let scrapedSources: Array<{ url?: string; snippet?: string }> =
+        businessInfo.preScrapedSources || [];
       try {
         const files = (businessInfo as any).uploadedFiles as File[] | undefined;
         if (files && files.length > 0) {
           const formData = new FormData();
           files.slice(0, 3).forEach((f, idx) => formData.append(`file_${idx}`, f, f.name));
-          const res = await fetch('/api/extract', { method: 'POST', headers: { 'x-session-id': sessionId }, body: formData });
+          const res = await fetch('/api/extract', {
+            method: 'POST',
+            headers: { 'x-session-id': sessionId },
+            body: formData,
+          });
           if (res.ok) {
             const { documents } = await res.json();
             const combined = (documents || []).map((d: { text: string }) => d.text).join('\n\n');
@@ -827,7 +996,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
             const scrapeRes = await fetch('/api/scrape', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ url: businessInfo.website })
+              body: JSON.stringify({ url: businessInfo.website }),
             });
             if (scrapeRes.ok) {
               const { result, sources } = await scrapeRes.json();
@@ -848,8 +1017,14 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         const resp = await fetch('/api/chat/stream', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: userMessage, businessInfo, conversationHistory, docContext, sessionId }),
-          signal: abortRef.current.signal
+          body: JSON.stringify({
+            message: userMessage,
+            businessInfo,
+            conversationHistory,
+            docContext,
+            sessionId,
+          }),
+          signal: abortRef.current.signal,
         });
         if (!resp.ok || !resp.body) throw new Error('stream failed');
 
@@ -857,10 +1032,16 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         const decoder = new TextDecoder();
         let acc = '';
         const newMsgId = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        setMessages(prev => [...prev, { id: newMsgId, content: '', sender: 'agent', timestamp: new Date(), metrics: {} }]);
+        setMessages((prev) => [
+          ...prev,
+          { id: newMsgId, content: '', sender: 'agent', timestamp: new Date(), metrics: {} },
+        ]);
 
         let timedOut = false;
-        const timer = setTimeout(() => { timedOut = true; abortRef.current?.abort(); }, 30000);
+        const timer = setTimeout(() => {
+          timedOut = true;
+          abortRef.current?.abort();
+        }, 30000);
         try {
           while (true) {
             const { value, done } = await reader.read();
@@ -877,29 +1058,68 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                 const jsonStr = after.slice('<<<SOURCES:'.length, endIdx);
                 try {
                   const sources = JSON.parse(jsonStr);
-                  const evidence = Array.isArray(sources) ? sources.map((s: any) => ({ source: 'website' as const, snippet: String(s.snippet || '').slice(0, 200), url: s.url })) : undefined;
+                  const evidence = Array.isArray(sources)
+                    ? sources.map((s: any) => ({
+                        source: 'website' as const,
+                        snippet: String(s.snippet || '').slice(0, 200),
+                        url: s.url,
+                      }))
+                    : undefined;
                   const latencyMs = Date.now() - startTs;
-                  const tokensEstimate = Math.ceil((before.length + (acc.length)) / 4);
-                  const price = { input: Number(process.env.MODEL_PRICE_INPUT_PER_MTOK || 0), output: Number(process.env.MODEL_PRICE_OUTPUT_PER_MTOK || 0) };
+                  const tokensEstimate = Math.ceil((before.length + acc.length) / 4);
+                  const price = {
+                    input: Number(process.env.MODEL_PRICE_INPUT_PER_MTOK || 0),
+                    output: Number(process.env.MODEL_PRICE_OUTPUT_PER_MTOK || 0),
+                  };
                   const mtok = tokensEstimate / 1_000_000;
                   const costUsdEstimate = (price.output || 0) * mtok;
                   const finalContent = `${before.trim()}`.trim();
-                  const mergedEvidence = (evidence && evidence.length ? evidence : (scrapedSources.length ? scrapedSources.map((s) => ({ source: 'website' as const, snippet: String(s.snippet || '').slice(0, 200), url: s.url })) : undefined));
-                  updateMessageWithMetrics(newMsgId, { content: finalContent, evidence: mergedEvidence, metrics: { latencyMs, tokensEstimate, costUsdEstimate } });
+                  const mergedEvidence =
+                    evidence && evidence.length
+                      ? evidence
+                      : scrapedSources.length
+                        ? scrapedSources.map((s) => ({
+                            source: 'website' as const,
+                            snippet: String(s.snippet || '').slice(0, 200),
+                            url: s.url,
+                          }))
+                        : undefined;
+                  updateMessageWithMetrics(newMsgId, {
+                    content: finalContent,
+                    evidence: mergedEvidence,
+                    metrics: { latencyMs, tokensEstimate, costUsdEstimate },
+                  });
                 } catch {
                   const latencyMs = Date.now() - startTs;
-                  const tokensEstimate = Math.ceil((before.length + (acc.length)) / 4);
-                  const price = { input: Number(process.env.MODEL_PRICE_INPUT_PER_MTOK || 0), output: Number(process.env.MODEL_PRICE_OUTPUT_PER_MTOK || 0) };
+                  const tokensEstimate = Math.ceil((before.length + acc.length) / 4);
+                  const price = {
+                    input: Number(process.env.MODEL_PRICE_INPUT_PER_MTOK || 0),
+                    output: Number(process.env.MODEL_PRICE_OUTPUT_PER_MTOK || 0),
+                  };
                   const mtok = tokensEstimate / 1_000_000;
                   const costUsdEstimate = (price.output || 0) * mtok;
                   const finalContent = `${before.trim()}`.trim();
-                  const mergedEvidence = (scrapedSources.length ? scrapedSources.map((s) => ({ source: 'website' as const, snippet: String(s.snippet || '').slice(0, 200), url: s.url })) : undefined);
-                  updateMessageWithMetrics(newMsgId, { content: finalContent, evidence: mergedEvidence, metrics: { latencyMs, tokensEstimate, costUsdEstimate } });
+                  const mergedEvidence = scrapedSources.length
+                    ? scrapedSources.map((s) => ({
+                        source: 'website' as const,
+                        snippet: String(s.snippet || '').slice(0, 200),
+                        url: s.url,
+                      }))
+                    : undefined;
+                  updateMessageWithMetrics(newMsgId, {
+                    content: finalContent,
+                    evidence: mergedEvidence,
+                    metrics: { latencyMs, tokensEstimate, costUsdEstimate },
+                  });
                 }
                 acc = '';
               }
             } else {
-              setMessages(prev => prev.map(m => m.id === newMsgId ? { ...m, content: (m.content + chunk).trimStart() } : m));
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === newMsgId ? { ...m, content: (m.content + chunk).trimStart() } : m,
+                ),
+              );
             }
           }
         } finally {
@@ -907,61 +1127,81 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         }
       } catch (streamErr) {
         // Fallback to non-streaming
-      // Non-streaming fallback with simple retry and soft messaging on 502
-      const doOnce = async () => fetch('/api/ai', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: userMessage,
-          businessInfo,
-          conversationHistory,
-            docContext,
-            sessionId
-        })
-      });
+        // Non-streaming fallback with simple retry and soft messaging on 502
+        const doOnce = async () =>
+          fetch('/api/ai', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              message: userMessage,
+              businessInfo,
+              conversationHistory,
+              docContext,
+              sessionId,
+            }),
+          });
 
-      let response = await doOnce();
-      if (!response.ok) {
-        // quick second attempt
-        await new Promise(r=>setTimeout(r, 400));
-        response = await doOnce();
-      }
+        let response = await doOnce();
+        if (!response.ok) {
+          // quick second attempt
+          await new Promise((r) => setTimeout(r, 400));
+          response = await doOnce();
+        }
 
-      if (!response.ok) {
-        const errText = await response.text().catch(() => '');
-        console.error('AI API error:', response.status, errText);
-        setIsTyping(false);
-        setMessages(prev => ([
-          ...prev,
-          {
-            id: `ai-failed-${Date.now()}`,
-            sender: 'agent',
-            content: 'Analysis is heavy right now. I switched to a lighter mode — ask one question and I will answer briefly while the deep analysis continues.',
-            timestamp: new Date(),
-            type: 'text'
-          }
-        ]));
-        return;
-      }
+        if (!response.ok) {
+          const errText = await response.text().catch(() => '');
+          console.error('AI API error:', response.status, errText);
+          setIsTyping(false);
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: `ai-failed-${Date.now()}`,
+              sender: 'agent',
+              content:
+                'Analysis is heavy right now. I switched to a lighter mode — ask one question and I will answer briefly while the deep analysis continues.',
+              timestamp: new Date(),
+              type: 'text',
+            },
+          ]);
+          return;
+        }
 
-      const data = await response.json();
+        const data = await response.json();
         // Optionally attach simple evidence: if we scraped, include a tiny snippet reference
-        const apiSources = (data.sources && Array.isArray(data.sources) && data.sources.length) ? data.sources : scrapedSources;
-        const evidence = (apiSources && apiSources.length)
-          ? apiSources.map((s: any) => ({ source: 'website' as const, snippet: String(s.snippet || '').slice(0, 200), url: s.url }))
-          : (docContext ? [{ source: 'website' as const, snippet: String(docContext).slice(0, 200) }] : undefined);
+        const apiSources =
+          data.sources && Array.isArray(data.sources) && data.sources.length
+            ? data.sources
+            : scrapedSources;
+        const evidence =
+          apiSources && apiSources.length
+            ? apiSources.map((s: any) => ({
+                source: 'website' as const,
+                snippet: String(s.snippet || '').slice(0, 200),
+                url: s.url,
+              }))
+            : docContext
+              ? [{ source: 'website' as const, snippet: String(docContext).slice(0, 200) }]
+              : undefined;
         const newMsgId = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         const latencyMs = Date.now() - startTs;
-          const tokensEstimate = Math.ceil((data.response.length) / 4);
-          const model = getChatModel('complex'); // Chat now uses gpt-5
+        const tokensEstimate = Math.ceil(data.response.length / 4);
+        const model = getChatModel('complex'); // Chat now uses gpt-5
         const { getModelPricing } = await import('@/lib/ai-client');
         const price = getModelPricing(model);
         const mtok = tokensEstimate / 1_000_000;
         const costUsdEstimate = (price.output || 0) * mtok;
-        const newMessage: Message = { id: newMsgId, content: `${data.response}`.trim(), sender: 'agent', timestamp: new Date(), evidence, metrics: { latencyMs, tokensEstimate, costUsdEstimate }, type: 'text' };
-        setMessages(prev => [...prev, newMessage]);
+        const newMessage: Message = {
+          id: newMsgId,
+          content: `${data.response}`.trim(),
+          sender: 'agent',
+          timestamp: new Date(),
+          evidence,
+          metrics: { latencyMs, tokensEstimate, costUsdEstimate },
+          type: 'text',
+        };
+        setMessages((prev) => [...prev, newMessage]);
         saveMessageToDb(newMessage);
       }
       setIsTyping(false);
@@ -975,26 +1215,28 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
 
   const getFallbackResponse = (userMessage: string): string => {
     const lowerMessage = userMessage.toLowerCase();
-    
+
     if (lowerMessage.includes('competitor') || lowerMessage.includes('competition')) {
       return `Based on your ${businessInfo.industry} business in the ${businessInfo.targetMarket} market, I can help you analyze your competitive landscape. Let me gather some insights about your main competitors and differentiation strategies.`;
     } else if (lowerMessage.includes('funding') || lowerMessage.includes('investment')) {
-      const fundingAdvice = businessInfo.stage === 'idea' 
-        ? 'As an idea-stage startup, focus on pre-seed funding from angels. Target €100K-500K to validate your concept and build an MVP.'
-        : businessInfo.stage === 'mvp'
-        ? 'With an MVP, you\'re ready for seed funding. Look for €500K-2M to prove product-market fit and gain initial traction.'
-        : 'Given your current stage, consider Series A funding to scale your go-to-market strategy and expand your team.';
+      const fundingAdvice =
+        businessInfo.stage === 'idea'
+          ? 'As an idea-stage startup, focus on pre-seed funding from angels. Target €100K-500K to validate your concept and build an MVP.'
+          : businessInfo.stage === 'mvp'
+            ? "With an MVP, you're ready for seed funding. Look for €500K-2M to prove product-market fit and gain initial traction."
+            : 'Given your current stage, consider Series A funding to scale your go-to-market strategy and expand your team.';
       return fundingAdvice;
     } else if (lowerMessage.includes('team') || lowerMessage.includes('hiring')) {
-      const teamAdvice = businessInfo.teamSize === '1' 
-        ? 'As a solo founder, consider bringing on a co-founder with complementary skills. Look for someone with domain expertise in sales, marketing, or technical development depending on your background.'
-        : `With a team of ${businessInfo.teamSize}, focus on scaling key roles. For ${businessInfo.industry} companies, typically sales and engineering are critical hires at your stage.`;
+      const teamAdvice =
+        businessInfo.teamSize === '1'
+          ? 'As a solo founder, consider bringing on a co-founder with complementary skills. Look for someone with domain expertise in sales, marketing, or technical development depending on your background.'
+          : `With a team of ${businessInfo.teamSize}, focus on scaling key roles. For ${businessInfo.industry} companies, typically sales and engineering are critical hires at your stage.`;
       return teamAdvice;
     } else {
       const responses = [
         `That's a great question about your ${businessInfo.industry} startup. Let me think about how this applies to your ${businessInfo.stage} stage business...`,
         `Interesting point! For a ${businessInfo.businessModel} company targeting ${businessInfo.targetMarket}, I'd recommend...`,
-        `Based on your business context, here's what I think about that...`
+        `Based on your business context, here's what I think about that...`,
       ];
       return responses[Math.floor(Math.random() * responses.length)];
     }
@@ -1002,30 +1244,37 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
 
   const handleFileUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    
+
     const file = files[0];
     const sessionId = localStorage.getItem('frejfund-session-id');
-    
+
     setInsightCard({ text: `Uploading ${file.name}...`, type: 'info' });
-    
+
     try {
       const response = await fetch('/api/documents', {
         method: 'POST',
         headers: {
           'x-session-id': sessionId || '',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          type: file.name.includes('pitch') || file.name.includes('deck') ? 'pitch_deck' : 
-                file.name.includes('financial') || file.name.includes('model') ? 'financial_model' : 'other',
+          type:
+            file.name.includes('pitch') || file.name.includes('deck')
+              ? 'pitch_deck'
+              : file.name.includes('financial') || file.name.includes('model')
+                ? 'financial_model'
+                : 'other',
           title: file.name,
           content: await file.text(),
-          status: 'uploaded'
-        })
+          status: 'uploaded',
+        }),
       });
-      
+
       if (response.ok) {
-        setInsightCard({ text: `${file.name} uploaded. Analyzing to improve your profile...`, type: 'success' });
+        setInsightCard({
+          text: `${file.name} uploaded. Analyzing to improve your profile...`,
+          type: 'success',
+        });
         setTimeout(() => setInsightCard(null), 3000);
       } else {
         setInsightCard({ text: 'Upload failed. Please try again.', type: 'warning' });
@@ -1046,9 +1295,14 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
     setInputValue('');
 
     // Handle analysis requests specially
-    if (userMessage.toLowerCase().includes('analysis') || userMessage.toLowerCase().includes('analyze')) {
-      await simulateTyping('Perfect! I\'ll run a comprehensive business analysis for you. This will take a few minutes as I analyze your business model, market opportunity, team capabilities, and generate personalized insights.');
-      
+    if (
+      userMessage.toLowerCase().includes('analysis') ||
+      userMessage.toLowerCase().includes('analyze')
+    ) {
+      await simulateTyping(
+        "Perfect! I'll run a comprehensive business analysis for you. This will take a few minutes as I analyze your business model, market opportunity, team capabilities, and generate personalized insights.",
+      );
+
       setTimeout(() => {
         setShowAnalysisModal(true);
       }, 1000);
@@ -1061,11 +1315,11 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   const handleAnalysisComplete = (result: BusinessAnalysisResult) => {
     setShowAnalysisModal(false);
     setAnalysisResult(result);
-    
+
     addMessage(
       `Analysis complete! I've evaluated your ${businessInfo.industry} business across 10 key dimensions with ${result.accuracy}% accuracy. Your overall investment readiness score is ${result.scores.overallScore}/100. Here are my key insights and recommendations.`,
       'agent',
-      'analysis'
+      'analysis',
     );
 
     setTimeout(() => {
@@ -1076,74 +1330,74 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   // Rotating question suggestions based on business context
   const getContextualQuestions = () => {
     const baseQuestions = [
-      "What should my next milestone be in the next 90 days?",
-      "How can I improve my pitch to investors?",
-      "What are the biggest risks for my business right now?",
-      "How should I price my product or service?",
-      "What metrics should I be tracking at my stage?",
-      "How can I differentiate from my competitors?",
+      'What should my next milestone be in the next 90 days?',
+      'How can I improve my pitch to investors?',
+      'What are the biggest risks for my business right now?',
+      'How should I price my product or service?',
+      'What metrics should I be tracking at my stage?',
+      'How can I differentiate from my competitors?',
       "What's my ideal customer acquisition strategy?",
-      "When should I start fundraising?",
-      "How can I validate my market demand?",
-      "What team members should I hire next?"
+      'When should I start fundraising?',
+      'How can I validate my market demand?',
+      'What team members should I hire next?',
     ];
 
     const stageSpecificQuestions = {
-      'idea': [
-        "How do I validate my business idea with potential customers?",
+      idea: [
+        'How do I validate my business idea with potential customers?',
         "What's the minimum viable product I should build first?",
-        "How much money do I need to get started?",
-        "Should I find a co-founder or go solo?",
-        "What legal structure should I choose for my startup?"
+        'How much money do I need to get started?',
+        'Should I find a co-founder or go solo?',
+        'What legal structure should I choose for my startup?',
       ],
-      'mvp': [
-        "How do I get my first 100 customers?",
-        "What features should I prioritize in my next version?",
-        "How do I know if I have product-market fit?",
-        "When should I start charging customers?",
-        "How can I improve my user onboarding?"
+      mvp: [
+        'How do I get my first 100 customers?',
+        'What features should I prioritize in my next version?',
+        'How do I know if I have product-market fit?',
+        'When should I start charging customers?',
+        'How can I improve my user onboarding?',
       ],
       'early-revenue': [
-        "How can I scale my customer acquisition?",
+        'How can I scale my customer acquisition?',
         "What's my path to profitability?",
-        "How do I improve my unit economics?",
-        "When should I expand to new markets?",
-        "How can I reduce customer churn?"
+        'How do I improve my unit economics?',
+        'When should I expand to new markets?',
+        'How can I reduce customer churn?',
       ],
-      'scaling': [
-        "How do I prepare for Series A funding?",
+      scaling: [
+        'How do I prepare for Series A funding?',
         "What's my international expansion strategy?",
-        "How can I build a scalable sales process?",
-        "What operational systems do I need?",
-        "How do I maintain company culture while growing?"
-      ]
+        'How can I build a scalable sales process?',
+        'What operational systems do I need?',
+        'How do I maintain company culture while growing?',
+      ],
     };
 
     const industrySpecificQuestions: Record<string, string[]> = {
-      'SaaS': [
-        "How can I improve my SaaS metrics (CAC, LTV, churn)?",
+      SaaS: [
+        'How can I improve my SaaS metrics (CAC, LTV, churn)?',
         "What's the best pricing model for my SaaS product?",
-        "How do I build a scalable customer success program?"
+        'How do I build a scalable customer success program?',
       ],
       'E-commerce': [
-        "How can I improve my conversion rate and AOV?",
+        'How can I improve my conversion rate and AOV?',
         "What's the best customer acquisition strategy for e-commerce?",
-        "How do I optimize my inventory management?"
+        'How do I optimize my inventory management?',
       ],
-      'Fintech': [
-        "What regulatory requirements do I need to consider?",
-        "How do I build trust with financial service customers?",
-        "What's my path to financial licenses?"
-      ]
+      Fintech: [
+        'What regulatory requirements do I need to consider?',
+        'How do I build trust with financial service customers?',
+        "What's my path to financial licenses?",
+      ],
     };
 
     // Combine questions based on context
     let allQuestions = [...baseQuestions];
-    
+
     if (stageSpecificQuestions[businessInfo.stage]) {
       allQuestions = [...allQuestions, ...stageSpecificQuestions[businessInfo.stage]];
     }
-    
+
     if (industrySpecificQuestions[businessInfo.industry]) {
       allQuestions = [...allQuestions, ...industrySpecificQuestions[businessInfo.industry]];
     }
@@ -1157,21 +1411,21 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
 
   // Shorter placeholders for input field
   const placeholderQuestions = [
-    "Ask anything...",
-    "What should I focus on next?",
-    "How do I grow faster?",
-    "Am I ready to fundraise?",
-    "What metrics matter most?",
-    "How can I reduce churn?",
-    "Should I hire?",
-    "Improve my pitch?"
+    'Ask anything...',
+    'What should I focus on next?',
+    'How do I grow faster?',
+    'Am I ready to fundraise?',
+    'What metrics matter most?',
+    'How can I reduce churn?',
+    'Should I hire?',
+    'Improve my pitch?',
   ];
 
   // Rotate questions every 4 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentQuestionIndex(prev => (prev + 1) % rotatingQuestions.length);
-      setCurrentPlaceholderIndex(prev => (prev + 1) % placeholderQuestions.length);
+      setCurrentQuestionIndex((prev) => (prev + 1) % rotatingQuestions.length);
+      setCurrentPlaceholderIndex((prev) => (prev + 1) % placeholderQuestions.length);
     }, 4000);
 
     return () => clearInterval(interval);
@@ -1184,7 +1438,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       action: () => {
         addMessage('Please run a comprehensive business analysis', 'user');
         handleSendMessage();
-      }
+      },
     },
     {
       icon: TrendingUp,
@@ -1192,7 +1446,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       action: () => {
         addMessage('Analyze my market opportunity and competition', 'user');
         handleSendMessage();
-      }
+      },
     },
     {
       icon: FileText,
@@ -1200,16 +1454,16 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       action: () => {
         addMessage('Help me improve my pitch deck and presentation', 'user');
         handleSendMessage();
-      }
+      },
     },
     {
       icon: BarChart3,
       label: 'Funding Strategy',
       action: () => {
-        addMessage('What\'s the best funding strategy for my stage?', 'user');
+        addMessage("What's the best funding strategy for my stage?", 'user');
         handleSendMessage();
-      }
-    }
+      },
+    },
   ];
 
   // Show loading state while fetching message history
@@ -1227,16 +1481,16 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
   return (
     <div className="h-screen bg-white flex flex-col">
       {/* Header */}
-      <motion.header 
+      <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="bg-white border-b border-gray-200 px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between"
       >
         <div className="flex items-center space-x-2 sm:space-x-3">
-          <motion.div 
+          <motion.div
             className="w-8 h-8 sm:w-10 sm:h-10 bg-black rounded-full flex items-center justify-center cursor-pointer"
             whileHover={{ scale: 1.02 }}
-            onClick={() => window.location.href = '/dashboard'}
+            onClick={() => (window.location.href = '/dashboard')}
           >
             <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-white rounded-full" />
           </motion.div>
@@ -1261,7 +1515,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                       ({Math.round((analysisProgress.current / analysisProgress.total) * 100)}%)
                     </span>
                     <Info className="w-3 h-3 ml-1.5 text-gray-400 cursor-help" />
-                    
+
                     {/* Tooltip - appears below the icon */}
                     <div className="absolute top-full left-0 mt-2 w-72 p-4 bg-white text-black text-xs rounded-xl shadow-2xl border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-[100]">
                       <div className="font-bold mb-2 text-sm">Deep Analysis in Progress</div>
@@ -1275,11 +1529,15 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                       </div>
                       <div className="mt-3 pt-3 border-t border-gray-200">
                         <p className="font-medium text-gray-900">Data sources:</p>
-                        <p className="text-gray-700">Website, LinkedIn, GitHub, Product Hunt, documents</p>
+                        <p className="text-gray-700">
+                          Website, LinkedIn, GitHub, Product Hunt, documents
+                        </p>
                       </div>
                       <div className="mt-2 pt-2 border-t border-gray-200 rounded-lg p-2 -mx-1 bg-gray-50">
                         <p className="font-bold text-gray-900">15-30 minutes</p>
-                        <p className="text-gray-700 text-[10px]">Optimized for cost with gpt-5-mini</p>
+                        <p className="text-gray-700 text-[10px]">
+                          Optimized for cost with gpt-5-mini
+                        </p>
                       </div>
                       {/* Arrow pointing up */}
                       <div className="absolute -top-2 left-4 w-0 h-0 border-l-[8px] border-r-[8px] border-b-[8px] border-transparent border-b-white"></div>
@@ -1311,7 +1569,9 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
             {showInfoPopup && (
               <div className="absolute right-0 top-9 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-3 text-xs">
                 <div className="font-semibold text-black mb-1">{businessInfo.name}</div>
-                <div className="text-gray-600">{businessInfo.industry} • {businessInfo.stage} stage</div>
+                <div className="text-gray-600">
+                  {businessInfo.industry} • {businessInfo.stage} stage
+                </div>
                 <div className="text-gray-600">Targeting {businessInfo.targetMarket}</div>
                 <div className="text-gray-600 mt-1">{businessInfo.businessModel}</div>
               </div>
@@ -1324,7 +1584,9 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
           >
             <Lightbulb className="w-3.5 h-3.5 text-gray-600" />
             {tips.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-black rounded-full text-white text-[9px] flex items-center justify-center">{tips.length}</span>
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-black rounded-full text-white text-[9px] flex items-center justify-center">
+                {tips.length}
+              </span>
             )}
           </button>
           <div className="relative">
@@ -1346,9 +1608,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   <h3 className="font-semibold text-black">VC Interest</h3>
                 </div>
                 {notifications.length === 0 ? (
-                  <div className="p-6 text-center text-sm text-gray-500">
-                    No new notifications
-                  </div>
+                  <div className="p-6 text-center text-sm text-gray-500">No new notifications</div>
                 ) : (
                   <div className="divide-y divide-gray-100">
                     {notifications.map((notif) => (
@@ -1358,9 +1618,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                             <div className="text-sm font-semibold text-black mb-1">
                               🎉 {notif.vcFirm} is interested!
                             </div>
-                            <div className="text-xs text-gray-600 mb-3">
-                              {notif.message}
-                            </div>
+                            <div className="text-xs text-gray-600 mb-3">{notif.message}</div>
                           </div>
                           {notif.matchScore && (
                             <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs font-bold">
@@ -1380,12 +1638,15 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                                       body: JSON.stringify({
                                         requestId: notif.id,
                                         response: 'accept',
-                                        message: 'Yes, I\'d love to connect!'
-                                      })
+                                        message: "Yes, I'd love to connect!",
+                                      }),
                                     });
                                     loadNotifications();
                                     setShowNotifications(false);
-                                    addMessage(`Great news! I've accepted the intro request from ${notif.vcFirm}. You can now message them directly!`, 'agent');
+                                    addMessage(
+                                      `Great news! I've accepted the intro request from ${notif.vcFirm}. You can now message them directly!`,
+                                      'agent',
+                                    );
                                   } catch (error) {
                                     console.error('Error accepting intro:', error);
                                   }
@@ -1403,8 +1664,8 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                                       body: JSON.stringify({
                                         requestId: notif.id,
                                         response: 'decline',
-                                        message: 'Not interested right now'
-                                      })
+                                        message: 'Not interested right now',
+                                      }),
                                     });
                                     loadNotifications();
                                   } catch (error) {
@@ -1422,7 +1683,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                                 setActiveMatchChat({
                                   introRequestId: notif.id,
                                   vcName: notif.vcName,
-                                  vcFirm: notif.vcFirm
+                                  vcFirm: notif.vcFirm,
                                 });
                                 setShowMatchChat(true);
                                 setShowNotifications(false);
@@ -1457,18 +1718,48 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
             </button>
             {showDataMenu && (
               <div className="absolute right-0 top-9 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                <button onClick={async ()=>{ setShowDataMenu(false); await syncInboxNow(); }} className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors disabled:opacity-50" disabled={syncingInbox}>
+                <button
+                  onClick={async () => {
+                    setShowDataMenu(false);
+                    await syncInboxNow();
+                  }}
+                  className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  disabled={syncingInbox}
+                >
                   {syncingInbox ? 'Syncing Inbox…' : 'Sync Inbox now'}
                 </button>
-                <button onClick={()=>{setShowEmailModal(true); setShowDataMenu(false);}} className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors">Add single email…</button>
-                <button onClick={()=>{setShowKpiModal(true); setShowDataMenu(false);}} className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors">KPI CSV</button>
-                <button onClick={()=>{setShowDeckModal(true); setShowDataMenu(false);}} className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors">Pitch Deck</button>
+                <button
+                  onClick={() => {
+                    setShowEmailModal(true);
+                    setShowDataMenu(false);
+                  }}
+                  className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors"
+                >
+                  Add single email…
+                </button>
+                <button
+                  onClick={() => {
+                    setShowKpiModal(true);
+                    setShowDataMenu(false);
+                  }}
+                  className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors"
+                >
+                  KPI CSV
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDeckModal(true);
+                    setShowDataMenu(false);
+                  }}
+                  className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors"
+                >
+                  Pitch Deck
+                </button>
               </div>
             )}
           </div>
         </div>
       </motion.header>
-
 
       {/* Thinking progress bar */}
       <div className="h-1 w-full bg-gray-100">
@@ -1487,29 +1778,44 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
               <div className="text-sm font-semibold text-black">Daily Compass</div>
               <div className="flex items-center gap-2">
-                <button onClick={runDailyCompassNow} disabled={loadingCompass} className={`px-3 py-1.5 text-xs rounded-lg ${loadingCompass ? 'bg-gray-200 text-gray-500' : 'bg-black text-white hover:bg-gray-800'} transition-colors`}>
+                <button
+                  onClick={runDailyCompassNow}
+                  disabled={loadingCompass}
+                  className={`px-3 py-1.5 text-xs rounded-lg ${loadingCompass ? 'bg-gray-200 text-gray-500' : 'bg-black text-white hover:bg-gray-800'} transition-colors`}
+                >
                   {loadingCompass ? 'Updating…' : 'Run now'}
                 </button>
-                <button onClick={() => setShowCompass(false)} className="px-3 py-1.5 text-xs text-gray-600 hover:text-black">Dismiss</button>
+                <button
+                  onClick={() => setShowCompass(false)}
+                  className="px-3 py-1.5 text-xs text-gray-600 hover:text-black"
+                >
+                  Dismiss
+                </button>
               </div>
             </div>
             <div className="grid md:grid-cols-3 gap-4 p-4">
               <div>
                 <div className="text-xs font-semibold text-gray-700 mb-2">Insights</div>
                 <ul className="space-y-1 list-disc ml-4 text-sm text-gray-800">
-                  {(dailyCompass.insights || []).slice(0,3).map((t, i) => <li key={`ins-${i}`}>{t}</li>)}
+                  {(dailyCompass.insights || []).slice(0, 3).map((t, i) => (
+                    <li key={`ins-${i}`}>{t}</li>
+                  ))}
                 </ul>
               </div>
               <div>
                 <div className="text-xs font-semibold text-gray-700 mb-2">Risks</div>
                 <ul className="space-y-1 list-disc ml-4 text-sm text-gray-800">
-                  {(dailyCompass.risks || []).slice(0,3).map((t, i) => <li key={`risk-${i}`}>{t}</li>)}
+                  {(dailyCompass.risks || []).slice(0, 3).map((t, i) => (
+                    <li key={`risk-${i}`}>{t}</li>
+                  ))}
                 </ul>
               </div>
               <div>
                 <div className="text-xs font-semibold text-gray-700 mb-2">Actions</div>
                 <ul className="space-y-1 list-disc ml-4 text-sm text-gray-800">
-                  {(dailyCompass.actions || []).slice(0,3).map((t, i) => <li key={`act-${i}`}>{t}</li>)}
+                  {(dailyCompass.actions || []).slice(0, 3).map((t, i) => (
+                    <li key={`act-${i}`}>{t}</li>
+                  ))}
                 </ul>
               </div>
             </div>
@@ -1531,41 +1837,47 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               }`}
             >
               {message.sender === 'agent' && (
-                <motion.div 
+                <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                   className="w-6 h-6 sm:w-8 sm:h-8 bg-black rounded-full flex items-center justify-center flex-shrink-0 relative"
                 >
-                  <motion.div 
+                  <motion.div
                     className="w-0.5 h-0.5 sm:w-1 sm:h-1 bg-white rounded-full"
-                    animate={isTyping ? { 
-                      scale: [1, 1.3, 1],
-                      opacity: [1, 0.7, 1]
-                    } : {}}
-                    transition={{ 
-                      duration: 1.5, 
+                    animate={
+                      isTyping
+                        ? {
+                            scale: [1, 1.3, 1],
+                            opacity: [1, 0.7, 1],
+                          }
+                        : {}
+                    }
+                    transition={{
+                      duration: 1.5,
                       repeat: isTyping ? Infinity : 0,
-                      ease: "easeInOut"
+                      ease: 'easeInOut',
                     }}
                   />
                 </motion.div>
               )}
-              
-              <div className={`max-w-[85%] sm:max-w-md ${message.sender === 'user' ? 'order-1' : ''}`}>
-                  <motion.div
-                    initial={{ scale: 0.95, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    whileHover={{ scale: 1.01 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                    className={`px-3 sm:px-4 py-2 sm:py-2.5 group relative overflow-hidden ${
-                      message.sender === 'user'
-                        ? 'bg-black text-white rounded-2xl rounded-br-sm text-sm sm:text-base'
-                        : message.type === 'analysis'
+
+              <div
+                className={`max-w-[85%] sm:max-w-md ${message.sender === 'user' ? 'order-1' : ''}`}
+              >
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                  className={`px-3 sm:px-4 py-2 sm:py-2.5 group relative overflow-hidden ${
+                    message.sender === 'user'
+                      ? 'bg-black text-white rounded-2xl rounded-br-sm text-sm sm:text-base'
+                      : message.type === 'analysis'
                         ? 'bg-gray-100 text-gray-900 rounded-2xl rounded-bl-sm border border-gray-200 text-sm sm:text-base'
                         : 'bg-gray-100 text-gray-900 rounded-2xl rounded-bl-sm text-sm sm:text-base'
-                    }`}
-                  >
+                  }`}
+                >
                   {/* Subtle gradient overlay on hover */}
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-br from-transparent to-black/5 opacity-0 pointer-events-none"
@@ -1576,29 +1888,45 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                     <StructuredRenderer data={parseStructured(message.content)} />
                   ) : message.sender === 'agent' ? (
                     <div className="text-sm leading-relaxed max-w-none">
-                      <ReactMarkdown 
+                      <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
                         components={{
-                          p: ({children}) => (
-                            <p className="mb-2 sm:mb-2.5 leading-relaxed text-gray-800">{children}</p>
+                          p: ({ children }) => (
+                            <p className="mb-2 sm:mb-2.5 leading-relaxed text-gray-800">
+                              {children}
+                            </p>
                           ),
-                          ul: ({children}) => (
-                            <ul className="my-2 pl-4 list-disc space-y-1 text-gray-800">{children}</ul>
+                          ul: ({ children }) => (
+                            <ul className="my-2 pl-4 list-disc space-y-1 text-gray-800">
+                              {children}
+                            </ul>
                           ),
-                          ol: ({children}) => (
-                            <ol className="my-2 pl-4 list-decimal space-y-1 text-gray-800">{children}</ol>
+                          ol: ({ children }) => (
+                            <ol className="my-2 pl-4 list-decimal space-y-1 text-gray-800">
+                              {children}
+                            </ol>
                           ),
-                          li: ({children}) => <li className="mb-1">{children}</li>,
-                          strong: ({children}) => <strong className="font-semibold text-black">{children}</strong>,
-                          h2: ({children}) => <h2 className="text-sm font-semibold text-black mt-2 mb-1">{children}</h2>,
-                          h3: ({children}) => <h3 className="text-sm font-semibold text-black mt-2 mb-1">{children}</h3>,
+                          li: ({ children }) => <li className="mb-1">{children}</li>,
+                          strong: ({ children }) => (
+                            <strong className="font-semibold text-black">{children}</strong>
+                          ),
+                          h2: ({ children }) => (
+                            <h2 className="text-sm font-semibold text-black mt-2 mb-1">
+                              {children}
+                            </h2>
+                          ),
+                          h3: ({ children }) => (
+                            <h3 className="text-sm font-semibold text-black mt-2 mb-1">
+                              {children}
+                            </h3>
+                          ),
                         }}
                       >
                         {formatAsMarkdown(message.content)}
                       </ReactMarkdown>
                     </div>
                   ) : (
-                  <p className="text-sm leading-relaxed">{message.content}</p>
+                    <p className="text-sm leading-relaxed">{message.content}</p>
                   )}
                   {message.sender === 'agent' && (
                     <div className="relative z-10 mt-2 flex items-center space-x-2 opacity-70 group-hover:opacity-100 transition-opacity">
@@ -1607,7 +1935,10 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              setShowEvidence(prev => ({ ...prev, [message.id]: !prev[message.id] }));
+                              setShowEvidence((prev) => ({
+                                ...prev,
+                                [message.id]: !prev[message.id],
+                              }));
                             }}
                             className="text-xs text-gray-600 hover:text-black inline-flex items-center cursor-pointer"
                             title="Toggle evidence"
@@ -1647,7 +1978,14 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                           {e.url && (
                             <>
                               {' '}
-                              <a href={e.url} target="_blank" rel="noreferrer" className="underline text-gray-700 hover:text-black">[link]</a>
+                              <a
+                                href={e.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="underline text-gray-700 hover:text-black"
+                              >
+                                [link]
+                              </a>
                             </>
                           )}
                         </div>
@@ -1672,8 +2010,8 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                             }
                           }}
                           className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            action.variant === 'primary' 
-                              ? 'bg-black text-white hover:bg-gray-800' 
+                            action.variant === 'primary'
+                              ? 'bg-black text-white hover:bg-gray-800'
                               : 'bg-gray-100 text-black hover:bg-gray-200'
                           }`}
                         >
@@ -1686,13 +2024,22 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   {message.type === 'analysis' && lastGap && lastGap.messageId === message.id && (
                     <div className="mt-2 flex flex-wrap gap-2">
                       <button
-                        onClick={() => { setInputValue(lastGap.question); try { inputRef.current?.focus(); } catch {} }}
+                        onClick={() => {
+                          setInputValue(lastGap.question);
+                          try {
+                            inputRef.current?.focus();
+                          } catch {}
+                        }}
                         className="px-2.5 py-1 text-xs border border-gray-300 rounded-full hover:border-black"
                       >
                         Answer here
                       </button>
                       <button
-                        onClick={() => { try { fileInputRef.current?.click(); } catch {} }}
+                        onClick={() => {
+                          try {
+                            fileInputRef.current?.click();
+                          } catch {}
+                        }}
                         className="px-2.5 py-1 text-xs border border-gray-300 rounded-full hover:border-black"
                       >
                         Upload file
@@ -1711,16 +2058,23 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                   )}
                 </motion.div>
                 <div className="mt-1 text-xs text-gray-500 px-1">
-                  {new Date(message.timestamp).toLocaleTimeString([], { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
+                  {new Date(message.timestamp).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
                   })}
                   {message.metrics && (
                     <>
                       {' '}
-                      · {message.metrics.latencyMs ? `${Math.round(message.metrics.latencyMs)}ms` : ''}
-                      {message.metrics.tokensEstimate ? ` · ~${message.metrics.tokensEstimate} tok` : ''}
-                      {typeof message.metrics.costUsdEstimate === 'number' ? ` · ~$${message.metrics.costUsdEstimate.toFixed(4)}` : ''}
+                      ·{' '}
+                      {message.metrics.latencyMs
+                        ? `${Math.round(message.metrics.latencyMs)}ms`
+                        : ''}
+                      {message.metrics.tokensEstimate
+                        ? ` · ~${message.metrics.tokensEstimate} tok`
+                        : ''}
+                      {typeof message.metrics.costUsdEstimate === 'number'
+                        ? ` · ~$${message.metrics.costUsdEstimate.toFixed(4)}`
+                        : ''}
                     </>
                   )}
                 </div>
@@ -1744,82 +2098,79 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               exit={{ opacity: 0, y: -20 }}
               className="flex items-start space-x-3"
             >
-            <motion.div className="relative">
-              {/* Animated pulse rings */}
-              <motion.div
-                className="absolute inset-0 bg-black rounded-full"
-                animate={{ 
-                  scale: [1, 1.5, 2],
-                  opacity: [0.4, 0.2, 0]
-                }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-              />
-              <motion.div
-                className="absolute inset-0 bg-black rounded-full"
-                animate={{ 
-                  scale: [1, 1.5, 2],
-                  opacity: [0.4, 0.2, 0]
-                }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeOut", delay: 0.5 }}
-              />
-              <motion.div 
-                className="relative w-10 h-10 bg-black rounded-full flex items-center justify-center shadow-lg overflow-hidden"
-                animate={{ scale: [1, 1.02, 1] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <img src="/freja.png" alt="Freja" className="w-full h-full object-cover" />
+              <motion.div className="relative">
+                {/* Animated pulse rings */}
+                <motion.div
+                  className="absolute inset-0 bg-black rounded-full"
+                  animate={{
+                    scale: [1, 1.5, 2],
+                    opacity: [0.4, 0.2, 0],
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
+                />
+                <motion.div
+                  className="absolute inset-0 bg-black rounded-full"
+                  animate={{
+                    scale: [1, 1.5, 2],
+                    opacity: [0.4, 0.2, 0],
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'easeOut', delay: 0.5 }}
+                />
+                <motion.div
+                  className="relative w-10 h-10 bg-black rounded-full flex items-center justify-center shadow-lg overflow-hidden"
+                  animate={{ scale: [1, 1.02, 1] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  <img src="/freja.png" alt="Freja" className="w-full h-full object-cover" />
+                </motion.div>
               </motion.div>
-            </motion.div>
-            
-            <motion.div
-              className="bg-gray-50 border border-gray-200 px-6 py-3.5 rounded-2xl shadow-sm backdrop-blur-sm"
-              animate={{ 
-                boxShadow: [
-                  "0 1px 3px rgba(0,0,0,0.1)",
-                  "0 10px 20px rgba(0,0,0,0.1)",
-                  "0 1px 3px rgba(0,0,0,0.1)"
-                ]
-              }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              <div className="flex items-center space-x-3">
-                <div className="flex space-x-1">
-                  {[0, 0.15, 0.3].map((delay, i) => (
-                    <motion.div
-                      key={i}
-                      className="relative"
-                    >
-                      <motion.div
-                        className="absolute inset-0 bg-gray-400 rounded-full blur-sm"
-                        animate={{ 
-                          scale: [0, 2, 0],
-                          opacity: [0, 0.5, 0]
-                        }}
-                        transition={{ 
-                          duration: 1.5, 
-                          repeat: Infinity, 
-                          delay,
-                          ease: "easeOut"
-                        }}
-                      />
-                      <motion.div
-                        animate={{ 
-                          y: [0, -10, 0],
-                          scale: [1, 1.2, 1]
-                        }}
-                        transition={{ 
-                          duration: 1.5, 
-                          repeat: Infinity, 
-                          delay,
-                          ease: "easeInOut"
-                        }}
-                        className="relative w-2.5 h-2.5 bg-gray-600 rounded-full"
-                      />
-                    </motion.div>
-                  ))}
+
+              <motion.div
+                className="bg-gray-50 border border-gray-200 px-6 py-3.5 rounded-2xl shadow-sm backdrop-blur-sm"
+                animate={{
+                  boxShadow: [
+                    '0 1px 3px rgba(0,0,0,0.1)',
+                    '0 10px 20px rgba(0,0,0,0.1)',
+                    '0 1px 3px rgba(0,0,0,0.1)',
+                  ],
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="flex space-x-1">
+                    {[0, 0.15, 0.3].map((delay, i) => (
+                      <motion.div key={i} className="relative">
+                        <motion.div
+                          className="absolute inset-0 bg-gray-400 rounded-full blur-sm"
+                          animate={{
+                            scale: [0, 2, 0],
+                            opacity: [0, 0.5, 0],
+                          }}
+                          transition={{
+                            duration: 1.5,
+                            repeat: Infinity,
+                            delay,
+                            ease: 'easeOut',
+                          }}
+                        />
+                        <motion.div
+                          animate={{
+                            y: [0, -10, 0],
+                            scale: [1, 1.2, 1],
+                          }}
+                          transition={{
+                            duration: 1.5,
+                            repeat: Infinity,
+                            delay,
+                            ease: 'easeInOut',
+                          }}
+                          className="relative w-2.5 h-2.5 bg-gray-600 rounded-full"
+                        />
+                      </motion.div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -1832,7 +2183,12 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
         <div className="fixed right-4 top-20 bottom-20 w-80 bg-white border border-gray-200 rounded-xl shadow p-4 overflow-y-auto z-30">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm font-semibold text-black">Proactive tips</div>
-            <button onClick={() => setShowTips(false)} className="text-xs text-gray-600 hover:text-black">Close</button>
+            <button
+              onClick={() => setShowTips(false)}
+              className="text-xs text-gray-600 hover:text-black"
+            >
+              Close
+            </button>
           </div>
           {tips.length === 0 ? (
             <div className="text-xs text-gray-500">No tips yet.</div>
@@ -1840,7 +2196,9 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
             <div className="space-y-3">
               {tips.map((t, i) => (
                 <div key={i} className="border border-gray-200 rounded-lg p-3">
-                  <div className="text-xs text-gray-500 mb-1">{t.priority?.toUpperCase() || 'MEDIUM'}</div>
+                  <div className="text-xs text-gray-500 mb-1">
+                    {t.priority?.toUpperCase() || 'MEDIUM'}
+                  </div>
                   <div className="text-sm font-medium text-black">{t.title}</div>
                   {t.why && <div className="text-xs text-gray-700 mt-1">Why: {t.why}</div>}
                   {t.action && <div className="text-xs text-gray-700 mt-1">Action: {t.action}</div>}
@@ -1858,37 +2216,46 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
             initial={{ opacity: 0, y: -20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.9 }}
-            transition={{ type: "spring", stiffness: 300 }}
+            transition={{ type: 'spring', stiffness: 300 }}
             className="absolute top-20 left-1/2 transform -translate-x-1/2 z-50"
           >
-            <motion.div 
+            <motion.div
               className={`px-6 py-4 rounded-2xl shadow-lg backdrop-blur-md flex items-center gap-3 ${
-                insightCard.type === 'success' ? 'bg-green-50 border-2 border-green-200' :
-                insightCard.type === 'warning' ? 'bg-yellow-50 border-2 border-yellow-200' :
-                'bg-blue-50 border-2 border-blue-200'
+                insightCard.type === 'success'
+                  ? 'bg-green-50 border-2 border-green-200'
+                  : insightCard.type === 'warning'
+                    ? 'bg-yellow-50 border-2 border-yellow-200'
+                    : 'bg-blue-50 border-2 border-blue-200'
               }`}
-              animate={{ 
+              animate={{
                 scale: [1, 1.02, 1],
               }}
-              transition={{ 
+              transition={{
                 duration: 2,
                 repeat: Infinity,
-                ease: "easeInOut"
+                ease: 'easeInOut',
               }}
             >
               <motion.span
                 animate={{ rotate: 360 }}
-                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
                 className="text-2xl"
               >
-                {insightCard.type === 'success' ? '✨' : 
-                 insightCard.type === 'warning' ? '⚡' : '💡'}
+                {insightCard.type === 'success'
+                  ? '✨'
+                  : insightCard.type === 'warning'
+                    ? '⚡'
+                    : '💡'}
               </motion.span>
-              <span className={`font-medium ${
-                insightCard.type === 'success' ? 'text-green-800' :
-                insightCard.type === 'warning' ? 'text-yellow-800' :
-                'text-blue-800'
-              }`}>
+              <span
+                className={`font-medium ${
+                  insightCard.type === 'success'
+                    ? 'text-green-800'
+                    : insightCard.type === 'warning'
+                      ? 'text-yellow-800'
+                      : 'text-blue-800'
+                }`}
+              >
                 {insightCard.text}
               </span>
             </motion.div>
@@ -1934,7 +2301,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               initial={{ opacity: 0, scale: 0.8, x: -100 }}
               animate={{ opacity: 1, scale: 1, x: 0 }}
               exit={{ opacity: 0, scale: 0.8, x: -100 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               className="fixed bottom-24 sm:bottom-40 left-3 sm:left-6 right-3 sm:right-auto sm:w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 p-4 sm:p-6 z-40"
             >
               <div className="flex items-center justify-between mb-3 sm:mb-4">
@@ -1950,39 +2317,39 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                 {(() => {
                   const lastMessage = messages[messages.length - 1]?.content.toLowerCase() || '';
                   let suggestions = [];
-                  
+
                   if (lastMessage.includes('growth') || lastMessage.includes('revenue')) {
                     suggestions = [
                       "What's my best growth channel?",
-                      "How do I scale customer acquisition?",
-                      "Show me pricing strategies",
-                      "Start intelligent search"
+                      'How do I scale customer acquisition?',
+                      'Show me pricing strategies',
+                      'Start intelligent search',
                     ];
                   } else if (lastMessage.includes('funding') || lastMessage.includes('invest')) {
                     suggestions = [
-                      "Am I ready to fundraise?",
+                      'Am I ready to fundraise?',
                       "What's my valuation range?",
-                      "Create investor pitch",
-                      "Start intelligent search"
+                      'Create investor pitch',
+                      'Start intelligent search',
                     ];
                   } else if (lastMessage.includes('team') || lastMessage.includes('hire')) {
                     suggestions = [
-                      "Who should I hire next?",
-                      "Build compensation plan",
-                      "Create org structure",
-                      "Start intelligent search"
+                      'Who should I hire next?',
+                      'Build compensation plan',
+                      'Create org structure',
+                      'Start intelligent search',
                     ];
                   } else {
                     suggestions = [
-                      "How do I grow faster?",
-                      "Start intelligent search",
+                      'How do I grow faster?',
+                      'Start intelligent search',
                       "What's my biggest risk?",
-                      "When should I fundraise?",
-                      "Help me with my pitch deck",
-                      "What metrics should I track?"
+                      'When should I fundraise?',
+                      'Help me with my pitch deck',
+                      'What metrics should I track?',
                     ];
                   }
-                  
+
                   return suggestions;
                 })().map((question, index) => (
                   <motion.button
@@ -1990,7 +2357,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    whileHover={{ x: 4, backgroundColor: "#f9fafb" }}
+                    whileHover={{ x: 4, backgroundColor: '#f9fafb' }}
                     onClick={() => {
                       if (question.toLowerCase().includes('intelligent search')) {
                         setShowIntelligentSearch(true);
@@ -1999,10 +2366,10 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                         setInputValue(question);
                         inputRef.current?.focus();
                         setShowQuickQuestions(false);
-                        
+
                         setInsightCard({
-                          text: "Great question! Let me analyze this for you...",
-                          type: 'info'
+                          text: 'Great question! Let me analyze this for you...',
+                          type: 'info',
                         });
                         setTimeout(() => setInsightCard(null), 3000);
                       }
@@ -2014,9 +2381,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                 ))}
               </div>
               <div className="mt-4 pt-4 border-t border-gray-100">
-                <p className="text-xs text-gray-500 text-center">
-                  Click any question to ask Freja
-                </p>
+                <p className="text-xs text-gray-500 text-center">Click any question to ask Freja</p>
               </div>
             </motion.div>
           </>
@@ -2024,12 +2389,15 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       </AnimatePresence>
 
       {/* Input */}
-      <motion.div 
+      <motion.div
         className="px-3 sm:px-6 py-3 sm:py-4 bg-white backdrop-blur-xl border-t border-gray-100 relative z-[60]"
         initial={{ y: 100 }}
         animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setIsDragging(true);
+        }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={(e) => {
           e.preventDefault();
@@ -2046,7 +2414,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
           </div>
         )}
         <div className="max-w-3xl mx-auto">
-        <div className="flex items-center space-x-2 sm:space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             {/* File upload button */}
             <input
               ref={fileInputRef}
@@ -2065,38 +2433,38 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               <Paperclip className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
             </motion.button>
 
-            <motion.div 
+            <motion.div
               className="flex-1 relative"
               whileHover={{ scale: 1.01 }}
-              transition={{ type: "spring", stiffness: 400 }}
+              transition={{ type: 'spring', stiffness: 400 }}
             >
               {/* Pulsing glow effect when ready */}
               {!isTyping && (
                 <motion.div
                   className="absolute -inset-0.5 bg-gray-400 rounded-full blur opacity-20"
-                  animate={{ 
+                  animate={{
                     scale: [1, 1.02, 1],
-                    opacity: [0.2, 0.4, 0.2]
+                    opacity: [0.2, 0.4, 0.2],
                   }}
-                  transition={{ 
+                  transition={{
                     duration: 3,
                     repeat: Infinity,
-                    ease: "easeInOut"
+                    ease: 'easeInOut',
                   }}
                 />
               )}
-            <input
-              ref={inputRef}
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-              placeholder={placeholderQuestions[currentPlaceholderIndex]}
-              className="relative w-full px-4 sm:px-5 py-2.5 sm:py-3.5 pr-12 sm:pr-14 bg-gray-50 border border-gray-200 rounded-full focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all text-black placeholder-gray-400 text-sm sm:text-[15px] z-10"
-            />
+              <input
+                ref={inputRef}
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                placeholder={placeholderQuestions[currentPlaceholderIndex]}
+                className="relative w-full px-4 sm:px-5 py-2.5 sm:py-3.5 pr-12 sm:pr-14 bg-gray-50 border border-gray-200 rounded-full focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all text-black placeholder-gray-400 text-sm sm:text-[15px] z-10"
+              />
               {isTyping ? (
-            <motion.button
-              whileHover={{ scale: 1.1 }}
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => abortRef.current?.abort()}
                   className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center hover:bg-gray-300 transition-all"
@@ -2106,17 +2474,17 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               ) : (
                 <motion.button
                   whileHover={{ scale: 1.1, rotate: 15 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={handleSendMessage}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleSendMessage}
                   disabled={!inputValue.trim()}
                   className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all ${
-                    inputValue.trim() 
-                      ? 'bg-black text-white hover:bg-gray-800' 
+                    inputValue.trim()
+                      ? 'bg-black text-white hover:bg-gray-800'
                       : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                   }`}
                 >
                   <Send className="w-4 h-4 ml-0.5" />
-            </motion.button>
+                </motion.button>
               )}
             </motion.div>
           </div>
@@ -2138,27 +2506,47 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
       {/* Email Ingest Modal */}
       <AnimatePresence>
         {showEmailModal && (
-          <EmailIngestModal sessionId={sessionId} onClose={() => setShowEmailModal(false)} onIngest={async (email)=>{
-            try {
-              const summaryRes = await fetch('/api/summary', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ businessInfo, websiteText: businessInfo.preScrapedText, emails: [email], kpiPreview: null })
-              });
-              if (summaryRes.ok) {
-                const s = await summaryRes.json();
-                const note = `New email ingested. Updated context: ${s.summary}`;
-                addMessage(note, 'agent');
-                const tipsRes = await fetch('/api/proactive', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ sessionId, businessInfo }) });
-                if (tipsRes.ok){ const d = await tipsRes.json(); if (Array.isArray(d.tips)) setTips(d.tips); }
-              }
-            } catch {}
-          }} />
+          <EmailIngestModal
+            sessionId={sessionId}
+            onClose={() => setShowEmailModal(false)}
+            onIngest={async (email) => {
+              try {
+                const summaryRes = await fetch('/api/summary', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    businessInfo,
+                    websiteText: businessInfo.preScrapedText,
+                    emails: [email],
+                    kpiPreview: null,
+                  }),
+                });
+                if (summaryRes.ok) {
+                  const s = await summaryRes.json();
+                  const note = `New email ingested. Updated context: ${s.summary}`;
+                  addMessage(note, 'agent');
+                  const tipsRes = await fetch('/api/proactive', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId, businessInfo }),
+                  });
+                  if (tipsRes.ok) {
+                    const d = await tipsRes.json();
+                    if (Array.isArray(d.tips)) setTips(d.tips);
+                  }
+                }
+              } catch {}
+            }}
+          />
         )}
       </AnimatePresence>
       {/* KPI Upload Modal */}
       <AnimatePresence>
         {showKpiModal && (
-          <KpiUploadModal onClose={() => setShowKpiModal(false)} initialCsv={businessInfo.demoKpiCsv} />
+          <KpiUploadModal
+            onClose={() => setShowKpiModal(false)}
+            initialCsv={businessInfo.demoKpiCsv}
+          />
         )}
       </AnimatePresence>
       {/* Deck Summary Modal */}
@@ -2224,20 +2612,25 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                           sessionId,
                           rating: pendingFeedback.rating === 'up' ? 'up' : 'down',
                           reason: feedbackReason || undefined,
-                          missing: feedbackMissing || undefined
-                        })
+                          missing: feedbackMissing || undefined,
+                        }),
                       });
                     } catch {}
                     setPendingFeedback(null);
                     setFeedbackReason('');
                     setFeedbackMissing('');
-                    addMessage('Thanks for your feedback! We use it to improve responses.', 'agent');
+                    addMessage(
+                      'Thanks for your feedback! We use it to improve responses.',
+                      'agent',
+                    );
                     // Auto-regenerate on thumbs down with constraints
                     if (pendingFeedback.rating === 'down') {
                       const constraints: string[] = [];
                       if (feedbackMissing) constraints.push(`Please add: ${feedbackMissing}.`);
-                      if (feedbackReason) constraints.push(`Consider this critique: ${feedbackReason}.`);
-                      const regenPrompt = `Regenerate the previous answer with these constraints. Be concise, cite sources as [1], [2] if applicable. ${constraints.join(' ')}`.trim();
+                      if (feedbackReason)
+                        constraints.push(`Consider this critique: ${feedbackReason}.`);
+                      const regenPrompt =
+                        `Regenerate the previous answer with these constraints. Be concise, cite sources as [1], [2] if applicable. ${constraints.join(' ')}`.trim();
                       addMessage(regenPrompt, 'user');
                       await getAIResponse(regenPrompt);
                     }
@@ -2273,18 +2666,18 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
             businessInfo={businessInfo}
             onComplete={(analysis, conversationState) => {
               setShowIntelligentSearch(false);
-              
+
               // Add the analysis to chat
               addMessage(
                 `I've completed an intelligent discovery session with you! Here's my comprehensive analysis:\n\n${analysis}`,
                 'agent',
-                'analysis'
+                'analysis',
               );
-              
+
               // Show success notification
               setInsightCard({
                 text: `Discovery complete! Gathered ${conversationState.knownFacts.length} key insights with ${conversationState.confidenceScore}% confidence.`,
-                type: 'success'
+                type: 'success',
               });
               setTimeout(() => setInsightCard(null), 4000);
             }}
@@ -2310,7 +2703,7 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 20 }}
             className="fixed inset-x-0 top-24 mx-auto max-w-lg z-50 pointer-events-none"
           >
             <div className="mx-4">
@@ -2323,29 +2716,30 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
                   animate={{ x: [-400, 400] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
                 />
-                
+
                 {/* Content */}
                 <div className="relative z-10">
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
+                    transition={{ delay: 0.2, type: 'spring', stiffness: 300 }}
                     className="w-16 h-16 bg-white rounded-full mx-auto mb-4 flex items-center justify-center"
                   >
                     <motion.div
                       animate={{ rotate: [0, 360] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
                       className="w-3 h-3 bg-black rounded-full"
                     />
                   </motion.div>
-                  
+
                   <h3 className="text-xl font-bold mb-2">Analysis Complete!</h3>
                   <p className="text-sm text-gray-300">
-                    I've analyzed your business across 95 dimensions and am ready to be your smartest investment coach.
+                    I've analyzed your business across 95 dimensions and am ready to be your
+                    smartest investment coach.
                   </p>
-                  
+
                   {/* Animated dots */}
                   <div className="flex justify-center mt-4 space-x-2">
                     {[0, 1, 2].map((i) => (

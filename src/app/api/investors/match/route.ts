@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   try {
     const sessionId = req.headers.get('x-session-id');
-    
+
     if (!sessionId) {
       return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
     }
@@ -22,8 +22,8 @@ export async function POST(req: NextRequest) {
     // Find matches
     const matches = await findInvestorMatches(businessInfo, sessionId, limit);
 
-    return NextResponse.json({ 
-      matches: matches.map(m => ({
+    return NextResponse.json({
+      matches: matches.map((m) => ({
         investor: {
           id: m.investor.id,
           name: m.investor.name,
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
           checkSizeMax: m.investor.checkSizeMax,
           thesis: m.investor.thesis,
           notableInvestments: m.investor.notableInvestments,
-          portfolioCount: m.investor.portfolioCount
+          portfolioCount: m.investor.portfolioCount,
         },
         matchScore: m.matchScore,
         reasoning: m.reasoning,
@@ -46,9 +46,9 @@ export async function POST(req: NextRequest) {
           stage: m.stageMatch,
           industry: m.industryMatch,
           geography: m.geoMatch,
-          checkSize: m.checkSizeMatch
-        }
-      }))
+          checkSize: m.checkSizeMatch,
+        },
+      })),
     });
   } catch (error) {
     console.error('Error finding investor matches:', error);
@@ -60,15 +60,15 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const sessionId = req.headers.get('x-session-id');
-    
+
     if (!sessionId) {
       return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
     }
 
     const matches = await getSavedMatches(sessionId);
 
-    return NextResponse.json({ 
-      matches: matches.map(m => ({
+    return NextResponse.json({
+      matches: matches.map((m) => ({
         id: m.id,
         investor: {
           id: m.investor.id,
@@ -83,7 +83,7 @@ export async function GET(req: NextRequest) {
           checkSizeMin: m.investor.checkSizeMin,
           checkSizeMax: m.investor.checkSizeMax,
           thesis: m.investor.thesis,
-          notableInvestments: m.investor.notableInvestments
+          notableInvestments: m.investor.notableInvestments,
         },
         matchScore: m.matchScore,
         reasoning: m.reasoning,
@@ -93,9 +93,9 @@ export async function GET(req: NextRequest) {
           stage: m.stageMatch,
           industry: m.industryMatch,
           geography: m.geoMatch,
-          checkSize: m.checkSizeMatch
-        }
-      }))
+          checkSize: m.checkSizeMatch,
+        },
+      })),
     });
   } catch (error) {
     console.error('Error fetching saved matches:', error);

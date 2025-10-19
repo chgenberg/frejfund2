@@ -27,10 +27,10 @@ export async function generateInvestorEmail(context: EmailContext): Promise<{
   tips: string[];
 }> {
   const { businessInfo, investor, emailType, mutualConnection, previousInteraction } = context;
-  
+
   // Build prompt based on email type
   let prompt = '';
-  
+
   if (emailType === 'cold_outreach') {
     prompt = `Write a cold outreach email to ${investor.name} at ${investor.firmName}.
 
@@ -111,47 +111,55 @@ REQUIREMENTS:
 
 Return ONLY the email.`;
   }
-  
+
   try {
     const openai = getOpenAIClient();
     const response = await openai.chat.completions.create({
       model: getChatModel('simple'),
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.7,
-      max_tokens: 500
+      max_tokens: 500,
     });
-    
+
     const emailText = response.choices[0].message.content?.trim() || '';
-    
+
     // Parse subject and body
     const subjectMatch = emailText.match(/Subject:\s*(.+?)(?:\n|$)/i);
-    const subject = subjectMatch ? subjectMatch[1].trim() : `Partnership opportunity: ${businessInfo.name}`;
-    
+    const subject = subjectMatch
+      ? subjectMatch[1].trim()
+      : `Partnership opportunity: ${businessInfo.name}`;
+
     // Extract body (everything after subject line)
     let body = emailText;
     if (subjectMatch) {
-      body = emailText.substring(emailText.indexOf(subjectMatch[0]) + subjectMatch[0].length).trim();
+      body = emailText
+        .substring(emailText.indexOf(subjectMatch[0]) + subjectMatch[0].length)
+        .trim();
     }
-    
+
     // Remove "Body:" prefix if present
     body = body.replace(/^Body:\s*/i, '').trim();
-    
+
     // Generate tips for improving the email
     const tips = generateEmailTips(emailType, context);
-    
+
     return {
       subject,
       body,
-      tips
+      tips,
     };
   } catch (error) {
     console.error('Error generating email:', error);
-    
+
     // Fallback template
     return {
       subject: `${businessInfo.name} - ${businessInfo.industry} opportunity`,
       body: `Hi ${investor.name},\n\nI'm reaching out because ${investor.firmName}'s focus on ${investor.sweetSpot || 'early-stage companies'} aligns perfectly with what we're building at ${businessInfo.name}.\n\nWe're a ${businessInfo.stage} stage ${businessInfo.industry} company targeting ${businessInfo.targetMarket}. Would love to schedule a brief call to share our story.\n\nBest,\n[Your name]`,
-      tips: ['Personalize the opening', 'Add specific traction metrics', 'Reference their portfolio']
+      tips: [
+        'Personalize the opening',
+        'Add specific traction metrics',
+        'Reference their portfolio',
+      ],
     };
   }
 }
@@ -161,12 +169,12 @@ Return ONLY the email.`;
  */
 function generateEmailTips(emailType: string, context: EmailContext): string[] {
   const tips: string[] = [];
-  
+
   if (emailType === 'cold_outreach') {
     tips.push('✓ Send Tuesday-Thursday, 8-10 AM for best open rates');
     tips.push('✓ Follow up after 5-7 days if no response');
     tips.push('✓ Keep it under 150 words');
-    
+
     if (context.investor.notableInvestments && context.investor.notableInvestments.length > 0) {
       tips.push(`✓ Mention their investment in ${context.investor.notableInvestments[0]}`);
     }
@@ -176,10 +184,10 @@ function generateEmailTips(emailType: string, context: EmailContext): string[] {
     tips.push('✓ Thank the connector personally');
   } else if (emailType === 'follow_up') {
     tips.push('✓ Add new information (traction, news, insight)');
-    tips.push('✓ Don\'t be pushy - give them an out');
+    tips.push("✓ Don't be pushy - give them an out");
     tips.push('✓ Reference specific point from first email');
   }
-  
+
   return tips;
 }
 
@@ -188,7 +196,7 @@ function generateEmailTips(emailType: string, context: EmailContext): string[] {
  */
 export async function generateSubjectVariations(
   businessInfo: BusinessInfo,
-  investor: { firmName: string }
+  investor: { firmName: string },
 ): Promise<string[]> {
   const prompt = `Generate 5 email subject line variations for reaching out to ${investor.firmName}.
 
@@ -211,11 +219,14 @@ Return only the 5 subject lines, one per line.`;
       model: getChatModel('simple'),
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.8,
-      max_tokens: 200
+      max_tokens: 200,
     });
-    
+
     const text = response.choices[0].message.content?.trim() || '';
-    return text.split('\n').filter(line => line.trim()).slice(0, 5);
+    return text
+      .split('\n')
+      .filter((line) => line.trim())
+      .slice(0, 5);
   } catch (error) {
     console.error('Error generating subject variations:', error);
     return [
@@ -223,7 +234,7 @@ Return only the 5 subject lines, one per line.`;
       `Scaling ${businessInfo.industry} in ${businessInfo.targetMarket}`,
       `${investor.firmName} + ${businessInfo.name}: potential fit?`,
       `${businessInfo.stage} stage ${businessInfo.industry} seeking ${investor.firmName}`,
-      `Following your ${investor.firmName} thesis - ${businessInfo.name}`
+      `Following your ${investor.firmName} thesis - ${businessInfo.name}`,
     ];
   }
 }

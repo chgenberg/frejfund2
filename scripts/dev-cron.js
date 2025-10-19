@@ -13,13 +13,15 @@ async function runOnce() {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        ...(CRON_SECRET ? { authorization: `Bearer ${CRON_SECRET}` } : {})
+        ...(CRON_SECRET ? { authorization: `Bearer ${CRON_SECRET}` } : {}),
       },
-      body: JSON.stringify({ sessionId: SESSION_ID })
+      body: JSON.stringify({ sessionId: SESSION_ID }),
     });
     const json = await res.json().catch(() => ({}));
     const ok = res.ok;
-    console.log(`[dev-cron] ${new Date().toISOString()} status=${res.status} ok=${ok} result=${JSON.stringify(json)}`);
+    console.log(
+      `[dev-cron] ${new Date().toISOString()} status=${res.status} ok=${ok} result=${JSON.stringify(json)}`,
+    );
   } catch (e) {
     console.error('[dev-cron] error', e);
   }
@@ -28,5 +30,3 @@ async function runOnce() {
 // Run immediately, then every 30 minutes
 runOnce();
 cron.schedule('*/30 * * * *', runOnce);
-
-

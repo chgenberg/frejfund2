@@ -2,7 +2,19 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Building2, ArrowRight, Briefcase, TrendingUp, Users, Shield, Info, Brain, Target, Sparkles } from 'lucide-react';
+import {
+  X,
+  Building2,
+  ArrowRight,
+  Briefcase,
+  TrendingUp,
+  Users,
+  Shield,
+  Info,
+  Brain,
+  Target,
+  Sparkles,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface InvestorModalProps {
@@ -15,28 +27,33 @@ const VC_TABS = [
   {
     title: 'Get Started',
     icon: <Sparkles className="w-5 h-5" />,
-    content: 'Create an investor account (or use demo), set your thesis, and access a curated feed of startups that match your preferences.'
+    content:
+      'Create an investor account (or use demo), set your thesis, and access a curated feed of startups that match your preferences.',
   },
   {
     title: 'Deep Analysis',
     icon: <Brain className="w-5 h-5" />,
-    content: 'Every startup is analyzed across 95 dimensions (market, team, traction, financials, risks) so you can make fast, confident decisions.'
+    content:
+      'Every startup is analyzed across 95 dimensions (market, team, traction, financials, risks) so you can make fast, confident decisions.',
   },
   {
     title: 'Smart Matching',
     icon: <Target className="w-5 h-5" />,
-    content: 'We match by stage, industry, geography, check size and thesis signals. Prioritized feed with high-fit deals first.'
+    content:
+      'We match by stage, industry, geography, check size and thesis signals. Prioritized feed with high-fit deals first.',
   },
   {
     title: 'Due Diligence',
     icon: <Briefcase className="w-5 h-5" />,
-    content: 'One-click access to pitch decks, metrics, and references. Track red flags, strengths and follow-ups directly in the profile.'
+    content:
+      'One-click access to pitch decks, metrics, and references. Track red flags, strengths and follow-ups directly in the profile.',
   },
   {
     title: 'Invest & Track',
     icon: <TrendingUp className="w-5 h-5" />,
-    content: 'Request intros, collaborate with your team, and track portfolio metrics post-investment with automated updates.'
-  }
+    content:
+      'Request intros, collaborate with your team, and track portfolio metrics post-investment with automated updates.',
+  },
 ];
 
 export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
@@ -60,7 +77,7 @@ export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
-        signal: controller.signal
+        signal: controller.signal,
       }).catch((e) => {
         throw e;
       });
@@ -131,9 +148,7 @@ export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
                     <input
                       type="email"
                       value={email}
@@ -144,9 +159,7 @@ export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Password
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
                     <input
                       type="password"
                       value={password}
@@ -156,9 +169,7 @@ export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
                     />
                   </div>
 
-                  {error && (
-                    <p className="text-red-600 text-sm text-center">{error}</p>
-                  )}
+                  {error && <p className="text-red-600 text-sm text-center">{error}</p>}
 
                   <motion.button
                     whileHover={{ scale: 1.02 }}
@@ -185,7 +196,9 @@ export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className="w-full px-6 py-3 bg-white text-black border border-gray-300 rounded-lg font-medium hover:border-black transition-colors"
-                    onClick={() => window.location.href = 'mailto:vcs@frejfund.com?subject=VC Access Request'}
+                    onClick={() =>
+                      (window.location.href = 'mailto:vcs@frejfund.com?subject=VC Access Request')
+                    }
                   >
                     Request Access
                   </motion.button>
@@ -212,7 +225,7 @@ export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
                 >
                   <ArrowRight className="w-5 h-5 rotate-180" />
                 </button>
-                
+
                 <button
                   onClick={onClose}
                   className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -222,7 +235,9 @@ export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
 
                 <div className="text-center mt-4 mb-2 sm:mb-6">
                   <h2 className="text-2xl font-bold text-black mb-2">How FrejFund Works for VCs</h2>
-                  <p className="text-gray-600">Evaluate, decide and act faster with investor-grade AI insights</p>
+                  <p className="text-gray-600">
+                    Evaluate, decide and act faster with investor-grade AI insights
+                  </p>
                 </div>
 
                 {/* Tabs */}
@@ -258,9 +273,15 @@ export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
                     <div className="text-center">
                       <div className="w-16 h-16 sm:w-20 sm:h-20 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
                         {vcTabs[activeTab]?.icon}
-                        {vcTabs[activeTab] ? React.cloneElement(vcTabs[activeTab].icon, { className: "w-10 h-10 text-white" }) : null}
+                        {vcTabs[activeTab]
+                          ? React.cloneElement(vcTabs[activeTab].icon, {
+                              className: 'w-10 h-10 text-white',
+                            })
+                          : null}
                       </div>
-                      <h3 className="text-xl font-bold text-black mb-3">{vcTabs[activeTab]?.title}</h3>
+                      <h3 className="text-xl font-bold text-black mb-3">
+                        {vcTabs[activeTab]?.title}
+                      </h3>
                       <p className="text-gray-600 leading-relaxed">{vcTabs[activeTab]?.content}</p>
                     </div>
 
@@ -283,7 +304,9 @@ export default function InvestorModal({ isOpen, onClose }: InvestorModalProps) {
 
                     {activeTab === 1 && (
                       <div className="bg-gray-50 rounded-xl p-4 text-sm">
-                        <p className="font-semibold text-black mb-2">95 Analysis Dimensions Include:</p>
+                        <p className="font-semibold text-black mb-2">
+                          95 Analysis Dimensions Include:
+                        </p>
                         <div className="grid grid-cols-2 gap-2 text-gray-600">
                           <span>• Market Opportunity</span>
                           <span>• Team Experience</span>

@@ -3,11 +3,31 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ArrowLeft, Globe, Linkedin, FileText, TrendingUp, Users, 
-  Target, DollarSign, Calendar, MapPin, CheckCircle, AlertCircle,
-  BarChart3, Briefcase, Brain, Shield, Download, Mail, Clock,
-  Building2, Sparkles, ChevronRight, Activity, Zap
+import {
+  ArrowLeft,
+  Globe,
+  Linkedin,
+  FileText,
+  TrendingUp,
+  Users,
+  Target,
+  DollarSign,
+  Calendar,
+  MapPin,
+  CheckCircle,
+  AlertCircle,
+  BarChart3,
+  Briefcase,
+  Brain,
+  Shield,
+  Download,
+  Mail,
+  Clock,
+  Building2,
+  Sparkles,
+  ChevronRight,
+  Activity,
+  Zap,
 } from 'lucide-react';
 
 interface StartupProfile {
@@ -98,10 +118,7 @@ export default function StartupProfilePage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600">Startup not found</p>
-          <button
-            onClick={() => router.push('/vc')}
-            className="mt-4 text-black hover:underline"
-          >
+          <button onClick={() => router.push('/vc')} className="mt-4 text-black hover:underline">
             Back to dashboard
           </button>
         </div>
@@ -114,7 +131,7 @@ export default function StartupProfilePage() {
     { id: 'metrics', label: 'Metrics', icon: BarChart3 },
     { id: 'analysis', label: 'Deep Analysis', icon: Brain },
     { id: 'team', label: 'Team & Execution', icon: Users },
-    { id: 'risks', label: 'Risks & Insights', icon: Shield }
+    { id: 'risks', label: 'Risks & Insights', icon: Shield },
   ];
 
   const getScoreColor = (score: number) => {
@@ -140,8 +157,8 @@ export default function StartupProfilePage() {
               </motion.button>
               {/* Company Logo */}
               <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                <img 
-                  src={startup.logo || '/placeholder.png'} 
+                <img
+                  src={startup.logo || '/placeholder.png'}
                   alt={`${startup.companyName} logo`}
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -154,7 +171,7 @@ export default function StartupProfilePage() {
                 <p className="text-sm text-gray-600">{startup.oneLiner}</p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               {/* Action Buttons */}
               <motion.button
@@ -201,9 +218,7 @@ export default function StartupProfilePage() {
               <div className="text-xs text-gray-600">MRR</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
-                +{startup.metrics.growth}%
-              </div>
+              <div className="text-2xl font-bold text-green-600">+{startup.metrics.growth}%</div>
               <div className="text-xs text-gray-600">Growth</div>
             </div>
             <div className="text-center">
@@ -222,7 +237,7 @@ export default function StartupProfilePage() {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8 overflow-x-auto">
-            {tabs.map(tab => (
+            {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
@@ -257,13 +272,13 @@ export default function StartupProfilePage() {
               <div className="lg:col-span-2 space-y-6">
                 <div className="bg-white rounded-xl border border-gray-200 p-6">
                   <h2 className="text-lg font-semibold text-black mb-4">Company Overview</h2>
-                  
+
                   <div className="space-y-4">
                     <div>
                       <h3 className="text-sm font-medium text-gray-700 mb-1">Description</h3>
                       <p className="text-gray-600">{startup.oneLiner}</p>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <h3 className="text-sm font-medium text-gray-700 mb-1">Industry</h3>
@@ -377,7 +392,9 @@ export default function StartupProfilePage() {
                     <div>
                       <div className="flex justify-between items-center mb-1">
                         <span className="text-sm text-gray-600">Product-Market Fit</span>
-                        <span className={`font-bold ${getScoreColor(startup.metrics.productMarketFit)}`}>
+                        <span
+                          className={`font-bold ${getScoreColor(startup.metrics.productMarketFit)}`}
+                        >
                           {startup.metrics.productMarketFit}%
                         </span>
                       </div>
@@ -391,7 +408,9 @@ export default function StartupProfilePage() {
                     <div>
                       <div className="flex justify-between items-center mb-1">
                         <span className="text-sm text-gray-600">Unit Economics</span>
-                        <span className={`font-bold ${getScoreColor(startup.metrics.unitEconomics)}`}>
+                        <span
+                          className={`font-bold ${getScoreColor(startup.metrics.unitEconomics)}`}
+                        >
                           {startup.metrics.unitEconomics}%
                         </span>
                       </div>
@@ -501,15 +520,11 @@ export default function StartupProfilePage() {
                   </div>
                   <div>
                     <div className="text-sm text-gray-600">Competition Level</div>
-                    <div className="text-2xl font-bold text-yellow-600">
-                      Medium
-                    </div>
+                    <div className="text-2xl font-bold text-yellow-600">Medium</div>
                   </div>
                   <div>
                     <div className="text-sm text-gray-600">Market Timing</div>
-                    <div className="text-2xl font-bold text-green-600">
-                      Good
-                    </div>
+                    <div className="text-2xl font-bold text-green-600">Good</div>
                   </div>
                 </div>
               </div>
@@ -531,7 +546,7 @@ export default function StartupProfilePage() {
                 <p className="text-gray-600 mb-6">
                   Comprehensive AI analysis across all business dimensions
                 </p>
-                
+
                 {/* Analysis categories would go here */}
                 <div className="text-center py-8">
                   <p className="text-gray-500">Full analysis breakdown coming soon...</p>
@@ -584,11 +599,15 @@ export default function StartupProfilePage() {
                             <h3 className="font-medium text-black">{insight.title}</h3>
                             <p className="text-sm text-gray-600 mt-1">{insight.description}</p>
                           </div>
-                          <span className={`text-xs px-2 py-1 rounded ${
-                            insight.priority === 'critical' ? 'bg-red-100 text-red-700' :
-                            insight.priority === 'high' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-gray-100 text-gray-700'
-                          }`}>
+                          <span
+                            className={`text-xs px-2 py-1 rounded ${
+                              insight.priority === 'critical'
+                                ? 'bg-red-100 text-red-700'
+                                : insight.priority === 'high'
+                                  ? 'bg-yellow-100 text-yellow-700'
+                                  : 'bg-gray-100 text-gray-700'
+                            }`}
+                          >
                             {insight.priority}
                           </span>
                         </div>

@@ -2,9 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  TrendingUp, Users, Target, Mail, ExternalLink, 
-  Building2, MapPin, Calendar, DollarSign, Sparkles
+import {
+  TrendingUp,
+  Users,
+  Target,
+  Mail,
+  ExternalLink,
+  Building2,
+  MapPin,
+  Calendar,
+  DollarSign,
+  Sparkles,
 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 
@@ -72,7 +80,9 @@ export default function FounderProfilePage() {
             <Users className="w-8 h-8 text-gray-400" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Profile Not Found</h1>
-          <p className="text-gray-600">This founder profile doesn't exist or has been made private.</p>
+          <p className="text-gray-600">
+            This founder profile doesn't exist or has been made private.
+          </p>
         </div>
       </div>
     );
@@ -133,7 +143,7 @@ export default function FounderProfilePage() {
                   )}
                 </div>
               </div>
-              
+
               {profile.readinessScore && (
                 <div className="text-center">
                   <div className="w-20 h-20 rounded-full border-4 border-green-500 flex items-center justify-center mb-2">
@@ -232,10 +242,13 @@ export default function FounderProfilePage() {
         <div className="text-center text-sm text-gray-500">
           <p>
             This profile is powered by{' '}
-            <a href="https://frejfund2-production.up.railway.app" className="text-black font-medium hover:underline">
+            <a
+              href="https://frejfund2-production.up.railway.app"
+              className="text-black font-medium hover:underline"
+            >
               FrejFund AI
-            </a>
-            {' '}— The fundraising platform for ambitious founders
+            </a>{' '}
+            — The fundraising platform for ambitious founders
           </p>
         </div>
       </main>

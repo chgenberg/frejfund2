@@ -30,17 +30,26 @@ const QUESTIONS = [
     subtitle: 'Select all that apply',
     type: 'multi-select',
     options: [
-      'B2B SaaS', 'Fintech', 'Health Tech', 'Climate Tech', 
-      'E-commerce', 'AI/ML', 'Cybersecurity', 'EdTech',
-      'Logistics', 'Biotech', 'Gaming', 'Consumer'
-    ]
+      'B2B SaaS',
+      'Fintech',
+      'Health Tech',
+      'Climate Tech',
+      'E-commerce',
+      'AI/ML',
+      'Cybersecurity',
+      'EdTech',
+      'Logistics',
+      'Biotech',
+      'Gaming',
+      'Consumer',
+    ],
   },
   {
     id: 'stages',
     title: 'What stages do you invest in?',
     subtitle: 'Select your preferred stages',
     type: 'multi-select',
-    options: ['Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C+']
+    options: ['Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C+'],
   },
   {
     id: 'ticketSize',
@@ -49,53 +58,53 @@ const QUESTIONS = [
     type: 'range',
     min: 50000,
     max: 10000000,
-    step: 50000
+    step: 50000,
   },
   {
     id: 'geography',
     title: 'Geographic preferences?',
     subtitle: 'Where do you invest?',
     type: 'multi-select',
-    options: ['Europe', 'North America', 'Asia', 'LATAM', 'Africa', 'Global']
+    options: ['Europe', 'North America', 'Asia', 'LATAM', 'Africa', 'Global'],
   },
   {
     id: 'greenInvestments',
     title: 'Interested in green investments?',
     subtitle: 'ESG and climate-focused startups',
-    type: 'boolean'
+    type: 'boolean',
   },
   {
     id: 'impactFocus',
     title: 'Focus on social impact?',
     subtitle: 'Companies with positive societal impact',
-    type: 'boolean'
+    type: 'boolean',
   },
   {
     id: 'b2bOnly',
     title: 'B2B companies only?',
     subtitle: 'Exclude B2C opportunities',
-    type: 'boolean'
+    type: 'boolean',
   },
   {
     id: 'technicalFounders',
     title: 'Require technical founders?',
     subtitle: 'At least one technical co-founder',
-    type: 'boolean'
+    type: 'boolean',
   },
   {
     id: 'minimumTraction',
     title: 'Minimum traction required?',
     subtitle: 'Monthly recurring revenue',
     type: 'single-select',
-    options: ['No revenue required', '$10k+ MRR', '$50k+ MRR', '$100k+ MRR', '$500k+ MRR']
+    options: ['No revenue required', '$10k+ MRR', '$50k+ MRR', '$100k+ MRR', '$500k+ MRR'],
   },
   {
     id: 'timeToExit',
     title: 'Expected time to exit?',
     subtitle: 'Your investment horizon',
     type: 'single-select',
-    options: ['3-5 years', '5-7 years', '7-10 years', '10+ years', 'No preference']
-  }
+    options: ['3-5 years', '5-7 years', '7-10 years', '10+ years', 'No preference'],
+  },
 ];
 
 export default function InvestmentWizard({ isOpen, onClose, onComplete }: InvestmentWizardProps) {
@@ -110,7 +119,7 @@ export default function InvestmentWizard({ isOpen, onClose, onComplete }: Invest
     b2bOnly: false,
     technicalFounders: false,
     minimumTraction: 'No revenue required',
-    timeToExit: '5-7 years'
+    timeToExit: '5-7 years',
   });
 
   const handleNext = () => {
@@ -135,7 +144,10 @@ export default function InvestmentWizard({ isOpen, onClose, onComplete }: Invest
   const toggleMultiSelect = (key: string, value: string) => {
     const current = answers[key] || [];
     if (current.includes(value)) {
-      updateAnswer(key, current.filter((v: string) => v !== value));
+      updateAnswer(
+        key,
+        current.filter((v: string) => v !== value),
+      );
     } else {
       updateAnswer(key, [...current, value]);
     }
@@ -288,10 +300,12 @@ export default function InvestmentWizard({ isOpen, onClose, onComplete }: Invest
                         max={question.max}
                         step={question.step}
                         value={answers[question.id]?.min || question.min}
-                        onChange={(e) => updateAnswer(question.id, {
-                          ...answers[question.id],
-                          min: parseInt(e.target.value)
-                        })}
+                        onChange={(e) =>
+                          updateAnswer(question.id, {
+                            ...answers[question.id],
+                            min: parseInt(e.target.value),
+                          })
+                        }
                         className="w-full"
                       />
                       <p className="text-center mt-2 font-bold">
@@ -308,10 +322,12 @@ export default function InvestmentWizard({ isOpen, onClose, onComplete }: Invest
                         max={question.max}
                         step={question.step}
                         value={answers[question.id]?.max || question.max}
-                        onChange={(e) => updateAnswer(question.id, {
-                          ...answers[question.id],
-                          max: parseInt(e.target.value)
-                        })}
+                        onChange={(e) =>
+                          updateAnswer(question.id, {
+                            ...answers[question.id],
+                            max: parseInt(e.target.value),
+                          })
+                        }
                         className="w-full"
                       />
                       <p className="text-center mt-2 font-bold">

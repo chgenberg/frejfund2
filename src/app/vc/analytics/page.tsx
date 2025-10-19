@@ -3,9 +3,17 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { 
-  TrendingUp, Users, DollarSign, Building2, Calendar,
-  ChevronLeft, Target, Activity, Globe, BarChart3
+import {
+  TrendingUp,
+  Users,
+  DollarSign,
+  Building2,
+  Calendar,
+  ChevronLeft,
+  Target,
+  Activity,
+  Globe,
+  BarChart3,
 } from 'lucide-react';
 
 export default function VCAnalytics() {
@@ -22,13 +30,13 @@ export default function VCAnalytics() {
       { name: 'Health Tech', count: 23, percentage: 16 },
       { name: 'Climate Tech', count: 18, percentage: 13 },
       { name: 'E-commerce', count: 15, percentage: 11 },
-      { name: 'Other', count: 13, percentage: 8 }
+      { name: 'Other', count: 13, percentage: 8 },
     ],
     stages: [
       { name: 'Pre-seed', count: 34, percentage: 24 },
       { name: 'Seed', count: 52, percentage: 37 },
       { name: 'Series A', count: 41, percentage: 29 },
-      { name: 'Series B+', count: 15, percentage: 10 }
+      { name: 'Series B+', count: 15, percentage: 10 },
     ],
     countries: [
       { name: 'Sweden', count: 38 },
@@ -36,8 +44,8 @@ export default function VCAnalytics() {
       { name: 'UK', count: 27 },
       { name: 'France', count: 19 },
       { name: 'Netherlands', count: 14 },
-      { name: 'Others', count: 13 }
-    ]
+      { name: 'Others', count: 13 },
+    ],
   });
 
   return (
@@ -60,7 +68,7 @@ export default function VCAnalytics() {
                 <p className="text-sm text-gray-600">Overview of investment opportunities</p>
               </div>
             </div>
-            
+
             {/* Time Range Selector */}
             <select
               value={timeRange}
@@ -148,7 +156,7 @@ export default function VCAnalytics() {
           >
             <h3 className="font-semibold text-black mb-4">Industries</h3>
             <div className="space-y-3">
-              {stats.industries.map(industry => (
+              {stats.industries.map((industry) => (
                 <div key={industry.name}>
                   <div className="flex items-center justify-between text-sm mb-1">
                     <span className="text-gray-700">{industry.name}</span>
@@ -174,7 +182,7 @@ export default function VCAnalytics() {
           >
             <h3 className="font-semibold text-black mb-4">Funding Stages</h3>
             <div className="space-y-3">
-              {stats.stages.map(stage => (
+              {stats.stages.map((stage) => (
                 <div key={stage.name}>
                   <div className="flex items-center justify-between text-sm mb-1">
                     <span className="text-gray-700">{stage.name}</span>
@@ -227,8 +235,8 @@ export default function VCAnalytics() {
               { range: '21-40', count: 15, color: 'bg-orange-500' },
               { range: '41-60', count: 28, color: 'bg-yellow-500' },
               { range: '61-80', count: 52, color: 'bg-green-500' },
-              { range: '81-100', count: 39, color: 'bg-green-600' }
-            ].map(bucket => (
+              { range: '81-100', count: 39, color: 'bg-green-600' },
+            ].map((bucket) => (
               <div key={bucket.range} className="text-center">
                 <div className="relative h-32 flex items-end justify-center mb-2">
                   <div

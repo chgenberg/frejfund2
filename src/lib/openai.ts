@@ -2,7 +2,12 @@ import OpenAI from 'openai';
 import { BusinessInfo, BusinessAnalysisResult } from '@/types/business';
 import { getOpenAIClient, getChatModel, TaskComplexity } from '@/lib/ai-client';
 
-async function chatWithFallback(args: { messages: { role: 'system' | 'user' | 'assistant'; content: string }[]; temperature: number; maxTokens?: number; complexity?: TaskComplexity }): Promise<string> {
+async function chatWithFallback(args: {
+  messages: { role: 'system' | 'user' | 'assistant'; content: string }[];
+  temperature: number;
+  maxTokens?: number;
+  complexity?: TaskComplexity;
+}): Promise<string> {
   const model = getChatModel(args.complexity || 'simple');
   const isGpt5 = model.startsWith('gpt-5');
   try {
@@ -12,17 +17,28 @@ async function chatWithFallback(args: { messages: { role: 'system' | 'user' | 'a
       model,
       messages: args.messages,
       ...(isGpt5 ? {} : { temperature: args.temperature }),
-      ...(args.maxTokens ? (isGpt5 ? { max_completion_tokens: args.maxTokens } : { max_tokens: args.maxTokens }) : {})
+      ...(args.maxTokens
+        ? isGpt5
+          ? { max_completion_tokens: args.maxTokens }
+          : { max_tokens: args.maxTokens }
+        : {}),
     });
     console.log('[DEBUG] Chat Completions succeeded');
     // Cost logging
     try {
       const promptTokens = (resp as any).usage?.prompt_tokens ?? 0;
       const completionTokens = (resp as any).usage?.completion_tokens ?? 0;
-      const totalTokens = (resp as any).usage?.total_tokens ?? (promptTokens + completionTokens);
+      const totalTokens = (resp as any).usage?.total_tokens ?? promptTokens + completionTokens;
       const { estimateCostUsd, logAICost } = await import('@/lib/cost-logger');
       const costUsd = estimateCostUsd(model, promptTokens, completionTokens);
-      logAICost({ model, promptTokens, completionTokens, totalTokens, costUsd, route: 'chat.completions' });
+      logAICost({
+        model,
+        promptTokens,
+        completionTokens,
+        totalTokens,
+        costUsd,
+        route: 'chat.completions',
+      });
     } catch {}
     return resp.choices[0]?.message?.content || '';
   } catch (e) {
@@ -34,7 +50,7 @@ async function chatWithFallback(args: { messages: { role: 'system' | 'user' | 'a
       const r = await (client2 as any).responses.create({
         model,
         input: args.messages.map((m) => `${m.role.toUpperCase()}: ${m.content}`).join('\n\n'),
-        ...(isGpt5 ? {} : { temperature: args.temperature })
+        ...(isGpt5 ? {} : { temperature: args.temperature }),
       });
       console.log('[DEBUG] Responses API succeeded');
       // SDK v5: r.output_text gives concatenated content when available
@@ -113,34 +129,49 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
   async generateChatResponse(
     message: string,
     businessInfo: BusinessInfo,
-    conversationHistory: Array<{role: 'user' | 'assistant', content: string}>,
-    sessionId?: string
+    conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>,
+    sessionId?: string,
   ): Promise<string> {
     try {
       // Check if user is asking about investors
       const investorKeywords = [
-        'investor', 'vc', 'venture capital',
-        'pitch', 'funding', 'raise',
-        'contact', 'reach out'
+        'investor',
+        'vc',
+        'venture capital',
+        'pitch',
+        'funding',
+        'raise',
+        'contact',
+        'reach out',
       ];
-      
+
       const emailKeywords = [
-        'email', 'draft', 'write', 'intro', 'introduction',
-        'reach out', 'contact', 'message'
+        'email',
+        'draft',
+        'write',
+        'intro',
+        'introduction',
+        'reach out',
+        'contact',
+        'message',
       ];
-      
+
       const warmIntroKeywords = [
-        'warm intro', 'introduction', 'mutual connection', 'know anyone', 'warm introduction'
+        'warm intro',
+        'introduction',
+        'mutual connection',
+        'know anyone',
+        'warm introduction',
       ];
-      
-      const isAskingAboutInvestors = investorKeywords.some(keyword => 
-        message.toLowerCase().includes(keyword)
+
+      const isAskingAboutInvestors = investorKeywords.some((keyword) =>
+        message.toLowerCase().includes(keyword),
       );
-      
-      const isAskingForEmail = emailKeywords.some(keyword =>
-        message.toLowerCase().includes(keyword)
+
+      const isAskingForEmail = emailKeywords.some((keyword) =>
+        message.toLowerCase().includes(keyword),
       );
-      
+
       // If asking about investors and we have a session, trigger matching
       if (isAskingAboutInvestors && sessionId) {
         try {
@@ -148,42 +179,43 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'x-session-id': sessionId
+              'x-session-id': sessionId,
             },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
               businessInfo: {
                 name: businessInfo.name,
                 industry: businessInfo.industry,
                 stage: businessInfo.stage,
                 targetMarket: businessInfo.targetMarket,
-                businessModel: businessInfo.businessModel
+                businessModel: businessInfo.businessModel,
               },
-              limit: 5
-            })
+              limit: 5,
+            }),
           });
-          
+
           if (response.ok) {
             const data = await response.json();
             const matches = data.matches || [];
-            
+
             if (matches.length > 0) {
               // Format investor recommendations
               let investorResponse = `Based on your profile (${businessInfo.industry}, ${businessInfo.stage} stage), here are your **top investor matches**:\n\n`;
-              
+
               matches.slice(0, 3).forEach((match: any, idx: number) => {
-                const checkRange = match.investor.checkSizeMin && match.investor.checkSizeMax
-                  ? `$${(match.investor.checkSizeMin / 1000000).toFixed(1)}M-$${(match.investor.checkSizeMax / 1000000).toFixed(1)}M`
-                  : 'varies';
-                
+                const checkRange =
+                  match.investor.checkSizeMin && match.investor.checkSizeMax
+                    ? `$${(match.investor.checkSizeMin / 1000000).toFixed(1)}M-$${(match.investor.checkSizeMax / 1000000).toFixed(1)}M`
+                    : 'varies';
+
                 investorResponse += `**${idx + 1}. ${match.investor.firmName || match.investor.name}** (${match.matchScore}% match)\n`;
                 investorResponse += `${match.reasoning}\n`;
                 investorResponse += `• Check size: ${checkRange}\n`;
                 investorResponse += `• Portfolio: ${match.investor.notableInvestments?.slice(0, 2).join(', ')}\n\n`;
               });
-              
+
               investorResponse += `I've saved these matches for you. Want me to draft intro emails?\n\n`;
               investorResponse += `💡 Just ask: "Draft email to Creandum" or "Write intro email to ${matches[0].investor.firmName}"`;
-              
+
               return investorResponse;
             }
           }
@@ -192,27 +224,30 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
           // Continue with normal response if matching fails
         }
       }
-      
+
       // Check if user wants an email draft
       if (isAskingForEmail && (isAskingAboutInvestors || message.toLowerCase().includes('draft'))) {
         try {
           // Extract investor name from message
-          const investorNameMatch = message.match(/(?:to|with)\s+([A-Z][a-zA-Z\s&]+?)(?:\s|$|\.|\?)/);
+          const investorNameMatch = message.match(
+            /(?:to|with)\s+([A-Z][a-zA-Z\s&]+?)(?:\s|$|\.|\?)/,
+          );
           const investorName = investorNameMatch ? investorNameMatch[1].trim() : null;
-          
+
           if (investorName && sessionId) {
             // Find investor in saved matches or database
             const matchesResponse = await fetch('/api/investors/match', {
-              headers: { 'x-session-id': sessionId }
+              headers: { 'x-session-id': sessionId },
             });
-            
+
             if (matchesResponse.ok) {
               const matchesData = await matchesResponse.json();
-              const targetMatch = matchesData.matches?.find((m: any) => 
-                m.investor.firmName.toLowerCase().includes(investorName.toLowerCase()) ||
-                m.investor.name.toLowerCase().includes(investorName.toLowerCase())
+              const targetMatch = matchesData.matches?.find(
+                (m: any) =>
+                  m.investor.firmName.toLowerCase().includes(investorName.toLowerCase()) ||
+                  m.investor.name.toLowerCase().includes(investorName.toLowerCase()),
               );
-              
+
               if (targetMatch) {
                 // Generate email
                 const emailResponse = await fetch('/api/investors/email', {
@@ -221,13 +256,13 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
                   body: JSON.stringify({
                     investorId: targetMatch.investor.id,
                     businessInfo,
-                    emailType: 'cold_outreach'
-                  })
+                    emailType: 'cold_outreach',
+                  }),
                 });
-                
+
                 if (emailResponse.ok) {
                   const emailData = await emailResponse.json();
-                  
+
                   let emailDraft = `Here's a personalized email draft for **${targetMatch.investor.firmName}**:\n\n`;
                   emailDraft += `**Subject:** ${emailData.email.subject}\n\n`;
                   emailDraft += `**Body:**\n${emailData.email.body}\n\n`;
@@ -235,16 +270,21 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
                   emailData.email.tips.forEach((tip: string) => {
                     emailDraft += `${tip}\n`;
                   });
-                  
-                  if (emailData.email.subjectVariations && emailData.email.subjectVariations.length > 0) {
+
+                  if (
+                    emailData.email.subjectVariations &&
+                    emailData.email.subjectVariations.length > 0
+                  ) {
                     emailDraft += `\n**Alternative subject lines:**\n`;
-                    emailData.email.subjectVariations.slice(0, 3).forEach((subject: string, i: number) => {
-                      emailDraft += `${i + 1}. ${subject}\n`;
-                    });
+                    emailData.email.subjectVariations
+                      .slice(0, 3)
+                      .forEach((subject: string, i: number) => {
+                        emailDraft += `${i + 1}. ${subject}\n`;
+                      });
                   }
-                  
+
                   emailDraft += `\nWant me to revise anything?`;
-                  
+
                   return emailDraft;
                 }
               }
@@ -255,49 +295,53 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
           // Continue with normal response if email generation fails
         }
       }
-      
+
       // Check if user wants warm intro guidance
-      const isAskingForWarmIntro = warmIntroKeywords.some(keyword =>
-        message.toLowerCase().includes(keyword)
+      const isAskingForWarmIntro = warmIntroKeywords.some((keyword) =>
+        message.toLowerCase().includes(keyword),
       );
-      
+
       if (isAskingForWarmIntro && isAskingAboutInvestors) {
         try {
           // Extract investor name
-          const investorNameMatch = message.match(/(?:to|with)\s+([A-Z][a-zA-Z\s&]+?)(?:\s|$|\.|\?)/);
+          const investorNameMatch = message.match(
+            /(?:to|with)\s+([A-Z][a-zA-Z\s&]+?)(?:\s|$|\.|\?)/,
+          );
           const investorName = investorNameMatch ? investorNameMatch[1].trim() : 'the investor';
-          
+
           const { generateWarmIntroGuidance } = await import('./warm-intro-simple');
           const guidance = await generateWarmIntroGuidance(investorName, investorName);
-          
+
           return guidance;
         } catch (error) {
           console.error('Error generating warm intro guidance:', error);
         }
       }
-      
+
       // Import coaching prompts and goal system
-      const { calculateReadinessScore, getCoachingSystemPrompt } = await import('./coaching-prompts');
+      const { calculateReadinessScore, getCoachingSystemPrompt } = await import(
+        './coaching-prompts'
+      );
       const { getCurrentMilestone } = await import('./goal-system');
-      
+
       // Calculate readiness score
       const readiness = calculateReadinessScore(businessInfo);
-      
+
       // Get user goal and roadmap from localStorage
       let userGoal: string | undefined;
       let currentMilestone: string | undefined;
-      
+
       if (typeof window !== 'undefined') {
         const goalId = localStorage.getItem('frejfund-goal');
         const customGoal = localStorage.getItem('frejfund-custom-goal');
         const roadmapStr = localStorage.getItem('frejfund-roadmap');
-        
+
         if (goalId) {
           const { GOAL_OPTIONS } = await import('./goal-system');
-          const goalOption = GOAL_OPTIONS.find(g => g.id === goalId);
+          const goalOption = GOAL_OPTIONS.find((g) => g.id === goalId);
           userGoal = goalId === 'custom' ? customGoal || 'Custom goal' : goalOption?.title;
         }
-        
+
         if (roadmapStr) {
           const roadmap = JSON.parse(roadmapStr);
           const milestone = getCurrentMilestone(roadmap);
@@ -306,23 +350,23 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
           }
         }
       }
-      
+
       // Get coaching system prompt with goal awareness
       let coachingSystemPrompt = getCoachingSystemPrompt(
-        businessInfo, 
+        businessInfo,
         readiness.score,
         userGoal,
-        currentMilestone
+        currentMilestone,
       );
-      
+
       // Enhance with deep analysis context if available
       try {
         const { getFrejaCoachingContext, getProgressComparison } = await import('./freja-coaching');
         const deepContext = await getFrejaCoachingContext(sessionId || 'unknown');
-        
+
         if (deepContext && !deepContext.includes('still running')) {
           coachingSystemPrompt += '\n\n--- DEEP ANALYSIS RESULTS ---\n' + deepContext;
-          
+
           // Add progress comparison if this isn't the first analysis
           try {
             const progressContext = await getProgressComparison(sessionId || 'unknown');
@@ -334,17 +378,17 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
       } catch (error) {
         console.log('Deep analysis context not available yet');
       }
-      
+
       const contextPrompt = `User Question: ${message}`;
 
       let text = await chatWithFallback({
         messages: [
           { role: 'system', content: coachingSystemPrompt },
           ...conversationHistory,
-          { role: 'user', content: contextPrompt }
+          { role: 'user', content: contextPrompt },
         ],
         temperature: 0.7,
-        complexity: 'complex' // Upgrade chat to gpt-5 for richer reasoning
+        complexity: 'complex', // Upgrade chat to gpt-5 for richer reasoning
       });
 
       // Clean up excessive line breaks
@@ -356,17 +400,19 @@ I understand you're currently at $18k MRR with 6 customers. Is this correct?`;
         text = text.replace(/\n([A-Z][^:]+):\s*/g, '\n**$1:** ');
       }
 
-      return text || 'I apologize, but I encountered an issue generating a response. Please try again.';
+      return (
+        text || 'I apologize, but I encountered an issue generating a response. Please try again.'
+      );
     } catch (error) {
       console.error('OpenAI API Error:', error);
-      return 'I\'m experiencing some technical difficulties right now. Let me provide you with some general guidance based on your business context.';
+      return "I'm experiencing some technical difficulties right now. Let me provide you with some general guidance based on your business context.";
     }
   }
 
   async generateComprehensiveAnalysis(
     businessInfo: BusinessInfo,
     websiteContent?: string,
-    uploadedDocs?: string[]
+    uploadedDocs?: string[],
   ): Promise<Partial<BusinessAnalysisResult>> {
     try {
       const analysisPrompt = `Conduct a comprehensive business analysis for this startup:
@@ -399,10 +445,10 @@ Format as JSON with clear structure.`;
       const content = await chatWithFallback({
         messages: [
           { role: 'system', content: this.systemPrompt },
-          { role: 'user', content: analysisPrompt }
+          { role: 'user', content: analysisPrompt },
         ],
         temperature: 0.3,
-        complexity: 'complex' // Use full model for deep business analysis
+        complexity: 'complex', // Use full model for deep business analysis
       });
       if (!content) throw new Error('No response from OpenAI');
 
@@ -424,7 +470,10 @@ Format as JSON with clear structure.`;
     }
   }
 
-  private parseTextAnalysis(content: string, businessInfo: BusinessInfo): Partial<BusinessAnalysisResult> {
+  private parseTextAnalysis(
+    content: string,
+    businessInfo: BusinessInfo,
+  ): Partial<BusinessAnalysisResult> {
     // Fallback parsing logic for when JSON parsing fails
     return {
       companyContext: {
@@ -433,13 +482,16 @@ Format as JSON with clear structure.`;
         targetMarket: businessInfo.targetMarket,
         businessModel: businessInfo.businessModel,
         revenue: businessInfo.monthlyRevenue,
-        team: businessInfo.teamSize
+        team: businessInfo.teamSize,
       },
       investmentThesis: {
         opportunitySize: `${businessInfo.industry} market with significant growth potential`,
-        marketValidation: businessInfo.monthlyRevenue !== '0' ? 'Revenue indicates market demand' : 'Requires validation',
+        marketValidation:
+          businessInfo.monthlyRevenue !== '0'
+            ? 'Revenue indicates market demand'
+            : 'Requires validation',
         competitiveAdvantage: 'Execution-dependent competitive positioning',
-        scalabilityFactor: businessInfo.businessModel.toLowerCase().includes('software') ? 8 : 6
+        scalabilityFactor: businessInfo.businessModel.toLowerCase().includes('software') ? 8 : 6,
       },
       actionableInsights: [
         {
@@ -448,15 +500,19 @@ Format as JSON with clear structure.`;
           priority: 'high' as const,
           timeline: '30 days',
           expectedImpact: 'Reduce market risk by 50%',
-          specificSteps: ['Conduct customer interviews', 'Analyze competitor positioning', 'Test pricing models']
-        }
+          specificSteps: [
+            'Conduct customer interviews',
+            'Analyze competitor positioning',
+            'Test pricing models',
+          ],
+        },
       ],
       riskFactors: [
         {
           risk: 'Market Competition',
           severity: 'medium' as const,
-          mitigation: 'Focus on differentiation and customer retention'
-        }
+          mitigation: 'Focus on differentiation and customer retention',
+        },
       ],
       scores: {
         problemSolutionFit: 65,
@@ -466,8 +522,8 @@ Format as JSON with clear structure.`;
         teamExecution: 70,
         traction: businessInfo.monthlyRevenue !== '0' ? 75 : 45,
         financialHealth: 60,
-        overallScore: 65
-      }
+        overallScore: 65,
+      },
     };
   }
 }

@@ -22,18 +22,18 @@ export default function VCLogin() {
       const response = await fetch('/api/vc/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        
+
         // Store VC session
         localStorage.setItem('vc-token', data.token);
         localStorage.setItem('vc-email', email);
         localStorage.setItem('vc-firm', data.firm);
         localStorage.setItem('vc-name', data.name);
-        
+
         // Redirect to dashboard
         router.push('/vc');
       } else {
@@ -66,9 +66,7 @@ export default function VCLogin() {
         {/* Login Form */}
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
             <input
               type="email"
               value={email}
@@ -80,9 +78,7 @@ export default function VCLogin() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Password
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -97,11 +93,7 @@ export default function VCLogin() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
-                {showPassword ? (
-                  <EyeOff className="w-5 h-5" />
-                ) : (
-                  <Eye className="w-5 h-5" />
-                )}
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
           </div>
@@ -127,8 +119,12 @@ export default function VCLogin() {
         <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
           <p className="text-xs font-medium text-gray-700 mb-2">Demo Credentials:</p>
           <div className="space-y-1 text-xs text-gray-600">
-            <p>Email: <span className="font-mono">vc@demo.com</span></p>
-            <p>Password: <span className="font-mono">demo123</span></p>
+            <p>
+              Email: <span className="font-mono">vc@demo.com</span>
+            </p>
+            <p>
+              Password: <span className="font-mono">demo123</span>
+            </p>
           </div>
         </div>
 

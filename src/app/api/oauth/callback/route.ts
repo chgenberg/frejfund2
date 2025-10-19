@@ -15,13 +15,13 @@ export async function GET(req: NextRequest) {
       console.error('OAuth error:', error);
       const errorDescription = searchParams.get('error_description') || 'Authorization failed';
       return NextResponse.redirect(
-        new URL(`/integrations?error=${encodeURIComponent(errorDescription)}`, req.url)
+        new URL(`/integrations?error=${encodeURIComponent(errorDescription)}`, req.url),
       );
     }
 
     if (!code || !state) {
       return NextResponse.redirect(
-        new URL('/integrations?error=Missing authorization code', req.url)
+        new URL('/integrations?error=Missing authorization code', req.url),
       );
     }
 
@@ -30,9 +30,7 @@ export async function GET(req: NextRequest) {
     try {
       stateData = JSON.parse(state);
     } catch {
-      return NextResponse.redirect(
-        new URL('/integrations?error=Invalid state parameter', req.url)
-      );
+      return NextResponse.redirect(new URL('/integrations?error=Invalid state parameter', req.url));
     }
 
     // In production, here we would:
@@ -42,12 +40,12 @@ export async function GET(req: NextRequest) {
     // 4. Start initial data sync
 
     const tokenExchangeHandlers: Record<string, (code: string) => Promise<any>> = {
-      'gmail': async (code) => exchangeGoogleToken(code, 'gmail'),
+      gmail: async (code) => exchangeGoogleToken(code, 'gmail'),
       'google-calendar': async (code) => exchangeGoogleToken(code, 'calendar'),
       'google-analytics': async (code) => exchangeGoogleToken(code, 'analytics'),
-      'stripe': async (code) => exchangeStripeToken(code),
-      'hubspot': async (code) => exchangeHubSpotToken(code),
-      'slack': async (code) => exchangeSlackToken(code),
+      stripe: async (code) => exchangeStripeToken(code),
+      hubspot: async (code) => exchangeHubSpotToken(code),
+      slack: async (code) => exchangeSlackToken(code),
     };
 
     const handler = tokenExchangeHandlers[stateData.integrationId];
@@ -56,15 +54,15 @@ export async function GET(req: NextRequest) {
         const tokenData = await handler(code);
         // Store token securely (encrypted in database)
         console.log('Token exchange successful for:', stateData.integrationId);
-        
+
         // Redirect with success
         return NextResponse.redirect(
-          new URL(`/integrations?connected=${stateData.integrationId}`, req.url)
+          new URL(`/integrations?connected=${stateData.integrationId}`, req.url),
         );
       } catch (error) {
         console.error('Token exchange failed:', error);
         return NextResponse.redirect(
-          new URL(`/integrations?error=Failed to connect ${stateData.integrationId}`, req.url)
+          new URL(`/integrations?error=Failed to connect ${stateData.integrationId}`, req.url),
         );
       }
     }
@@ -74,7 +72,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('OAuth callback error:', error);
     return NextResponse.redirect(
-      new URL('/integrations?error=An unexpected error occurred', req.url)
+      new URL('/integrations?error=An unexpected error occurred', req.url),
     );
   }
 }
@@ -87,13 +85,13 @@ async function exchangeGoogleToken(code: string, service: string) {
     client_id: process.env.GOOGLE_CLIENT_ID || '',
     client_secret: process.env.GOOGLE_CLIENT_SECRET || '',
     redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/oauth/callback`,
-    grant_type: 'authorization_code'
+    grant_type: 'authorization_code',
   });
 
   const response = await fetch(tokenUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params.toString()
+    body: params.toString(),
   });
 
   if (!response.ok) {
@@ -108,13 +106,13 @@ async function exchangeStripeToken(code: string) {
   const params = new URLSearchParams({
     code,
     client_secret: process.env.STRIPE_SECRET_KEY || '',
-    grant_type: 'authorization_code'
+    grant_type: 'authorization_code',
   });
 
   const response = await fetch(tokenUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params.toString()
+    body: params.toString(),
   });
 
   if (!response.ok) {
@@ -131,13 +129,13 @@ async function exchangeHubSpotToken(code: string) {
     client_id: process.env.HUBSPOT_CLIENT_ID || '',
     client_secret: process.env.HUBSPOT_CLIENT_SECRET || '',
     redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/oauth/callback`,
-    grant_type: 'authorization_code'
+    grant_type: 'authorization_code',
   });
 
   const response = await fetch(tokenUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params.toString()
+    body: params.toString(),
   });
 
   if (!response.ok) {
@@ -153,13 +151,13 @@ async function exchangeSlackToken(code: string) {
     code,
     client_id: process.env.SLACK_CLIENT_ID || '',
     client_secret: process.env.SLACK_CLIENT_SECRET || '',
-    redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/oauth/callback`
+    redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/oauth/callback`,
   });
 
   const response = await fetch(tokenUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params.toString()
+    body: params.toString(),
   });
 
   if (!response.ok) {

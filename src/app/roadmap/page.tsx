@@ -3,7 +3,16 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Target, CheckCircle2, Circle, ChevronRight, Calendar, TrendingUp, ArrowLeft, ArrowRight } from 'lucide-react';
+import {
+  Target,
+  CheckCircle2,
+  Circle,
+  ChevronRight,
+  Calendar,
+  TrendingUp,
+  ArrowLeft,
+  ArrowRight,
+} from 'lucide-react';
 import Header from '@/components/Header';
 import { UserRoadmap, calculateRoadmapProgress, getCurrentMilestone } from '@/lib/goal-system';
 
@@ -34,11 +43,11 @@ export default function RoadmapPage() {
             tasks: Array.isArray(m?.tasks)
               ? m.tasks.map((t: any) => ({
                   ...t,
-                  dueDate: t?.dueDate ? new Date(t.dueDate) : undefined
+                  dueDate: t?.dueDate ? new Date(t.dueDate) : undefined,
                 }))
-              : []
+              : [],
           }))
-        : []
+        : [],
     };
     setRoadmap(hydrated);
 
@@ -65,12 +74,15 @@ export default function RoadmapPage() {
   }
 
   const progress = calculateRoadmapProgress(roadmap);
-  const targetMs = roadmap.targetDate instanceof Date ? roadmap.targetDate.getTime() : new Date(roadmap.targetDate as unknown as string).getTime();
+  const targetMs =
+    roadmap.targetDate instanceof Date
+      ? roadmap.targetDate.getTime()
+      : new Date(roadmap.targetDate as unknown as string).getTime();
   const weeksRemaining = Math.ceil((targetMs - Date.now()) / (7 * 24 * 60 * 60 * 1000));
 
   return (
     <div className="min-h-screen bg-white">
-      <Header 
+      <Header
         rightContent={
           <button
             onClick={() => router.push('/goal-setting')}
@@ -127,7 +139,7 @@ export default function RoadmapPage() {
         <div className="space-y-4 mb-8">
           {roadmap.milestones.map((milestone, idx) => {
             const isExpanded = expandedMilestone === milestone.id;
-            const completedTasks = milestone.tasks.filter(t => t.completed).length;
+            const completedTasks = milestone.tasks.filter((t) => t.completed).length;
             const milestoneProgress = Math.round((completedTasks / milestone.tasks.length) * 100);
 
             return (
@@ -145,13 +157,15 @@ export default function RoadmapPage() {
                 >
                   <div className="flex items-start space-x-4 flex-1">
                     {/* Status Icon */}
-                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                      milestone.completed
-                        ? 'bg-green-100'
-                        : completedTasks > 0
-                        ? 'bg-blue-100'
-                        : 'bg-gray-100'
-                    }`}>
+                    <div
+                      className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+                        milestone.completed
+                          ? 'bg-green-100'
+                          : completedTasks > 0
+                            ? 'bg-blue-100'
+                            : 'bg-gray-100'
+                      }`}
+                    >
                       {milestone.completed ? (
                         <CheckCircle2 className="w-6 h-6 text-green-600" />
                       ) : completedTasks > 0 ? (
@@ -163,19 +177,17 @@ export default function RoadmapPage() {
 
                     {/* Content */}
                     <div className="flex-1 text-left">
-                      <h3 className="text-lg font-semibold text-black mb-1">
-                        {milestone.title}
-                      </h3>
-                      <p className="text-sm text-gray-600 mb-2">
-                        {milestone.description}
-                      </p>
+                      <h3 className="text-lg font-semibold text-black mb-1">{milestone.title}</h3>
+                      <p className="text-sm text-gray-600 mb-2">{milestone.description}</p>
                       <div className="flex items-center space-x-4 text-xs text-gray-500">
                         <span className="flex items-center space-x-1">
                           <Calendar className="w-3 h-3" />
                           <span>{milestone.timeframe}</span>
                         </span>
                         <span>•</span>
-                        <span>{completedTasks}/{milestone.tasks.length} tasks completed</span>
+                        <span>
+                          {completedTasks}/{milestone.tasks.length} tasks completed
+                        </span>
                         <span>•</span>
                         <span className="font-medium">{milestoneProgress}%</span>
                       </div>
@@ -183,9 +195,11 @@ export default function RoadmapPage() {
                   </div>
 
                   {/* Expand Icon */}
-                  <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${
-                    isExpanded ? 'rotate-90' : ''
-                  }`} />
+                  <ChevronRight
+                    className={`w-5 h-5 text-gray-400 transition-transform ${
+                      isExpanded ? 'rotate-90' : ''
+                    }`}
+                  />
                 </button>
 
                 {/* Tasks List */}
@@ -203,24 +217,24 @@ export default function RoadmapPage() {
                           className="flex items-start space-x-3 p-4 bg-white rounded-xl border border-gray-200"
                         >
                           {/* Checkbox */}
-                          <div className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center ${
-                            task.completed
-                              ? 'bg-black border-black'
-                              : 'border-gray-300'
-                          }`}>
+                          <div
+                            className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center ${
+                              task.completed ? 'bg-black border-black' : 'border-gray-300'
+                            }`}
+                          >
                             {task.completed && <CheckCircle2 className="w-3 h-3 text-white" />}
                           </div>
 
                           {/* Task Content */}
                           <div className="flex-1">
-                            <h4 className={`font-medium mb-1 ${
-                              task.completed ? 'text-gray-400 line-through' : 'text-black'
-                            }`}>
+                            <h4
+                              className={`font-medium mb-1 ${
+                                task.completed ? 'text-gray-400 line-through' : 'text-black'
+                              }`}
+                            >
                               {task.title}
                             </h4>
-                            <p className="text-sm text-gray-600">
-                              {task.description}
-                            </p>
+                            <p className="text-sm text-gray-600">{task.description}</p>
                           </div>
                         </div>
                       ))}
@@ -251,9 +265,7 @@ export default function RoadmapPage() {
             </span>
           </motion.button>
 
-          <p className="text-sm text-gray-500 mt-4">
-            Let's get started on your first milestone
-          </p>
+          <p className="text-sm text-gray-500 mt-4">Let's get started on your first milestone</p>
         </motion.div>
       </div>
     </div>

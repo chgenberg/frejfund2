@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
@@ -22,4 +22,3 @@ jobs:
           NEXT_PUBLIC_APP_URL: http://localhost:3000
       - run: npm run format:check
       - run: npm run build
-

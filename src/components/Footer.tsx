@@ -26,7 +26,9 @@ export default function Footer() {
 
           {/* For Investors section */}
           <div className="col-span-1">
-            <h3 className="font-semibold text-black mb-2 sm:mb-3 text-sm sm:text-base">For Investors</h3>
+            <h3 className="font-semibold text-black mb-2 sm:mb-3 text-sm sm:text-base">
+              For Investors
+            </h3>
             <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-600">
               <li>
                 <Link href="/vc" className="hover:text-black transition-colors">

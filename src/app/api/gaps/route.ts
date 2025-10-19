@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 export async function GET(req: NextRequest) {
   try {
     const sessionId = req.nextUrl.searchParams.get('sessionId');
-    
+
     if (!sessionId) {
       return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
     }
@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     // Get analysis to verify it exists and get business info
     const analysis = await prisma.deepAnalysis.findUnique({
       where: { sessionId },
-      select: { businessInfo: true }
+      select: { businessInfo: true },
     });
 
     if (!analysis) {
@@ -30,14 +30,11 @@ export async function GET(req: NextRequest) {
       gaps,
       questions,
       totalGaps: gaps.length,
-      businessInfo: analysis.businessInfo
+      businessInfo: analysis.businessInfo,
     });
   } catch (error) {
     console.error('Error identifying gaps:', error);
-    return NextResponse.json(
-      { error: 'Failed to identify analysis gaps' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to identify analysis gaps' }, { status: 500 });
   }
 }
 
@@ -46,10 +43,7 @@ export async function POST(req: NextRequest) {
     const { sessionId, answers } = await req.json();
 
     if (!sessionId || !answers) {
-      return NextResponse.json(
-        { error: 'Session ID and answers required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Session ID and answers required' }, { status: 400 });
     }
 
     // Save gap answers
@@ -57,26 +51,30 @@ export async function POST(req: NextRequest) {
       where: { id: sessionId },
       data: {
         metadata: {
-          ...(await prisma.session.findUnique({
-            where: { id: sessionId },
-            select: { metadata: true }
-          }))?.metadata as any,
+          ...((
+            await prisma.session.findUnique({
+              where: { id: sessionId },
+              select: { metadata: true },
+            })
+          )?.metadata as any),
           gapAnswers: answers,
-          gapAnsweredAt: new Date()
-        }
-      }
+          gapAnsweredAt: new Date(),
+        },
+      },
     });
 
     // Get dimension IDs from answers
-    const dimensionIds = Object.keys(answers).map(key => {
-      const parts = key.split('-');
-      return parts.slice(0, -1).join('-'); // Remove question suffix
-    }).filter(Boolean);
+    const dimensionIds = Object.keys(answers)
+      .map((key) => {
+        const parts = key.split('-');
+        return parts.slice(0, -1).join('-'); // Remove question suffix
+      })
+      .filter(Boolean);
 
     // Trigger incremental reanalysis for affected dimensions
     if (dimensionIds.length > 0) {
       const { runIncrementalAnalysis } = await import('@/lib/gap-qa-system');
-      
+
       // Format answers as additional context
       const additionalContext = Object.entries(answers)
         .map(([key, value]) => `${key}: ${value}`)
@@ -88,13 +86,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Answers saved and analysis updated',
-      updatedDimensions: dimensionIds.length
+      updatedDimensions: dimensionIds.length,
     });
   } catch (error) {
     console.error('Error saving gap answers:', error);
-    return NextResponse.json(
-      { error: 'Failed to save answers' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to save answers' }, { status: 500 });
   }
 }

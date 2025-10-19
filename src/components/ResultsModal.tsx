@@ -2,10 +2,23 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  X, TrendingUp, Users, DollarSign, Target, Brain, Shield, 
-  ChevronRight, AlertTriangle, CheckCircle, Clock, Star,
-  Download, Share2, BarChart3, Lightbulb
+import {
+  X,
+  TrendingUp,
+  Users,
+  DollarSign,
+  Target,
+  Brain,
+  Shield,
+  ChevronRight,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  Star,
+  Download,
+  Share2,
+  BarChart3,
+  Lightbulb,
 } from 'lucide-react';
 import { BusinessAnalysisResult, BusinessInfo } from '@/types/business';
 
@@ -16,13 +29,15 @@ interface ResultsModalProps {
 }
 
 export default function ResultsModal({ result, businessInfo, onClose }: ResultsModalProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'insights' | 'scores' | 'risks'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'insights' | 'scores' | 'risks'>(
+    'overview',
+  );
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'insights', label: 'Insights', icon: Lightbulb },
     { id: 'scores', label: 'Scores', icon: Star },
-    { id: 'risks', label: 'Risks', icon: AlertTriangle }
+    { id: 'risks', label: 'Risks', icon: AlertTriangle },
   ];
 
   const scoreData = [
@@ -32,7 +47,7 @@ export default function ResultsModal({ result, businessInfo, onClose }: ResultsM
     { label: 'Business Model', value: result.scores.businessModel, color: 'orange' },
     { label: 'Team Execution', value: result.scores.teamExecution, color: 'red' },
     { label: 'Traction', value: result.scores.traction, color: 'indigo' },
-    { label: 'Financial Health', value: result.scores.financialHealth, color: 'pink' }
+    { label: 'Financial Health', value: result.scores.financialHealth, color: 'pink' },
   ];
 
   const getScoreColor = (score: number) => {
@@ -43,10 +58,14 @@ export default function ResultsModal({ result, businessInfo, onClose }: ResultsM
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'text-red-600 bg-red-100';
-      case 'medium': return 'text-yellow-600 bg-yellow-100';
-      case 'low': return 'text-green-600 bg-green-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case 'high':
+        return 'text-red-600 bg-red-100';
+      case 'medium':
+        return 'text-yellow-600 bg-yellow-100';
+      case 'low':
+        return 'text-green-600 bg-green-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
     }
   };
 
@@ -55,28 +74,59 @@ export default function ResultsModal({ result, businessInfo, onClose }: ResultsM
     const s = result.scores;
     const suggestions: Array<{ area: string; score: number; text: string }> = [];
     if (typeof s.problemSolutionFit === 'number' && s.problemSolutionFit < 70) {
-      suggestions.push({ area: 'Problem-Solution Fit', score: s.problemSolutionFit, text: 'Tighten ICP and refine the pain → solution story. Add 3 concrete use-cases and before/after metrics.' });
+      suggestions.push({
+        area: 'Problem-Solution Fit',
+        score: s.problemSolutionFit,
+        text: 'Tighten ICP and refine the pain → solution story. Add 3 concrete use-cases and before/after metrics.',
+      });
     }
     if (typeof s.marketTiming === 'number' && s.marketTiming < 70) {
-      suggestions.push({ area: 'Market & Timing', score: s.marketTiming, text: 'Show demand signals: waitlist size, inbound rate, pilot requests. Add trend data and “why now”.' });
+      suggestions.push({
+        area: 'Market & Timing',
+        score: s.marketTiming,
+        text: 'Show demand signals: waitlist size, inbound rate, pilot requests. Add trend data and “why now”.',
+      });
     }
     if (typeof s.competitiveMoat === 'number' && s.competitiveMoat < 70) {
-      suggestions.push({ area: 'Competitive Moat', score: s.competitiveMoat, text: 'Strengthen moat via data assets, distribution partnerships, switching costs or IP. Add a clear moat slide.' });
+      suggestions.push({
+        area: 'Competitive Moat',
+        score: s.competitiveMoat,
+        text: 'Strengthen moat via data assets, distribution partnerships, switching costs or IP. Add a clear moat slide.',
+      });
     }
     if (typeof s.businessModel === 'number' && s.businessModel < 70) {
-      suggestions.push({ area: 'Business Model', score: s.businessModel, text: 'Clarify unit economics: target CAC/LTV, payback, pricing tiers. Add 12–18m monetization plan.' });
+      suggestions.push({
+        area: 'Business Model',
+        score: s.businessModel,
+        text: 'Clarify unit economics: target CAC/LTV, payback, pricing tiers. Add 12–18m monetization plan.',
+      });
     }
     if (typeof s.teamExecution === 'number' && s.teamExecution < 70) {
-      suggestions.push({ area: 'Team Execution', score: s.teamExecution, text: 'Close key gaps (e.g., sales/ops). Add advisors with credibility and list shipped milestones last 90 days.' });
+      suggestions.push({
+        area: 'Team Execution',
+        score: s.teamExecution,
+        text: 'Close key gaps (e.g., sales/ops). Add advisors with credibility and list shipped milestones last 90 days.',
+      });
     }
     if (typeof s.traction === 'number' && s.traction < 70) {
-      suggestions.push({ area: 'Traction', score: s.traction, text: 'Prioritize proof: 3 pilots, first $10k MRR, or 10 paying logos. Add retention or usage graphs.' });
+      suggestions.push({
+        area: 'Traction',
+        score: s.traction,
+        text: 'Prioritize proof: 3 pilots, first $10k MRR, or 10 paying logos. Add retention or usage graphs.',
+      });
     }
     if (typeof s.financialHealth === 'number' && s.financialHealth < 70) {
-      suggestions.push({ area: 'Financial Health', score: s.financialHealth, text: 'Show runway, planned burn, and use of funds tied to milestones. Include contingency plan.' });
+      suggestions.push({
+        area: 'Financial Health',
+        score: s.financialHealth,
+        text: 'Show runway, planned burn, and use of funds tied to milestones. Include contingency plan.',
+      });
     }
     // Sort by lowest score first and return top 3
-    return suggestions.sort((a, b) => a.score - b.score).slice(0, 3).map(sug => `${sug.text}`);
+    return suggestions
+      .sort((a, b) => a.score - b.score)
+      .slice(0, 3)
+      .map((sug) => `${sug.text}`);
   };
 
   const renderOverview = () => (
@@ -91,7 +141,9 @@ export default function ResultsModal({ result, businessInfo, onClose }: ResultsM
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
           <div>
             <span className="text-gray-600">Stage:</span>
-            <div className="font-medium text-gray-900 capitalize">{result.companyContext.stage}</div>
+            <div className="font-medium text-gray-900 capitalize">
+              {result.companyContext.stage}
+            </div>
           </div>
           <div>
             <span className="text-gray-600">Industry:</span>
@@ -126,7 +178,9 @@ export default function ResultsModal({ result, businessInfo, onClose }: ResultsM
             <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center">
               <Star className="w-6 h-6 text-white" />
             </div>
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${getScoreColor(result.scores.overallScore)}`}>
+            <span
+              className={`px-3 py-1 rounded-full text-sm font-medium ${getScoreColor(result.scores.overallScore)}`}
+            >
               {result.scores.overallScore}/100
             </span>
           </div>
@@ -220,7 +274,9 @@ export default function ResultsModal({ result, businessInfo, onClose }: ResultsM
           <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
             <div className="mb-4 text-center">
               <h3 className="text-lg font-semibold text-gray-900">How to improve your score</h3>
-              <p className="text-sm text-gray-600">High-impact, low-regret actions to move the needle</p>
+              <p className="text-sm text-gray-600">
+                High-impact, low-regret actions to move the needle
+              </p>
             </div>
             <ul className="space-y-2">
               {improvements.map((tip, i) => (
@@ -235,7 +291,9 @@ export default function ResultsModal({ result, businessInfo, onClose }: ResultsM
       })()}
       <div className="text-center mb-6">
         <h3 className="text-xl font-bold text-gray-900 mb-2">Actionable Insights</h3>
-        <p className="text-gray-600">Personalized recommendations to improve your investment readiness</p>
+        <p className="text-gray-600">
+          Personalized recommendations to improve your investment readiness
+        </p>
       </div>
 
       <div className="space-y-4">
@@ -256,7 +314,9 @@ export default function ResultsModal({ result, businessInfo, onClose }: ResultsM
                 <div>
                   <h4 className="font-semibold text-gray-900">{insight.title}</h4>
                   <div className="flex items-center space-x-4 mt-1">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(insight.priority)}`}>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(insight.priority)}`}
+                    >
                       {insight.priority.toUpperCase()}
                     </span>
                     <span className="flex items-center text-xs text-gray-500">
@@ -267,9 +327,9 @@ export default function ResultsModal({ result, businessInfo, onClose }: ResultsM
                 </div>
               </div>
             </div>
-            
+
             <p className="text-gray-700 mb-4 leading-relaxed">{insight.description}</p>
-            
+
             <div className="bg-gray-50 rounded-lg p-4 mb-4">
               <h5 className="font-medium text-gray-900 mb-2">Expected Impact:</h5>
               <p className="text-sm text-gray-600">{insight.expectedImpact}</p>
@@ -351,7 +411,9 @@ export default function ResultsModal({ result, businessInfo, onClose }: ResultsM
           >
             <div className="flex items-center justify-between mb-2">
               <span className="font-medium text-gray-900">{item.label}</span>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getScoreColor(item.value)}`}>
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-medium ${getScoreColor(item.value)}`}
+              >
                 {item.value}/100
               </span>
             </div>
@@ -402,22 +464,37 @@ export default function ResultsModal({ result, businessInfo, onClose }: ResultsM
             className="bg-white rounded-xl p-6 border border-gray-200"
           >
             <div className="flex items-start space-x-4">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                risk.severity === 'high' ? 'bg-red-100' :
-                risk.severity === 'medium' ? 'bg-yellow-100' : 'bg-green-100'
-              }`}>
-                <AlertTriangle className={`w-6 h-6 ${
-                  risk.severity === 'high' ? 'text-red-600' :
-                  risk.severity === 'medium' ? 'text-yellow-600' : 'text-green-600'
-                }`} />
+              <div
+                className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                  risk.severity === 'high'
+                    ? 'bg-red-100'
+                    : risk.severity === 'medium'
+                      ? 'bg-yellow-100'
+                      : 'bg-green-100'
+                }`}
+              >
+                <AlertTriangle
+                  className={`w-6 h-6 ${
+                    risk.severity === 'high'
+                      ? 'text-red-600'
+                      : risk.severity === 'medium'
+                        ? 'text-yellow-600'
+                        : 'text-green-600'
+                  }`}
+                />
               </div>
               <div className="flex-1">
                 <div className="flex items-center space-x-3 mb-2">
                   <h4 className="font-semibold text-gray-900">{risk.risk}</h4>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    risk.severity === 'high' ? 'bg-red-100 text-red-600' :
-                    risk.severity === 'medium' ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'
-                  }`}>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      risk.severity === 'high'
+                        ? 'bg-red-100 text-red-600'
+                        : risk.severity === 'medium'
+                          ? 'bg-yellow-100 text-yellow-600'
+                          : 'bg-green-100 text-green-600'
+                    }`}
+                  >
                     {risk.severity.toUpperCase()}
                   </span>
                 </div>
@@ -469,7 +546,9 @@ export default function ResultsModal({ result, businessInfo, onClose }: ResultsM
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
             <h1 className="text-xl font-bold text-gray-900">Business Analysis Results</h1>
-            <p className="text-sm text-gray-600">{businessInfo.name} • {businessInfo.industry}</p>
+            <p className="text-sm text-gray-600">
+              {businessInfo.name} • {businessInfo.industry}
+            </p>
           </div>
           <div className="flex items-center space-x-3">
             <motion.button

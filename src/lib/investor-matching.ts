@@ -26,7 +26,7 @@ interface InvestorMatch {
  */
 function calculateMatchScore(
   business: BusinessProfile,
-  investor: any
+  investor: any,
 ): { score: number; breakdown: any } {
   let stageMatch = 0;
   let industryMatch = 0;
@@ -80,10 +80,7 @@ function calculateMatchScore(
 
   // Weighted average
   const score = Math.round(
-    stageMatch * 0.35 +
-    industryMatch * 0.35 +
-    geoMatch * 0.15 +
-    checkSizeMatch * 0.15
+    stageMatch * 0.35 + industryMatch * 0.35 + geoMatch * 0.15 + checkSizeMatch * 0.15,
   );
 
   return {
@@ -92,8 +89,8 @@ function calculateMatchScore(
       stageMatch,
       industryMatch,
       geoMatch,
-      checkSizeMatch
-    }
+      checkSizeMatch,
+    },
   };
 }
 
@@ -103,7 +100,7 @@ function calculateMatchScore(
 async function generateReasoning(
   business: BusinessProfile,
   investor: any,
-  breakdown: any
+  breakdown: any,
 ): Promise<string> {
   const prompt = `You are a fundraising advisor. Explain in 2-3 sentences why ${investor.firmName || investor.name} is a good match for ${business.name}.
 
@@ -132,7 +129,7 @@ Be specific and actionable. Mention their portfolio companies if relevant.`;
       model: getChatModel('simple'),
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 150,
-      temperature: 0.7
+      temperature: 0.7,
     });
 
     return response.choices[0].message.content?.trim() || 'Good match based on investment criteria';
@@ -148,21 +145,26 @@ Be specific and actionable. Mention their portfolio companies if relevant.`;
 export async function findInvestorMatches(
   business: BusinessProfile,
   sessionId: string,
-  limit: number = 10
+  limit: number = 10,
 ): Promise<InvestorMatch[]> {
   // Fetch all investors from database
   const investors = await prisma.investor.findMany({
-    orderBy: { ranking: 'desc' }
+    orderBy: { ranking: 'desc' },
   });
 
   // Calculate match scores for all investors
   const matches: InvestorMatch[] = [];
 
   for (const investor of investors) {
-  const { score, breakdown } = calculateMatchScore(business, investor);
-  const kpis = normalizeKpis((investor as any)?.traction || {});
-  const readiness = estimateReadiness(business as any, kpis);
-  const finalScore = blendMatchScore({ baseScore: score, kpiScore: kpis.composite, readinessScore: readiness, affinity: {} });
+    const { score, breakdown } = calculateMatchScore(business, investor);
+    const kpis = normalizeKpis((investor as any)?.traction || {});
+    const readiness = estimateReadiness(business as any, kpis);
+    const finalScore = blendMatchScore({
+      baseScore: score,
+      kpiScore: kpis.composite,
+      readinessScore: readiness,
+      affinity: {},
+    });
 
     // Only include matches above 50%
     if (finalScore >= 50) {
@@ -175,7 +177,7 @@ export async function findInvestorMatches(
         stageMatch: breakdown.stageMatch,
         industryMatch: breakdown.industryMatch,
         geoMatch: breakdown.geoMatch,
-        checkSizeMatch: breakdown.checkSizeMatch
+        checkSizeMatch: breakdown.checkSizeMatch,
       });
     }
   }
@@ -185,14 +187,14 @@ export async function findInvestorMatches(
 
   // Save top matches to database
   const topMatches = matches.slice(0, limit);
-  
+
   for (const match of topMatches) {
     await prisma.investorMatch.upsert({
       where: {
         sessionId_investorId: {
           sessionId,
-          investorId: match.investor.id
-        }
+          investorId: match.investor.id,
+        },
       },
       create: {
         sessionId,
@@ -202,7 +204,7 @@ export async function findInvestorMatches(
         stageMatch: match.stageMatch,
         industryMatch: match.industryMatch,
         geoMatch: match.geoMatch,
-        checkSizeMatch: match.checkSizeMatch
+        checkSizeMatch: match.checkSizeMatch,
       },
       update: {
         matchScore: match.matchScore,
@@ -211,8 +213,8 @@ export async function findInvestorMatches(
         industryMatch: match.industryMatch,
         geoMatch: match.geoMatch,
         checkSizeMatch: match.checkSizeMatch,
-        updatedAt: new Date()
-      }
+        updatedAt: new Date(),
+      },
     });
   }
 
@@ -226,7 +228,7 @@ export async function getSavedMatches(sessionId: string) {
   const matches = await prisma.investorMatch.findMany({
     where: { sessionId },
     include: { investor: true },
-    orderBy: { matchScore: 'desc' }
+    orderBy: { matchScore: 'desc' },
   });
 
   return matches;
@@ -235,19 +237,15 @@ export async function getSavedMatches(sessionId: string) {
 /**
  * Update match status (contacted, meeting_scheduled, etc.)
  */
-export async function updateMatchStatus(
-  matchId: string,
-  status: string,
-  notes?: string
-) {
+export async function updateMatchStatus(matchId: string, status: string, notes?: string) {
   return await prisma.investorMatch.update({
     where: { id: matchId },
     data: {
       status,
       notes,
       contactedAt: status === 'contacted' ? new Date() : undefined,
-      updatedAt: new Date()
-    }
+      updatedAt: new Date(),
+    },
   });
 }
 
@@ -278,8 +276,14 @@ function normalizeIndustry(industry: string): string {
 
 function normalizeGeography(market: string): string {
   const m = market.toLowerCase();
-  if (m.includes('sweden') || m.includes('norway') || m.includes('denmark') || 
-      m.includes('finland') || m.includes('nordic')) return 'nordics';
+  if (
+    m.includes('sweden') ||
+    m.includes('norway') ||
+    m.includes('denmark') ||
+    m.includes('finland') ||
+    m.includes('nordic')
+  )
+    return 'nordics';
   if (m.includes('europe') || m.includes('eu')) return 'europe';
   if (m.includes('us') || m.includes('usa') || m.includes('america')) return 'us';
   if (m.includes('global') || m.includes('world')) return 'global';
@@ -288,22 +292,22 @@ function normalizeGeography(market: string): string {
 
 function hasRelatedIndustry(industry: string, investorIndustries: string[]): boolean {
   const related: Record<string, string[]> = {
-    'saas': ['fintech', 'health tech', 'marketplace'],
-    'fintech': ['saas', 'marketplace'],
+    saas: ['fintech', 'health tech', 'marketplace'],
+    fintech: ['saas', 'marketplace'],
     'health tech': ['saas', 'deep_tech'],
-    'marketplace': ['saas', 'consumer'],
-    'deep_tech': ['saas', 'health tech']
+    marketplace: ['saas', 'consumer'],
+    deep_tech: ['saas', 'health tech'],
   };
-  
-  return investorIndustries.some(inv => related[industry]?.includes(inv));
+
+  return investorIndustries.some((inv) => related[industry]?.includes(inv));
 }
 
 function hasRelatedGeo(geo: string, investorGeos: string[]): boolean {
   const related: Record<string, string[]> = {
-    'nordics': ['europe', 'global'],
-    'europe': ['global', 'us'],
-    'us': ['global']
+    nordics: ['europe', 'global'],
+    europe: ['global', 'us'],
+    us: ['global'],
   };
-  
-  return investorGeos.some(inv => related[geo]?.includes(inv));
+
+  return investorGeos.some((inv) => related[geo]?.includes(inv));
 }

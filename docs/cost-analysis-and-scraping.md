@@ -3,6 +3,7 @@
 ## 💰 **Token-kostnader för Deep Analysis**
 
 ### **Nuvarande setup:**
+
 - **Modell:** GPT-4o-mini (via `getChatModel('simple')`)
 - **Antal dimensioner:** 68 st
 - **Körordning:** Critical → High → Medium → Low
@@ -10,6 +11,7 @@
 ### **Token-användning per dimension:**
 
 #### Input tokens (per dimension):
+
 - System prompt: ~100 tokens
 - Dimension-specifik prompt: ~150 tokens
 - Business info: ~200 tokens
@@ -18,16 +20,19 @@
 - **Total input per dimension: ~8,450 tokens**
 
 #### Output tokens (per dimension):
+
 - JSON-strukturerad analys: ~400 tokens
 - **Total output per dimension: ~400 tokens**
 
 ### **GPT-4o-mini priser (December 2024):**
+
 - Input: $0.15 per 1M tokens
 - Output: $0.60 per 1M tokens
 
 ### **Kostnad per företagsanalys:**
 
 #### Full analys (68 dimensioner):
+
 ```
 Input:  68 × 8,450 tokens = 574,600 tokens
 Output: 68 × 400 tokens   = 27,200 tokens
@@ -39,6 +44,7 @@ Total per analys: $0.102 (~$0.10 eller ~1 SEK)
 ```
 
 #### Critical-only analys (12-14 dimensioner):
+
 ```
 Input:  14 × 8,450 = 118,300 tokens
 Output: 14 × 400   = 5,600 tokens
@@ -49,7 +55,7 @@ Total cost: ~$0.021 (~$0.02 eller ~0.20 SEK)
 ### **Månadsvolym exempel:**
 
 | Analyser/mån | Full analys | Critical-only | Mix (50/50) |
-|--------------|-------------|---------------|-------------|
+| ------------ | ----------- | ------------- | ----------- |
 | 100          | $10.20      | $2.10         | $6.15       |
 | 500          | $51.00      | $10.50        | $30.75      |
 | 1,000        | $102.00     | $21.00        | $61.50      |
@@ -81,6 +87,7 @@ Total cost: ~$0.021 (~$0.02 eller ~0.20 SEK)
 ## 🔍 **Enhanced Scraping-verktyg & Datakällor**
 
 ### **1. Nuvarande scraping:**
+
 ```typescript
 // src/lib/web-scraper.ts
 - Cheerio (HTML parsing)
@@ -90,6 +97,7 @@ Total cost: ~$0.021 (~$0.02 eller ~0.20 SEK)
 ### **2. Föreslagna tillägg:**
 
 #### **A. LinkedIn Company Intelligence** 🌟
+
 ```typescript
 // Scrapa företagsprofil (offentlig data)
 interface LinkedInCompanyData {
@@ -116,6 +124,7 @@ interface LinkedInCompanyData {
 ---
 
 #### **B. Crunchbase API** 💼
+
 ```typescript
 // Officiell API för startup-data
 interface CrunchbaseData {
@@ -140,6 +149,7 @@ interface CrunchbaseData {
 ---
 
 #### **B. SimilarWeb / Ahrefs (Traffic & SEO)** 📊
+
 ```typescript
 interface TrafficData {
   monthlyVisits: number;
@@ -169,6 +179,7 @@ interface TrafficData {
 ---
 
 #### **C. GitHub API (för tech companies)** 💻
+
 ```typescript
 interface GitHubData {
   publicRepos: number;
@@ -195,6 +206,7 @@ interface GitHubData {
 ---
 
 #### **D. Product Hunt / Hacker News Scraping** 🚀
+
 ```typescript
 interface CommunityData {
   productHuntLaunches: {
@@ -219,6 +231,7 @@ interface CommunityData {
 ---
 
 #### **E. Financial Data APIs** 💰
+
 ```typescript
 // För publika bolag eller via integrations
 interface FinancialData {
@@ -246,6 +259,7 @@ interface FinancialData {
 ---
 
 #### **F. G2 / Capterra Reviews** ⭐
+
 ```typescript
 interface ReviewData {
   averageRating: number;
@@ -269,6 +283,7 @@ interface ReviewData {
 ---
 
 #### **G. Job Boards Scraping (LinkedIn, Indeed, Glassdoor)** 👥
+
 ```typescript
 interface JobBoardData {
   activeJobPostings: number;
@@ -289,6 +304,7 @@ interface JobBoardData {
 ---
 
 #### **H. News & Media Monitoring** 📰
+
 ```typescript
 interface MediaData {
   recentArticles: {
@@ -313,6 +329,7 @@ interface MediaData {
 ---
 
 #### **I. Domain & Tech Stack Analysis** 🔧
+
 ```typescript
 interface TechStackData {
   technologies: {
@@ -340,6 +357,7 @@ interface TechStackData {
 ---
 
 #### **J. Social Media Analytics** 📱
+
 ```typescript
 interface SocialData {
   twitter: {
@@ -369,6 +387,7 @@ interface SocialData {
 ## 🎯 **Rekommenderad Implementation Roadmap**
 
 ### **Phase 1: Free/Low-cost (Månad 1)**
+
 1. ✅ Enhanced web scraping (redan implementerat)
 2. ✅ Document extraction (PDF, DOCX, etc) - implementerat
 3. 🆕 LinkedIn public profile scraping
@@ -379,6 +398,7 @@ interface SocialData {
 **Kostnad: $0-50/månad**
 
 ### **Phase 2: Paid APIs (Månad 2-3)**
+
 1. Crunchbase Basic ($29/month)
 2. NewsAPI ($79/month)
 3. BuiltWith Lite ($295/month)
@@ -386,6 +406,7 @@ interface SocialData {
 **Kostnad: ~$400/månad**
 
 ### **Phase 3: Premium Intelligence (Månad 4-6)**
+
 1. SimilarWeb API ($200/month)
 2. Ahrefs API ($99/month)
 3. Review scraping (G2, Capterra)
@@ -393,6 +414,7 @@ interface SocialData {
 **Kostnad: +$300/månad = ~$700/månad total**
 
 ### **Phase 4: Real-time Integrations (Månad 6+)**
+
 1. Stripe integration (med user consent)
 2. Google Analytics integration
 3. QuickBooks/accounting integrations
@@ -404,6 +426,7 @@ interface SocialData {
 ## 📊 **ROI Analysis**
 
 ### **Kostnad per användare:**
+
 ```
 Deep Analysis (GPT-4o-mini): $0.10
 Enhanced scraping (amortized): $0.20
@@ -418,6 +441,7 @@ Cost per analys: $0.80
 ```
 
 ### **Pricing för att vara lönsam:**
+
 ```
 Freemium:
 - Free tier: Critical-only ($0.02 cost)
@@ -436,6 +460,7 @@ Break-even vid ~40-50 betalande kunder
 ## 🚀 **Quick Wins att implementera nu:**
 
 ### **1. LinkedIn Scraping (Free)**
+
 ```typescript
 // src/lib/linkedin-scraper.ts
 export async function scrapeLinkedInCompany(companyUrl: string) {
@@ -445,6 +470,7 @@ export async function scrapeLinkedInCompany(companyUrl: string) {
 ```
 
 ### **2. GitHub Integration (Free)**
+
 ```typescript
 // src/lib/github-api.ts
 export async function analyzeGitHubOrg(orgName: string) {
@@ -455,6 +481,7 @@ export async function analyzeGitHubOrg(orgName: string) {
 ```
 
 ### **3. Traffic Estimation (Free alternative)**
+
 ```typescript
 // Use: Alexa rank approximation, Cloudflare stats
 // Or: Build own traffic estimator based on:
@@ -464,6 +491,7 @@ export async function analyzeGitHubOrg(orgName: string) {
 ```
 
 ### **4. Enhanced Prompt with Available Data**
+
 ```typescript
 // Combine all data sources in prompt:
 const enrichedPrompt = `
@@ -490,8 +518,8 @@ Detta skulle ge **mycket** rikare analys för samma GPT-kostnad!
 4. **ROI:** Mycket bättre analyskvalitet → högre conversion → snabb payback
 
 **Next steps:**
+
 1. Implementera LinkedIn + GitHub scraping (gratis, stor vinst)
 2. Testa Crunchbase API ($29/månad)
 3. Mät kvalitetsförbättring i analyser
 4. Lägg till fler datakällor baserat på feedback
-

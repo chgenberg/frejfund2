@@ -7,14 +7,14 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   try {
     const sessionId = req.headers.get('x-session-id');
-    
+
     if (!sessionId) {
       return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
     }
 
     // Check if documents already exist
     const existing = await prisma.generatedDocument.findFirst({
-      where: { sessionId }
+      where: { sessionId },
     });
 
     if (existing) {
@@ -38,9 +38,9 @@ export async function POST(req: NextRequest) {
             { title: 'Problem', content: 'Based on your business info...' },
             { title: 'Solution', content: 'Your unique approach...' },
             { title: 'Market', content: 'Market opportunity...' },
-            { title: 'Traction', content: 'Current metrics...' }
-          ]
-        }
+            { title: 'Traction', content: 'Current metrics...' },
+          ],
+        },
       },
       {
         sessionId,
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
         version: 'v1.0',
         viewCount: 0,
         shareCount: 0,
-        generatedBy: 'gpt-5'
+        generatedBy: 'gpt-5',
       },
       {
         sessionId,
@@ -65,23 +65,26 @@ export async function POST(req: NextRequest) {
         content: {
           metrics: {
             mrr: 'Connect your data to auto-populate',
-            users: 'Connect your data to auto-populate'
+            users: 'Connect your data to auto-populate',
           },
           highlights: ['AI will generate highlights based on your connected data'],
           lowlights: ['Challenges will be identified automatically'],
-          asks: ['Suggestions will appear based on your goals']
-        }
-      }
+          asks: ['Suggestions will appear based on your goals'],
+        },
+      },
     ];
 
     const created = await prisma.generatedDocument.createMany({
-      data: sampleDocs
+      data: sampleDocs,
     });
 
-    return NextResponse.json({ 
-      message: 'Sample documents created', 
-      count: created.count 
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        message: 'Sample documents created',
+        count: created.count,
+      },
+      { status: 201 },
+    );
   } catch (error) {
     console.error('Error seeding documents:', error);
     return NextResponse.json({ error: 'Failed to seed documents' }, { status: 500 });

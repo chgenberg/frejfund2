@@ -12,7 +12,7 @@ export default function ContactPage() {
     email: '',
     company: '',
     type: 'founder',
-    message: ''
+    message: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -20,13 +20,13 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
     setIsSubmitting(false);
     setIsSubmitted(true);
-    
+
     // Reset form after 3 seconds
     setTimeout(() => {
       setIsSubmitted(false);
@@ -35,22 +35,24 @@ export default function ContactPage() {
         email: '',
         company: '',
         type: 'founder',
-        message: ''
+        message: '',
       });
     }, 3000);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData(prev => ({
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
   };
 
   return (
     <div className="min-h-screen bg-white font-sans antialiased">
       <Header />
-      
+
       <main className="pt-24">
         {/* Hero Section */}
         <section className="px-6 py-20">
@@ -64,13 +66,15 @@ export default function ContactPage() {
               <MessageSquare className="w-4 h-4" />
               <span className="text-sm font-medium text-gray-700">Get in Touch</span>
             </div>
-            
+
             <h1 className="text-5xl md:text-6xl font-bold text-black mb-6 tracking-tight leading-tight">
-              Let&apos;s start a<br />conversation
+              Let&apos;s start a<br />
+              conversation
             </h1>
-            
+
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Whether you&apos;re a founder seeking funding or an investor looking for opportunities, we&apos;re here to help.
+              Whether you&apos;re a founder seeking funding or an investor looking for
+              opportunities, we&apos;re here to help.
             </p>
           </motion.div>
         </section>
@@ -98,7 +102,10 @@ export default function ContactPage() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label
+                        htmlFor="name"
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                      >
                         Your Name
                       </label>
                       <input
@@ -112,9 +119,12 @@ export default function ContactPage() {
                         placeholder="Jakob Andersson"
                       />
                     </div>
-                    
+
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label
+                        htmlFor="email"
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                      >
                         Email
                       </label>
                       <input
@@ -132,7 +142,10 @@ export default function ContactPage() {
 
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label
+                        htmlFor="company"
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                      >
                         Company
                       </label>
                       <input
@@ -145,9 +158,12 @@ export default function ContactPage() {
                         placeholder="Your Company"
                       />
                     </div>
-                    
+
                     <div>
-                      <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label
+                        htmlFor="type"
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                      >
                         I am a
                       </label>
                       <select
@@ -165,7 +181,10 @@ export default function ContactPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label
+                      htmlFor="message"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
                       Message
                     </label>
                     <textarea
@@ -274,7 +293,10 @@ export default function ContactPage() {
                 <h3 className="text-xl font-semibold text-black mb-2">Social</h3>
                 <p className="text-gray-600 mb-2">Follow our journey</p>
                 <div className="flex justify-center space-x-4">
-                  <a href="https://linkedin.com/company/frejfund" className="text-black hover:underline">
+                  <a
+                    href="https://linkedin.com/company/frejfund"
+                    className="text-black hover:underline"
+                  >
                     LinkedIn
                   </a>
                   <a href="https://twitter.com/frejfund" className="text-black hover:underline">
@@ -291,7 +313,8 @@ export default function ContactPage() {
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl font-bold text-black mb-6">Frequently Asked Questions</h2>
             <p className="text-lg text-gray-600 mb-8">
-              Can&apos;t find what you&apos;re looking for? Our AI assistant is available 24/7 to help answer any questions.
+              Can&apos;t find what you&apos;re looking for? Our AI assistant is available 24/7 to
+              help answer any questions.
             </p>
             <motion.button
               whileHover={{ scale: 1.02 }}

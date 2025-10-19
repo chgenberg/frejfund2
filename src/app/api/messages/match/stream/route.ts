@@ -16,7 +16,9 @@ export async function GET(req: NextRequest) {
       const encoder = new TextEncoder();
       const send = (data: string) => controller.enqueue(encoder.encode(data));
       const onClose = () => {
-        try { controller.close(); } catch {}
+        try {
+          controller.close();
+        } catch {}
       };
 
       // Initial keepalive
@@ -25,17 +27,15 @@ export async function GET(req: NextRequest) {
     },
     cancel() {
       sseUnsubscribe(introRequestId, subscriberId!);
-    }
+    },
   });
 
   return new Response(stream, {
     headers: {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache, no-transform',
-      'Connection': 'keep-alive',
+      Connection: 'keep-alive',
       'Access-Control-Allow-Origin': '*',
-    }
+    },
   });
 }
-
-

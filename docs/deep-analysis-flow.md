@@ -14,6 +14,7 @@ Användare fyller i:
 ```
 
 **Output:**
+
 - `businessInfo` objekt
 - `scrapedContent` från hemsida
 - `uploadedDocuments` text från PDF/DOCX
@@ -26,11 +27,12 @@ Användare fyller i:
 // I BusinessWizard när användaren klickar "Start Analysis"
 const response = await fetch('/api/analyze', {
   method: 'POST',
-  body: JSON.stringify({ businessInfo, scrapedContent })
+  body: JSON.stringify({ businessInfo, scrapedContent }),
 });
 ```
 
 **Detta sker:**
+
 1. Snabb GPT-analys (10-15 sekunder)
 2. Beräknar Investment Readiness Score (0-10)
 3. Genererar välkomstmeddelande från Freja
@@ -50,8 +52,8 @@ await fetch('/api/deep-analysis', {
     sessionId,
     businessInfo,
     scrapedContent,
-    uploadedDocuments
-  })
+    uploadedDocuments,
+  }),
 });
 ```
 
@@ -67,11 +69,12 @@ FOR varje dimension (68 st):
      - Strengths (styrkor)
      - Questions (frågor att ställa)
   3. Spara i database → analysis_dimensions
-  
+
   Progress: 1/68 → 2/68 → ... → 68/68
 ```
 
 **Efter alla analyser:**
+
 1. Beräkna overall score (medelvärde)
 2. Identifiera kritiska insights
 3. Generera prioriterade frågor
@@ -119,15 +122,19 @@ KEY QUESTIONS TO ASK FOUNDER:
 **Nu kan Freja:**
 
 ✅ **Referera specifika fynd:**
+
 > "Jag ser i min analys att din LTV:CAC ratio är bara 1.2. Det är för lågt - du behöver minst 3. Hur planerar du att förbättra detta?"
 
 ✅ **Ställa datadrivna frågor:**
+
 > "Du säger att du har product-market fit, men jag saknar data om din churn rate. Vad är den?"
 
 ✅ **Utmana med bevis:**
+
 > "Din hemsida säger 'snabb tillväxt' men jag ser inte några siffror. Vad är din faktiska MoM growth?"
 
 ✅ **Prioritera kritiska frågor:**
+
 > "Innan vi pratar investerare måste vi fixa din unit economics. Det är den första frågan varje VC kommer ställa."
 
 ---
@@ -151,6 +158,7 @@ User: "2% per månad"
 ## 📊 Database Schema
 
 ### `deep_analyses`
+
 ```sql
 - id, sessionId (unique), userId
 - status: pending → analyzing → completed
@@ -160,6 +168,7 @@ User: "2% per månad"
 ```
 
 ### `analysis_dimensions`
+
 ```sql
 - id, analysisId, dimensionId (t.ex. 'unit-economics')
 - category, name
@@ -172,6 +181,7 @@ User: "2% per månad"
 ```
 
 ### `analysis_insights`
+
 ```sql
 - id, analysisId
 - type: strength | weakness | opportunity | threat
@@ -189,8 +199,8 @@ User: "2% per månad"
 ```
 User: "Hur hittar jag investerare?"
 
-Freja: "Innan vi pratar investerare måste vi addressera en kritisk fråga: 
-Jag analyserade din ekonomi och din LTV:CAC ratio är 1.2. Det betyder 
+Freja: "Innan vi pratar investerare måste vi addressera en kritisk fråga:
+Jag analyserade din ekonomi och din LTV:CAC ratio är 1.2. Det betyder
 att du tjänar $600 på en kund som kostar $500 att värva.
 
 Investerare vill se minst 3:1, helst 4:1.
@@ -208,7 +218,7 @@ Berätta för mig vilken av dessa du tror har störst potential."
 ```
 User: "Kan du hjälpa mig förbättra min pitch?"
 
-Freja: "Absolut! Men jag ser att du inte har laddat upp någon pitch deck ännu. 
+Freja: "Absolut! Men jag ser att du inte har laddat upp någon pitch deck ännu.
 Jag kan ge mycket bättre feedback om jag faktiskt ser decken.
 
 Ladda upp den här så kan jag ge slide-för-slide feedback på:
@@ -256,6 +266,7 @@ Vilken av dessa kan du kvantifiera för mig?"
 ## 🎯 Resultat
 
 Med detta system blir Freja:
+
 - **Data-driven**: Baserar råd på faktisk analys, inte gissningar
 - **Proaktiv**: Ställer frågor om det som saknas
 - **Utmanande**: Kan ifrågasätta påståenden med bevis

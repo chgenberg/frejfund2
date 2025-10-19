@@ -66,7 +66,7 @@ If you can't find a metric, set it to null. Set confidence based on how clear th
       model: getChatModel('simple'),
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.1, // Low temp for accuracy
-      response_format: { type: 'json_object' }
+      response_format: { type: 'json_object' },
     });
 
     const result = response.choices[0].message.content?.trim() || '{}';
@@ -86,7 +86,7 @@ If you can't find a metric, set it to null. Set confidence based on how clear th
       runway: metrics.runway || undefined,
       fundingAsk: metrics.fundingAsk || undefined,
       useOfFunds: metrics.useOfFunds || undefined,
-      confidence: metrics.confidence || 0
+      confidence: metrics.confidence || 0,
     };
   } catch (error) {
     console.error('Error extracting metrics:', error);
@@ -116,7 +116,7 @@ export function generateMetricsConfirmation(metrics: ExtractedMetrics): string {
   }
 
   let message = `Great! I found these metrics from your documents:\n\n${found.join('\n')}`;
-  
+
   message += `\n\n**Is this correct?** Reply:\n`;
   message += `• "Yes" - I'll save these\n`;
   message += `• "Edit [metric]" - To change specific values\n`;
@@ -149,7 +149,7 @@ export function getMissingMetrics(metrics: ExtractedMetrics): string[] {
 export function calculateProfileCompletion(
   hasBasicInfo: boolean,
   metrics: ExtractedMetrics,
-  hasPitchDeck: boolean
+  hasPitchDeck: boolean,
 ): number {
   let score = 0;
 

@@ -10,24 +10,24 @@ import { SEO_LOCATIONS } from '@/lib/seo-locations';
 // For client components, we'll set this via document.title in useEffect
 
 export default function LocationsPage() {
-  const majorHubs = SEO_LOCATIONS.filter(l => l.tech_scene === 'major');
-  const growingHubs = SEO_LOCATIONS.filter(l => l.tech_scene === 'growing');
-  const emergingHubs = SEO_LOCATIONS.filter(l => l.tech_scene === 'emerging');
+  const majorHubs = SEO_LOCATIONS.filter((l) => l.tech_scene === 'major');
+  const growingHubs = SEO_LOCATIONS.filter((l) => l.tech_scene === 'growing');
+  const emergingHubs = SEO_LOCATIONS.filter((l) => l.tech_scene === 'emerging');
 
   const regions = {
-    'North America': SEO_LOCATIONS.filter(l => l.region === 'North America'),
-    'Europe': SEO_LOCATIONS.filter(l => l.region === 'Europe'),
-    'Asia': SEO_LOCATIONS.filter(l => l.region === 'Asia'),
-    'Middle East': SEO_LOCATIONS.filter(l => l.region === 'Middle East'),
-    'Africa': SEO_LOCATIONS.filter(l => l.region === 'Africa'),
-    'South America': SEO_LOCATIONS.filter(l => l.region === 'South America'),
-    'Oceania': SEO_LOCATIONS.filter(l => l.region === 'Oceania'),
+    'North America': SEO_LOCATIONS.filter((l) => l.region === 'North America'),
+    Europe: SEO_LOCATIONS.filter((l) => l.region === 'Europe'),
+    Asia: SEO_LOCATIONS.filter((l) => l.region === 'Asia'),
+    'Middle East': SEO_LOCATIONS.filter((l) => l.region === 'Middle East'),
+    Africa: SEO_LOCATIONS.filter((l) => l.region === 'Africa'),
+    'South America': SEO_LOCATIONS.filter((l) => l.region === 'South America'),
+    Oceania: SEO_LOCATIONS.filter((l) => l.region === 'Oceania'),
   };
 
   return (
     <div className="min-h-screen bg-white">
       <Header showInvestorsButton />
-      
+
       <div className="pt-24 pb-20">
         <div className="max-w-7xl mx-auto px-6">
           {/* Hero */}
@@ -36,8 +36,8 @@ export default function LocationsPage() {
               FrejFund Worldwide
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Connect with investors and startups in over 150 cities and countries. 
-              Because great ideas deserve a chance, no matter where they come from.
+              Connect with investors and startups in over 150 cities and countries. Because great
+              ideas deserve a chance, no matter where they come from.
             </p>
           </div>
 
@@ -77,27 +77,30 @@ export default function LocationsPage() {
               <h2 className="text-3xl font-bold text-black">Browse by Region</h2>
             </div>
             <div className="space-y-12">
-              {Object.entries(regions).map(([region, locations]) => (
-                locations.length > 0 && (
-                  <div key={region}>
-                    <h3 className="text-xl font-semibold text-black mb-4">{region}</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                      {locations.map((location) => (
-                        <Link
-                          key={location.slug}
-                          href={`/${location.slug}`}
-                          className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                        >
-                          <span className="text-sm font-medium text-gray-700 hover:text-black">
-                            {location.name}
-                            {location.type === 'city' && location.country && ` • ${location.country}`}
-                          </span>
-                        </Link>
-                      ))}
+              {Object.entries(regions).map(
+                ([region, locations]) =>
+                  locations.length > 0 && (
+                    <div key={region}>
+                      <h3 className="text-xl font-semibold text-black mb-4">{region}</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {locations.map((location) => (
+                          <Link
+                            key={location.slug}
+                            href={`/${location.slug}`}
+                            className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                          >
+                            <span className="text-sm font-medium text-gray-700 hover:text-black">
+                              {location.name}
+                              {location.type === 'city' &&
+                                location.country &&
+                                ` • ${location.country}`}
+                            </span>
+                          </Link>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )
-              ))}
+                  ),
+              )}
             </div>
           </section>
         </div>
@@ -109,10 +112,7 @@ export default function LocationsPage() {
           <p className="text-gray-600 mb-4">
             Can't find your location? We're constantly expanding.
           </p>
-          <Link 
-            href="/" 
-            className="text-black font-semibold hover:underline"
-          >
+          <Link href="/" className="text-black font-semibold hover:underline">
             Get Started Anyway →
           </Link>
         </div>

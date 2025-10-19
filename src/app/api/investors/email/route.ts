@@ -8,23 +8,26 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { 
-      investorId, 
-      businessInfo, 
+    const {
+      investorId,
+      businessInfo,
       emailType = 'cold_outreach',
       mutualConnection,
-      previousInteraction 
+      previousInteraction,
     } = body;
 
     if (!investorId || !businessInfo) {
-      return NextResponse.json({ 
-        error: 'Investor ID and business info required' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Investor ID and business info required',
+        },
+        { status: 400 },
+      );
     }
 
     // Fetch investor from database
     const investor = await prisma.investor.findUnique({
-      where: { id: investorId }
+      where: { id: investorId },
     });
 
     if (!investor) {
@@ -39,31 +42,31 @@ export async function POST(req: NextRequest) {
         firmName: investor.firmName || investor.name,
         thesis: investor.thesis,
         notableInvestments: investor.notableInvestments,
-        sweetSpot: investor.sweetSpot
+        sweetSpot: investor.sweetSpot,
       },
       emailType,
       mutualConnection,
-      previousInteraction
+      previousInteraction,
     });
 
     // Generate subject variations
     const subjectVariations = await generateSubjectVariations(businessInfo, {
-      firmName: investor.firmName || investor.name
+      firmName: investor.firmName || investor.name,
     });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       email: {
         subject: email.subject,
         body: email.body,
         tips: email.tips,
-        subjectVariations
+        subjectVariations,
       },
       investor: {
         name: investor.name,
         firmName: investor.firmName,
         email: investor.email,
-        linkedIn: investor.linkedIn
-      }
+        linkedIn: investor.linkedIn,
+      },
     });
   } catch (error) {
     console.error('Error generating email:', error);

@@ -12,40 +12,40 @@ export default function HelpModal({ isOpen, onClose }: HelpModalProps) {
   const capabilities = [
     {
       icon: Target,
-      title: "Find Perfect Investors",
-      description: "AI matches you with 91+ VCs based on your stage, industry, and goals",
-      example: "Ask: 'Who should I contact for funding?'"
+      title: 'Find Perfect Investors',
+      description: 'AI matches you with 91+ VCs based on your stage, industry, and goals',
+      example: "Ask: 'Who should I contact for funding?'",
     },
     {
       icon: Mail,
-      title: "Draft Personalized Emails",
+      title: 'Draft Personalized Emails',
       description: "Generate investor-ready emails tailored to each VC's thesis and portfolio",
-      example: "Ask: 'Draft email to Creandum'"
+      example: "Ask: 'Draft email to Creandum'",
     },
     {
       icon: Users,
-      title: "Warm Intro Guidance",
-      description: "Step-by-step help finding mutual connections and requesting introductions",
-      example: "Ask: 'How do I get a warm intro?'"
+      title: 'Warm Intro Guidance',
+      description: 'Step-by-step help finding mutual connections and requesting introductions',
+      example: "Ask: 'How do I get a warm intro?'",
     },
     {
       icon: FileText,
-      title: "Generate Documents",
-      description: "Auto-create pitch decks, one-pagers, and investor updates from your data",
-      example: "Ask: 'Create my pitch deck'"
+      title: 'Generate Documents',
+      description: 'Auto-create pitch decks, one-pagers, and investor updates from your data',
+      example: "Ask: 'Create my pitch deck'",
     },
     {
       icon: TrendingUp,
-      title: "Track Your Progress",
-      description: "Investment readiness score, goal tracking, and personalized roadmaps",
-      example: "Ask: 'How ready am I?'"
+      title: 'Track Your Progress',
+      description: 'Investment readiness score, goal tracking, and personalized roadmaps',
+      example: "Ask: 'How ready am I?'",
     },
     {
       icon: Zap,
-      title: "Daily Coaching",
-      description: "Proactive tips, risk alerts, and action items based on your journey",
-      example: "Ask: 'What should I focus on today?'"
-    }
+      title: 'Daily Coaching',
+      description: 'Proactive tips, risk alerts, and action items based on your journey',
+      example: "Ask: 'What should I focus on today?'",
+    },
   ];
 
   return (
@@ -66,7 +66,7 @@ export default function HelpModal({ isOpen, onClose }: HelpModalProps) {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             className="fixed inset-0 z-[101] flex items-center justify-center p-4 sm:p-6"
           >
             <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
@@ -77,7 +77,9 @@ export default function HelpModal({ isOpen, onClose }: HelpModalProps) {
                     <MessageCircle className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-semibold text-white">What can Freja help you with?</h2>
+                    <h2 className="text-xl font-semibold text-white">
+                      What can Freja help you with?
+                    </h2>
                     <p className="text-sm text-gray-300">Your AI fundraising coach</p>
                   </div>
                 </div>
@@ -94,8 +96,8 @@ export default function HelpModal({ isOpen, onClose }: HelpModalProps) {
                 {/* Intro */}
                 <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
                   <p className="text-sm text-gray-700 leading-relaxed">
-                    Freja is your personal fundraising coach. Just chat naturally - ask questions, 
-                    request help, or tell me what you need. I'll understand and help you every step 
+                    Freja is your personal fundraising coach. Just chat naturally - ask questions,
+                    request help, or tell me what you need. I'll understand and help you every step
                     of your fundraising journey.
                   </p>
                 </div>
@@ -141,7 +143,9 @@ export default function HelpModal({ isOpen, onClose }: HelpModalProps) {
                     <span>Quick Tips</span>
                   </h3>
                   <ul className="space-y-2 text-sm text-gray-300">
-                    <li>✓ Be specific - "Draft email to Creandum" works better than "Help with emails"</li>
+                    <li>
+                      ✓ Be specific - "Draft email to Creandum" works better than "Help with emails"
+                    </li>
                     <li>✓ Upload documents - pitch decks, KPIs, financials for better advice</li>
                     <li>✓ Set your goal - I'll tailor coaching to your specific objective</li>
                     <li>✓ Ask follow-ups - "Make it shorter", "Add more metrics", etc.</li>

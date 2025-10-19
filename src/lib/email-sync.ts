@@ -27,9 +27,9 @@ function getEnv(name: string): string | undefined {
 function hasGmailEnv(): boolean {
   return Boolean(
     getEnv('GOOGLE_CLIENT_ID') &&
-    getEnv('GOOGLE_CLIENT_SECRET') &&
-    getEnv('GMAIL_REFRESH_TOKEN') &&
-    getEnv('GMAIL_EMAIL')
+      getEnv('GOOGLE_CLIENT_SECRET') &&
+      getEnv('GMAIL_REFRESH_TOKEN') &&
+      getEnv('GMAIL_EMAIL'),
   );
 }
 
@@ -42,7 +42,10 @@ async function getGmailClient(): Promise<GmailClient> {
   return google.gmail({ version: 'v1', auth: oAuth2Client });
 }
 
-async function getLargestHistoryId(gmail: GmailClient, userId: string): Promise<string | undefined> {
+async function getLargestHistoryId(
+  gmail: GmailClient,
+  userId: string,
+): Promise<string | undefined> {
   try {
     const prof = await gmail.users.getProfile({ userId });
     const hid = (prof.data as any).historyId || (prof.data as any).historyId?.toString?.();
@@ -75,12 +78,20 @@ async function ensureStateTable() {
   `);
 }
 
-async function loadHistoryId(sessionId: string): Promise<{ provider?: string; historyId?: string } | null> {
+async function loadHistoryId(
+  sessionId: string,
+): Promise<{ provider?: string; historyId?: string } | null> {
   const db = getDb();
   await ensureStateTable();
-  const res = await db.query('SELECT provider, history_id FROM email_sync_state WHERE session_id = $1', [sessionId]);
+  const res = await db.query(
+    'SELECT provider, history_id FROM email_sync_state WHERE session_id = $1',
+    [sessionId],
+  );
   if (res.rows?.length) {
-    return { provider: res.rows[0].provider || undefined, historyId: res.rows[0].history_id || undefined };
+    return {
+      provider: res.rows[0].provider || undefined,
+      historyId: res.rows[0].history_id || undefined,
+    };
   }
   return null;
 }
@@ -94,14 +105,14 @@ async function saveHistoryId(sessionId: string, provider: string, historyId: str
       `INSERT INTO email_sync_state (session_id, provider, history_id, updated_at)
        VALUES ($1, $2, $3, $4)
        ON CONFLICT (session_id) DO UPDATE SET provider = EXCLUDED.provider, history_id = EXCLUDED.history_id, updated_at = EXCLUDED.updated_at`,
-      [sessionId, provider, historyId, now]
+      [sessionId, provider, historyId, now],
     );
   } else {
     await db.query(
       `INSERT INTO email_sync_state (session_id, provider, updated_at)
        VALUES ($1, $2, $3)
        ON CONFLICT (session_id) DO UPDATE SET provider = EXCLUDED.provider, updated_at = EXCLUDED.updated_at`,
-      [sessionId, provider, now]
+      [sessionId, provider, now],
     );
   }
 }
@@ -110,7 +121,11 @@ async function indexEmailIntoSession(sessionId: string, parsed: ParsedMail): Pro
   const lines: string[] = [];
   const subject = parsed.subject || '';
   const from = parsed.from?.text || '';
-  const to = parsed.to ? (typeof parsed.to === 'string' ? parsed.to : (parsed.to as any).text || '') : '';
+  const to = parsed.to
+    ? typeof parsed.to === 'string'
+      ? parsed.to
+      : (parsed.to as any).text || ''
+    : '';
   const date = parsed.date ? new Date(parsed.date).toISOString() : '';
   const bodyText = parsed.text || (parsed.html ? stripHtml(parsed.html) : '') || '';
   if (subject) lines.push(`Subject: ${subject}`);
@@ -121,15 +136,18 @@ async function indexEmailIntoSession(sessionId: string, parsed: ParsedMail): Pro
 
   // Parse attachments to extracted text
   try {
-    const files: Array<{ name: string; type: string; arrayBuffer: () => Promise<ArrayBuffer> }> = [];
+    const files: Array<{ name: string; type: string; arrayBuffer: () => Promise<ArrayBuffer> }> =
+      [];
     for (const att of parsed.attachments || []) {
       if (!att.content || !att.filename) continue;
       const type = att.contentType || 'application/octet-stream';
-      const buf: Buffer = Buffer.isBuffer(att.content) ? (att.content as Buffer) : Buffer.from(att.content as any);
+      const buf: Buffer = Buffer.isBuffer(att.content)
+        ? (att.content as Buffer)
+        : Buffer.from(att.content as any);
       files.push({
         name: att.filename,
         type,
-        arrayBuffer: async () => buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength)
+        arrayBuffer: async () => buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength),
       });
     }
     if (files.length) {
@@ -141,11 +159,18 @@ async function indexEmailIntoSession(sessionId: string, parsed: ParsedMail): Pro
 
   const text = lines.join('\n');
   if (!text) return 0;
-  return indexContextForSession(sessionId, text.slice(0, 200_000), { url: subject ? `email:${subject}` : 'email' });
+  return indexContextForSession(sessionId, text.slice(0, 200_000), {
+    url: subject ? `email:${subject}` : 'email',
+  });
 }
 
 function stripHtml(html: string): string {
-  return html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 async function gmailDeltaSync(sessionId: string, options?: SyncOptions): Promise<EmailSyncResult> {
@@ -164,7 +189,12 @@ async function gmailDeltaSync(sessionId: string, options?: SyncOptions): Promise
     // Use History API to get new/changed messages
     let pageToken: string | undefined;
     do {
-      const resp = await gmail.users.history.list({ userId, startHistoryId: sinceHistoryId, pageToken, historyTypes: ['messageAdded'] as any });
+      const resp = await gmail.users.history.list({
+        userId,
+        startHistoryId: sinceHistoryId,
+        pageToken,
+        historyTypes: ['messageAdded'] as any,
+      });
       const history = resp.data.history || [];
       for (const h of history) {
         const added = (h.messagesAdded || []).map((m) => m.message?.id).filter(Boolean) as string[];
@@ -172,7 +202,10 @@ async function gmailDeltaSync(sessionId: string, options?: SyncOptions): Promise
       }
       pageToken = resp.data.nextPageToken || undefined;
       // Track the largest seen historyId from this page
-      const pageMax = history.reduce((acc: number, h: any) => Math.max(acc, Number(h.id || h.historyId || 0)), 0);
+      const pageMax = history.reduce(
+        (acc: number, h: any) => Math.max(acc, Number(h.id || h.historyId || 0)),
+        0,
+      );
       if (pageMax) newHistoryId = String(pageMax);
     } while (pageToken);
   }
@@ -224,12 +257,13 @@ async function imapFallbackSync(_sessionId: string): Promise<EmailSyncResult> {
   return { provider: 'imap', indexedEmails: 0, indexedChunks: 0 };
 }
 
-export async function syncEmailsForSession(sessionId: string, options?: SyncOptions): Promise<EmailSyncResult> {
+export async function syncEmailsForSession(
+  sessionId: string,
+  options?: SyncOptions,
+): Promise<EmailSyncResult> {
   if (!sessionId || typeof sessionId !== 'string') throw new Error('sessionId required');
   if (hasGmailEnv()) {
     return gmailDeltaSync(sessionId, options);
   }
   return imapFallbackSync(sessionId);
 }
-
-

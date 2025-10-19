@@ -26,7 +26,7 @@ export async function learnVCPreferences(vcEmail: string): Promise<VCPreferences
   const swipes = await prisma.vCSwipe.findMany({
     where: { vcEmail },
     orderBy: { createdAt: 'desc' },
-    take: 100 // Last 100 swipes
+    take: 100, // Last 100 swipes
   });
 
   if (swipes.length < 5) {
@@ -34,28 +34,28 @@ export async function learnVCPreferences(vcEmail: string): Promise<VCPreferences
     return getDefaultPreferences(vcEmail);
   }
 
-  const likes = swipes.filter(s => s.action === 'like' || s.action === 'super_like');
-  const passes = swipes.filter(s => s.action === 'pass');
+  const likes = swipes.filter((s) => s.action === 'like' || s.action === 'super_like');
+  const passes = swipes.filter((s) => s.action === 'pass');
 
   // Analyze liked profiles
   const preferredStages: Record<string, number> = {};
   const preferredIndustries: Record<string, number> = {};
   let totalCheckSize = 0;
   let checkSizeCount = 0;
-  
-  likes.forEach(swipe => {
+
+  likes.forEach((swipe) => {
     const data = swipe.anonymousData as any;
-    
+
     // Count stages
     if (data.stage) {
       preferredStages[data.stage] = (preferredStages[data.stage] || 0) + 1;
     }
-    
+
     // Count industries
     if (data.industry) {
       preferredIndustries[data.industry] = (preferredIndustries[data.industry] || 0) + 1;
     }
-    
+
     // Avg check size
     if (data.askAmount) {
       totalCheckSize += data.askAmount;
@@ -65,28 +65,29 @@ export async function learnVCPreferences(vcEmail: string): Promise<VCPreferences
 
   // Normalize to percentages
   const totalLikes = likes.length;
-  Object.keys(preferredStages).forEach(stage => {
+  Object.keys(preferredStages).forEach((stage) => {
     preferredStages[stage] = preferredStages[stage] / totalLikes;
   });
-  Object.keys(preferredIndustries).forEach(industry => {
+  Object.keys(preferredIndustries).forEach((industry) => {
     preferredIndustries[industry] = preferredIndustries[industry] / totalLikes;
   });
 
   // Calculate average match score of liked profiles
-  const likedScores = likes.map(s => s.matchScore || 0).filter(s => s > 0);
-  const likeThreshold = likedScores.length > 0
-    ? Math.min(...likedScores) - 5 // Slightly below their lowest like
-    : 70;
+  const likedScores = likes.map((s) => s.matchScore || 0).filter((s) => s > 0);
+  const likeThreshold =
+    likedScores.length > 0
+      ? Math.min(...likedScores) - 5 // Slightly below their lowest like
+      : 70;
 
   // Detect patterns
-  const likedData = likes.map(s => s.anonymousData as any);
-  const likesHighGrowth = likedData.filter(d => 
-    d.traction?.growth && parseInt(d.traction.growth) > 20
-  ).length > likes.length * 0.6;
+  const likedData = likes.map((s) => s.anonymousData as any);
+  const likesHighGrowth =
+    likedData.filter((d) => d.traction?.growth && parseInt(d.traction.growth) > 20).length >
+    likes.length * 0.6;
 
-  const likesLargeTeams = likedData.filter(d =>
-    d.traction?.teamSize && d.traction.teamSize > 5
-  ).length > likes.length * 0.5;
+  const likesLargeTeams =
+    likedData.filter((d) => d.traction?.teamSize && d.traction.teamSize > 5).length >
+    likes.length * 0.5;
 
   return {
     vcEmail,
@@ -97,8 +98,8 @@ export async function learnVCPreferences(vcEmail: string): Promise<VCPreferences
     patterns: {
       likesHighGrowth,
       likesLargeTeams,
-      likesEstablishedMarkets: false // TODO: implement
-    }
+      likesEstablishedMarkets: false, // TODO: implement
+    },
   };
 }
 
@@ -107,7 +108,7 @@ export async function learnVCPreferences(vcEmail: string): Promise<VCPreferences
  */
 export async function calculateSmartMatchScore(
   vcEmail: string,
-  founderProfile: any
+  founderProfile: any,
 ): Promise<{ score: number; reasoning: string }> {
   // Get learned preferences
   const prefs = await learnVCPreferences(vcEmail);
@@ -132,7 +133,7 @@ export async function calculateSmartMatchScore(
   // Check size preference
   if (founderProfile.askAmount) {
     const checkDiff = Math.abs(founderProfile.askAmount - prefs.avgCheckSize);
-    const checkSimilarity = 1 - (checkDiff / prefs.avgCheckSize);
+    const checkSimilarity = 1 - checkDiff / prefs.avgCheckSize;
     if (checkSimilarity > 0.5) {
       score += checkSimilarity * 10;
       reasons.push('Check size aligned with your typical investments');
@@ -156,9 +157,8 @@ export async function calculateSmartMatchScore(
   // Cap at 100
   score = Math.min(100, Math.round(score));
 
-  const reasoning = reasons.length > 0
-    ? reasons.join('. ') + '.'
-    : 'Matches your general investment criteria.';
+  const reasoning =
+    reasons.length > 0 ? reasons.join('. ') + '.' : 'Matches your general investment criteria.';
 
   return { score, reasoning };
 }
@@ -166,15 +166,15 @@ export async function calculateSmartMatchScore(
 function getDefaultPreferences(vcEmail: string): VCPreferences {
   return {
     vcEmail,
-    preferredStages: { 'seed': 0.6, 'series_a': 0.4 },
-    preferredIndustries: { 'saas': 0.5, 'fintech': 0.3, 'marketplace': 0.2 },
+    preferredStages: { seed: 0.6, series_a: 0.4 },
+    preferredIndustries: { saas: 0.5, fintech: 0.3, marketplace: 0.2 },
     avgCheckSize: 2000000,
     likeThreshold: 70,
     patterns: {
       likesHighGrowth: true,
       likesLargeTeams: false,
-      likesEstablishedMarkets: false
-    }
+      likesEstablishedMarkets: false,
+    },
   };
 }
 
@@ -183,7 +183,7 @@ function getDefaultPreferences(vcEmail: string): VCPreferences {
  */
 export async function getPersonalizedRecommendations(
   vcEmail: string,
-  limit: number = 10
+  limit: number = 10,
 ): Promise<any[]> {
   // Get VC preferences
   const prefs = await learnVCPreferences(vcEmail);
@@ -191,25 +191,25 @@ export async function getPersonalizedRecommendations(
   // Get public founder profiles that VC hasn't swiped yet
   const swipedSessionIds = await prisma.vCSwipe.findMany({
     where: { vcEmail },
-    select: { sessionId: true }
+    select: { sessionId: true },
   });
 
-  const swipedIds = new Set(swipedSessionIds.map(s => s.sessionId));
+  const swipedIds = new Set(swipedSessionIds.map((s) => s.sessionId));
 
   const publicSessions = await prisma.session.findMany({
     where: {
       user: {
-        isProfilePublic: true
-      }
+        isProfilePublic: true,
+      },
     },
     include: { user: true },
-    take: 100
+    take: 100,
   });
 
   // Score each profile
   const scored = await Promise.all(
     publicSessions
-      .filter(s => !swipedIds.has(s.id))
+      .filter((s) => !swipedIds.has(s.id))
       .map(async (session) => {
         const businessInfo = session.businessInfo as any;
         const user = session.user;
@@ -218,7 +218,7 @@ export async function getPersonalizedRecommendations(
           stage: businessInfo?.stage || user?.stage,
           industry: businessInfo?.industry || user?.industry,
           askAmount: user?.askAmount,
-          traction: user?.traction || businessInfo?.traction
+          traction: user?.traction || businessInfo?.traction,
         };
 
         const { score, reasoning } = await calculateSmartMatchScore(vcEmail, profileData);
@@ -230,14 +230,14 @@ export async function getPersonalizedRecommendations(
           profile: {
             ...profileData,
             oneLiner: user?.oneLiner,
-            readinessScore: businessInfo?.readinessScore
-          }
+            readinessScore: businessInfo?.readinessScore,
+          },
         };
-      })
+      }),
   );
 
   // Sort by score and return top N
   scored.sort((a, b) => b.score - a.score);
-  
+
   return scored.slice(0, limit);
 }

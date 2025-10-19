@@ -3,7 +3,18 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Info, CheckCircle2, X, ArrowUpRight, Sparkles, Target, Brain, TrendingUp, Users } from 'lucide-react';
+import {
+  ArrowRight,
+  Info,
+  CheckCircle2,
+  X,
+  ArrowUpRight,
+  Sparkles,
+  Target,
+  Brain,
+  TrendingUp,
+  Users,
+} from 'lucide-react';
 import { BusinessInfo, Message } from '@/types/business';
 import { demoCompany, demoWebsiteText, demoKpiCsv } from '@/lib/demo-case';
 import ChatInterface from '@/components/ChatInterface';
@@ -25,11 +36,11 @@ export default function Home() {
 
   // Hoist tabs outside any conditional rendering to avoid TDZ/initialization timing issues
   const tabs = [
-    { icon: Sparkles, label: "Get Started" },
-    { icon: Brain, label: "Deep Analysis" },
-    { icon: Target, label: "AI Coaching" },
-    { icon: Users, label: "Investor Matching" },
-    { icon: TrendingUp, label: "Get Funded" }
+    { icon: Sparkles, label: 'Get Started' },
+    { icon: Brain, label: 'Deep Analysis' },
+    { icon: Target, label: 'AI Coaching' },
+    { icon: Users, label: 'Investor Matching' },
+    { icon: TrendingUp, label: 'Get Funded' },
   ];
 
   const handleStartAnalysis = () => {
@@ -38,13 +49,13 @@ export default function Home() {
 
   const handleWizardComplete = async (info: BusinessInfo) => {
     setBusinessInfo(info);
-    
+
     // Save to database if email provided
     if (info.email && typeof window !== 'undefined') {
       try {
         const sessionId = localStorage.getItem('frejfund-session-id') || `sess-${Date.now()}`;
         localStorage.setItem('frejfund-session-id', sessionId);
-        
+
         const response = await fetch('/api/session/save', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -53,10 +64,10 @@ export default function Home() {
             sessionId,
             businessInfo: info,
             scrapedText: info.preScrapedText || '',
-            scrapedSources: info.preScrapedSources || []
-          })
+            scrapedSources: info.preScrapedSources || [],
+          }),
         });
-        
+
         if (!response.ok) {
           const errorData = await response.json();
           console.error('Session save failed:', errorData);
@@ -65,7 +76,7 @@ export default function Home() {
         console.error('Failed to save session:', error);
       }
     }
-    
+
     // For real users, go to goal-setting. For demo, go to chat.
     if (info.demoKpiCsv) {
       setCurrentView('chat');
@@ -93,18 +104,14 @@ export default function Home() {
       window.location.href = '/dashboard';
     }
     return (
-      <ChatInterface 
-        businessInfo={businessInfo} 
-        messages={messages}
-        setMessages={setMessages}
-      />
+      <ChatInterface businessInfo={businessInfo} messages={messages} setMessages={setMessages} />
     );
   }
 
   return (
     <div className="min-h-screen bg-white font-sans antialiased">
       {/* Header */}
-      <motion.header 
+      <motion.header
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
@@ -112,15 +119,15 @@ export default function Home() {
       >
         <div className="container mx-auto px-4 sm:px-8 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <motion.div 
+            <motion.div
               className="flex items-center space-x-3"
               whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 400 }}
+              transition={{ type: 'spring', stiffness: 400 }}
             >
               <div className="relative">
-                <img 
-                  src="/FREJFUND-logo.png" 
-                  alt="FrejFund" 
+                <img
+                  src="/FREJFUND-logo.png"
+                  alt="FrejFund"
                   className="h-10 sm:h-12 md:h-14 w-auto"
                 />
               </div>
@@ -158,22 +165,22 @@ export default function Home() {
           <div className="minimal-box minimal-box-shadow text-center px-6 sm:px-8 md:px-10 py-8 sm:py-10 md:py-12">
             <div className="flex items-center justify-center mb-6 sm:mb-8">
               <div className="w-12 h-12 sm:w-14 sm:h-14 bg-black rounded-full flex items-center justify-center relative">
-          <motion.div
+                <motion.div
                   className="w-1.5 h-1.5 bg-white rounded-full"
-            animate={{
+                  animate={{
                     scale: [1, 1.3, 1],
-                    opacity: [1, 0.7, 1] 
+                    opacity: [1, 0.7, 1],
                   }}
-                  transition={{ 
+                  transition={{
                     duration: 2,
                     repeat: Infinity,
-                    ease: "easeInOut"
+                    ease: 'easeInOut',
                   }}
                 />
               </div>
             </div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-black mb-3 sm:mb-4 tracking-tight leading-tight">
-              Because great ideas{' '}<br className="hidden sm:block" />
+              Because great ideas <br className="hidden sm:block" />
               <span className="sm:hidden">deserve a chance.</span>
               <span className="hidden sm:inline">deserve a chance.</span>
             </h1>
@@ -189,7 +196,7 @@ export default function Home() {
               <span>Get Started Free</span>
               <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </motion.button>
-            
+
             {/* How it works button - centered and smaller */}
             <div className="flex justify-center mt-4">
               <motion.button
@@ -208,7 +215,7 @@ export default function Home() {
                   transition={{
                     duration: 3,
                     repeat: Infinity,
-                    ease: "easeInOut"
+                    ease: 'easeInOut',
                   }}
                 />
                 <Info className="w-3 h-3 relative z-10" />
@@ -283,9 +290,11 @@ export default function Home() {
                           <Sparkles className="w-8 h-8 text-white" />
                         </div>
                         <h3 className="text-xl font-bold mb-2">Start Your Journey in 60 Seconds</h3>
-                        <p className="text-gray-600">No credit card required. No spam. Just results.</p>
+                        <p className="text-gray-600">
+                          No credit card required. No spam. Just results.
+                        </p>
                       </div>
-                      
+
                       <div className="space-y-4">
                         <div className="flex items-start gap-4">
                           <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -293,34 +302,42 @@ export default function Home() {
                           </div>
                           <div>
                             <h4 className="font-semibold mb-1">Click "Get Started Free"</h4>
-                            <p className="text-sm text-gray-600">Begin your investment readiness journey instantly</p>
+                            <p className="text-sm text-gray-600">
+                              Begin your investment readiness journey instantly
+                            </p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-start gap-4">
                           <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
                             <span className="text-sm font-bold">2</span>
                           </div>
                           <div>
                             <h4 className="font-semibold mb-1">Tell us about your business</h4>
-                            <p className="text-sm text-gray-600">Company name, website, stage, and industry</p>
+                            <p className="text-sm text-gray-600">
+                              Company name, website, stage, and industry
+                            </p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-start gap-4">
                           <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
                             <span className="text-sm font-bold">3</span>
                           </div>
                           <div>
                             <h4 className="font-semibold mb-1">Upload documents (optional)</h4>
-                            <p className="text-sm text-gray-600">Pitch deck, financials, or any business documents</p>
+                            <p className="text-sm text-gray-600">
+                              Pitch deck, financials, or any business documents
+                            </p>
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="bg-gray-50 rounded-xl p-4 mt-6">
                         <p className="text-sm text-gray-700">
-                          <strong>Pro tip:</strong> The more information you provide, the better our AI can help you. We analyze your website, LinkedIn, GitHub, and Product Hunt automatically!
+                          <strong>Pro tip:</strong> The more information you provide, the better our
+                          AI can help you. We analyze your website, LinkedIn, GitHub, and Product
+                          Hunt automatically!
                         </p>
                       </div>
                     </motion.div>
@@ -339,9 +356,11 @@ export default function Home() {
                           <Brain className="w-8 h-8 text-white" />
                         </div>
                         <h3 className="text-xl font-bold mb-2">95-Point Deep Analysis</h3>
-                        <p className="text-gray-600">More insights than you knew existed about your business</p>
+                        <p className="text-gray-600">
+                          More insights than you knew existed about your business
+                        </p>
                       </div>
-                      
+
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div className="bg-gray-50 rounded-xl p-4">
                           <h4 className="font-semibold mb-2 flex items-center gap-2">
@@ -355,7 +374,7 @@ export default function Home() {
                             <li>• Market timing analysis</li>
                           </ul>
                         </div>
-                        
+
                         <div className="bg-gray-50 rounded-xl p-4">
                           <h4 className="font-semibold mb-2 flex items-center gap-2">
                             <Users className="w-4 h-4" />
@@ -368,7 +387,7 @@ export default function Home() {
                             <li>• Execution track record</li>
                           </ul>
                         </div>
-                        
+
                         <div className="bg-gray-50 rounded-xl p-4">
                           <h4 className="font-semibold mb-2 flex items-center gap-2">
                             <TrendingUp className="w-4 h-4" />
@@ -381,12 +400,13 @@ export default function Home() {
                             <li>• Key performance indicators</li>
                           </ul>
                         </div>
-                        
                       </div>
-                      
+
                       <div className="bg-black text-white rounded-xl p-4 mt-6">
                         <p className="text-sm">
-                          <strong>Powered by GPT-5:</strong> Our analysis uses the most advanced AI to give you investor-grade insights in 15-30 minutes. You'll discover strengths and gaps you didn't know existed.
+                          <strong>Powered by GPT-5:</strong> Our analysis uses the most advanced AI
+                          to give you investor-grade insights in 15-30 minutes. You'll discover
+                          strengths and gaps you didn't know existed.
                         </p>
                       </div>
                     </motion.div>
@@ -405,42 +425,49 @@ export default function Home() {
                           <Target className="w-8 h-8 text-white" />
                         </div>
                         <h3 className="text-xl font-bold mb-2">AI Investment Coach - Freja</h3>
-                        <p className="text-gray-600">Your personal fundraising advisor, available 24/7</p>
+                        <p className="text-gray-600">
+                          Your personal fundraising advisor, available 24/7
+                        </p>
                       </div>
-                      
+
                       <div className="space-y-4">
                         <div className="bg-gray-50 rounded-xl p-4">
                           <h4 className="font-semibold mb-2">Personalized Guidance</h4>
                           <p className="text-sm text-gray-600">
-                            Freja analyzes your entire business context and provides specific, actionable advice tailored to your situation.
+                            Freja analyzes your entire business context and provides specific,
+                            actionable advice tailored to your situation.
                           </p>
                         </div>
-                        
+
                         <div className="bg-gray-50 rounded-xl p-4">
                           <h4 className="font-semibold mb-2">Strategic Questions</h4>
                           <p className="text-sm text-gray-600">
-                            She asks the tough questions investors will ask, helping you prepare and strengthen your pitch.
+                            She asks the tough questions investors will ask, helping you prepare and
+                            strengthen your pitch.
                           </p>
                         </div>
-                        
+
                         <div className="bg-gray-50 rounded-xl p-4">
                           <h4 className="font-semibold mb-2">Growth Strategies</h4>
                           <p className="text-sm text-gray-600">
-                            Get specific advice on improving metrics, refining your business model, and accelerating growth.
+                            Get specific advice on improving metrics, refining your business model,
+                            and accelerating growth.
                           </p>
                         </div>
-                        
+
                         <div className="bg-gray-50 rounded-xl p-4">
                           <h4 className="font-semibold mb-2">Pitch Optimization</h4>
                           <p className="text-sm text-gray-600">
-                            Refine your story, strengthen your financials, and create a compelling narrative that resonates with investors.
+                            Refine your story, strengthen your financials, and create a compelling
+                            narrative that resonates with investors.
                           </p>
                         </div>
                       </div>
-                      
+
                       <div className="border border-gray-200 rounded-xl p-4 mt-6">
                         <p className="text-sm text-gray-700">
-                          <strong>Example:</strong> "Based on your SaaS metrics, you should focus on reducing churn from 8% to 5%. Here's how..."
+                          <strong>Example:</strong> "Based on your SaaS metrics, you should focus on
+                          reducing churn from 8% to 5%. Here's how..."
                         </p>
                       </div>
                     </motion.div>
@@ -459,31 +486,36 @@ export default function Home() {
                           <Users className="w-8 h-8 text-white" />
                         </div>
                         <h3 className="text-xl font-bold mb-2">Smart Investor Matching</h3>
-                        <p className="text-gray-600">Connect with investors who actually invest in businesses like yours</p>
+                        <p className="text-gray-600">
+                          Connect with investors who actually invest in businesses like yours
+                        </p>
                       </div>
-                      
+
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div className="border border-gray-200 rounded-xl p-4">
                           <h4 className="font-semibold mb-2">Precision Matching</h4>
                           <p className="text-sm text-gray-600">
-                            We match based on industry, stage, check size, geography, and investment thesis alignment.
+                            We match based on industry, stage, check size, geography, and investment
+                            thesis alignment.
                           </p>
                         </div>
-                        
+
                         <div className="border border-gray-200 rounded-xl p-4">
                           <h4 className="font-semibold mb-2">500+ Active Investors</h4>
                           <p className="text-sm text-gray-600">
-                            Angels, VCs, corporate investors, and impact funds across Europe and globally.
+                            Angels, VCs, corporate investors, and impact funds across Europe and
+                            globally.
                           </p>
                         </div>
-                        
+
                         <div className="border border-gray-200 rounded-xl p-4">
                           <h4 className="font-semibold mb-2">Warm Introductions</h4>
                           <p className="text-sm text-gray-600">
-                            We facilitate proper introductions with context, increasing your response rate by 4x.
+                            We facilitate proper introductions with context, increasing your
+                            response rate by 4x.
                           </p>
                         </div>
-                        
+
                         <div className="border border-gray-200 rounded-xl p-4">
                           <h4 className="font-semibold mb-2">Fast Process</h4>
                           <p className="text-sm text-gray-600">
@@ -491,15 +523,18 @@ export default function Home() {
                           </p>
                         </div>
                       </div>
-                      
+
                       <div className="bg-gray-50 rounded-xl p-4 mt-6">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-sm font-medium">Match Quality Score</span>
                           <span className="text-sm text-gray-600">Based on 15+ factors</span>
                         </div>
                         <div className="flex gap-1">
-                          {[1,2,3,4,5].map((i) => (
-                            <div key={i} className={`h-2 flex-1 rounded-full ${i <= 4 ? 'bg-black' : 'bg-gray-200'}`} />
+                          {[1, 2, 3, 4, 5].map((i) => (
+                            <div
+                              key={i}
+                              className={`h-2 flex-1 rounded-full ${i <= 4 ? 'bg-black' : 'bg-gray-200'}`}
+                            />
                           ))}
                         </div>
                       </div>
@@ -519,30 +554,34 @@ export default function Home() {
                           <TrendingUp className="w-8 h-8 text-white" />
                         </div>
                         <h3 className="text-xl font-bold mb-2">From First Meeting to Funding</h3>
-                        <p className="text-gray-600">We support you through the entire fundraising journey</p>
+                        <p className="text-gray-600">
+                          We support you through the entire fundraising journey
+                        </p>
                       </div>
-                      
+
                       <div className="space-y-4">
                         <div className="flex items-start gap-4">
                           <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                           <div>
                             <h4 className="font-semibold mb-1">Meeting Preparation</h4>
                             <p className="text-sm text-gray-600">
-                              Investor-specific insights, likely questions, and negotiation strategies
+                              Investor-specific insights, likely questions, and negotiation
+                              strategies
                             </p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-start gap-4">
                           <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                           <div>
                             <h4 className="font-semibold mb-1">Due Diligence Support</h4>
                             <p className="text-sm text-gray-600">
-                              Help organizing data rooms, answering investor questions, and managing the process
+                              Help organizing data rooms, answering investor questions, and managing
+                              the process
                             </p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-start gap-4">
                           <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                           <div>
@@ -552,7 +591,7 @@ export default function Home() {
                             </p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-start gap-4">
                           <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                           <div>
@@ -561,18 +600,19 @@ export default function Home() {
                               Navigate legal processes and celebrate your success!
                             </p>
                           </div>
-            </div>
-          </div>
-                      
+                        </div>
+                      </div>
+
                       <div className="bg-gradient-to-r from-gray-900 to-black text-white rounded-xl p-6 mt-6">
                         <h4 className="font-bold mb-2 flex items-center gap-2">
                           <ArrowUpRight className="w-5 h-5" />
                           Success Stories
                         </h4>
                         <p className="text-sm opacity-90">
-                          Our founders have raised €50M+ from top-tier investors. Average time from first analysis to funding: 3.5 months.
-          </p>
-        </div>
+                          Our founders have raised €50M+ from top-tier investors. Average time from
+                          first analysis to funding: 3.5 months.
+                        </p>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -607,10 +647,7 @@ export default function Home() {
       <Footer />
 
       {/* Investor Modal */}
-      <InvestorModal 
-        isOpen={showInvestorModal} 
-        onClose={() => setShowInvestorModal(false)} 
-      />
+      <InvestorModal isOpen={showInvestorModal} onClose={() => setShowInvestorModal(false)} />
     </div>
   );
 }

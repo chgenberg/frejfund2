@@ -4,7 +4,11 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Sparkles, TrendingUp, CheckCircle2, Brain } from 'lucide-react';
 import { BusinessInfo } from '@/types/business';
-import { intelligentSearch, IntelligentQuestion, ConversationState } from '@/lib/intelligent-search';
+import {
+  intelligentSearch,
+  IntelligentQuestion,
+  ConversationState,
+} from '@/lib/intelligent-search';
 
 interface IntelligentSearchModalProps {
   businessInfo: BusinessInfo;
@@ -12,10 +16,10 @@ interface IntelligentSearchModalProps {
   onClose: () => void;
 }
 
-export default function IntelligentSearchModal({ 
-  businessInfo, 
-  onComplete, 
-  onClose 
+export default function IntelligentSearchModal({
+  businessInfo,
+  onComplete,
+  onClose,
 }: IntelligentSearchModalProps) {
   const [conversationState, setConversationState] = useState<ConversationState | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<IntelligentQuestion | null>(null);
@@ -23,25 +27,25 @@ export default function IntelligentSearchModal({
   const [isProcessing, setIsProcessing] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [finalAnalysis, setFinalAnalysis] = useState<string | null>(null);
-  
+
   // Initialize conversation on mount
   useEffect(() => {
     const initState = intelligentSearch.initializeConversation(businessInfo);
     setConversationState(initState);
     loadNextQuestion(initState);
   }, [businessInfo]);
-  
+
   const loadNextQuestion = async (state: ConversationState) => {
     setIsProcessing(true);
     try {
       const nextQ = await intelligentSearch.getNextQuestion(state, businessInfo);
-      
+
       if (!nextQ) {
         // No more questions - generate final analysis
         await completeSurvey(state);
         return;
       }
-      
+
       setCurrentQuestion(nextQ);
     } catch (error) {
       console.error('Error loading next question:', error);
@@ -49,24 +53,24 @@ export default function IntelligentSearchModal({
       setIsProcessing(false);
     }
   };
-  
+
   const handleSubmitAnswer = async () => {
     if (!userAnswer.trim() || !currentQuestion || !conversationState) return;
-    
+
     setIsProcessing(true);
-    
+
     try {
       // Process the answer and update state
       const updatedState = await intelligentSearch.processAnswer(
         conversationState,
         currentQuestion,
         userAnswer,
-        businessInfo
+        businessInfo,
       );
-      
+
       setConversationState(updatedState);
       setUserAnswer('');
-      
+
       // Check if we're done
       if (intelligentSearch.isReadyForAnalysis(updatedState)) {
         await completeSurvey(updatedState);
@@ -79,14 +83,14 @@ export default function IntelligentSearchModal({
       setIsProcessing(false);
     }
   };
-  
+
   const completeSurvey = async (state: ConversationState) => {
     setIsProcessing(true);
     try {
       const analysis = await intelligentSearch.generateFinalAnalysis(state, businessInfo);
       setFinalAnalysis(analysis);
       setIsComplete(true);
-      
+
       // Call completion callback after a short delay
       setTimeout(() => {
         onComplete(analysis, state);
@@ -97,11 +101,11 @@ export default function IntelligentSearchModal({
       setIsProcessing(false);
     }
   };
-  
-  const progress = conversationState 
+
+  const progress = conversationState
     ? Math.round((conversationState.questionsAsked.length / 10) * 100)
     : 0;
-  
+
   if (!conversationState) {
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -114,7 +118,7 @@ export default function IntelligentSearchModal({
       </div>
     );
   }
-  
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -134,18 +138,18 @@ export default function IntelligentSearchModal({
         <div className="bg-gradient-to-r from-black to-gray-800 text-white p-6 relative overflow-hidden">
           <motion.div
             className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20"
-            animate={{ 
+            animate={{
               backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
             }}
             transition={{ duration: 5, repeat: Infinity }}
           />
-          
+
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
                 <motion.div
                   animate={{ rotate: [0, 360] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                  transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
                   className="w-10 h-10 bg-white rounded-full flex items-center justify-center"
                 >
                   <Brain className="w-6 h-6 text-black" />
@@ -162,7 +166,7 @@ export default function IntelligentSearchModal({
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             {/* Progress Bar */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
@@ -174,7 +178,7 @@ export default function IntelligentSearchModal({
                   className="h-full bg-white"
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
+                  transition={{ duration: 0.5, ease: 'easeOut' }}
                 />
               </div>
               <div className="flex items-center justify-between text-xs text-white/60">
@@ -184,7 +188,7 @@ export default function IntelligentSearchModal({
             </div>
           </div>
         </div>
-        
+
         {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
           {isComplete && finalAnalysis ? (
@@ -198,17 +202,19 @@ export default function IntelligentSearchModal({
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 200 }}
+                  transition={{ type: 'spring', stiffness: 200 }}
                   className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center"
                 >
                   <CheckCircle2 className="w-7 h-7 text-green-600" />
                 </motion.div>
                 <div>
                   <h3 className="text-xl font-bold text-black">Discovery Complete!</h3>
-                  <p className="text-sm text-gray-600">Here's what we learned about your business</p>
+                  <p className="text-sm text-gray-600">
+                    Here's what we learned about your business
+                  </p>
                 </div>
               </div>
-              
+
               <div className="prose prose-sm max-w-none">
                 <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                   <div className="text-sm leading-relaxed text-gray-800 whitespace-pre-wrap">
@@ -216,13 +222,16 @@ export default function IntelligentSearchModal({
                   </div>
                 </div>
               </div>
-              
+
               <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
                 <div className="flex items-start space-x-3">
                   <Sparkles className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-blue-900">
                     <p className="font-semibold mb-1">Next Steps</p>
-                    <p>I'll use these insights to provide you with personalized recommendations and match you with relevant investors.</p>
+                    <p>
+                      I'll use these insights to provide you with personalized recommendations and
+                      match you with relevant investors.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -233,7 +242,9 @@ export default function IntelligentSearchModal({
               {/* Previous Q&A History */}
               {conversationState.answersGiven.length > 0 && (
                 <div className="mb-6 space-y-3">
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Previous Answers</h3>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Previous Answers
+                  </h3>
                   <div className="space-y-2 max-h-32 overflow-y-auto">
                     {conversationState.answersGiven.slice(-2).map((qa, idx) => (
                       <div key={idx} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
@@ -244,7 +255,7 @@ export default function IntelligentSearchModal({
                   </div>
                 </div>
               )}
-              
+
               {/* Current Question */}
               {currentQuestion && (
                 <motion.div
@@ -260,15 +271,19 @@ export default function IntelligentSearchModal({
                     <div className="flex-1">
                       <div className="bg-white rounded-xl p-4 border-2 border-black shadow-sm">
                         <div className="flex items-center justify-between mb-2">
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${
-                            currentQuestion.type === 'fixed' 
-                              ? 'bg-blue-100 text-blue-700' 
-                              : 'bg-purple-100 text-purple-700'
-                          }`}>
+                          <span
+                            className={`text-xs px-2 py-0.5 rounded-full ${
+                              currentQuestion.type === 'fixed'
+                                ? 'bg-blue-100 text-blue-700'
+                                : 'bg-purple-100 text-purple-700'
+                            }`}
+                          >
                             {currentQuestion.type === 'fixed' ? 'Core Question' : 'Follow-up'}
                           </span>
                           {currentQuestion.reasoning && (
-                            <span className="text-xs text-gray-500">{currentQuestion.reasoning}</span>
+                            <span className="text-xs text-gray-500">
+                              {currentQuestion.reasoning}
+                            </span>
                           )}
                         </div>
                         <p className="text-base text-gray-900 font-medium leading-relaxed">
@@ -277,7 +292,7 @@ export default function IntelligentSearchModal({
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Answer Input */}
                   <div className="space-y-3">
                     <textarea
@@ -293,10 +308,11 @@ export default function IntelligentSearchModal({
                       rows={4}
                       disabled={isProcessing}
                     />
-                    
+
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-gray-500">
-                        Tip: Press {navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}+Enter to submit
+                        Tip: Press {navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}+Enter to
+                        submit
                       </span>
                       <motion.button
                         whileHover={{ scale: 1.02 }}
@@ -329,4 +345,3 @@ export default function IntelligentSearchModal({
     </motion.div>
   );
 }
-

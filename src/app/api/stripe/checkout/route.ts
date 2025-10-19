@@ -5,10 +5,13 @@ export async function POST(request: NextRequest) {
   try {
     // Check if Stripe is configured
     if (!isStripeConfigured()) {
-      return NextResponse.json({ 
-        error: 'Stripe not configured',
-        message: 'Payments are disabled for testing. All users have Pro access.'
-      }, { status: 503 });
+      return NextResponse.json(
+        {
+          error: 'Stripe not configured',
+          message: 'Payments are disabled for testing. All users have Pro access.',
+        },
+        { status: 503 },
+      );
     }
 
     const { userId, plan, interval } = await request.json();
@@ -32,15 +35,12 @@ export async function POST(request: NextRequest) {
       userId,
       priceId,
       `${origin}/dashboard?upgrade=success`,
-      `${origin}/dashboard?upgrade=canceled`
+      `${origin}/dashboard?upgrade=canceled`,
     );
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error('Checkout error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create checkout session' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 });
   }
 }

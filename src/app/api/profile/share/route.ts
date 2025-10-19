@@ -7,14 +7,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { 
-      email, 
-      isPublic, 
-      oneLiner, 
-      askAmount, 
-      traction,
-      pitchDeck 
-    } = body;
+    const { email, isPublic, oneLiner, askAmount, traction, pitchDeck } = body;
 
     if (!email) {
       return NextResponse.json({ error: 'Email required' }, { status: 400 });
@@ -22,7 +15,7 @@ export async function POST(req: NextRequest) {
 
     // Find or create user
     let user = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
     });
 
     if (!user) {
@@ -33,13 +26,14 @@ export async function POST(req: NextRequest) {
     let profileSlug = user.profileSlug;
     if (isPublic && !profileSlug) {
       // Generate from company name or random
-      const baseSlug = user.company
-        ?.toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '') || `founder-${Date.now()}`;
-      
+      const baseSlug =
+        user.company
+          ?.toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '') || `founder-${Date.now()}`;
+
       profileSlug = baseSlug;
-      
+
       // Ensure uniqueness
       let counter = 1;
       while (await prisma.user.findUnique({ where: { profileSlug } })) {
@@ -57,11 +51,11 @@ export async function POST(req: NextRequest) {
         oneLiner,
         askAmount,
         traction,
-        pitchDeck
-      }
+        pitchDeck,
+      },
     });
 
-    const profileUrl = isPublic 
+    const profileUrl = isPublic
       ? `https://frejfund2-production.up.railway.app/founder/${profileSlug}`
       : null;
 
@@ -69,13 +63,16 @@ export async function POST(req: NextRequest) {
       success: true,
       isPublic: updated.isProfilePublic,
       profileUrl,
-      profileSlug: updated.profileSlug
+      profileSlug: updated.profileSlug,
     });
   } catch (error: any) {
     console.error('Error updating profile sharing:', error);
-    return NextResponse.json({ 
-      error: 'Failed to update profile',
-      details: error.message 
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Failed to update profile',
+        details: error.message,
+      },
+      { status: 500 },
+    );
   }
 }

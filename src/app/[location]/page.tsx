@@ -11,7 +11,7 @@ interface PageProps {
 // Other locations will be generated on-demand
 export async function generateStaticParams() {
   // Only pre-generate major tech hubs to save memory during build
-  const majorLocations = SEO_LOCATIONS.filter(l => l.tech_scene === 'major').slice(0, 20);
+  const majorLocations = SEO_LOCATIONS.filter((l) => l.tech_scene === 'major').slice(0, 20);
   return majorLocations.map((location) => ({
     location: location.slug,
   }));
@@ -24,17 +24,18 @@ export const revalidate = 3600; // Revalidate every hour
 // Generate metadata for SEO
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { location: locationSlug } = await params;
-  const location = SEO_LOCATIONS.find(l => l.slug === locationSlug);
-  
+  const location = SEO_LOCATIONS.find((l) => l.slug === locationSlug);
+
   if (!location) {
     return {
       title: 'Location Not Found - FrejFund',
     };
   }
 
-  const locationTitle = location.type === 'city' && location.country 
-    ? `${location.name}, ${location.country}` 
-    : location.name;
+  const locationTitle =
+    location.type === 'city' && location.country
+      ? `${location.name}, ${location.country}`
+      : location.name;
 
   return {
     title: `FrejFund ${locationTitle} - Connecting Founders & Investors`,
@@ -48,7 +49,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       `angel investors ${location.name}`,
       'FrejFund',
       'investment platform',
-      'startup analysis'
+      'startup analysis',
     ].join(', '),
     openGraph: {
       title: `FrejFund ${locationTitle} - Investment Platform`,
@@ -71,8 +72,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function LocationPage({ params }: PageProps) {
   const { location: locationSlug } = await params;
-  const location = SEO_LOCATIONS.find(l => l.slug === locationSlug);
-  
+  const location = SEO_LOCATIONS.find((l) => l.slug === locationSlug);
+
   if (!location) {
     notFound();
   }

@@ -2,9 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import { 
-  Heart, X, Star, TrendingUp, DollarSign, Users,
-  Calendar, Target, Sparkles, ChevronLeft, Eye, Info
+import {
+  Heart,
+  X,
+  Star,
+  TrendingUp,
+  DollarSign,
+  Users,
+  Calendar,
+  Target,
+  Sparkles,
+  ChevronLeft,
+  Eye,
+  Info,
 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -28,7 +38,13 @@ interface BlindProfile {
   founded?: string;
   geography: string;
   explain?: {
-    kpis: { mrrScore: number; growthScore: number; usersScore: number; teamScore: number; composite: number };
+    kpis: {
+      mrrScore: number;
+      growthScore: number;
+      usersScore: number;
+      teamScore: number;
+      composite: number;
+    };
     readiness: number;
     affinity: { industry?: number; stage?: number; geography?: number };
     baseScore: number;
@@ -52,7 +68,7 @@ export default function VCSwipePage() {
 
   const ensurePreferencesThenLoad = async () => {
     const vcEmail = localStorage.getItem('vc-email');
-    
+
     if (!vcEmail) {
       // Redirect to login if no VC email
       window.location.href = '/vc';
@@ -62,7 +78,7 @@ export default function VCSwipePage() {
     // Require preferences
     try {
       const prefRes = await fetch('/api/vc/preferences', {
-        headers: { 'x-vc-email': vcEmail }
+        headers: { 'x-vc-email': vcEmail },
       });
       if (prefRes.ok) {
         const data = await prefRes.json();
@@ -82,8 +98,8 @@ export default function VCSwipePage() {
     try {
       const response = await fetch('/api/vc/swipe', {
         headers: {
-          'x-vc-email': vcEmail
-        }
+          'x-vc-email': vcEmail,
+        },
       });
 
       if (response.ok) {
@@ -109,13 +125,14 @@ export default function VCSwipePage() {
           mrr: '$87k',
           users: '342',
           growth: '+18% MoM',
-          teamSize: 4
+          teamSize: 4,
         },
         matchScore: 94,
-        aiAnalysis: 'Strong unit economics with CAC of $450 and LTV of $5.4k. Team has proven track record (ex-Spotify, ex-Klarna). Product-market fit validated with 342 paying customers. Growth metrics above industry average for seed stage.',
+        aiAnalysis:
+          'Strong unit economics with CAC of $450 and LTV of $5.4k. Team has proven track record (ex-Spotify, ex-Klarna). Product-market fit validated with 342 paying customers. Growth metrics above industry average for seed stage.',
         readinessScore: 75,
         founded: '6 months ago',
-        geography: 'Stockholm, Sweden'
+        geography: 'Stockholm, Sweden',
       },
       {
         id: 'anon_2',
@@ -127,13 +144,14 @@ export default function VCSwipePage() {
         traction: {
           users: '1,200',
           growth: '+35% MoM',
-          teamSize: 6
+          teamSize: 6,
         },
         matchScore: 89,
-        aiAnalysis: 'Exceptional growth rate. Team includes 2 MDs and 1 AI researcher from MIT. Early traction in regulated space impressive. Potential for category leadership.',
+        aiAnalysis:
+          'Exceptional growth rate. Team includes 2 MDs and 1 AI researcher from MIT. Early traction in regulated space impressive. Potential for category leadership.',
         readinessScore: 82,
         founded: '8 months ago',
-        geography: 'Copenhagen, Denmark'
+        geography: 'Copenhagen, Denmark',
       },
       {
         id: 'anon_3',
@@ -146,14 +164,15 @@ export default function VCSwipePage() {
           mrr: '$42k',
           users: '89',
           growth: '+28% MoM',
-          teamSize: 5
+          teamSize: 5,
         },
         matchScore: 91,
-        aiAnalysis: 'High-value customers ($470 ACV). Strong retention (98% after 6mo). Team built similar infrastructure at Klarna. Regulatory risk mitigated with banking partner.',
+        aiAnalysis:
+          'High-value customers ($470 ACV). Strong retention (98% after 6mo). Team built similar infrastructure at Klarna. Regulatory risk mitigated with banking partner.',
         readinessScore: 78,
         founded: '10 months ago',
-        geography: 'Helsinki, Finland'
-      }
+        geography: 'Helsinki, Finland',
+      },
     ];
 
     setProfiles(mockProfiles);
@@ -189,7 +208,7 @@ export default function VCSwipePage() {
           message: `Intro request sent to the founder. You'll be notified when they respond.`,
           matchScore: profile.matchScore,
           status: 'pending',
-          requestId: `demo-${Date.now()}`
+          requestId: `demo-${Date.now()}`,
         });
         setShowReveal(true);
       } else {
@@ -201,8 +220,8 @@ export default function VCSwipePage() {
             vcFirm,
             sessionId: profile.sessionId,
             action: 'like',
-            anonymousData: profile
-          })
+            anonymousData: profile,
+          }),
         });
 
         if (response.ok) {
@@ -213,14 +232,14 @@ export default function VCSwipePage() {
               message: data.message,
               matchScore: profile.matchScore,
               status: data.status,
-              requestId: data.requestId
+              requestId: data.requestId,
             });
             setShowReveal(true);
           } else if (data.action === 'revealed' && data.fullProfile) {
             setRevealedCompany({
               ...data.fullProfile,
               matchScore: profile.matchScore,
-              aiAnalysis: profile.aiAnalysis
+              aiAnalysis: profile.aiAnalysis,
             });
             setShowReveal(true);
           }
@@ -234,7 +253,7 @@ export default function VCSwipePage() {
   };
 
   const moveToNext = () => {
-    setCurrentIndex(prev => prev + 1);
+    setCurrentIndex((prev) => prev + 1);
   };
 
   const currentProfile = profiles[currentIndex];
@@ -262,7 +281,7 @@ export default function VCSwipePage() {
             No more matches for today. Check back tomorrow for new qualified leads.
           </p>
           <button
-            onClick={() => window.location.href = '/vc'}
+            onClick={() => (window.location.href = '/vc')}
             className="px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
           >
             Back to Dashboard
@@ -278,7 +297,7 @@ export default function VCSwipePage() {
       <header className="bg-white border-b border-gray-200 px-4 py-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <button
-            onClick={() => window.location.href = '/vc'}
+            onClick={() => (window.location.href = '/vc')}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <ChevronLeft className="w-5 h-5 text-gray-700" />
@@ -301,12 +320,12 @@ export default function VCSwipePage() {
               key={currentProfile.id}
               initial={{ scale: 0.9, opacity: 0, rotateY: -10 }}
               animate={{ scale: 1, opacity: 1, rotateY: 0 }}
-              exit={{ 
+              exit={{
                 x: swipeDirection === 'right' ? 400 : swipeDirection === 'left' ? -400 : 0,
                 opacity: 0,
-                rotate: swipeDirection === 'right' ? 15 : swipeDirection === 'left' ? -15 : 0
+                rotate: swipeDirection === 'right' ? 15 : swipeDirection === 'left' ? -15 : 0,
               }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               drag="x"
               dragConstraints={{ left: 0, right: 0 }}
               onDragEnd={(e, info: PanInfo) => {
@@ -322,13 +341,13 @@ export default function VCSwipePage() {
                 {/* Match Score Badge */}
                 <div className="absolute top-4 right-4 z-10">
                   <motion.div
-                    animate={{ 
+                    animate={{
                       scale: [1, 1.05, 1],
                     }}
                     transition={{
                       duration: 2,
                       repeat: Infinity,
-                      ease: "easeInOut"
+                      ease: 'easeInOut',
                     }}
                     className="px-3 py-1.5 bg-black text-white rounded-full text-sm font-bold shadow-lg border-2 border-white"
                   >
@@ -345,7 +364,9 @@ export default function VCSwipePage() {
                       </div>
                       <div>
                         <div className="text-sm text-gray-500">Anonymous Company</div>
-                        <div className="text-2xl font-bold text-black">#{currentProfile.id.slice(-4).toUpperCase()}</div>
+                        <div className="text-2xl font-bold text-black">
+                          #{currentProfile.id.slice(-4).toUpperCase()}
+                        </div>
                       </div>
                     </div>
                     <p className="text-lg text-gray-800 leading-relaxed">
@@ -357,7 +378,9 @@ export default function VCSwipePage() {
                   <div className="grid grid-cols-2 gap-3 mb-6">
                     <div className="p-3 bg-gray-50 rounded-lg">
                       <div className="text-xs text-gray-600 mb-1">Industry</div>
-                      <div className="text-sm font-semibold text-black">{currentProfile.industry}</div>
+                      <div className="text-sm font-semibold text-black">
+                        {currentProfile.industry}
+                      </div>
                     </div>
                     <div className="p-3 bg-gray-50 rounded-lg">
                       <div className="text-xs text-gray-600 mb-1">Stage</div>
@@ -371,16 +394,29 @@ export default function VCSwipePage() {
                     </div>
                     <div className="p-3 bg-gray-50 rounded-lg">
                       <div className="text-xs text-gray-600 mb-1">Location</div>
-                      <div className="text-sm font-semibold text-black">{currentProfile.geography}</div>
+                      <div className="text-sm font-semibold text-black">
+                        {currentProfile.geography}
+                      </div>
                     </div>
                   </div>
 
                   {/* Fit Badges */}
                   {currentProfile.explain && (
                     <div className="mb-6 flex flex-wrap gap-2">
-                      <span className="px-2 py-1 rounded-full border text-xs bg-gray-50 border-gray-200 text-gray-800">Readiness {currentProfile.explain.readiness}/100</span>
-                      <span className="px-2 py-1 rounded-full border text-xs bg-gray-50 border-gray-200 text-gray-800">KPI {currentProfile.explain.kpis.composite}/100</span>
-                      <span className="px-2 py-1 rounded-full border text-xs bg-gray-50 border-gray-200 text-gray-800">Affinity ×{Number((currentProfile.explain.affinity?.industry||1)*(currentProfile.explain.affinity?.stage||1)*(currentProfile.explain.affinity?.geography||1)).toFixed(2)}</span>
+                      <span className="px-2 py-1 rounded-full border text-xs bg-gray-50 border-gray-200 text-gray-800">
+                        Readiness {currentProfile.explain.readiness}/100
+                      </span>
+                      <span className="px-2 py-1 rounded-full border text-xs bg-gray-50 border-gray-200 text-gray-800">
+                        KPI {currentProfile.explain.kpis.composite}/100
+                      </span>
+                      <span className="px-2 py-1 rounded-full border text-xs bg-gray-50 border-gray-200 text-gray-800">
+                        Affinity ×
+                        {Number(
+                          (currentProfile.explain.affinity?.industry || 1) *
+                            (currentProfile.explain.affinity?.stage || 1) *
+                            (currentProfile.explain.affinity?.geography || 1),
+                        ).toFixed(2)}
+                      </span>
                     </div>
                   )}
 
@@ -394,7 +430,9 @@ export default function VCSwipePage() {
                             <DollarSign className="w-3 h-3 text-gray-500" />
                             <div className="text-xs text-gray-600">MRR</div>
                           </div>
-                          <div className="text-xl font-bold text-black">{currentProfile.traction.mrr}</div>
+                          <div className="text-xl font-bold text-black">
+                            {currentProfile.traction.mrr}
+                          </div>
                         </div>
                       )}
                       {currentProfile.traction.users && (
@@ -403,7 +441,9 @@ export default function VCSwipePage() {
                             <Users className="w-3 h-3 text-gray-500" />
                             <div className="text-xs text-gray-600">Users</div>
                           </div>
-                          <div className="text-xl font-bold text-black">{currentProfile.traction.users}</div>
+                          <div className="text-xl font-bold text-black">
+                            {currentProfile.traction.users}
+                          </div>
                         </div>
                       )}
                       {currentProfile.traction.growth && (
@@ -412,7 +452,9 @@ export default function VCSwipePage() {
                             <TrendingUp className="w-3 h-3 text-green-600" />
                             <div className="text-xs text-gray-600">Growth</div>
                           </div>
-                          <div className="text-xl font-bold text-green-600">{currentProfile.traction.growth}</div>
+                          <div className="text-xl font-bold text-green-600">
+                            {currentProfile.traction.growth}
+                          </div>
                         </div>
                       )}
                       {currentProfile.traction.teamSize && (
@@ -421,7 +463,9 @@ export default function VCSwipePage() {
                             <Users className="w-3 h-3 text-gray-500" />
                             <div className="text-xs text-gray-600">Team</div>
                           </div>
-                          <div className="text-xl font-bold text-black">{currentProfile.traction.teamSize}</div>
+                          <div className="text-xl font-bold text-black">
+                            {currentProfile.traction.teamSize}
+                          </div>
                         </div>
                       )}
                     </div>
@@ -429,9 +473,9 @@ export default function VCSwipePage() {
 
                   {/* AI Analysis */}
                   <motion.div
-                    whileHover={{ 
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                      scale: 1.01
+                    whileHover={{
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      scale: 1.01,
                     }}
                     transition={{ duration: 0.2 }}
                     className="mb-6 p-4 bg-gray-100 rounded-xl border border-gray-200"
@@ -439,7 +483,7 @@ export default function VCSwipePage() {
                     <div className="flex items-center space-x-2 mb-2">
                       <motion.div
                         animate={{ rotate: [0, 10, -10, 0] }}
-                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                       >
                         <Sparkles className="w-4 h-4 text-black" />
                       </motion.div>
@@ -452,44 +496,63 @@ export default function VCSwipePage() {
                       <div className="mt-3 text-xs text-gray-700 grid grid-cols-2 gap-2">
                         <div className="p-2 bg-white rounded border border-gray-200">
                           <div className="font-semibold mb-1">KPI Breakdown</div>
-                          <div className="mb-1">Composite: {currentProfile.explain.kpis.composite}/100</div>
+                          <div className="mb-1">
+                            Composite: {currentProfile.explain.kpis.composite}/100
+                          </div>
                           {/* KPI Bars */}
                           {[
                             ['MRR', currentProfile.explain.kpis.mrrScore],
                             ['Growth', currentProfile.explain.kpis.growthScore],
                             ['Users', currentProfile.explain.kpis.usersScore],
-                            ['Team', currentProfile.explain.kpis.teamScore]
+                            ['Team', currentProfile.explain.kpis.teamScore],
                           ].map(([label, val]) => (
                             <div key={label as string} className="mb-1">
-                              <div className="flex justify-between text-[11px] text-gray-600"><span>{label as string}</span><span>{val as number}/100</span></div>
+                              <div className="flex justify-between text-[11px] text-gray-600">
+                                <span>{label as string}</span>
+                                <span>{val as number}/100</span>
+                              </div>
                               <div className="w-full h-1.5 bg-gray-200 rounded">
-                                <div className="h-1.5 bg-black rounded" style={{ width: `${val as number}%` }} />
+                                <div
+                                  className="h-1.5 bg-black rounded"
+                                  style={{ width: `${val as number}%` }}
+                                />
                               </div>
                             </div>
                           ))}
                         </div>
                         <div className="p-2 bg-white rounded border border-gray-200">
                           <div className="font-semibold mb-1">Why this match</div>
-                          <div className="text-[11px]">Readiness {currentProfile.explain.readiness}/100 • Affinity ×{Number((currentProfile.explain.affinity?.industry||1)*(currentProfile.explain.affinity?.stage||1)*(currentProfile.explain.affinity?.geography||1)).toFixed(2)}</div>
-                        </div>
-                        {currentProfile.explain.whyNot && currentProfile.explain.whyNot.length>0 && (
-                          <div className="col-span-2 p-2 bg-yellow-50 rounded border border-yellow-200 text-yellow-900">
-                            <div className="font-semibold mb-1">Why not (heads-up)</div>
-                            <ul className="list-disc ml-5">
-                              {currentProfile.explain.whyNot.slice(0,3).map((t,i)=>(<li key={i}>{t}</li>))}
-                            </ul>
+                          <div className="text-[11px]">
+                            Readiness {currentProfile.explain.readiness}/100 • Affinity ×
+                            {Number(
+                              (currentProfile.explain.affinity?.industry || 1) *
+                                (currentProfile.explain.affinity?.stage || 1) *
+                                (currentProfile.explain.affinity?.geography || 1),
+                            ).toFixed(2)}
                           </div>
-                        )}
+                        </div>
+                        {currentProfile.explain.whyNot &&
+                          currentProfile.explain.whyNot.length > 0 && (
+                            <div className="col-span-2 p-2 bg-yellow-50 rounded border border-yellow-200 text-yellow-900">
+                              <div className="font-semibold mb-1">Why not (heads-up)</div>
+                              <ul className="list-disc ml-5">
+                                {currentProfile.explain.whyNot.slice(0, 3).map((t, i) => (
+                                  <li key={i}>{t}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
                       </div>
                     )}
 
                     {/* Expandable: Why this match */}
                     <div className="mt-3">
                       <button
-                        onClick={() => setShowExplain(v=>!v)}
+                        onClick={() => setShowExplain((v) => !v)}
                         className="inline-flex items-center text-xs text-gray-700 hover:text-black"
                       >
-                        <Info className="w-3.5 h-3.5 mr-1" /> {showExplain ? 'Hide explanation' : 'Why this match?'}
+                        <Info className="w-3.5 h-3.5 mr-1" />{' '}
+                        {showExplain ? 'Hide explanation' : 'Why this match?'}
                       </button>
                       <AnimatePresence>
                         {showExplain && currentProfile.explain && (
@@ -499,21 +562,33 @@ export default function VCSwipePage() {
                             exit={{ opacity: 0, y: 6 }}
                             className="mt-2 text-xs text-gray-800 space-y-1"
                           >
-                            <div>• Top driver: {(() => {
-                              const e = currentProfile.explain!;
-                              const entries = [
-                                ['MRR', e.kpis.mrrScore],
-                                ['Growth', e.kpis.growthScore],
-                                ['Users', e.kpis.usersScore],
-                                ['Team', e.kpis.teamScore],
-                                ['Readiness', e.readiness]
-                              ];
-                              const top = entries.sort((a,b)=>Number(b[1])-Number(a[1]))[0];
-                              return `${top[0]} (${top[1]}/100)`;
-                            })()}</div>
-                            <div>• Affinitet (ditt beteende): ×{Number((currentProfile.explain.affinity?.industry||1)*(currentProfile.explain.affinity?.stage||1)*(currentProfile.explain.affinity?.geography||1)).toFixed(2)}</div>
-                            {currentProfile.explain.whyNot?.length>0 && (
-                              <div>• Risker: {currentProfile.explain.whyNot.slice(0,2).join('; ')}</div>
+                            <div>
+                              • Top driver:{' '}
+                              {(() => {
+                                const e = currentProfile.explain!;
+                                const entries = [
+                                  ['MRR', e.kpis.mrrScore],
+                                  ['Growth', e.kpis.growthScore],
+                                  ['Users', e.kpis.usersScore],
+                                  ['Team', e.kpis.teamScore],
+                                  ['Readiness', e.readiness],
+                                ];
+                                const top = entries.sort((a, b) => Number(b[1]) - Number(a[1]))[0];
+                                return `${top[0]} (${top[1]}/100)`;
+                              })()}
+                            </div>
+                            <div>
+                              • Affinitet (ditt beteende): ×
+                              {Number(
+                                (currentProfile.explain.affinity?.industry || 1) *
+                                  (currentProfile.explain.affinity?.stage || 1) *
+                                  (currentProfile.explain.affinity?.geography || 1),
+                              ).toFixed(2)}
+                            </div>
+                            {currentProfile.explain.whyNot?.length > 0 && (
+                              <div>
+                                • Risker: {currentProfile.explain.whyNot.slice(0, 2).join('; ')}
+                              </div>
                             )}
                           </motion.div>
                         )}
@@ -528,21 +603,25 @@ export default function VCSwipePage() {
                   >
                     <div>
                       <div className="text-sm font-semibold text-white">Investment Readiness</div>
-                      <div className="text-xs text-gray-400">Above average for {currentProfile.stage}</div>
+                      <div className="text-xs text-gray-400">
+                        Above average for {currentProfile.stage}
+                      </div>
                     </div>
                     <motion.div
-                      animate={{ 
+                      animate={{
                         rotate: [0, 5, -5, 0],
-                        scale: [1, 1.05, 1]
+                        scale: [1, 1.05, 1],
                       }}
                       transition={{
                         duration: 3,
                         repeat: Infinity,
-                        ease: "easeInOut"
+                        ease: 'easeInOut',
                       }}
                       className="w-14 h-14 rounded-full border-4 border-white flex items-center justify-center bg-black"
                     >
-                      <span className="text-xl font-bold text-white">{currentProfile.readinessScore}</span>
+                      <span className="text-xl font-bold text-white">
+                        {currentProfile.readinessScore}
+                      </span>
                     </motion.div>
                   </motion.div>
                 </div>
@@ -556,10 +635,7 @@ export default function VCSwipePage() {
                       onClick={() => handleSwipe('left', currentProfile)}
                       className="w-16 h-16 bg-white border-3 border-gray-300 rounded-full flex items-center justify-center hover:border-black hover:bg-gray-50 transition-all shadow-lg"
                     >
-                      <motion.div
-                        whileHover={{ rotate: 180 }}
-                        transition={{ duration: 0.3 }}
-                      >
+                      <motion.div whileHover={{ rotate: 180 }} transition={{ duration: 0.3 }}>
                         <X className="w-7 h-7 text-gray-700" />
                       </motion.div>
                     </motion.button>
@@ -576,13 +652,13 @@ export default function VCSwipePage() {
                         transition={{ duration: 0.3 }}
                       />
                       <motion.div
-                        animate={{ 
-                          scale: [1, 1.2, 1]
+                        animate={{
+                          scale: [1, 1.2, 1],
                         }}
                         transition={{
                           duration: 1.5,
                           repeat: Infinity,
-                          ease: "easeInOut"
+                          ease: 'easeInOut',
                         }}
                       >
                         <Heart className="w-8 h-8 text-white fill-current relative z-10" />
@@ -599,22 +675,25 @@ export default function VCSwipePage() {
                       className="w-16 h-16 bg-white border-3 border-gray-900 rounded-full flex items-center justify-center hover:bg-gray-900 transition-all shadow-lg group"
                     >
                       <motion.div
-                        animate={{ 
-                          rotate: [0, 20, -20, 0]
+                        animate={{
+                          rotate: [0, 20, -20, 0],
                         }}
                         transition={{
                           duration: 2,
                           repeat: Infinity,
-                          ease: "easeInOut"
+                          ease: 'easeInOut',
                         }}
                       >
                         <Star className="w-6 h-6 text-gray-900 group-hover:text-white fill-current transition-colors" />
                       </motion.div>
                     </motion.button>
                   </div>
-                  {currentProfile.explain?.whyNot && currentProfile.explain.whyNot.length>0 && (
+                  {currentProfile.explain?.whyNot && currentProfile.explain.whyNot.length > 0 && (
                     <div className="mt-4 text-center">
-                      <span className="text-[11px] text-gray-500">Improvement suggestions: {currentProfile.explain.whyNot.slice(0,2).join('; ')}</span>
+                      <span className="text-[11px] text-gray-500">
+                        Improvement suggestions:{' '}
+                        {currentProfile.explain.whyNot.slice(0, 2).join('; ')}
+                      </span>
                     </div>
                   )}
                   <div className="text-center mt-3 text-xs text-gray-500">
@@ -641,7 +720,7 @@ export default function VCSwipePage() {
                 initial={{ scale: 0.8, opacity: 0, y: 50 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.8, opacity: 0, y: 50 }}
-                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                 className="fixed inset-0 z-[60] flex items-center justify-center p-4"
               >
                 <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
@@ -656,23 +735,25 @@ export default function VCSwipePage() {
                       transition={{
                         duration: 20,
                         repeat: Infinity,
-                        repeatType: "reverse"
+                        repeatType: 'reverse',
                       }}
                       style={{
                         backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-                        backgroundSize: '50px 50px'
+                        backgroundSize: '50px 50px',
                       }}
                     />
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                      transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
                       className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 relative z-10"
                     >
                       <Heart className="w-10 h-10 text-black fill-current" />
                     </motion.div>
                     <h2 className="text-2xl font-bold mb-2 relative z-10">It's a Match!</h2>
-                    <p className="text-gray-300 relative z-10">You can now see full company details</p>
+                    <p className="text-gray-300 relative z-10">
+                      You can now see full company details
+                    </p>
                   </div>
 
                   {/* Revealed Info */}
@@ -682,7 +763,7 @@ export default function VCSwipePage() {
                       <div className="text-center py-8">
                         <motion.div
                           animate={{ rotate: 360 }}
-                          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                          transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
                           className="w-16 h-16 border-4 border-gray-200 border-t-black rounded-full mx-auto mb-4"
                         />
                         <h3 className="text-xl font-bold text-black mb-2">Intro Request Sent</h3>
@@ -690,7 +771,8 @@ export default function VCSwipePage() {
                           {revealedCompany.message || 'Waiting for founder to accept...'}
                         </p>
                         <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 text-sm text-gray-700">
-                          We've notified the founder. You'll get an email when they respond (usually within 24 hours).
+                          We've notified the founder. You'll get an email when they respond (usually
+                          within 24 hours).
                         </div>
                         <button
                           onClick={() => setShowReveal(false)}
@@ -706,37 +788,39 @@ export default function VCSwipePage() {
                           <h3 className="text-3xl font-bold text-black mb-2">
                             {revealedCompany.company || 'Company Name'}
                           </h3>
-                          <p className="text-gray-600">Founded by {revealedCompany.name || 'Founder Name'}</p>
+                          <p className="text-gray-600">
+                            Founded by {revealedCompany.name || 'Founder Name'}
+                          </p>
                         </div>
 
-                    <div className="space-y-4 mb-6">
-                      <div className="p-4 bg-gray-50 rounded-lg">
-                        <div className="text-sm text-gray-600 mb-1">One-liner</div>
-                        <div className="text-base text-gray-900">{currentProfile.oneLiner}</div>
-                      </div>
+                        <div className="space-y-4 mb-6">
+                          <div className="p-4 bg-gray-50 rounded-lg">
+                            <div className="text-sm text-gray-600 mb-1">One-liner</div>
+                            <div className="text-base text-gray-900">{currentProfile.oneLiner}</div>
+                          </div>
 
-                      {revealedCompany.website && (
-                        <div className="p-4 bg-gray-50 rounded-lg">
-                          <div className="text-sm text-gray-600 mb-1">Website</div>
-                          <a 
-                            href={revealedCompany.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-base text-black hover:underline inline-flex items-center space-x-1"
-                          >
-                            <span>{revealedCompany.website}</span>
-                            <Eye className="w-4 h-4" />
-                          </a>
-                        </div>
-                      )}
+                          {revealedCompany.website && (
+                            <div className="p-4 bg-gray-50 rounded-lg">
+                              <div className="text-sm text-gray-600 mb-1">Website</div>
+                              <a
+                                href={revealedCompany.website}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-base text-black hover:underline inline-flex items-center space-x-1"
+                              >
+                                <span>{revealedCompany.website}</span>
+                                <Eye className="w-4 h-4" />
+                              </a>
+                            </div>
+                          )}
 
-                      {revealedCompany.email && (
-                        <div className="p-4 bg-gray-50 rounded-lg">
-                          <div className="text-sm text-gray-600 mb-1">Contact</div>
-                          <div className="text-base text-gray-900">{revealedCompany.email}</div>
+                          {revealedCompany.email && (
+                            <div className="p-4 bg-gray-50 rounded-lg">
+                              <div className="text-sm text-gray-600 mb-1">Contact</div>
+                              <div className="text-base text-gray-900">{revealedCompany.email}</div>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
 
                         {/* Action Buttons */}
                         <div className="flex space-x-3">

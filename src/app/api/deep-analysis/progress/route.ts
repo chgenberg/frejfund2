@@ -7,24 +7,27 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 // Global progress store (in production, use Redis or similar)
-const progressStore = new Map<string, {
-  current: number;
-  total: number;
-  completedCategories: string[];
-  lastUpdate: number;
-}>();
+const progressStore = new Map<
+  string,
+  {
+    current: number;
+    total: number;
+    completedCategories: string[];
+    lastUpdate: number;
+  }
+>();
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const sessionId = searchParams.get('sessionId');
-  
+
   if (!sessionId) {
     return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
   }
 
   // Import prisma dynamically
   const { prisma } = await import('@/lib/prisma');
-  
+
   // Create a stream
   const stream = new ReadableStream({
     start(controller) {
@@ -54,7 +57,7 @@ export async function GET(request: NextRequest) {
       const sub = useBull ? getSub() : null;
       const channel = getProgressChannel(sessionId);
       if (useBull && sub) {
-        sub.subscribe(channel).catch(()=>{});
+        sub.subscribe(channel).catch(() => {});
       }
 
       // Poll DB as a fallback (every few seconds)
@@ -67,11 +70,11 @@ export async function GET(request: NextRequest) {
             include: {
               dimensions: {
                 where: { analyzed: true },
-                select: { category: true }
-              }
-            }
+                select: { category: true },
+              },
+            },
           });
-          
+
           if (analysis) {
             const completedCount = analysis.dimensions.length;
             const totalCount = ANALYSIS_DIMENSIONS.length;
@@ -79,17 +82,28 @@ export async function GET(request: NextRequest) {
             // Compute client-facing progress as max(db.progress, computed)
             const coarseDbProgress = Math.max(0, Math.min(100, analysis.progress || 0));
             const computedProgress = Math.round((completedCount / Math.max(1, totalCount)) * 100);
-            const effectiveCount = Math.max(Math.round((coarseDbProgress / 100) * totalCount), completedCount);
-            const completedCategories = [...new Set(analysis.dimensions.map(d => d.category))];
-            
+            const effectiveCount = Math.max(
+              Math.round((coarseDbProgress / 100) * totalCount),
+              completedCount,
+            );
+            const completedCategories = [...new Set(analysis.dimensions.map((d) => d.category))];
+
             // Only send update if progress changed
             if (effectiveCount !== lastProgress || effectiveCount === 0) {
               lastProgress = effectiveCount;
-              const data = { type: 'progress', current: effectiveCount, total: totalCount, completedCategories, sessionId };
+              const data = {
+                type: 'progress',
+                current: effectiveCount,
+                total: totalCount,
+                completedCategories,
+                sessionId,
+              };
               write(data);
-              console.log(`📡 SSE: Sent progress ${effectiveCount}/${totalCount} to client (session ${sessionId})`);
+              console.log(
+                `📡 SSE: Sent progress ${effectiveCount}/${totalCount} to client (session ${sessionId})`,
+              );
             }
-            
+
             // Check if complete (require both DB status and count to agree)
             if (analysis.status === 'completed' && effectiveCount >= totalCount) {
               write({ type: 'complete' });
@@ -98,7 +112,9 @@ export async function GET(request: NextRequest) {
               clearInterval(keepAlive);
               if (!closed) {
                 closed = true;
-                try { controller.close(); } catch {}
+                try {
+                  controller.close();
+                } catch {}
               }
             }
           }
@@ -118,10 +134,14 @@ export async function GET(request: NextRequest) {
         console.log('📡 SSE: Client disconnected');
         clearInterval(interval);
         clearInterval(keepAlive);
-        try { useBull && sub && sub.unsubscribe(channel); } catch {}
+        try {
+          useBull && sub && sub.unsubscribe(channel);
+        } catch {}
         if (!closed) {
           closed = true;
-          try { controller.close(); } catch {}
+          try {
+            controller.close();
+          } catch {}
         }
       });
 
@@ -138,8 +158,15 @@ export async function GET(request: NextRequest) {
               write({ type: 'complete' });
               clearInterval(interval);
               clearInterval(keepAlive);
-              try { sub.unsubscribe(channel); } catch {}
-              if (!closed) { closed = true; try { controller.close(); } catch {} }
+              try {
+                sub.unsubscribe(channel);
+              } catch {}
+              if (!closed) {
+                closed = true;
+                try {
+                  controller.close();
+                } catch {}
+              }
             }
           } catch {}
         });
@@ -147,16 +174,18 @@ export async function GET(request: NextRequest) {
     },
     cancel() {
       // Stream consumer cancelled; ensure we stop timers and stop writing
-      try { /* no-op */ } catch {}
-    }
+      try {
+        /* no-op */
+      } catch {}
+    },
   });
 
   return new Response(stream, {
     headers: {
       'Content-Type': 'text/event-stream; charset=utf-8',
       'Cache-Control': 'no-cache, no-transform',
-      'Connection': 'keep-alive',
-      'X-Accel-Buffering': 'no'
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no',
     },
   });
 }
@@ -164,18 +193,18 @@ export async function GET(request: NextRequest) {
 // Endpoint to update progress (called by deep-analysis-runner)
 export async function POST(request: NextRequest) {
   const { sessionId, current, total, completedCategories } = await request.json();
-  
+
   if (!sessionId) {
     return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
   }
-  
+
   progressStore.set(sessionId, {
     current,
     total,
     completedCategories,
-    lastUpdate: Date.now()
+    lastUpdate: Date.now(),
   });
-  
+
   // Clean up old entries (older than 1 hour)
   const oneHourAgo = Date.now() - 60 * 60 * 1000;
   for (const [key, value] of progressStore.entries()) {
@@ -183,6 +212,6 @@ export async function POST(request: NextRequest) {
       progressStore.delete(key);
     }
   }
-  
+
   return NextResponse.json({ success: true });
 }

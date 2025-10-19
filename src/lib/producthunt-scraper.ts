@@ -14,7 +14,7 @@ export interface ProductHuntData {
   tagline?: string;
   description?: string;
   website?: string;
-  
+
   // Launch metrics
   launches: Array<{
     date: string;
@@ -23,33 +23,33 @@ export interface ProductHuntData {
     rank?: number; // Daily rank
     featured?: boolean;
   }>;
-  
+
   // Community metrics
   totalUpvotes: number;
   totalComments: number;
   followers?: number;
-  
+
   // Sentiment analysis
   topComments?: Array<{
     text: string;
     upvotes: number;
     sentiment?: 'positive' | 'neutral' | 'negative';
   }>;
-  
+
   // Launch success
   bestRank?: number;
   wasFeatured: boolean;
   productOfTheDay?: boolean;
-  
+
   // Maker information
   makers?: Array<{
     name: string;
     role?: string;
   }>;
-  
+
   // Traction signal
   communityInterest: 'viral' | 'strong' | 'moderate' | 'weak';
-  
+
   // Metadata
   productHuntUrl?: string;
   scrapedAt: Date;
@@ -59,12 +59,10 @@ export interface ProductHuntData {
  * Scrape Product Hunt using their public API
  * Note: Requires API token from https://api.producthunt.com/v2/docs
  */
-export async function scrapeProductHunt(
-  productNameOrUrl: string
-): Promise<ProductHuntData | null> {
+export async function scrapeProductHunt(productNameOrUrl: string): Promise<ProductHuntData | null> {
   try {
     const phToken = process.env.PRODUCTHUNT_API_TOKEN;
-    
+
     if (!phToken) {
       console.warn('PRODUCTHUNT_API_TOKEN not set, using web scraping fallback');
       return scrapeProductHuntWeb(productNameOrUrl);
@@ -105,13 +103,13 @@ export async function scrapeProductHunt(
     const response = await fetch('https://api.producthunt.com/v2/api/graphql', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${phToken}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${phToken}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         query,
-        variables: { slug }
-      })
+        variables: { slug },
+      }),
     });
 
     if (!response.ok) {
@@ -136,7 +134,7 @@ export async function scrapeProductHunt(
     const topComments = product.comments.edges.map((edge: any) => ({
       text: edge.node.body,
       upvotes: edge.node.votesCount,
-      sentiment: analyzeSentiment(edge.node.body)
+      sentiment: analyzeSentiment(edge.node.body),
     }));
 
     return {
@@ -144,12 +142,14 @@ export async function scrapeProductHunt(
       tagline: product.tagline,
       description: product.description,
       website: product.website,
-      launches: [{
-        date: product.featuredAt,
-        upvotes: product.votesCount,
-        comments: product.commentsCount,
-        featured: !!product.featuredAt
-      }],
+      launches: [
+        {
+          date: product.featuredAt,
+          upvotes: product.votesCount,
+          comments: product.commentsCount,
+          featured: !!product.featuredAt,
+        },
+      ],
       totalUpvotes: product.votesCount,
       totalComments: product.commentsCount,
       topComments,
@@ -158,9 +158,8 @@ export async function scrapeProductHunt(
       makers: product.makers.map((m: any) => ({ name: m.name })),
       communityInterest,
       productHuntUrl: product.url,
-      scrapedAt: new Date()
+      scrapedAt: new Date(),
     };
-
   } catch (error) {
     console.error('Product Hunt scraping error:', error);
     return null;
@@ -170,12 +169,10 @@ export async function scrapeProductHunt(
 /**
  * Fallback: Web scraping when API token not available
  */
-async function scrapeProductHuntWeb(
-  productNameOrUrl: string
-): Promise<ProductHuntData | null> {
+async function scrapeProductHuntWeb(productNameOrUrl: string): Promise<ProductHuntData | null> {
   try {
     let productUrl = productNameOrUrl;
-    
+
     if (!productUrl.includes('producthunt.com')) {
       // Search for product
       productUrl = `https://www.producthunt.com/posts/${productNameOrUrl.toLowerCase().replace(/\s+/g, '-')}`;
@@ -183,8 +180,8 @@ async function scrapeProductHuntWeb(
 
     const response = await fetch(productUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
-      }
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
     });
 
     if (!response.ok) {
@@ -207,19 +204,20 @@ async function scrapeProductHuntWeb(
     return {
       productName,
       tagline,
-      launches: [{
-        date: new Date().toISOString(),
-        upvotes,
-        comments
-      }],
+      launches: [
+        {
+          date: new Date().toISOString(),
+          upvotes,
+          comments,
+        },
+      ],
       totalUpvotes: upvotes,
       totalComments: comments,
       wasFeatured: upvotes > 100,
       communityInterest,
       productHuntUrl: productUrl,
-      scrapedAt: new Date()
+      scrapedAt: new Date(),
     };
-
   } catch (error) {
     console.error('Product Hunt web scraping error:', error);
     return null;
@@ -229,16 +227,14 @@ async function scrapeProductHuntWeb(
 /**
  * Search Product Hunt for a company's products
  */
-export async function searchProductHunt(
-  companyName: string
-): Promise<ProductHuntData[]> {
+export async function searchProductHunt(companyName: string): Promise<ProductHuntData[]> {
   try {
     const searchUrl = `https://www.producthunt.com/search?q=${encodeURIComponent(companyName)}`;
-    
+
     const response = await fetch(searchUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
-      }
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
     });
 
     if (!response.ok) {
@@ -246,20 +242,17 @@ export async function searchProductHunt(
     }
 
     const html = await response.text();
-    
+
     // Parse search results to find product URLs
     // This is a simplified version - in production, use proper HTML parser
     const productUrls = extractAllMatches(html, /href="(\/posts\/[^"]+)"/g)
-      .map(url => `https://www.producthunt.com${url}`)
+      .map((url) => `https://www.producthunt.com${url}`)
       .slice(0, 3); // Limit to first 3 results
 
     // Scrape each product
-    const results = await Promise.all(
-      productUrls.map(url => scrapeProductHuntWeb(url))
-    );
+    const results = await Promise.all(productUrls.map((url) => scrapeProductHuntWeb(url)));
 
-    return results.filter(r => r !== null) as ProductHuntData[];
-
+    return results.filter((r) => r !== null) as ProductHuntData[];
   } catch (error) {
     console.error('Product Hunt search error:', error);
     return [];
@@ -297,15 +290,22 @@ function extractAllMatches(html: string, regex: RegExp): string[] {
 }
 
 function analyzeSentiment(text: string): 'positive' | 'neutral' | 'negative' {
-  const positiveWords = ['great', 'awesome', 'love', 'excellent', 'amazing', 'perfect', 'brilliant'];
+  const positiveWords = [
+    'great',
+    'awesome',
+    'love',
+    'excellent',
+    'amazing',
+    'perfect',
+    'brilliant',
+  ];
   const negativeWords = ['bad', 'poor', 'terrible', 'awful', 'disappointing', 'useless'];
-  
+
   const lowerText = text.toLowerCase();
-  const positiveCount = positiveWords.filter(word => lowerText.includes(word)).length;
-  const negativeCount = negativeWords.filter(word => lowerText.includes(word)).length;
-  
+  const positiveCount = positiveWords.filter((word) => lowerText.includes(word)).length;
+  const negativeCount = negativeWords.filter((word) => lowerText.includes(word)).length;
+
   if (positiveCount > negativeCount) return 'positive';
   if (negativeCount > positiveCount) return 'negative';
   return 'neutral';
 }
-

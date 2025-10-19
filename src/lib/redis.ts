@@ -31,5 +31,3 @@ export function getSub(): IORedis {
 export function getProgressChannel(sessionId: string) {
   return `deepAnalysis:progress:${sessionId}`;
 }
-
-

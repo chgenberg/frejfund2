@@ -2,10 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FileText, Download, Share2, Eye, RefreshCw, Calendar,
-  TrendingUp, Mail, BarChart3, CheckCircle2, Clock,
-  Sparkles, ArrowLeft, ExternalLink
+import {
+  FileText,
+  Download,
+  Share2,
+  Eye,
+  RefreshCw,
+  Calendar,
+  TrendingUp,
+  Mail,
+  BarChart3,
+  CheckCircle2,
+  Clock,
+  Sparkles,
+  ArrowLeft,
+  ExternalLink,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -13,7 +24,13 @@ export const dynamic = 'force-dynamic';
 
 interface Document {
   id: string;
-  type: 'pitch_deck' | 'one_pager' | 'investor_update' | 'financial_model' | 'due_diligence' | 'email_template';
+  type:
+    | 'pitch_deck'
+    | 'one_pager'
+    | 'investor_update'
+    | 'financial_model'
+    | 'due_diligence'
+    | 'email_template';
   title: string;
   description: string;
   status: 'ready' | 'draft' | 'generating' | 'outdated';
@@ -39,10 +56,11 @@ export default function DocumentsPage() {
 
   const loadDocuments = async () => {
     setLoading(true);
-    
+
     try {
       // Support both keys to be robust across pages/components
-      const sessionId = localStorage.getItem('frejfund-session-id') || localStorage.getItem('sessionId');
+      const sessionId =
+        localStorage.getItem('frejfund-session-id') || localStorage.getItem('sessionId');
       if (!sessionId) {
         console.warn('No session ID found');
         setLoading(false);
@@ -51,13 +69,13 @@ export default function DocumentsPage() {
 
       const response = await fetch('/api/documents', {
         headers: {
-          'x-session-id': sessionId
-        }
+          'x-session-id': sessionId,
+        },
       });
 
       if (response.ok) {
         const data = await response.json();
-        
+
         // Show real documents only (no dummy data)
         if (data.documents && data.documents.length > 0) {
           const formattedDocs: Document[] = data.documents.map((doc: any) => ({
@@ -71,11 +89,11 @@ export default function DocumentsPage() {
             metrics: {
               views: doc.viewCount,
               avgTime: doc.avgViewTime ? `${Math.floor(doc.avgViewTime / 60)} min` : undefined,
-              shares: doc.shareCount
+              shares: doc.shareCount,
             },
-            url: doc.fileUrl
+            url: doc.fileUrl,
           }));
-          
+
           setDocuments(formattedDocs);
         } else {
           // No documents yet - empty state will show suggestions
@@ -93,29 +111,40 @@ export default function DocumentsPage() {
 
   const getDocumentIcon = (type: Document['type']) => {
     switch (type) {
-      case 'pitch_deck': return FileText;
-      case 'one_pager': return FileText;
-      case 'investor_update': return Mail;
-      case 'financial_model': return BarChart3;
-      case 'due_diligence': return CheckCircle2;
-      case 'email_template': return Mail;
-      default: return FileText;
+      case 'pitch_deck':
+        return FileText;
+      case 'one_pager':
+        return FileText;
+      case 'investor_update':
+        return Mail;
+      case 'financial_model':
+        return BarChart3;
+      case 'due_diligence':
+        return CheckCircle2;
+      case 'email_template':
+        return Mail;
+      default:
+        return FileText;
     }
   };
 
   const getStatusColor = (status: Document['status']) => {
     switch (status) {
-      case 'ready': return 'bg-green-100 text-green-700 border-green-200';
-      case 'draft': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      case 'generating': return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'outdated': return 'bg-gray-100 text-gray-700 border-gray-200';
-      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+      case 'ready':
+        return 'bg-green-100 text-green-700 border-green-200';
+      case 'draft':
+        return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      case 'generating':
+        return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'outdated':
+        return 'bg-gray-100 text-gray-700 border-gray-200';
+      default:
+        return 'bg-gray-100 text-gray-700 border-gray-200';
     }
   };
 
-  const filteredDocuments = selectedType === 'all' 
-    ? documents 
-    : documents.filter(doc => doc.type === selectedType);
+  const filteredDocuments =
+    selectedType === 'all' ? documents : documents.filter((doc) => doc.type === selectedType);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -138,11 +167,13 @@ export default function DocumentsPage() {
                 </div>
                 <div>
                   <h1 className="text-base sm:text-xl font-semibold text-black">Documents</h1>
-                  <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">All your fundraising materials</p>
+                  <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">
+                    All your fundraising materials
+                  </p>
                 </div>
               </div>
             </div>
-            
+
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -162,7 +193,9 @@ export default function DocumentsPage() {
           <button
             onClick={() => setSelectedType('all')}
             className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
-              selectedType === 'all' ? 'bg-black text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+              selectedType === 'all'
+                ? 'bg-black text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
             All Documents
@@ -170,7 +203,9 @@ export default function DocumentsPage() {
           <button
             onClick={() => setSelectedType('pitch_deck')}
             className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
-              selectedType === 'pitch_deck' ? 'bg-black text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+              selectedType === 'pitch_deck'
+                ? 'bg-black text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
             Pitch Materials
@@ -178,7 +213,9 @@ export default function DocumentsPage() {
           <button
             onClick={() => setSelectedType('investor_update')}
             className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
-              selectedType === 'investor_update' ? 'bg-black text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+              selectedType === 'investor_update'
+                ? 'bg-black text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
             Updates
@@ -186,7 +223,9 @@ export default function DocumentsPage() {
           <button
             onClick={() => setSelectedType('financial_model')}
             className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
-              selectedType === 'financial_model' ? 'bg-black text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+              selectedType === 'financial_model'
+                ? 'bg-black text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
             Financials
@@ -227,13 +266,17 @@ export default function DocumentsPage() {
                             <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
                           </div>
                           <div>
-                            <h3 className="text-sm sm:text-base font-semibold text-black">{doc.title}</h3>
+                            <h3 className="text-sm sm:text-base font-semibold text-black">
+                              {doc.title}
+                            </h3>
                             {doc.version && (
                               <span className="text-xs text-gray-500">{doc.version}</span>
                             )}
                           </div>
                         </div>
-                        <span className={`px-2 py-1 rounded-md text-xs font-medium border ${getStatusColor(doc.status)}`}>
+                        <span
+                          className={`px-2 py-1 rounded-md text-xs font-medium border ${getStatusColor(doc.status)}`}
+                        >
                           {doc.status === 'ready' && 'Ready'}
                           {doc.status === 'draft' && 'Draft'}
                           {doc.status === 'generating' && 'Generating...'}
@@ -253,7 +296,9 @@ export default function DocumentsPage() {
                                 <Eye className="w-3 h-3 text-gray-500" />
                                 <span className="text-xs text-gray-500">Views</span>
                               </div>
-                              <p className="text-sm sm:text-base font-semibold text-black">{doc.metrics.views}</p>
+                              <p className="text-sm sm:text-base font-semibold text-black">
+                                {doc.metrics.views}
+                              </p>
                             </div>
                           )}
                           {doc.metrics.avgTime && (
@@ -262,7 +307,9 @@ export default function DocumentsPage() {
                                 <Clock className="w-3 h-3 text-gray-500" />
                                 <span className="text-xs text-gray-500">Avg Time</span>
                               </div>
-                              <p className="text-sm sm:text-base font-semibold text-black">{doc.metrics.avgTime}</p>
+                              <p className="text-sm sm:text-base font-semibold text-black">
+                                {doc.metrics.avgTime}
+                              </p>
                             </div>
                           )}
                           {doc.metrics.shares !== undefined && (
@@ -271,7 +318,9 @@ export default function DocumentsPage() {
                                 <Share2 className="w-3 h-3 text-gray-500" />
                                 <span className="text-xs text-gray-500">Shares</span>
                               </div>
-                              <p className="text-sm sm:text-base font-semibold text-black">{doc.metrics.shares}</p>
+                              <p className="text-sm sm:text-base font-semibold text-black">
+                                {doc.metrics.shares}
+                              </p>
                             </div>
                           )}
                         </div>
@@ -326,7 +375,9 @@ export default function DocumentsPage() {
                 <FileText className="w-8 h-8 text-gray-400" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">No documents uploaded yet</h3>
-              <p className="text-gray-600 mb-6">Upload the materials below to strengthen your analysis and investor readiness</p>
+              <p className="text-gray-600 mb-6">
+                Upload the materials below to strengthen your analysis and investor readiness
+              </p>
             </div>
 
             {/* Suggested Documents to Upload */}
@@ -339,8 +390,12 @@ export default function DocumentsPage() {
               >
                 <FileText className="w-8 h-8 text-gray-700 mb-3" />
                 <h4 className="font-semibold text-black mb-2">Pitch Deck</h4>
-                <p className="text-sm text-gray-600 mb-3">Upload your investor presentation (PDF, PPTX, Keynote)</p>
-                <span className="text-xs text-gray-500 bg-yellow-50 px-2 py-1 rounded">Highly recommended</span>
+                <p className="text-sm text-gray-600 mb-3">
+                  Upload your investor presentation (PDF, PPTX, Keynote)
+                </p>
+                <span className="text-xs text-gray-500 bg-yellow-50 px-2 py-1 rounded">
+                  Highly recommended
+                </span>
               </motion.div>
 
               <motion.div
@@ -352,8 +407,12 @@ export default function DocumentsPage() {
               >
                 <BarChart3 className="w-8 h-8 text-gray-700 mb-3" />
                 <h4 className="font-semibold text-black mb-2">Financial Model</h4>
-                <p className="text-sm text-gray-600 mb-3">Your 3-year projections (Excel, Google Sheets)</p>
-                <span className="text-xs text-gray-500 bg-yellow-50 px-2 py-1 rounded">Highly recommended</span>
+                <p className="text-sm text-gray-600 mb-3">
+                  Your 3-year projections (Excel, Google Sheets)
+                </p>
+                <span className="text-xs text-gray-500 bg-yellow-50 px-2 py-1 rounded">
+                  Highly recommended
+                </span>
               </motion.div>
 
               <motion.div
@@ -366,7 +425,9 @@ export default function DocumentsPage() {
                 <TrendingUp className="w-8 h-8 text-gray-700 mb-3" />
                 <h4 className="font-semibold text-black mb-2">KPI Dashboard</h4>
                 <p className="text-sm text-gray-600 mb-3">Monthly metrics export (CSV, Excel)</p>
-                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">Optional</span>
+                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                  Optional
+                </span>
               </motion.div>
 
               <motion.div
@@ -378,8 +439,12 @@ export default function DocumentsPage() {
               >
                 <CheckCircle2 className="w-8 h-8 text-gray-700 mb-3" />
                 <h4 className="font-semibold text-black mb-2">Cap Table</h4>
-                <p className="text-sm text-gray-600 mb-3">Current ownership structure (Excel, PDF)</p>
-                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">Optional</span>
+                <p className="text-sm text-gray-600 mb-3">
+                  Current ownership structure (Excel, PDF)
+                </p>
+                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                  Optional
+                </span>
               </motion.div>
             </div>
 
@@ -393,7 +458,9 @@ export default function DocumentsPage() {
                 <Sparkles className="w-5 h-5" />
                 <span>Upload via Chat</span>
               </motion.button>
-              <p className="text-xs text-gray-500 mt-2">Drag & drop files in chat or ask Freja for help</p>
+              <p className="text-xs text-gray-500 mt-2">
+                Drag & drop files in chat or ask Freja for help
+              </p>
             </div>
           </div>
         )}
@@ -413,7 +480,8 @@ export default function DocumentsPage() {
               <div className="flex-1">
                 <h3 className="font-semibold mb-2">Need help with your documents?</h3>
                 <p className="text-sm text-gray-300 mb-4">
-                  Ask Freja to improve your pitch deck, generate investor updates, or create custom materials.
+                  Ask Freja to improve your pitch deck, generate investor updates, or create custom
+                  materials.
                 </p>
                 <motion.button
                   whileHover={{ scale: 1.02 }}

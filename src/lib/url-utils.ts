@@ -4,13 +4,13 @@
 
 export function normalizeUrl(input: string): string {
   let url = input.trim();
-  
+
   // Remove leading/trailing whitespace
   url = url.trim();
-  
+
   // If empty, return as-is
   if (!url) return url;
-  
+
   // If it already has a protocol, validate it
   if (url.startsWith('http://') || url.startsWith('https://')) {
     return url;

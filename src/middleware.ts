@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 
 export const config = {
-  matcher: ['/vc/:path*', '/api/:path*']
+  matcher: ['/vc/:path*', '/api/:path*'],
 };
 
 // Simple in-memory rate limiter (edge runtime resets per instance; good enough as a guard)
@@ -43,8 +43,9 @@ export function middleware(req: NextRequest) {
   res.headers.set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
   res.headers.set('Strict-Transport-Security', 'max-age=15552000; includeSubDomains; preload');
   // Light CSP (relaxed for Next.js, can be tightened later)
-  res.headers.set('Content-Security-Policy', "default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; connect-src 'self' https:; font-src 'self' https: data:");
+  res.headers.set(
+    'Content-Security-Policy',
+    "default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; connect-src 'self' https:; font-src 'self' https: data:",
+  );
   return res;
 }
-
-

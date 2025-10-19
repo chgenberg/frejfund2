@@ -13,13 +13,20 @@ async function summarizeWithFallback(deckText: string, businessInfo: any) {
   try {
     const r = await client.chat.completions.create({
       model,
-      messages: [ { role: 'system', content: system }, { role: 'user', content: user } ],
-      ...(isGpt5 ? {} : { temperature: 0.3 })
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: user },
+      ],
+      ...(isGpt5 ? {} : { temperature: 0.3 }),
     });
     return r.choices[0]?.message?.content || '';
   } catch {
     try {
-      const r2: any = await (client as any).responses.create({ model, input: `${system}\n\n${user}`, ...(isGpt5 ? {} : { temperature: 0.3 }) });
+      const r2: any = await (client as any).responses.create({
+        model,
+        input: `${system}\n\n${user}`,
+        ...(isGpt5 ? {} : { temperature: 0.3 }),
+      });
       return (r2 as any).output_text || '';
     } catch {
       return '';
@@ -33,11 +40,18 @@ export async function POST(req: NextRequest) {
     if (!deckText) return NextResponse.json({ error: 'deckText required' }, { status: 400 });
     let content = await summarizeWithFallback(deckText, businessInfo);
     let json: any;
-    try { json = JSON.parse((content || '{}').match(/\{[\s\S]*\}/)?.[0] || '{}'); } catch { json = {}; }
+    try {
+      json = JSON.parse((content || '{}').match(/\{[\s\S]*\}/)?.[0] || '{}');
+    } catch {
+      json = {};
+    }
     if (!json.summary) {
       json = {
         summary: deckText.split('\n').slice(0, 10).join(' ').slice(0, 600),
-        faq: [], highlights: [], risks: [], next_steps: []
+        faq: [],
+        highlights: [],
+        risks: [],
+        next_steps: [],
       };
     }
     return NextResponse.json(json);
@@ -50,5 +64,3 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   return NextResponse.json({ status: 'Pitch API is running' });
 }
-
-

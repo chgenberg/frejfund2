@@ -22,7 +22,7 @@ export default function LoginPage() {
       const params = new URLSearchParams(window.location.search);
       const authenticatedEmail = params.get('email');
       const isAuthenticated = params.get('authenticated');
-      
+
       if (isAuthenticated && authenticatedEmail) {
         // Load sessions for authenticated user
         loadUserSessions(authenticatedEmail);
@@ -60,7 +60,7 @@ export default function LoginPage() {
       const res = await fetch('/api/auth/magic-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.toLowerCase() })
+        body: JSON.stringify({ email: email.toLowerCase() }),
       });
 
       const data = await res.json();
@@ -136,9 +136,7 @@ export default function LoginPage() {
                   </div>
                 </div>
                 {session.lastMessage && (
-                  <p className="text-sm text-gray-500 line-clamp-2">
-                    {session.lastMessage}...
-                  </p>
+                  <p className="text-sm text-gray-500 line-clamp-2">{session.lastMessage}...</p>
                 )}
               </motion.button>
             ))}
@@ -175,9 +173,7 @@ export default function LoginPage() {
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
@@ -206,15 +202,12 @@ export default function LoginPage() {
               <div className="flex items-start space-x-3">
                 <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-green-900 mb-1">
-                    Check your email!
-                  </p>
+                  <p className="text-sm font-medium text-green-900 mb-1">Check your email!</p>
                   <p className="text-xs text-green-700">
-                    We've sent a magic link to <strong>{email}</strong>. Click the link to sign in instantly.
+                    We've sent a magic link to <strong>{email}</strong>. Click the link to sign in
+                    instantly.
                   </p>
-                  <p className="text-xs text-green-600 mt-2">
-                    Link expires in 15 minutes
-                  </p>
+                  <p className="text-xs text-green-600 mt-2">Link expires in 15 minutes</p>
                 </div>
               </div>
             </motion.div>

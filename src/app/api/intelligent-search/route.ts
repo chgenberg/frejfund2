@@ -11,23 +11,23 @@ export async function POST(request: NextRequest) {
       case 'initialize': {
         const state = intelligentSearch.initializeConversation(businessInfo as BusinessInfo);
         const firstQuestion = await intelligentSearch.getNextQuestion(state, businessInfo);
-        
+
         return NextResponse.json({
           success: true,
           conversationState: state,
-          question: firstQuestion
+          question: firstQuestion,
         });
       }
 
       case 'next_question': {
         const nextQuestion = await intelligentSearch.getNextQuestion(
           conversationState,
-          businessInfo as BusinessInfo
+          businessInfo as BusinessInfo,
         );
-        
+
         return NextResponse.json({
           success: true,
-          question: nextQuestion
+          question: nextQuestion,
         });
       }
 
@@ -36,46 +36,39 @@ export async function POST(request: NextRequest) {
           conversationState,
           question,
           answer,
-          businessInfo as BusinessInfo
+          businessInfo as BusinessInfo,
         );
-        
+
         const nextQuestion = await intelligentSearch.getNextQuestion(
           updatedState,
-          businessInfo as BusinessInfo
+          businessInfo as BusinessInfo,
         );
-        
+
         return NextResponse.json({
           success: true,
           conversationState: updatedState,
           question: nextQuestion,
-          isComplete: intelligentSearch.isReadyForAnalysis(updatedState)
+          isComplete: intelligentSearch.isReadyForAnalysis(updatedState),
         });
       }
 
       case 'finalize': {
         const analysis = await intelligentSearch.generateFinalAnalysis(
           conversationState,
-          businessInfo as BusinessInfo
+          businessInfo as BusinessInfo,
         );
-        
+
         return NextResponse.json({
           success: true,
-          analysis
+          analysis,
         });
       }
 
       default:
-        return NextResponse.json(
-          { success: false, error: 'Invalid action' },
-          { status: 400 }
-        );
+        return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
     }
   } catch (error) {
     console.error('Intelligent search error:', error);
-    return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }
-

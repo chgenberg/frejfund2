@@ -11,38 +11,38 @@ Systemet analyserar ditt företag över 68 olika dimensioner uppdelade i 15 kate
 ### 🔴 Critical Priority
 
 1. **Problem Clarity**
-   - *Vad analyseras:* Hur tydligt och brådskande är problemet som löses?
-   - *Letar efter:* Problem statements, pain points, kundcitat om problemet
-   - *Varför viktigt:* Investerare vill se att ni löser ett STORT problem
+   - _Vad analyseras:_ Hur tydligt och brådskande är problemet som löses?
+   - _Letar efter:_ Problem statements, pain points, kundcitat om problemet
+   - _Varför viktigt:_ Investerare vill se att ni löser ett STORT problem
 
 2. **Solution-Problem Fit**
-   - *Vad analyseras:* Hur direkt löser lösningen det identifierade problemet?
-   - *Letar efter:* Koppling mellan features och problem, "vitamin vs painkiller"
-   - *Varför viktigt:* Måste vara en painkiller, inte bara nice-to-have
+   - _Vad analyseras:_ Hur direkt löser lösningen det identifierade problemet?
+   - _Letar efter:_ Koppling mellan features och problem, "vitamin vs painkiller"
+   - _Varför viktigt:_ Måste vara en painkiller, inte bara nice-to-have
 
 ### 🟡 High Priority
 
 3. **Unique Insight**
-   - *Vad analyseras:* Har teamet en unik insikt om marknaden som andra missat?
-   - *Letar efter:* "Vi insåg att...", contrarian statements
-   - *Varför viktigt:* Unicorns bygger på unique insights
+   - _Vad analyseras:_ Har teamet en unik insikt om marknaden som andra missat?
+   - _Letar efter:_ "Vi insåg att...", contrarian statements
+   - _Varför viktigt:_ Unicorns bygger på unique insights
 
 4. **Why Now?**
-   - *Vad analyseras:* Vad gör denna lösning möjlig/nödvändig just NU?
-   - *Letar efter:* Nya teknologier, regleringar, marknadsförändringar
-   - *Varför viktigt:* Timing är allt - för tidigt = educare marknaden
+   - _Vad analyseras:_ Vad gör denna lösning möjlig/nödvändig just NU?
+   - _Letar efter:_ Nya teknologier, regleringar, marknadsförändringar
+   - _Varför viktigt:_ Timing är allt - för tidigt = educare marknaden
 
 ### 🟢 Medium Priority
 
 5. **Solution Simplicity**
-   - *Vad analyseras:* Kan lösningen förklaras i EN mening?
-   - *Letar efter:* Tagline, value prop, "we help X do Y"
-   - *Varför viktigt:* Komplexa pitches säljer inte
+   - _Vad analyseras:_ Kan lösningen förklaras i EN mening?
+   - _Letar efter:_ Tagline, value prop, "we help X do Y"
+   - _Varför viktigt:_ Komplexa pitches säljer inte
 
 6. **Product Magic Moment**
-   - *Vad analyseras:* När inser användaren "wow, detta är värdefullt"?
-   - *Letar efter:* Aha-moments i demos, customer testimonials
-   - *Varför viktigt:* Utan magic moment = no retention
+   - _Vad analyseras:_ När inser användaren "wow, detta är värdefullt"?
+   - _Letar efter:_ Aha-moments i demos, customer testimonials
+   - _Varför viktigt:_ Utan magic moment = no retention
 
 ---
 
@@ -51,50 +51,50 @@ Systemet analyserar ditt företag över 68 olika dimensioner uppdelade i 15 kate
 ### 🔴 Critical Priority
 
 7. **Market Size (TAM/SAM/SOM)**
-   - *Vad analyseras:* Hur stor är den adresserbara marknaden?
-   - *Letar efter:* "$X billion market", antal potentiella kunder
-   - *Varför viktigt:* VCs behöver miljardmarknader för 100x returns
+   - _Vad analyseras:_ Hur stor är den adresserbara marknaden?
+   - _Letar efter:_ "$X billion market", antal potentiella kunder
+   - _Varför viktigt:_ VCs behöver miljardmarknader för 100x returns
 
 8. **Competitive Landscape**
-   - *Vad analyseras:* Vilka är konkurrenterna och hur trångt är det?
-   - *Letar efter:* Konkurrentnamn, jämförelser, "unlike X"
-   - *Varför viktigt:* Behöver förstå hur ni vinner
+   - _Vad analyseras:_ Vilka är konkurrenterna och hur trångt är det?
+   - _Letar efter:_ Konkurrentnamn, jämförelser, "unlike X"
+   - _Varför viktigt:_ Behöver förstå hur ni vinner
 
 9. **Competitive Moat**
-   - *Vad analyseras:* Vad hindrar konkurrenter från att kopiera?
-   - *Letar efter:* Nätverkseffekter, proprietary data, patent
-   - *Varför viktigt:* Utan moat = commodity business
+   - _Vad analyseras:_ Vad hindrar konkurrenter från att kopiera?
+   - _Letar efter:_ Nätverkseffekter, proprietary data, patent
+   - _Varför viktigt:_ Utan moat = commodity business
 
 ### 🟡 High Priority
 
 10. **Market Growth Rate**
-    - *Vad analyseras:* Växer, stabil eller sjunkande marknad?
-    - *Letar efter:* CAGR, "fastest growing", trender
-    - *Varför viktigt:* Växande marknad liftar alla båtar
+    - _Vad analyseras:_ Växer, stabil eller sjunkande marknad?
+    - _Letar efter:_ CAGR, "fastest growing", trender
+    - _Varför viktigt:_ Växande marknad liftar alla båtar
 
 11. **Market Timing**
-    - *Vad analyseras:* För tidigt, precis rätt, eller för sent?
-    - *Letar efter:* Mognadsindikatorer, adoption
-    - *Varför viktigt:* Too early = bleed, too late = saturated
+    - _Vad analyseras:_ För tidigt, precis rätt, eller för sent?
+    - _Letar efter:_ Mognadsindikatorer, adoption
+    - _Varför viktigt:_ Too early = bleed, too late = saturated
 
 ### 🟢 Medium Priority
 
 12. **Market Consolidation Potential**
-    - *Vad analyseras:* Winner-take-all eller fragmenterad marknad?
-    - *Letar efter:* Platform dynamics, network effects
-    - *Varför viktigt:* Påverkar hur stora ni kan bli
+    - _Vad analyseras:_ Winner-take-all eller fragmenterad marknad?
+    - _Letar efter:_ Platform dynamics, network effects
+    - _Varför viktigt:_ Påverkar hur stora ni kan bli
 
 ### ⚪ Low Priority
 
 13. **Adjacent Markets**
-    - *Vad analyseras:* Vilka närliggande marknader kan ni expandera till?
-    - *Letar efter:* Roadmap, framtida planer
-    - *Varför viktigt:* Exit opportunities
+    - _Vad analyseras:_ Vilka närliggande marknader kan ni expandera till?
+    - _Letar efter:_ Roadmap, framtida planer
+    - _Varför viktigt:_ Exit opportunities
 
 14. **Substitute Threats**
-    - *Vad analyseras:* Vilka icke-uppenbara alternativ finns?
-    - *Letar efter:* Manuella processer, legacy solutions
-    - *Varför viktigt:* Excel är CRM:s största konkurrent
+    - _Vad analyseras:_ Vilka icke-uppenbara alternativ finns?
+    - _Letar efter:_ Manuella processer, legacy solutions
+    - _Varför viktigt:_ Excel är CRM:s största konkurrent
 
 ---
 
@@ -103,53 +103,53 @@ Systemet analyserar ditt företag över 68 olika dimensioner uppdelade i 15 kate
 ### 🔴 Critical Priority
 
 15. **Revenue Model Clarity**
-    - *Vad analyseras:* Hur tjänar ni pengar? Är det bevisat?
-    - *Letar efter:* Pricing pages, revenue model
-    - *Varför viktigt:* Måste ha tydlig monetization
+    - _Vad analyseras:_ Hur tjänar ni pengar? Är det bevisat?
+    - _Letar efter:_ Pricing pages, revenue model
+    - _Varför viktigt:_ Måste ha tydlig monetization
 
 16. **Unit Economics**
-    - *Vad analyseras:* LTV/CAC ratio, gross margins, payback period
-    - *Letar efter:* CAC, LTV mentions, pricing tiers
-    - *Varför viktigt:* LTV:CAC < 3 = ohållbart
+    - _Vad analyseras:_ LTV/CAC ratio, gross margins, payback period
+    - _Letar efter:_ CAC, LTV mentions, pricing tiers
+    - _Varför viktigt:_ LTV:CAC < 3 = ohållbart
 
 ### 🟡 High Priority
 
 17. **Revenue Predictability**
-    - *Vad analyseras:* Hur recurring och förutsägbar är revenue?
-    - *Letar efter:* Subscription terms, contract lengths
-    - *Varför viktigt:* Förutsägbar revenue = högre värdering
+    - _Vad analyseras:_ Hur recurring och förutsägbar är revenue?
+    - _Letar efter:_ Subscription terms, contract lengths
+    - _Varför viktigt:_ Förutsägbar revenue = högre värdering
 
 18. **Gross Margin Structure**
-    - *Vad analyseras:* Software-like (80%+) eller services (30-50%)?
-    - *Letar efter:* COGS, fulfillment costs
-    - *Varför viktigt:* Höga marginaler = skalbarhet
+    - _Vad analyseras:_ Software-like (80%+) eller services (30-50%)?
+    - _Letar efter:_ COGS, fulfillment costs
+    - _Varför viktigt:_ Höga marginaler = skalbarhet
 
 19. **Path to Profitability**
-    - *Vad analyseras:* När och hur blir ni lönsamma?
-    - *Letar efter:* Financial projections, breakeven
-    - *Varför viktigt:* Behöver visa att ni kan bli profitable
+    - _Vad analyseras:_ När och hur blir ni lönsamma?
+    - _Letar efter:_ Financial projections, breakeven
+    - _Varför viktigt:_ Behöver visa att ni kan bli profitable
 
 20. **Economic Scalability**
-    - *Vad analyseras:* Förbättras marginaler vid scale eller försämras?
-    - *Letar efter:* Cloud costs, automation level
-    - *Varför viktigt:* Services-modeller skalar dåligt
+    - _Vad analyseras:_ Förbättras marginaler vid scale eller försämras?
+    - _Letar efter:_ Cloud costs, automation level
+    - _Varför viktigt:_ Services-modeller skalar dåligt
 
 ### 🟢 Medium Priority
 
 21. **Pricing Power**
-    - *Vad analyseras:* Kan ni höja priser utan att förlora kunder?
-    - *Letar efter:* Value-based pricing, premium positioning
-    - *Varför viktigt:* Pricing power = strong moat
+    - _Vad analyseras:_ Kan ni höja priser utan att förlora kunder?
+    - _Letar efter:_ Value-based pricing, premium positioning
+    - _Varför viktigt:_ Pricing power = strong moat
 
 22. **Revenue Diversification**
-    - *Vad analyseras:* En revenue source eller flera streams?
-    - *Letar efter:* Product offerings, customer segments
-    - *Varför viktigt:* Single-customer-risk är farligt
+    - _Vad analyseras:_ En revenue source eller flera streams?
+    - _Letar efter:_ Product offerings, customer segments
+    - _Varför viktigt:_ Single-customer-risk är farligt
 
 23. **Monetization Strategy**
-    - *Vad analyseras:* Chargar ni rätt kund vid rätt tidpunkt?
-    - *Letar efter:* Freemium, PLG, value metric
-    - *Varför viktigt:* Fel monetization = lämnar pengar på bordet
+    - _Vad analyseras:_ Chargar ni rätt kund vid rätt tidpunkt?
+    - _Letar efter:_ Freemium, PLG, value metric
+    - _Varför viktigt:_ Fel monetization = lämnar pengar på bordet
 
 ---
 
@@ -158,45 +158,45 @@ Systemet analyserar ditt företag över 68 olika dimensioner uppdelade i 15 kate
 ### 🔴 Critical Priority
 
 24. **Revenue Growth Rate**
-    - *Vad analyseras:* MoM och YoY tillväxt
-    - *Letar efter:* Growth percentages, revenue charts
-    - *Varför viktigt:* VCs investerar i growth, inte status quo
+    - _Vad analyseras:_ MoM och YoY tillväxt
+    - _Letar efter:_ Growth percentages, revenue charts
+    - _Varför viktigt:_ VCs investerar i growth, inte status quo
 
 25. **Retention & Churn**
-    - *Vad analyseras:* Customer retention rate och churn analysis
-    - *Letar efter:* NRR, GRR, churn mentions
-    - *Varför viktigt:* Leaky bucket syndrome = dödskyss
+    - _Vad analyseras:_ Customer retention rate och churn analysis
+    - _Letar efter:_ NRR, GRR, churn mentions
+    - _Varför viktigt:_ Leaky bucket syndrome = dödskyss
 
 26. **Product-Market Fit Signals**
-    - *Vad analyseras:* Bevis på stark PMF utöver revenue
-    - *Letar efter:* Organic growth, word-of-mouth, low churn
-    - *Varför viktigt:* PMF är #1 predictor of success
+    - _Vad analyseras:_ Bevis på stark PMF utöver revenue
+    - _Letar efter:_ Organic growth, word-of-mouth, low churn
+    - _Varför viktigt:_ PMF är #1 predictor of success
 
 ### 🟡 High Priority
 
 27. **Customer Acquisition Momentum**
-    - *Vad analyseras:* Hur snabbt lägger ni till nya kunder?
-    - *Letar efter:* Customer count, growth rate
-    - *Varför viktigt:* Accelerating > linear growth
+    - _Vad analyseras:_ Hur snabbt lägger ni till nya kunder?
+    - _Letar efter:_ Customer count, growth rate
+    - _Varför viktigt:_ Accelerating > linear growth
 
 28. **Sales Efficiency (Magic Number)**
-    - *Vad analyseras:* Hur effektivt konverterar ni sales spend till revenue?
-    - *Letar efter:* Sales cycle, conversion rates
-    - *Varför viktigt:* Magic Number < 0.75 = inefficient
+    - _Vad analyseras:_ Hur effektivt konverterar ni sales spend till revenue?
+    - _Letar efter:_ Sales cycle, conversion rates
+    - _Varför viktigt:_ Magic Number < 0.75 = inefficient
 
 ### 🟢 Medium Priority
 
 29. **Viral/Word-of-Mouth Growth**
-    - *Vad analyseras:* Refererar kunder naturligt andra?
-    - *Letar efter:* Referral program, K-factor
-    - *Varför viktigt:* Viral growth = free CAC
+    - _Vad analyseras:_ Refererar kunder naturligt andra?
+    - _Letar efter:_ Referral program, K-factor
+    - _Varför viktigt:_ Viral growth = free CAC
 
 ### ⚪ Low Priority
 
 30. **Market Penetration Rate**
-    - *Vad analyseras:* Hur stor % av TAM har ni tagit?
-    - *Letar efter:* Customers / total potential
-    - *Varför viktigt:* 0.01% = huge opportunity, 10% = saturated?
+    - _Vad analyseras:_ Hur stor % av TAM har ni tagit?
+    - _Letar efter:_ Customers / total potential
+    - _Varför viktigt:_ 0.01% = huge opportunity, 10% = saturated?
 
 ---
 
@@ -205,38 +205,38 @@ Systemet analyserar ditt företag över 68 olika dimensioner uppdelade i 15 kate
 ### 🔴 Critical Priority
 
 31. **Founder-Market Fit**
-    - *Vad analyseras:* Varför är just NI rätt team för detta?
-    - *Letar efter:* Domain expertise, tidigare erfarenhet
-    - *Varför viktigt:* "Why you?" är avgörande fråga
+    - _Vad analyseras:_ Varför är just NI rätt team för detta?
+    - _Letar efter:_ Domain expertise, tidigare erfarenhet
+    - _Varför viktigt:_ "Why you?" är avgörande fråga
 
 ### 🟡 High Priority
 
 32. **Team Completeness**
-    - *Vad analyseras:* Har ni rätt skills: tech, sales, product?
-    - *Letar efter:* Team page, roller, gap analysis
-    - *Varför viktigt:* Incomplete team = execution risk
+    - _Vad analyseras:_ Har ni rätt skills: tech, sales, product?
+    - _Letar efter:_ Team page, roller, gap analysis
+    - _Varför viktigt:_ Incomplete team = execution risk
 
 33. **Execution Velocity**
-    - *Vad analyseras:* Hur snabbt shippar och itererar ni?
-    - *Letar efter:* Changelog, product updates
-    - *Varför viktigt:* Speed is moat in early stage
+    - _Vad analyseras:_ Hur snabbt shippar och itererar ni?
+    - _Letar efter:_ Changelog, product updates
+    - _Varför viktigt:_ Speed is moat in early stage
 
 34. **Founder Commitment**
-    - *Vad analyseras:* Heltid? Bootstrapped innan raise? Skin in game?
-    - *Letar efter:* Funding history, commitment signals
-    - *Varför viktigt:* Part-time founders = red flag
+    - _Vad analyseras:_ Heltid? Bootstrapped innan raise? Skin in game?
+    - _Letar efter:_ Funding history, commitment signals
+    - _Varför viktigt:_ Part-time founders = red flag
 
 ### 🟢 Medium Priority
 
 35. **Strategic Decision Quality**
-    - *Vad analyseras:* Gör ni smarta, contrarian bets?
-    - *Letar efter:* Focus, positioning, feature prioritering
-    - *Varför viktigt:* Decision quality predicts future success
+    - _Vad analyseras:_ Gör ni smarta, contrarian bets?
+    - _Letar efter:_ Focus, positioning, feature prioritering
+    - _Varför viktigt:_ Decision quality predicts future success
 
 36. **Hiring Ability**
-    - *Vad analyseras:* Kan ni attrahera top talent?
-    - *Letar efter:* Careers page, team backgrounds
-    - *Varför viktigt:* Can't scale without great hiring
+    - _Vad analyseras:_ Kan ni attrahera top talent?
+    - _Letar efter:_ Careers page, team backgrounds
+    - _Varför viktigt:_ Can't scale without great hiring
 
 ---
 
@@ -245,33 +245,33 @@ Systemet analyserar ditt företag över 68 olika dimensioner uppdelade i 15 kate
 ### 🔴 Critical Priority
 
 37. **Customer Acquisition Strategy**
-    - *Vad analyseras:* Hur hittar ni kunder? Repeterbart?
-    - *Letar efter:* PLG, enterprise sales, partnerships
-    - *Varför viktigt:* Måste ha repeatable playbook
+    - _Vad analyseras:_ Hur hittar ni kunder? Repeterbart?
+    - _Letar efter:_ PLG, enterprise sales, partnerships
+    - _Varför viktigt:_ Måste ha repeatable playbook
 
 ### 🟡 High Priority
 
 38. **ICP Clarity**
-    - *Vad analyseras:* Vet ni exakt vem er bästa kund är?
-    - *Letar efter:* Customer examples, case studies
-    - *Varför viktigt:* Diffuse ICP = waste money
+    - _Vad analyseras:_ Vet ni exakt vem er bästa kund är?
+    - _Letar efter:_ Customer examples, case studies
+    - _Varför viktigt:_ Diffuse ICP = waste money
 
 39. **Sales Cycle Length**
-    - *Vad analyseras:* Hur lång tid från first touch till deal?
-    - *Letar efter:* Demo flow, trial structure
-    - *Varför viktigt:* Long cycles = slow growth
+    - _Vad analyseras:_ Hur lång tid från first touch till deal?
+    - _Letar efter:_ Demo flow, trial structure
+    - _Varför viktigt:_ Long cycles = slow growth
 
 40. **Expansion/Upsell Potential**
-    - *Vad analyseras:* Kan ni växa revenue från befintliga kunder?
-    - *Letar efter:* Pricing tiers, add-ons
-    - *Varför viktigt:* NRR > 100% = magic
+    - _Vad analyseras:_ Kan ni växa revenue från befintliga kunder?
+    - _Letar efter:_ Pricing tiers, add-ons
+    - _Varför viktigt:_ NRR > 100% = magic
 
 ### 🟢 Medium Priority
 
 41. **Channel Diversification**
-    - *Vad analyseras:* En kanal-risk eller flera fungerande kanaler?
-    - *Letar efter:* Paid ads, SEO, partnerships
-    - *Varför viktigt:* Single channel = fragile growth
+    - _Vad analyseras:_ En kanal-risk eller flera fungerande kanaler?
+    - _Letar efter:_ Paid ads, SEO, partnerships
+    - _Varför viktigt:_ Single channel = fragile growth
 
 ---
 
@@ -280,31 +280,31 @@ Systemet analyserar ditt företag över 68 olika dimensioner uppdelade i 15 kate
 ### 🟡 High Priority
 
 42. **Technical Differentiation**
-    - *Vad analyseras:* Riktig tech innovation eller bara UX wrapper?
-    - *Letar efter:* Tech blog, patents, algorithms
-    - *Varför viktigt:* UX kan kopieras, tech är svårare
+    - _Vad analyseras:_ Riktig tech innovation eller bara UX wrapper?
+    - _Letar efter:_ Tech blog, patents, algorithms
+    - _Varför viktigt:_ UX kan kopieras, tech är svårare
 
 43. **Data/Network Effects**
-    - *Vad analyseras:* Blir produkten bättre med fler användare/data?
-    - *Letar efter:* AI/ML mentions, network features
-    - *Varför viktigt:* Network effects = defensibility
+    - _Vad analyseras:_ Blir produkten bättre med fler användare/data?
+    - _Letar efter:_ AI/ML mentions, network features
+    - _Varför viktigt:_ Network effects = defensibility
 
 44. **Platform vs Feature Risk**
-    - *Vad analyseras:* Plattform/company eller bara en feature?
-    - *Letar efter:* Scope, integration depth
-    - *Varför viktigt:* Features blir acqui-hired, platforms blir unicorns
+    - _Vad analyseras:_ Plattform/company eller bara en feature?
+    - _Letar efter:_ Scope, integration depth
+    - _Varför viktigt:_ Features blir acqui-hired, platforms blir unicorns
 
 ### 🟢 Medium Priority
 
 45. **Product Development Velocity**
-    - *Vad analyseras:* Hur snabbt kan ni shippa nya features?
-    - *Letar efter:* Changelog frequency
-    - *Varför viktigt:* Slow shipping = losing race
+    - _Vad analyseras:_ Hur snabbt kan ni shippa nya features?
+    - _Letar efter:_ Changelog frequency
+    - _Varför viktigt:_ Slow shipping = losing race
 
 46. **Technical Debt/Architecture**
-    - *Vad analyseras:* Kommer er tech skala eller behövas rebuild vid 10x?
-    - *Letar efter:* Tech stack, performance issues
-    - *Varför viktigt:* Rewrites kill momentum
+    - _Vad analyseras:_ Kommer er tech skala eller behövas rebuild vid 10x?
+    - _Letar efter:_ Tech stack, performance issues
+    - _Varför viktigt:_ Rewrites kill momentum
 
 ---
 
@@ -313,31 +313,31 @@ Systemet analyserar ditt företag över 68 olika dimensioner uppdelade i 15 kate
 ### 🔴 Critical Priority
 
 47. **Funding Stage Appropriateness**
-    - *Vad analyseras:* Är ni redo för den runda ni ska raise?
-    - *Letar efter:* Match mellan stage och metrics
-    - *Varför viktigt:* Raising too early = dilution
+    - _Vad analyseras:_ Är ni redo för den runda ni ska raise?
+    - _Letar efter:_ Match mellan stage och metrics
+    - _Varför viktigt:_ Raising too early = dilution
 
 48. **Runway & Burn Rate**
-    - *Vad analyseras:* Hur mycket runway kvar? Burn rate hälsosam?
-    - *Letar efter:* Funding, burn rate, cash position
-    - *Varför viktigt:* Default alive vs default dead
+    - _Vad analyseras:_ Hur mycket runway kvar? Burn rate hälsosam?
+    - _Letar efter:_ Funding, burn rate, cash position
+    - _Varför viktigt:_ Default alive vs default dead
 
 ### 🟡 High Priority
 
 49. **Capital Efficiency**
-    - *Vad analyseras:* Hur mycket värde per dollar raised?
-    - *Letar efter:* Revenue/funding ratio
-    - *Varför viktigt:* Capital efficiency = future valuation
+    - _Vad analyseras:_ Hur mycket värde per dollar raised?
+    - _Letar efter:_ Revenue/funding ratio
+    - _Varför viktigt:_ Capital efficiency = future valuation
 
 50. **Use of Funds Clarity**
-    - *Vad analyseras:* Tydlig plan för hur capital ska användas?
-    - *Letar efter:* Roadmap, hiring plans
-    - *Varför viktigt:* "What will you do with the money?" - top VC question
+    - _Vad analyseras:_ Tydlig plan för hur capital ska användas?
+    - _Letar efter:_ Roadmap, hiring plans
+    - _Varför viktigt:_ "What will you do with the money?" - top VC question
 
 51. **Valuation Reasonableness**
-    - *Vad analyseras:* Är era valuation-förväntningar realistiska?
-    - *Letar efter:* Revenue multiples vs industry
-    - *Varför viktigt:* Unrealistic ask = no deal
+    - _Vad analyseras:_ Är era valuation-förväntningar realistiska?
+    - _Letar efter:_ Revenue multiples vs industry
+    - _Varför viktigt:_ Unrealistic ask = no deal
 
 ---
 
@@ -346,31 +346,31 @@ Systemet analyserar ditt företag över 68 olika dimensioner uppdelade i 15 kate
 ### 🟡 High Priority
 
 52. **Regulatory/Compliance Risk**
-    - *Vad analyseras:* Hårt reglerad industri?
-    - *Letar efter:* FDA, GDPR, licensing
-    - *Varför viktigt:* Regulatory risk = längsam scale
+    - _Vad analyseras:_ Hårt reglerad industri?
+    - _Letar efter:_ FDA, GDPR, licensing
+    - _Varför viktigt:_ Regulatory risk = längsam scale
 
 53. **Key Dependency Risk**
-    - *Vad analyseras:* Beroende av en kund, supplier, eller platform?
-    - *Letar efter:* Platform dependencies, APIs
-    - *Varför viktigt:* Single point of failure
+    - _Vad analyseras:_ Beroende av en kund, supplier, eller platform?
+    - _Letar efter:_ Platform dependencies, APIs
+    - _Varför viktigt:_ Single point of failure
 
 54. **Competitive Threat Level**
-    - *Vad analyseras:* Kan Big Tech krossa er lätt?
-    - *Letar efter:* Moats, switching costs
-    - *Varför viktigt:* Amazon/Google risk är real
+    - _Vad analyseras:_ Kan Big Tech krossa er lätt?
+    - _Letar efter:_ Moats, switching costs
+    - _Varför viktigt:_ Amazon/Google risk är real
 
 ### 🟢 Medium Priority
 
 55. **Market Risk**
-    - *Vad analyseras:* Kan marknaden försvinna eller krympa?
-    - *Letar efter:* Sustainability, trend dependency
-    - *Varför viktigt:* Pandemic-specific = fad
+    - _Vad analyseras:_ Kan marknaden försvinna eller krympa?
+    - _Letar efter:_ Sustainability, trend dependency
+    - _Varför viktigt:_ Pandemic-specific = fad
 
 56. **Founder Conflict Risk**
-    - *Vad analyseras:* Tecken på co-founder tension?
-    - *Letar efter:* 50/50 splits, vague roles
-    - *Varför viktigt:* Co-founder breakups kill companies
+    - _Vad analyseras:_ Tecken på co-founder tension?
+    - _Letar efter:_ 50/50 splits, vague roles
+    - _Varför viktigt:_ Co-founder breakups kill companies
 
 ---
 
@@ -379,26 +379,26 @@ Systemet analyserar ditt företag över 68 olika dimensioner uppdelade i 15 kate
 ### 🟡 High Priority
 
 57. **Customer Love/NPS**
-    - *Vad analyseras:* Älskar kunder produkten genuint?
-    - *Letar efter:* Testimonials, NPS, reviews
-    - *Varför viktigt:* Love = retention + referrals
+    - _Vad analyseras:_ Älskar kunder produkten genuint?
+    - _Letar efter:_ Testimonials, NPS, reviews
+    - _Varför viktigt:_ Love = retention + referrals
 
 58. **Customer Diversity**
-    - *Vad analyseras:* En stor kund eller många små?
-    - *Letar efter:* Revenue concentration
-    - *Varför viktigt:* >20% från en kund = huge risk
+    - _Vad analyseras:_ En stor kund eller många små?
+    - _Letar efter:_ Revenue concentration
+    - _Varför viktigt:_ >20% från en kund = huge risk
 
 59. **Repeat Purchase/Usage**
-    - *Vad analyseras:* Kommer kunder tillbaka och använder regelbundet?
-    - *Letar efter:* Engagement metrics, DAU/MAU
-    - *Varför viktigt:* Habitual usage = sticky product
+    - _Vad analyseras:_ Kommer kunder tillbaka och använder regelbundet?
+    - _Letar efter:_ Engagement metrics, DAU/MAU
+    - _Varför viktigt:_ Habitual usage = sticky product
 
 ### 🟢 Medium Priority
 
 60. **Organic Demand Signals**
-    - *Vad analyseras:* Söker folk detta eller bli sålt till?
-    - *Letar efter:* Inbound leads, waitlist, SEO traffic
-    - *Varför viktigt:* Pull > Push
+    - _Vad analyseras:_ Söker folk detta eller bli sålt till?
+    - _Letar efter:_ Inbound leads, waitlist, SEO traffic
+    - _Varför viktigt:_ Pull > Push
 
 ---
 
@@ -407,21 +407,21 @@ Systemet analyserar ditt företag över 68 olika dimensioner uppdelade i 15 kate
 ### 🟡 High Priority
 
 61. **Market Positioning**
-    - *Vad analyseras:* Hur positionerar ni er vs konkurrenter?
-    - *Letar efter:* "X for Y", differentiation
-    - *Varför viktigt:* Clear positioning = easier to sell
+    - _Vad analyseras:_ Hur positionerar ni er vs konkurrenter?
+    - _Letar efter:_ "X for Y", differentiation
+    - _Varför viktigt:_ Clear positioning = easier to sell
 
 62. **Vision & Ambition**
-    - *Vad analyseras:* Tänker ni stort nog för VC returns?
-    - *Letar efter:* Mission statement, long-term vision
-    - *Varför viktigt:* "Nice business" ≠ VC backable
+    - _Vad analyseras:_ Tänker ni stort nog för VC returns?
+    - _Letar efter:_ Mission statement, long-term vision
+    - _Varför viktigt:_ "Nice business" ≠ VC backable
 
 ### 🟢 Medium Priority
 
 63. **Founder Story/Narrative**
-    - *Vad analyseras:* Finns en compelling origin story?
-    - *Letar efter:* Why we started, personal connection
-    - *Varför viktigt:* Stories sell, not just metrics
+    - _Vad analyseras:_ Finns en compelling origin story?
+    - _Letar efter:_ Why we started, personal connection
+    - _Varför viktigt:_ Stories sell, not just metrics
 
 ---
 
@@ -430,26 +430,26 @@ Systemet analyserar ditt företag över 68 olika dimensioner uppdelade i 15 kate
 ### 🟢 Medium Priority
 
 64. **Existing Investor Quality**
-    - *Vad analyseras:* Notable angels eller VCs redan?
-    - *Letar efter:* Investor logos, "backed by"
-    - *Varför viktigt:* Quality investors = stamp of approval
+    - _Vad analyseras:_ Notable angels eller VCs redan?
+    - _Letar efter:_ Investor logos, "backed by"
+    - _Varför viktigt:_ Quality investors = stamp of approval
 
 65. **Advisor/Board Quality**
-    - *Vad analyseras:* Relevanta, high-quality advisors?
-    - *Letar efter:* Advisor bios, industry experts
-    - *Varför viktigt:* Opens doors and adds credibility
+    - _Vad analyseras:_ Relevanta, high-quality advisors?
+    - _Letar efter:_ Advisor bios, industry experts
+    - _Varför viktigt:_ Opens doors and adds credibility
 
 66. **Customer Logo Quality**
-    - *Vad analyseras:* Recognizable customer brands?
-    - *Letar efter:* Customer logos, Fortune 500
-    - *Varför viktigt:* Logo validation sells
+    - _Vad analyseras:_ Recognizable customer brands?
+    - _Letar efter:_ Customer logos, Fortune 500
+    - _Varför viktigt:_ Logo validation sells
 
 ### ⚪ Low Priority
 
 67. **Press Coverage**
-    - *Vad analyseras:* Featured i notable publications?
-    - *Letar efter:* TechCrunch, industry press
-    - *Varför viktigt:* PR = awareness (men inte proof of traction)
+    - _Vad analyseras:_ Featured i notable publications?
+    - _Letar efter:_ TechCrunch, industry press
+    - _Varför viktigt:_ PR = awareness (men inte proof of traction)
 
 ---
 
@@ -458,23 +458,23 @@ Systemet analyserar ditt företag över 68 olika dimensioner uppdelade i 15 kate
 ### 🟡 High Priority
 
 68. **Metrics & Dashboard Discipline**
-    - *Vad analyseras:* Trackar ni systematiskt KPIs?
-    - *Letar efter:* Dashboard mentions, reporting
-    - *Varför viktigt:* "You can't improve what you don't measure"
+    - _Vad analyseras:_ Trackar ni systematiskt KPIs?
+    - _Letar efter:_ Dashboard mentions, reporting
+    - _Varför viktigt:_ "You can't improve what you don't measure"
 
 ### 🟢 Medium Priority
 
 69. **Process Maturity**
-    - *Vad analyseras:* Repeterbara processer eller winging it?
-    - *Letar efter:* Sales playbook, onboarding flow
-    - *Varför viktigt:* Processes enable scale
+    - _Vad analyseras:_ Repeterbara processer eller winging it?
+    - _Letar efter:_ Sales playbook, onboarding flow
+    - _Varför viktigt:_ Processes enable scale
 
 ### ⚪ Low Priority
 
 70. **Stakeholder Communication**
-    - *Vad analyseras:* Transparent communication med stakeholders?
-    - *Letar efter:* Blog frequency, investor updates
-    - *Varför viktigt:* Trust through transparency
+    - _Vad analyseras:_ Transparent communication med stakeholders?
+    - _Letar efter:_ Blog frequency, investor updates
+    - _Varför viktigt:_ Trust through transparency
 
 ---
 
@@ -483,27 +483,28 @@ Systemet analyserar ditt företag över 68 olika dimensioner uppdelade i 15 kate
 ### 🟢 Medium Priority
 
 71. **International Expansion Potential**
-    - *Vad analyseras:* Kan ni expandera globalt eller local-only?
-    - *Letar efter:* Multi-language, international customers
-    - *Varför viktigt:* Global market = bigger exit
+    - _Vad analyseras:_ Kan ni expandera globalt eller local-only?
+    - _Letar efter:_ Multi-language, international customers
+    - _Varför viktigt:_ Global market = bigger exit
 
 ### ⚪ Low Priority
 
 72. **Acquisition Potential**
-    - *Vad analyseras:* Kunde ni bli acquirerade av strategic players?
-    - *Letar efter:* Potential acquirers, strategic value
-    - *Varför viktigt:* Exit opportunity beyond IPO
+    - _Vad analyseras:_ Kunde ni bli acquirerade av strategic players?
+    - _Letar efter:_ Potential acquirers, strategic value
+    - _Varför viktigt:_ Exit opportunity beyond IPO
 
 73. **Ecosystem Positioning**
-    - *Vad analyseras:* Bygger ni med eller mot ecosystem?
-    - *Letar efter:* Integrations, partnerships
-    - *Varför viktigt:* Platform partnerships kan accelerera
+    - _Vad analyseras:_ Bygger ni med eller mot ecosystem?
+    - _Letar efter:_ Integrations, partnerships
+    - _Varför viktigt:_ Platform partnerships kan accelerera
 
 ---
 
 ## **📈 Hur det används:**
 
 ### **Priority Order:**
+
 1. **Critical (12 st)** - Körs först (~2-3 min)
    - Problem/Solution Fit
    - Market Size & Competition
@@ -527,6 +528,7 @@ Systemet analyserar ditt företag över 68 olika dimensioner uppdelade i 15 kate
    - Future opportunities
 
 ### **Output per dimension:**
+
 ```json
 {
   "dimension": "Unit Economics",
@@ -536,13 +538,8 @@ Systemet analyserar ditt företag över 68 olika dimensioner uppdelade i 15 kate
     "CAC payback period is 18 months",
     "Gross margin is 72%"
   ],
-  "redFlags": [
-    "LTV:CAC below 3x threshold",
-    "Long payback period indicates inefficient sales"
-  ],
-  "strengths": [
-    "Strong gross margins enable profitability path"
-  ],
+  "redFlags": ["LTV:CAC below 3x threshold", "Long payback period indicates inefficient sales"],
+  "strengths": ["Strong gross margins enable profitability path"],
   "questionsToAsk": [
     "How are you planning to reduce CAC?",
     "What's the retention rate after 12 months?"
@@ -555,6 +552,7 @@ Systemet analyserar ditt företag över 68 olika dimensioner uppdelade i 15 kate
 ```
 
 ### **Total analystid:**
+
 - **Critical**: 2-3 min
 - **High**: +3-4 min
 - **Medium**: +4-5 min
@@ -562,4 +560,3 @@ Systemet analyserar ditt företag över 68 olika dimensioner uppdelade i 15 kate
 - **TOTAL**: ~12-15 minuter
 
 Användaren kan chatta hela tiden - allt körs i bakgrunden! 🚀
-

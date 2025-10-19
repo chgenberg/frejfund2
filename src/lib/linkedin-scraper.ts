@@ -20,31 +20,31 @@ export interface LinkedInCompanyData {
   founded?: number;
   specialties?: string[];
   followers?: number;
-  
+
   // Team intelligence
   recentHires?: Array<{
     name: string;
     title: string;
     startDate?: string;
   }>;
-  
+
   keyPeople?: Array<{
     name: string;
     title: string;
     profile?: string;
   }>;
-  
+
   // Company updates
   recentPosts?: Array<{
     text: string;
     date?: string;
     engagement?: number;
   }>;
-  
+
   // Growth signals
   growthRate?: string; // e.g., "Growing (hired 5 people in last 3 months)"
   openPositions?: number;
-  
+
   // Metadata
   linkedInUrl: string;
   scrapedAt: Date;
@@ -55,7 +55,7 @@ export interface LinkedInCompanyData {
  * Note: This uses public data only, no authentication required
  */
 export async function scrapeLinkedInCompany(
-  companyUrl: string
+  companyUrl: string,
 ): Promise<LinkedInCompanyData | null> {
   try {
     // Ensure it's a LinkedIn URL
@@ -69,14 +69,15 @@ export async function scrapeLinkedInCompany(
     // For now, we'll use a simple fetch with proper headers
     const response = await fetch(companyUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'User-Agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.5',
         'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
+        Pragma: 'no-cache',
       },
       // Avoid CORS issues in development
-      ...(process.env.NODE_ENV === 'development' && { mode: 'no-cors' as RequestMode })
+      ...(process.env.NODE_ENV === 'development' && { mode: 'no-cors' as RequestMode }),
     });
 
     if (!response.ok) {
@@ -85,11 +86,14 @@ export async function scrapeLinkedInCompany(
     }
 
     const html = await response.text();
-    
+
     // Parse HTML (basic regex parsing - in production, use Cheerio or similar)
     const data: LinkedInCompanyData = {
       name: extractText(html, /<h1[^>]*>(.*?)<\/h1>/i) || 'Unknown Company',
-      description: extractText(html, /<p class="[^"]*org-top-card-summary__tagline[^"]*"[^>]*>(.*?)<\/p>/i),
+      description: extractText(
+        html,
+        /<p class="[^"]*org-top-card-summary__tagline[^"]*"[^>]*>(.*?)<\/p>/i,
+      ),
       website: extractText(html, /<a[^>]*href="([^"]*)"[^>]*>Website<\/a>/i),
       industry: extractText(html, /<div[^>]*>Industry<\/div>\s*<div[^>]*>(.*?)<\/div>/i),
       companySize: extractText(html, /<div[^>]*>Company size<\/div>\s*<div[^>]*>(.*?)<\/div>/i),
@@ -97,20 +101,20 @@ export async function scrapeLinkedInCompany(
       specialties: extractSpecialties(html),
       followers: extractNumber(html, /(\d+(?:,\d+)*)\s*followers/i),
       linkedInUrl: companyUrl,
-      scrapedAt: new Date()
+      scrapedAt: new Date(),
     };
 
     // Parse employee count from company size string
     if (data.companySize) {
       const match = data.companySize.match(/(\d+(?:,\d+)?)\s*-\s*(\d+(?:,\d+)?)/);
       if (match) {
-        const avg = (parseInt(match[1].replace(/,/g, '')) + parseInt(match[2].replace(/,/g, ''))) / 2;
+        const avg =
+          (parseInt(match[1].replace(/,/g, '')) + parseInt(match[2].replace(/,/g, ''))) / 2;
         data.employeeCount = Math.round(avg);
       }
     }
 
     return data;
-
   } catch (error) {
     console.error('LinkedIn scraping error:', error);
     return null;
@@ -122,10 +126,10 @@ export async function scrapeLinkedInCompany(
  * More reliable but costs ~$0.01 per request
  */
 export async function scrapeLinkedInViaAPI(
-  companyUrl: string
+  companyUrl: string,
 ): Promise<LinkedInCompanyData | null> {
   const rapidApiKey = process.env.RAPIDAPI_KEY;
-  
+
   if (!rapidApiKey) {
     console.warn('RAPIDAPI_KEY not set, falling back to direct scraping');
     return scrapeLinkedInCompany(companyUrl);
@@ -137,11 +141,11 @@ export async function scrapeLinkedInViaAPI(
       headers: {
         'Content-Type': 'application/json',
         'X-RapidAPI-Key': rapidApiKey,
-        'X-RapidAPI-Host': 'linkedin-api8.p.rapidapi.com'
+        'X-RapidAPI-Host': 'linkedin-api8.p.rapidapi.com',
       },
       body: JSON.stringify({
-        url: companyUrl
-      })
+        url: companyUrl,
+      }),
     });
 
     if (!response.ok) {
@@ -149,7 +153,7 @@ export async function scrapeLinkedInViaAPI(
     }
 
     const data = await response.json();
-    
+
     // Transform API response to our format
     return {
       name: data.name || 'Unknown Company',
@@ -163,9 +167,8 @@ export async function scrapeLinkedInViaAPI(
       specialties: data.specialties || [],
       followers: data.followerCount,
       linkedInUrl: companyUrl,
-      scrapedAt: new Date()
+      scrapedAt: new Date(),
     };
-
   } catch (error) {
     console.error('LinkedIn API error:', error);
     return null;
@@ -177,7 +180,7 @@ export async function scrapeLinkedInViaAPI(
  * This requires more advanced scraping or API access
  */
 export async function getLinkedInKeyPeople(
-  companyUrl: string
+  companyUrl: string,
 ): Promise<Array<{ name: string; title: string; profile?: string }>> {
   // This would require navigating to /people page
   // For now, return empty array
@@ -188,9 +191,7 @@ export async function getLinkedInKeyPeople(
 /**
  * Analyze hiring velocity from LinkedIn
  */
-export async function analyzeHiringVelocity(
-  companyUrl: string
-): Promise<{
+export async function analyzeHiringVelocity(companyUrl: string): Promise<{
   recentHires: number;
   openPositions: number;
   growthSignal: 'rapid' | 'steady' | 'slow' | 'unknown';
@@ -198,26 +199,26 @@ export async function analyzeHiringVelocity(
   try {
     // Scrape /jobs page
     const jobsUrl = companyUrl.replace('/about/', '/jobs/').replace(/\/$/, '') + '/jobs/';
-    
+
     const response = await fetch(jobsUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
-      }
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
     });
 
     if (response.ok) {
       const html = await response.text();
       const openPositions = (html.match(/job-posting/g) || []).length;
-      
+
       let growthSignal: 'rapid' | 'steady' | 'slow' | 'unknown' = 'unknown';
       if (openPositions > 10) growthSignal = 'rapid';
       else if (openPositions > 3) growthSignal = 'steady';
       else if (openPositions > 0) growthSignal = 'slow';
-      
+
       return {
         recentHires: 0, // Would need people page access
         openPositions,
-        growthSignal
+        growthSignal,
       };
     }
   } catch (error) {
@@ -227,7 +228,7 @@ export async function analyzeHiringVelocity(
   return {
     recentHires: 0,
     openPositions: 0,
-    growthSignal: 'unknown'
+    growthSignal: 'unknown',
   };
 }
 
@@ -251,8 +252,7 @@ function extractNumber(html: string, regex: RegExp): number | undefined {
 function extractSpecialties(html: string): string[] | undefined {
   const match = html.match(/Specialties<\/div>\s*<div[^>]*>(.*?)<\/div>/i);
   if (match && match[1]) {
-    return match[1].split(',').map(s => s.trim());
+    return match[1].split(',').map((s) => s.trim());
   }
   return undefined;
 }
-

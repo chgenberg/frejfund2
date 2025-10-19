@@ -8,14 +8,14 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: NextRequest) {
   try {
     const sessionId = req.headers.get('x-session-id');
-    
+
     if (!sessionId) {
       return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
     }
 
     const documents = await prisma.generatedDocument.findMany({
       where: { sessionId },
-      orderBy: { updatedAt: 'desc' }
+      orderBy: { updatedAt: 'desc' },
     });
 
     return NextResponse.json({ documents });
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const sessionId = req.headers.get('x-session-id');
-    
+
     if (!sessionId) {
       return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
     }
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
       content,
       metadata,
       fileUrl,
-      s3Key
+      s3Key,
     } = body;
 
     if (!type || !title) {
@@ -63,10 +63,10 @@ export async function POST(req: NextRequest) {
         metadata: {
           ...(metadata || {}),
           ...(fileUrl ? { fileUrl } : {}),
-          ...(s3Key ? { s3Key } : {})
+          ...(s3Key ? { s3Key } : {}),
         },
-        generatedBy: 'gpt-5'
-      }
+        generatedBy: 'gpt-5',
+      },
     });
 
     // If a pitch or fundraising-relevant doc is uploaded, trigger a partial reanalysis in background
@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
           scrapedContent: '',
           uploadedDocuments: [],
           // faster, targeted re-run to refresh Storytelling/Fundraising/PMF
-          mode: 'critical-only'
+          mode: 'critical-only',
         }).catch(() => {});
       }
     } catch {}
@@ -101,7 +101,7 @@ export async function PATCH(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const id = url.searchParams.get('id');
-    
+
     if (!id) {
       return NextResponse.json({ error: 'Document ID required' }, { status: 400 });
     }
@@ -124,7 +124,7 @@ export async function PATCH(req: NextRequest) {
 
     const document = await prisma.generatedDocument.update({
       where: { id },
-      data: updateData
+      data: updateData,
     });
 
     return NextResponse.json({ document });
@@ -139,13 +139,13 @@ export async function DELETE(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const id = url.searchParams.get('id');
-    
+
     if (!id) {
       return NextResponse.json({ error: 'Document ID required' }, { status: 400 });
     }
 
     await prisma.generatedDocument.delete({
-      where: { id }
+      where: { id },
     });
 
     return NextResponse.json({ success: true });

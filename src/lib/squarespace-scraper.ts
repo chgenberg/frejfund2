@@ -46,7 +46,7 @@ export async function isSquarespaceSite(url: string): Promise<boolean> {
       '#siteWrapper',
       '.sqs-block',
       '.squarespace-',
-      '[data-controller*="Squarespace"]'
+      '[data-controller*="Squarespace"]',
     ];
 
     for (const indicator of indicators) {
@@ -56,9 +56,11 @@ export async function isSquarespaceSite(url: string): Promise<boolean> {
     }
 
     // Check for Squarespace-specific patterns
-    if (html.includes('squarespace.com') || 
-        html.includes('Static.SQUARESPACE_CONTEXT') ||
-        html.includes('sqsp.net')) {
+    if (
+      html.includes('squarespace.com') ||
+      html.includes('Static.SQUARESPACE_CONTEXT') ||
+      html.includes('sqsp.net')
+    ) {
       return true;
     }
 
@@ -74,7 +76,7 @@ export async function isSquarespaceSite(url: string): Promise<boolean> {
 export async function scrapeSquarespaceSite(
   startUrl: string,
   maxPages = 12,
-  timeout = 8000
+  timeout = 8000,
 ): Promise<SquarespaceData> {
   const u = new URL(startUrl);
   const origin = u.origin;
@@ -88,17 +90,9 @@ export async function scrapeSquarespaceSite(
   let currency = 'USD';
 
   // Priority paths for Squarespace
-  const priorityPaths = [
-    '/',
-    '/shop',
-    '/store',
-    '/products',
-    '/about',
-    '/contact',
-    '/services'
-  ];
+  const priorityPaths = ['/', '/shop', '/store', '/products', '/about', '/contact', '/services'];
 
-  const queue = priorityPaths.map(path => `${origin}${path}`);
+  const queue = priorityPaths.map((path) => `${origin}${path}`);
 
   for (const url of queue) {
     if (visited.size >= maxPages) break;
@@ -111,23 +105,38 @@ export async function scrapeSquarespaceSite(
 
       // Extract site title
       if (!siteTitle) {
-        siteTitle = $('meta[property="og:site_name"]').attr('content') ||
-                   $('.site-title, .header-title-text').first().text().trim() ||
-                   $('title').text().split('—')[0].trim();
+        siteTitle =
+          $('meta[property="og:site_name"]').attr('content') ||
+          $('.site-title, .header-title-text').first().text().trim() ||
+          $('title').text().split('—')[0].trim();
       }
 
       // Extract site description
       if (!siteDescription) {
-        siteDescription = $('meta[name="description"]').attr('content') ||
-                         $('meta[property="og:description"]').attr('content') || '';
+        siteDescription =
+          $('meta[name="description"]').attr('content') ||
+          $('meta[property="og:description"]').attr('content') ||
+          '';
       }
 
       // Extract products (Squarespace commerce)
       $('.ProductList-item, .product-item, .sqs-block-product').each((_, el) => {
         const $el = $(el);
-        const name = $el.find('.ProductList-title, .product-title, h1, h2, h3').first().text().trim();
-        const priceText = $el.find('.product-price, .ProductList-price, .sqs-money-native').first().text().trim();
-        const description = $el.find('.ProductList-description, .product-excerpt').first().text().trim();
+        const name = $el
+          .find('.ProductList-title, .product-title, h1, h2, h3')
+          .first()
+          .text()
+          .trim();
+        const priceText = $el
+          .find('.product-price, .ProductList-price, .sqs-money-native')
+          .first()
+          .text()
+          .trim();
+        const description = $el
+          .find('.ProductList-description, .product-excerpt')
+          .first()
+          .text()
+          .trim();
         const productUrl = $el.find('a').first().attr('href');
         const imageUrl = $el.find('img').first().attr('src');
 
@@ -140,7 +149,7 @@ export async function scrapeSquarespaceSite(
             price,
             description: description.slice(0, 200),
             url: productUrl ? new URL(productUrl, url).href : url,
-            imageUrl
+            imageUrl,
           });
 
           const numPrice = parseFloat(price.replace(/,/g, ''));
@@ -151,26 +160,35 @@ export async function scrapeSquarespaceSite(
       // Extract page content
       const pageTitle = $('h1').first().text().trim() || $('title').text();
       const pageContent = $('.sqs-block-content, .Main-content, article').first().text().trim();
-      
+
       if (pageContent && pageContent.length > 100) {
         pages.push({
           title: pageTitle,
           content: pageContent.slice(0, 1000),
-          url
+          url,
         });
       }
 
       // Detect currency
-      const currencySymbol = $('.sqs-money-native').first().text().match(/^[^\d\s]+/)?.[0];
+      const currencySymbol = $('.sqs-money-native')
+        .first()
+        .text()
+        .match(/^[^\d\s]+/)?.[0];
       if (currencySymbol) {
         const currencyMap: Record<string, string> = {
-          '$': 'USD', '€': 'EUR', '£': 'GBP', 'kr': 'SEK', '¥': 'JPY'
+          $: 'USD',
+          '€': 'EUR',
+          '£': 'GBP',
+          kr: 'SEK',
+          '¥': 'JPY',
         };
         currency = currencyMap[currencySymbol] || 'USD';
       }
 
       // Extract social links
-      $('a[href*="facebook.com"], a[href*="instagram.com"], a[href*="twitter.com"], a[href*="linkedin.com"]').each((_, el) => {
+      $(
+        'a[href*="facebook.com"], a[href*="instagram.com"], a[href*="twitter.com"], a[href*="linkedin.com"]',
+      ).each((_, el) => {
         const href = $(el).attr('href');
         if (href) socialLinks.add(href);
       });
@@ -182,7 +200,11 @@ export async function scrapeSquarespaceSite(
           if (href && !href.startsWith('#')) {
             try {
               const pageUrl = new URL(href, url).href;
-              if (pageUrl.startsWith(origin) && !visited.has(pageUrl) && queue.length < maxPages * 2) {
+              if (
+                pageUrl.startsWith(origin) &&
+                !visited.has(pageUrl) &&
+                queue.length < maxPages * 2
+              ) {
                 queue.push(pageUrl);
               }
             } catch {}
@@ -201,13 +223,13 @@ export async function scrapeSquarespaceSite(
     priceRange: {
       min: prices.length > 0 ? Math.min(...prices) : 0,
       max: prices.length > 0 ? Math.max(...prices) : 0,
-      currency
+      currency,
     },
     siteInfo: {
       title: siteTitle,
       description: siteDescription,
-      socialLinks: Array.from(socialLinks)
-    }
+      socialLinks: Array.from(socialLinks),
+    },
   };
 }
 
@@ -227,17 +249,22 @@ export function squarespaceDataToContent(data: SquarespaceData): string {
 
   if (data.products.length > 0) {
     sections.push(`\nPRODUCTS/SERVICES (${data.totalProducts} total):`);
-    sections.push(`Price range: ${data.priceRange.currency} ${data.priceRange.min}-${data.priceRange.max}`);
-    
-    const productList = data.products.slice(0, 15).map(p => 
-      `- ${p.name}: ${data.priceRange.currency} ${p.price}${p.description ? ' - ' + p.description.slice(0, 100) : ''}`
+    sections.push(
+      `Price range: ${data.priceRange.currency} ${data.priceRange.min}-${data.priceRange.max}`,
     );
+
+    const productList = data.products
+      .slice(0, 15)
+      .map(
+        (p) =>
+          `- ${p.name}: ${data.priceRange.currency} ${p.price}${p.description ? ' - ' + p.description.slice(0, 100) : ''}`,
+      );
     sections.push(productList.join('\n'));
   }
 
   if (data.pages.length > 0) {
     sections.push(`\nKEY PAGES:`);
-    data.pages.forEach(page => {
+    data.pages.forEach((page) => {
       if (page.content) {
         sections.push(`\n${page.title}:\n${page.content.slice(0, 300)}...`);
       }

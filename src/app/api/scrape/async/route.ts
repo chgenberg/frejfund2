@@ -20,21 +20,21 @@ export async function POST(req: NextRequest) {
     }
 
     // Return immediately
-    const response = NextResponse.json({ 
-      ok: true, 
+    const response = NextResponse.json({
+      ok: true,
       message: 'Scraping started in background',
-      sessionId 
+      sessionId,
     });
 
     // Start background processing (non-blocking)
     setImmediate(async () => {
       try {
         console.log(`[Background Scrape] Starting for ${url}`);
-        
+
         // Scrape website (deep scrape but constrained)
         const maxPages = Math.min(4, Number(process.env.SCRAPE_MAX_PAGES || 4));
         const result = await scrapeSiteDeep(url, maxPages, 1);
-        
+
         if (!result?.combinedText) {
           console.error(`[Background Scrape] No text extracted from ${url}`);
           return;
@@ -46,18 +46,18 @@ export async function POST(req: NextRequest) {
           session = await prisma.session.upsert({
             where: { id: sessionId },
             update: {},
-            create: { 
+            create: {
               id: sessionId,
               userId: userId || undefined,
-              businessInfo: { website: url }
-            }
+              businessInfo: { website: url },
+            },
           });
         } else {
           session = await prisma.session.create({
             data: {
               userId: userId || undefined,
-              businessInfo: { website: url }
-            }
+              businessInfo: { website: url },
+            },
           });
         }
 
