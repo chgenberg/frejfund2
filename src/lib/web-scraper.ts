@@ -328,8 +328,8 @@ function relevanceScore(pathname: string): number {
 
 export async function scrapeSiteDeep(
   startUrl: string,
-  maxPages = 20,
-  maxDepth = 2,
+  maxPages = parseInt(process.env.SCRAPE_MAX_PAGES || '50'),
+  maxDepth = parseInt(process.env.SCRAPE_MAX_DEPTH || '2'),
 ): Promise<{ combinedText: string; sources: { url: string; snippet: string }[] }> {
   const u = new URL(startUrl);
   const origin = u.origin;

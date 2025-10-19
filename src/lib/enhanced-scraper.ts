@@ -63,6 +63,15 @@ const DEBOUNCE_MS = 60000; // 60s per key
 export async function runEnhancedScraping(
   businessInfo: BusinessInfo,
 ): Promise<EnhancedScrapingResult> {
+  // Read scrape limits from env with sensible defaults
+  const parseIntEnv = (key: string, fallback: number): number => {
+    const v = parseInt(process.env[key] || '');
+    return Number.isFinite(v) && v > 0 ? v : fallback;
+  };
+  const GENERIC_MAX_PAGES = parseIntEnv('SCRAPE_MAX_PAGES', 50);
+  const GENERIC_MAX_DEPTH = parseIntEnv('SCRAPE_MAX_DEPTH', 2);
+  const ECOM_MAX_PRODUCTS = parseIntEnv('ECOM_MAX_PRODUCTS', 24);
+  const ECOM_TIMEOUT_MS = parseIntEnv('ECOM_TIMEOUT_MS', 10000);
   const now = Date.now();
   const key = (businessInfo.website || businessInfo.name || 'unknown').toLowerCase();
   const last = lastRun.get(key) || 0;
@@ -96,36 +105,48 @@ export async function runEnhancedScraping(
 
     if (isShopify) {
       console.log('🛍️ Detected Shopify site - using enhanced e-commerce scraper');
-      const shopifyData = await scrapeShopifySite(businessInfo.website, 12, 8000);
+      const shopifyData = await scrapeShopifySite(
+        businessInfo.website,
+        ECOM_MAX_PRODUCTS,
+        ECOM_TIMEOUT_MS,
+      );
       websiteContent = shopifyDataToContent(shopifyData);
       websiteSources = [
         businessInfo.website,
         ...shopifyData.products
-          .slice(0, 5)
+          .slice(0, Math.min(10, ECOM_MAX_PRODUCTS))
           .map((p) => p.url)
           .filter(Boolean),
       ];
       dataSources.push('shopify');
     } else if (isWooCommerce) {
       console.log('🛒 Detected WooCommerce site - using WordPress e-commerce scraper');
-      const wooData = await scrapeWooCommerceSite(businessInfo.website, 12, 8000);
+      const wooData = await scrapeWooCommerceSite(
+        businessInfo.website,
+        ECOM_MAX_PRODUCTS,
+        ECOM_TIMEOUT_MS,
+      );
       websiteContent = woocommerceDataToContent(wooData);
       websiteSources = [
         businessInfo.website,
         ...wooData.products
-          .slice(0, 5)
+          .slice(0, Math.min(10, ECOM_MAX_PRODUCTS))
           .map((p) => p.url)
           .filter(Boolean),
       ];
       dataSources.push('woocommerce');
     } else if (isSquarespace) {
       console.log('📐 Detected Squarespace site - using Squarespace scraper');
-      const sqspData = await scrapeSquarespaceSite(businessInfo.website, 12, 8000);
+      const sqspData = await scrapeSquarespaceSite(
+        businessInfo.website,
+        ECOM_MAX_PRODUCTS,
+        ECOM_TIMEOUT_MS,
+      );
       websiteContent = squarespaceDataToContent(sqspData);
       websiteSources = [
         businessInfo.website,
         ...sqspData.products
-          .slice(0, 5)
+          .slice(0, Math.min(10, ECOM_MAX_PRODUCTS))
           .map((p) => p.url)
           .filter(Boolean),
       ];
@@ -133,7 +154,11 @@ export async function runEnhancedScraping(
     } else {
       // Use deep scraping for generic sites
       console.log('🌐 Generic site - using deep scraper');
-      const websiteData = await scrapeSiteDeep(businessInfo.website, 10, 2);
+      const websiteData = await scrapeSiteDeep(
+        businessInfo.website,
+        GENERIC_MAX_PAGES,
+        GENERIC_MAX_DEPTH,
+      );
       websiteContent = websiteData.combinedText;
       websiteSources = websiteData.sources.map((s) => s.url);
     }
