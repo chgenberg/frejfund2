@@ -259,10 +259,11 @@ export default function Dashboard() {
             const data = JSON.parse(event.data);
             retries = 0; // reset on successful message
             if (data.type === 'progress') {
-              setAnalysisProgress({
-                current: data.current,
-                total: data.total,
-                status: 'running',
+              // Clamp so progress never goes backwards
+              setAnalysisProgress((prev) => {
+                const clampedCurrent = Math.max(prev.current || 0, data.current || 0);
+                const total = data.total || prev.total || 95;
+                return { current: clampedCurrent, total, status: 'running' };
               });
             } else if (data.type === 'complete') {
               setHasDeepAnalysis(true);
