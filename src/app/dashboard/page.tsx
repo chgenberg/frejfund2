@@ -172,6 +172,42 @@ export default function Dashboard() {
     loadUserData();
   }, []);
 
+  // Start analysis if coming from wizard
+  useEffect(() => {
+    const shouldStartAnalysis = sessionStorage.getItem('frejfund-start-analysis');
+    if (shouldStartAnalysis === 'true') {
+      sessionStorage.removeItem('frejfund-start-analysis');
+      const triggerAnalysis = async () => {
+        const sessionId = localStorage.getItem('frejfund-session-id');
+        const businessInfo = localStorage.getItem('frejfund-business-info');
+        
+        if (sessionId && businessInfo) {
+          try {
+            setAnalysisProgress({ current: 0, total: 95, status: 'running' });
+            const response = await fetch('/api/deep-analysis', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                sessionId,
+                businessInfo: JSON.parse(businessInfo),
+              }),
+            });
+            
+            if (!response.ok) {
+              console.error('Failed to start analysis');
+              setAnalysisProgress({ current: 0, total: 95, status: 'idle' });
+            }
+          } catch (error) {
+            console.error('Error starting analysis:', error);
+            setAnalysisProgress({ current: 0, total: 95, status: 'idle' });
+          }
+        }
+      };
+      
+      triggerAnalysis();
+    }
+  }, []);
+
   // Check if deep analysis is complete and listen for progress
   useEffect(() => {
     const checkAnalysis = async () => {
@@ -362,12 +398,17 @@ export default function Dashboard() {
                 Settings
               </button>
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => router.push('/chat')}
-                className="minimal-button py-2 px-4 text-sm"
+                whileHover={{ scale: analysisProgress.status === 'running' ? 1 : 1.02 }}
+                whileTap={{ scale: analysisProgress.status === 'running' ? 1 : 0.98 }}
+                onClick={() => analysisProgress.status !== 'running' && router.push('/chat')}
+                className={`py-2 px-4 text-sm rounded-lg font-medium transition-all ${
+                  analysisProgress.status === 'running' 
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                    : 'minimal-button'
+                }`}
+                disabled={analysisProgress.status === 'running'}
               >
-                Open Chat
+                {analysisProgress.status === 'running' ? 'Chat Available After Analysis' : 'Open Chat'}
               </motion.button>
             </nav>
           </div>
@@ -463,8 +504,50 @@ export default function Dashboard() {
               transition={{ duration: 0.3 }}
               className="space-y-6"
             >
+              {/* Analysis Progress Bar - Show when analysis is running */}
+              {analysisProgress.status === 'running' && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gradient-to-r from-black to-gray-800 text-white rounded-2xl p-6 sm:p-8 mb-6"
+                >
+                  <h2 className="text-xl sm:text-2xl font-bold mb-2">
+                    Analyzing Your Business...
+                  </h2>
+                  <p className="text-gray-300 mb-6">
+                    Freja is conducting a deep analysis across 95 dimensions. This typically takes 2-3 minutes.
+                  </p>
+                  
+                  <div className="space-y-4">
+                    <div className="flex justify-between text-sm">
+                      <span>Progress</span>
+                      <span>{analysisProgress.current} of {analysisProgress.total} dimensions</span>
+                    </div>
+                    
+                    <div className="relative h-8 bg-gray-700 rounded-full overflow-hidden">
+                      <motion.div
+                        className="absolute top-0 left-0 h-full bg-gradient-to-r from-green-400 to-blue-400"
+                        initial={{ width: 0 }}
+                        animate={{ 
+                          width: `${(analysisProgress.current / analysisProgress.total) * 100}%` 
+                        }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center font-semibold">
+                        {Math.round((analysisProgress.current / analysisProgress.total) * 100)}%
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 text-sm text-gray-400">
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>Analysis in progress...</span>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
               {/* Metrics Grid - Only show when analysis is complete */}
-              {showMetrics ? (
+              {showMetrics && analysisProgress.status !== 'running' ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                   <motion.div whileHover={{ scale: 1.02 }} className="minimal-box p-4 sm:p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -716,14 +799,21 @@ export default function Dashboard() {
                   <h2 className="text-lg font-semibold text-black mb-4">Quick Actions</h2>
                   <div className="grid grid-cols-2 gap-3">
                     <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
-                      onClick={() => router.push('/chat')}
+                      whileHover={{ scale: analysisProgress.status === 'running' ? 1 : 1.02 }}
+                      whileTap={{ scale: analysisProgress.status === 'running' ? 1 : 0.98 }}
+                      className={`p-4 rounded-lg transition-colors text-left ${
+                        analysisProgress.status === 'running'
+                          ? 'bg-gray-50 opacity-50 cursor-not-allowed'
+                          : 'bg-gray-50 hover:bg-gray-100'
+                      }`}
+                      onClick={() => analysisProgress.status !== 'running' && router.push('/chat')}
+                      disabled={analysisProgress.status === 'running'}
                     >
                       <MessageCircle className="w-5 h-5 text-gray-700 mb-2" />
                       <h3 className="text-sm font-medium text-black">Chat with Freja</h3>
-                      <p className="text-xs text-gray-500">Get instant advice</p>
+                      <p className="text-xs text-gray-500">
+                        {analysisProgress.status === 'running' ? 'Available after analysis' : 'Get instant advice'}
+                      </p>
                     </motion.button>
 
                     <motion.button

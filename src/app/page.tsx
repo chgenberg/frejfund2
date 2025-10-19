@@ -99,8 +99,8 @@ export default function Home() {
   }
 
   if (currentView === 'chat' && businessInfo) {
-    // For authenticated flow, redirect to dashboard
-    if (typeof window !== 'undefined' && !businessInfo.demoKpiCsv) {
+    // Always redirect to dashboard after wizard completion
+    if (typeof window !== 'undefined') {
       window.location.href = '/dashboard';
     }
     return (

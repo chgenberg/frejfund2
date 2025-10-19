@@ -13,35 +13,60 @@ export default function ChatPage() {
   const [businessInfo, setBusinessInfo] = useState<BusinessInfo | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [analysisComplete, setAnalysisComplete] = useState(false);
 
   useEffect(() => {
-    // Try to get business info from localStorage
-    const savedInfo = localStorage.getItem('frejfund-business-info');
-    if (savedInfo) {
-      try {
-        const parsed = JSON.parse(savedInfo);
-        setBusinessInfo(parsed);
-      } catch (e) {
-        console.error('Failed to parse business info:', e);
+    const checkAnalysisStatus = async () => {
+      // Try to get business info from localStorage
+      const savedInfo = localStorage.getItem('frejfund-business-info');
+      if (savedInfo) {
+        try {
+          const parsed = JSON.parse(savedInfo);
+          setBusinessInfo(parsed);
+        } catch (e) {
+          console.error('Failed to parse business info:', e);
+        }
       }
-    }
 
-    // Also check if there's a temporary session
-    const tempInfo = sessionStorage.getItem('frejfund-temp-business-info');
-    if (tempInfo && !savedInfo) {
-      try {
-        const parsed = JSON.parse(tempInfo);
-        setBusinessInfo(parsed);
-        // Move to permanent storage
-        localStorage.setItem('frejfund-business-info', tempInfo);
-        sessionStorage.removeItem('frejfund-temp-business-info');
-      } catch (e) {
-        console.error('Failed to parse temp business info:', e);
+      // Also check if there's a temporary session
+      const tempInfo = sessionStorage.getItem('frejfund-temp-business-info');
+      if (tempInfo && !savedInfo) {
+        try {
+          const parsed = JSON.parse(tempInfo);
+          setBusinessInfo(parsed);
+          // Move to permanent storage
+          localStorage.setItem('frejfund-business-info', tempInfo);
+          sessionStorage.removeItem('frejfund-temp-business-info');
+        } catch (e) {
+          console.error('Failed to parse temp business info:', e);
+        }
       }
-    }
 
-    setLoading(false);
-  }, []);
+      // Check if analysis is complete
+      const sessionId = localStorage.getItem('frejfund-session-id');
+      if (sessionId) {
+        try {
+          const response = await fetch(`/api/deep-analysis?sessionId=${sessionId}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.status === 'completed') {
+              setAnalysisComplete(true);
+            } else {
+              // Redirect back to dashboard if analysis not complete
+              router.push('/dashboard');
+              return;
+            }
+          }
+        } catch (e) {
+          console.error('Failed to check analysis status:', e);
+        }
+      }
+
+      setLoading(false);
+    };
+
+    checkAnalysisStatus();
+  }, [router]);
 
   if (loading) {
     return (
