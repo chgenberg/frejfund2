@@ -2098,28 +2098,9 @@ export default function ChatInterface({ businessInfo, messages, setMessages }: C
               exit={{ opacity: 0, y: -20 }}
               className="flex items-start space-x-3"
             >
-              <motion.div className="relative">
-                {/* Animated pulse rings */}
-                <motion.div
-                  className="absolute inset-0 bg-black rounded-full"
-                  animate={{
-                    scale: [1, 1.5, 2],
-                    opacity: [0.4, 0.2, 0],
-                  }}
-                  transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
-                />
-                <motion.div
-                  className="absolute inset-0 bg-black rounded-full"
-                  animate={{
-                    scale: [1, 1.5, 2],
-                    opacity: [0.4, 0.2, 0],
-                  }}
-                  transition={{ duration: 2, repeat: Infinity, ease: 'easeOut', delay: 0.5 }}
-                />
-                <div className="relative w-10 h-10 bg-black rounded-full flex items-center justify-center shadow-lg overflow-hidden">
-                  <img src="/freja.png" alt="Freja" className="w-full h-full object-cover" />
-                </div>
-              </motion.div>
+              <div className="relative w-10 h-10 bg-black rounded-full flex items-center justify-center shadow-lg overflow-hidden">
+                <img src="/freja.png" alt="Freja" className="w-full h-full object-cover" />
+              </div>
 
               <motion.div
                 className="bg-gray-50 border border-gray-200 px-6 py-3.5 rounded-2xl shadow-sm backdrop-blur-sm"
