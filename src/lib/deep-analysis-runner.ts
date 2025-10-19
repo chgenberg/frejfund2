@@ -326,6 +326,20 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
       },
     });
 
+    // 6. Trigger automatic matching with VCs (async, non-blocking)
+    if (analysis.userId && avgScore >= 60) {
+      // Only match if score is decent
+      try {
+        const { autoMatchStartupWithVCs } = await import('@/lib/auto-matching');
+        // Fire and forget – don't block analysis completion
+        autoMatchStartupWithVCs(sessionId).catch((e) =>
+          console.error('Auto-matching failed:', e),
+        );
+      } catch (e) {
+        console.error('Failed to trigger auto-matching:', e);
+      }
+    }
+
     return analysis.id;
   } catch (error) {
     console.error('Deep analysis failed:', error);

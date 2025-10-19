@@ -29,6 +29,7 @@ import {
   Circle,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import NotificationBell from '@/components/NotificationBell';
 
 export const dynamic = 'force-dynamic';
 
@@ -325,6 +326,7 @@ export default function Dashboard() {
             </div>
 
             <nav className="hidden sm:flex items-center space-x-6">
+              <NotificationBell userId={undefined} />
               <button
                 onClick={() => setActiveSection('overview')}
                 className={`text-sm font-medium transition-colors ${

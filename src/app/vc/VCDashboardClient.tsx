@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import InvestmentWizard from '@/components/InvestmentWizard';
+import NotificationBell from '@/components/NotificationBell';
 
 // Dynamically import map component to avoid SSR issues
 const InteractiveMap = dynamic(() => import('@/components/InteractiveMap'), {
@@ -162,6 +163,7 @@ export default function VCDashboardClient() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              <NotificationBell userId={undefined} />
               <div className="bg-gray-100 rounded-lg p-1 flex">
                 <button
                   onClick={() => setViewMode('list')}
