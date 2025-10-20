@@ -31,6 +31,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_OPTIONS="--max-old-space-size=2048"
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 # Include deps and source so the same image can run a worker
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/src ./src
