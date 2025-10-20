@@ -76,8 +76,27 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
       await prisma.analysisInsight.deleteMany({ where: { analysisId: analysis.id } });
     }
 
-    // 2. GPT public knowledge (low-priority source)
-    // If provided by orchestrator, use it; otherwise harvest now
+  // 2. Detect company stage and gather external intelligence
+  const { detectCompanyStage, gatherExternalIntelligence, getEnterprisNADimensions } = await import('./external-intelligence');
+  const companyStage = detectCompanyStage(businessInfo, scrapedContent);
+  const naDimensionsForStage = companyStage === 'enterprise' ? getEnterprisNADimensions() : [];
+  
+  console.log(`📊 Detected company stage: ${companyStage}`);
+  if (naDimensionsForStage.length > 0) {
+    console.log(`⏭️  Marking ${naDimensionsForStage.length} dimensions as N/A for ${companyStage}`);
+  }
+
+  // Gather external intelligence (Wikipedia, news, Crunchbase)
+  let externalIntel = null;
+  try {
+    externalIntel = await gatherExternalIntelligence(businessInfo.name, businessInfo.website);
+    console.log(`🌍 External sources gathered: ${externalIntel.sources.join(', ')}`);
+  } catch (e) {
+    console.warn('External intelligence gathering failed:', e);
+  }
+
+  // 3. GPT public knowledge (low-priority source)
+  // If provided by orchestrator, use it; otherwise harvest now
     let gptKnowledgeText = options.preHarvestText || '';
     if (!gptKnowledgeText) {
       try {
@@ -97,7 +116,7 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
       } catch {}
     }
 
-    // 3. Determine which dimensions to analyze based on mode and subscription tier
+    // 4. Determine which dimensions to analyze based on mode and subscription tier
     let dimensionsToAnalyze =
       specificDimensions && specificDimensions.length > 0
         ? ANALYSIS_DIMENSIONS.filter(
@@ -113,6 +132,11 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
               : mode === 'specific'
                 ? [] // Will be handled by specificDimensions
                 : FREE_TIER_DIMENSIONS; // Default to free tier for 'progressive' mode
+    
+    // Filter out N/A dimensions for enterprise companies
+    if (naDimensionsForStage.length > 0) {
+      dimensionsToAnalyze = dimensionsToAnalyze.filter(d => !naDimensionsForStage.includes(d.id));
+    }
 
     const hasDocs = Array.isArray(uploadedDocuments) && uploadedDocuments.length > 0;
     const scrapedLen = (scrapedContent || '').trim().length;
@@ -300,11 +324,12 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
       }
     }
 
-    // 4. Calculate overall scores
+    // 4. Calculate overall scores (confidence-weighted and data completeness)
     const allDimensions = await prisma.analysisDimension.findMany({
       where: { analysisId: analysis.id, analyzed: true },
     });
 
+    // Simple average score (raw)
     const avgScore =
       allDimensions.length > 0
         ? Math.round(
@@ -312,9 +337,29 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
           )
         : 0;
 
-    const investmentReadiness = Math.round(avgScore / 10); // Convert to 0-10 scale
+    // Confidence-weighted score (penalize low-confidence dimensions less)
+    const confidenceWeights = { high: 1.0, medium: 0.7, low: 0.4 };
+    let weightedSum = 0;
+    let weightSum = 0;
+    
+    allDimensions.forEach(d => {
+      const conf = (d.confidence || 'medium') as 'high' | 'medium' | 'low';
+      const weight = confidenceWeights[conf] || 0.7;
+      weightedSum += (d.score || 0) * weight;
+      weightSum += weight;
+    });
+    
+    const confidenceWeightedScore = weightSum > 0 ? Math.round(weightedSum / weightSum) : 0;
+    
+    // Data completeness (% of dimensions with high confidence)
+    const highConfCount = allDimensions.filter(d => d.confidence === 'high').length;
+    const dataCompleteness = allDimensions.length > 0 
+      ? Math.round((highConfCount / allDimensions.length) * 100) 
+      : 0;
 
-    // 5. Mark analysis as complete
+    const investmentReadiness = Math.round(confidenceWeightedScore / 10); // Convert to 0-10 scale
+
+    // 5. Mark analysis as complete with all score variants
     await prisma.deepAnalysis.update({
       where: { id: analysis.id },
       data: {
@@ -322,7 +367,10 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
         completedAt: new Date(),
         progress: 100,
         overallScore: avgScore,
+        confidenceWeightedScore,
+        dataCompleteness,
         investmentReadiness,
+        companyStage,
       },
     });
 
@@ -385,15 +433,20 @@ async function analyzeDimension(
 
   // gpt-5 / gpt-5-mini: temperature not used; response_format unsupported on gpt-5*
 
-  // Combine all available content (enriched with LinkedIn, GitHub, Product Hunt)
+  // Combine all available content (enriched with external intelligence)
+  const externalText = externalIntel?.combinedText || '';
   const fullContent = `
 # Company Intelligence Report
 
+## Website & Scraped Content:
 ${scrapedContent}
+
+## External Intelligence (Wikipedia, News, Crunchbase):
+${externalText}
 
 ## Uploaded Documents:
 ${uploadedDocuments.join('\n\n---\n\n')}
-  `.slice(0, 6000);
+  `.slice(0, 8000);
 
   // Build enhanced analysis prompt with better structure
   const analysisPrompt = `${dimension.prompt(businessInfo, fullContent)}

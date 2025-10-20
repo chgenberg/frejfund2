@@ -545,8 +545,11 @@ model DeepAnalysis {
   progress Int    @default(0) // 0-100
 
   // Overall scores
-  overallScore        Int? // 0-100
-  investmentReadiness Int? // 0-10
+  overallScore              Int? // 0-100 (simple average)
+  confidenceWeightedScore   Int? // 0-100 (weighted by confidence)
+  dataCompleteness          Int? // 0-100 (% of high-confidence dimensions)
+  investmentReadiness       Int? // 0-10
+  companyStage              String? // 'startup' | 'scaleup' | 'enterprise'
   
   // Cached business info for VC display
   businessInfo Json?

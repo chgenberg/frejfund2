@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import Header from '@/components/Header';
 import ImprovementGuide from '@/components/ImprovementGuide';
+import DocumentUploadModal from '@/components/DocumentUploadModal';
 
 export const dynamic = 'force-dynamic';
 
@@ -391,6 +392,9 @@ export default function AnalysisPage() {
   const [activeCategory, setActiveCategory] = useState('Problem & Solution');
   const [dimensions, setDimensions] = useState<AnalysisDimension[]>([]);
   const [overallScore, setOverallScore] = useState(0);
+  const [confidenceWeightedScore, setConfidenceWeightedScore] = useState(0);
+  const [dataCompleteness, setDataCompleteness] = useState(0);
+  const [companyStage, setCompanyStage] = useState<string>('startup');
   const [isLoading, setIsLoading] = useState(true);
   const [analysisProgress, setAnalysisProgress] = useState<{
     current: number;
@@ -401,6 +405,7 @@ export default function AnalysisPage() {
   const [isRerunning, setIsRerunning] = useState(false);
   const [selectedDimensionForGuide, setSelectedDimensionForGuide] =
     useState<AnalysisDimension | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   useEffect(() => {
     // Ensure we never regenerate a new session id here; rely on existing one
@@ -427,10 +432,15 @@ export default function AnalysisPage() {
         if (analysis && analysis.dimensions && analysis.dimensions.length > 0) {
           setDimensions(analysis.dimensions);
           setOverallScore(analysis.overallScore || 0);
+          setConfidenceWeightedScore(analysis.confidenceWeightedScore || analysis.overallScore || 0);
+          setDataCompleteness(analysis.dataCompleteness || 0);
+          setCompanyStage(analysis.companyStage || 'startup');
         } else {
           // Keep dimensions empty while loading
           setDimensions([]);
           setOverallScore(0);
+          setConfidenceWeightedScore(0);
+          setDataCompleteness(0);
         }
       } else {
         console.error('Failed to load analysis:', response.statusText);
@@ -627,28 +637,89 @@ export default function AnalysisPage() {
             )}
           </div>
 
-          {/* Overall Score */}
+          {/* Score Display - Confidence Weighted + Data Completeness */}
           <div className="inline-block">
-            <div className="relative w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-4">
-              <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 160 160">
-                <circle cx="80" cy="80" r="70" fill="none" stroke="#e5e5e5" strokeWidth="12" />
-                <motion.circle
-                  cx="80"
-                  cy="80"
-                  r="70"
-                  fill="none"
-                  stroke="#000"
-                  strokeWidth="12"
-                  strokeLinecap="round"
-                  strokeDasharray={440}
-                  initial={{ strokeDashoffset: 440 }}
-                  animate={{ strokeDashoffset: 440 - (overallScore / 100) * 440 }}
-                  transition={{ duration: 1.5, ease: 'easeOut' }}
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-4xl sm:text-5xl font-bold text-black">{overallScore}</span>
-                <span className="text-sm text-gray-500">Overall Score</span>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-3xl mx-auto">
+              {/* Confidence-Weighted Score (Primary) */}
+              <div>
+                <div className="relative w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-3">
+                  <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 160 160">
+                    <circle cx="80" cy="80" r="70" fill="none" stroke="#e5e5e5" strokeWidth="12" />
+                    <motion.circle
+                      cx="80"
+                      cy="80"
+                      r="70"
+                      fill="none"
+                      stroke="#000"
+                      strokeWidth="12"
+                      strokeLinecap="round"
+                      strokeDasharray={440}
+                      initial={{ strokeDashoffset: 440 }}
+                      animate={{ strokeDashoffset: 440 - (confidenceWeightedScore / 100) * 440 }}
+                      transition={{ duration: 1.5, ease: 'easeOut' }}
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-4xl sm:text-5xl font-bold text-black">{confidenceWeightedScore}</span>
+                    <span className="text-xs text-gray-500">Score</span>
+                  </div>
+                </div>
+                <p className="text-center text-sm font-medium text-black">Investment Score</p>
+                <p className="text-center text-xs text-gray-500">Confidence-weighted</p>
+              </div>
+
+              {/* Data Completeness */}
+              <div>
+                <div className="relative w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-3">
+                  <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 160 160">
+                    <circle cx="80" cy="80" r="70" fill="none" stroke="#e5e5e5" strokeWidth="12" />
+                    <motion.circle
+                      cx="80"
+                      cy="80"
+                      r="70"
+                      fill="none"
+                      stroke="#6b7280"
+                      strokeWidth="12"
+                      strokeLinecap="round"
+                      strokeDasharray={440}
+                      initial={{ strokeDashoffset: 440 }}
+                      animate={{ strokeDashoffset: 440 - (dataCompleteness / 100) * 440 }}
+                      transition={{ duration: 1.5, ease: 'easeOut', delay: 0.2 }}
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-4xl sm:text-5xl font-bold text-gray-700">{dataCompleteness}%</span>
+                    <span className="text-xs text-gray-500">Complete</span>
+                  </div>
+                </div>
+                <p className="text-center text-sm font-medium text-black">Data Quality</p>
+                <p className="text-center text-xs text-gray-500">High-confidence data</p>
+                {dataCompleteness < 70 && (
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setShowUploadModal(true)}
+                    className="mt-2 w-full px-3 py-1.5 bg-black text-white rounded-lg text-xs font-medium hover:bg-gray-800 transition-colors"
+                  >
+                    Upload Documents
+                  </motion.button>
+                )}
+              </div>
+
+              {/* Company Stage */}
+              <div>
+                <div className="relative w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-3 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-20 h-20 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center">
+                      <span className="text-3xl">
+                        {companyStage === 'enterprise' ? '🏢' : companyStage === 'scaleup' ? '📈' : '🚀'}
+                      </span>
+                    </div>
+                    <span className="text-lg font-bold text-black capitalize">{companyStage}</span>
+                  </div>
+                </div>
+                <p className="text-center text-sm font-medium text-black">Company Stage</p>
+                <p className="text-center text-xs text-gray-500">Auto-detected</p>
               </div>
             </div>
           </div>
@@ -1115,6 +1186,15 @@ ${(DIMENSION_EXAMPLES[showInfoPopup] || getAutoExample(showInfoPopup)).dataNeede
           dimension={selectedDimensionForGuide}
         />
       )}
+
+      {/* Document Upload Modal */}
+      <DocumentUploadModal
+        isOpen={showUploadModal}
+        onClose={() => setShowUploadModal(false)}
+        onUploadComplete={() => {
+          loadAnalysisData();
+        }}
+      />
     </div>
   );
 }
