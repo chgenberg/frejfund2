@@ -7,15 +7,16 @@ RUN npm ci --legacy-peer-deps
 FROM mcr.microsoft.com/devcontainers/javascript-node:20 AS builder
 WORKDIR /app
 COPY package.json package-lock.json* ./
+
+# Install all dependencies first
+RUN npm ci --legacy-peer-deps && ls -la node_modules | head -20
+
 COPY . .
 
 # Set environment variables for build optimization
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 ENV NODE_OPTIONS="--max-old-space-size=2048"
-
-# Install all dependencies (fresh install ensures everything is present)
-RUN npm ci --legacy-peer-deps
 
 # Generate Prisma Client before building
 RUN npx prisma generate
