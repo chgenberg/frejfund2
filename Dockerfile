@@ -6,7 +6,7 @@ RUN npm ci --legacy-peer-deps
 
 FROM mcr.microsoft.com/devcontainers/javascript-node:20 AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+COPY package.json package-lock.json* ./
 COPY . .
 
 # Set environment variables for build optimization
@@ -14,8 +14,8 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 
-# Ensure Tailwind and PostCSS are available in builder
-RUN npm install tailwindcss@3.4.15 autoprefixer@10.4.20 postcss@8.4.49
+# Install all dependencies (fresh install ensures everything is present)
+RUN npm ci --legacy-peer-deps
 
 # Generate Prisma Client before building
 RUN npx prisma generate
