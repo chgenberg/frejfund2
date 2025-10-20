@@ -20,6 +20,7 @@ RUN npm ci --legacy-peer-deps --include=dev && npm rebuild lightningcss || true
 
 # Switch to production for the actual build
 ENV NODE_ENV=production
+ENV NEXT_DISABLE_LIGHTNINGCSS=1
 
 # Generate Prisma Client before building
 RUN npx prisma generate
