@@ -14,6 +14,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 
+# Ensure Tailwind and PostCSS are available (belt-and-suspenders)
+RUN npm install --no-save tailwindcss@3.4.15 autoprefixer@10.4.20 postcss@8.4.49
+
 # Generate Prisma Client before building
 RUN npx prisma generate
 
