@@ -1,10 +1,10 @@
 # Railway-friendly Dockerfile for Next.js standalone output
-FROM node:22-slim AS deps
+FROM public.ecr.aws/docker/library/node:22-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci --legacy-peer-deps
 
-FROM node:22-slim AS builder
+FROM public.ecr.aws/docker/library/node:22-slim AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -20,7 +20,7 @@ RUN npx prisma generate
 # Build with memory optimizations
 RUN npm run build
 
-FROM node:22-slim AS runner
+FROM public.ecr.aws/docker/library/node:22-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
