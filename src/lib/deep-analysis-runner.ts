@@ -433,16 +433,12 @@ async function analyzeDimension(
 
   // gpt-5 / gpt-5-mini: temperature not used; response_format unsupported on gpt-5*
 
-  // Combine all available content (enriched with external intelligence)
-  const externalText = externalIntel?.combinedText || '';
+  // Combine all available content
   const fullContent = `
 # Company Intelligence Report
 
 ## Website & Scraped Content:
 ${scrapedContent}
-
-## External Intelligence (Wikipedia, News, Crunchbase):
-${externalText}
 
 ## Uploaded Documents:
 ${uploadedDocuments.join('\n\n---\n\n')}
