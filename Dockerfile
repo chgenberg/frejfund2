@@ -8,8 +8,10 @@ FROM mcr.microsoft.com/devcontainers/javascript-node:20 AS builder
 WORKDIR /app
 COPY package.json package-lock.json* ./
 
-# Install all dependencies first
-RUN npm ci --legacy-peer-deps && ls -la node_modules | head -20
+# Install all dependencies first (cache-bust: v2)
+RUN npm ci --legacy-peer-deps && \
+    echo "=== Verifying critical packages ===" && \
+    ls -d node_modules/tailwindcss node_modules/autoprefixer node_modules/postcss 2>/dev/null || echo "MISSING PACKAGES!"
 
 COPY . .
 
