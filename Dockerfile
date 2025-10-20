@@ -11,8 +11,12 @@ COPY . .
 
 # Set environment variables for build optimization
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_ENV=production
+# Keep dev deps available during build
+ENV NODE_ENV=development
 ENV NODE_OPTIONS="--max-old-space-size=2048"
+
+# Ensure platform-specific optional deps (swc/lightningcss) are present
+RUN npm ci --legacy-peer-deps
 
 # Generate Prisma Client before building
 RUN npx prisma generate
