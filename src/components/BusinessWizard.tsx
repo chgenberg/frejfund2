@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import { BusinessInfo } from '@/types/business';
 import { normalizeUrl, isValidUrl } from '@/lib/url-utils';
-import InvestorModal from '@/components/InvestorModal';
 
 interface BusinessWizardProps {
   onComplete: (businessInfo: BusinessInfo) => void;
@@ -22,7 +21,6 @@ interface BusinessWizardProps {
 
 export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
   const [currentStep, setCurrentStep] = useState(-1); // Start with welcome screen
-  const [showInvestorModal, setShowInvestorModal] = useState(false);
   const [businessInfo, setBusinessInfo] = useState<Partial<BusinessInfo>>({});
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isScraping, setIsScraping] = useState(false);
@@ -1012,7 +1010,7 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => setShowInvestorModal(true)}
+                onClick={() => window.location.href = '/vc/login'}
                 className="px-4 sm:px-6 py-2 sm:py-2.5 bg-black text-white rounded-full text-xs sm:text-sm font-medium hover:bg-gray-800 transition-colors"
               >
                 Investors
@@ -1155,8 +1153,6 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
         </motion.div>
       </div>
 
-      {/* Investor Modal */}
-      <InvestorModal isOpen={showInvestorModal} onClose={() => setShowInvestorModal(false)} />
     </div>
   );
 }

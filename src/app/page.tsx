@@ -20,7 +20,6 @@ import { demoCompany, demoWebsiteText, demoKpiCsv } from '@/lib/demo-case';
 import ChatInterface from '@/components/ChatInterface';
 import BusinessWizard from '@/components/BusinessWizard';
 import Footer from '@/components/Footer';
-import InvestorModal from '@/components/InvestorModal';
 
 // Disable prerendering; this page depends on client-only state/localStorage and async flows
 export const dynamic = 'force-dynamic';
@@ -32,7 +31,6 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
-  const [showInvestorModal, setShowInvestorModal] = useState(false);
 
   // Hoist tabs outside any conditional rendering to avoid TDZ/initialization timing issues
   const tabs = [
@@ -144,7 +142,7 @@ export default function Home() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => setShowInvestorModal(true)}
+                onClick={() => router.push('/vc/login')}
                 className="px-4 sm:px-6 py-2 sm:py-2.5 bg-black text-white rounded-full text-xs sm:text-sm font-medium hover:bg-gray-800 transition-colors"
               >
                 Investors
@@ -645,9 +643,6 @@ export default function Home() {
 
       {/* Footer */}
       <Footer />
-
-      {/* Investor Modal */}
-      <InvestorModal isOpen={showInvestorModal} onClose={() => setShowInvestorModal(false)} />
     </div>
   );
 }
