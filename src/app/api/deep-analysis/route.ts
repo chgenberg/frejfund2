@@ -81,6 +81,48 @@ export async function POST(request: NextRequest) {
       console.warn('Could not reset analysis row at start:', e);
     }
 
+    // Auto-publish founder profile by default (opt-out later in dashboard)
+    try {
+      const sessionRow = await prisma.session.findUnique({
+        where: { id: sessionId },
+        select: { userId: true, businessInfo: true },
+      });
+      const bi: any = (sessionRow?.businessInfo as any) || (businessInfo as any) || {};
+
+      if (sessionRow?.userId) {
+        await prisma.user.update({
+          where: { id: sessionRow.userId },
+          data: {
+            isProfilePublic: true,
+            name: bi.founderName || undefined,
+            company: bi.name || undefined,
+            industry: bi.industry || undefined,
+            stage: bi.stage || undefined,
+            website: bi.website || undefined,
+            oneLiner: bi.description || undefined,
+            askAmount: bi.seeking || undefined,
+          },
+        });
+      } else {
+        const user = await prisma.user.create({
+          data: {
+            email: bi.email || `${sessionId}@frejfund.com`,
+            name: bi.founderName || null,
+            company: bi.name || null,
+            industry: bi.industry || null,
+            stage: bi.stage || null,
+            website: bi.website || null,
+            oneLiner: bi.description || null,
+            askAmount: bi.seeking || null,
+            isProfilePublic: true,
+          },
+        });
+        await prisma.session.update({ where: { id: sessionId }, data: { userId: user.id } });
+      }
+    } catch (pubErr) {
+      console.warn('Auto-publish profile failed (non-fatal):', pubErr);
+    }
+
     // Orchestrate: harvest (mini) + scrape + docs before analysis
     (async () => {
       const { fetchGptKnowledgeForCompany } = await import('@/lib/gpt-knowledge');
