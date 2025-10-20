@@ -100,10 +100,9 @@ export default function Home() {
     // Always redirect to dashboard after wizard completion
     if (typeof window !== 'undefined') {
       window.location.href = '/dashboard';
+      return null; // Don't render ChatInterface during redirect
     }
-    return (
-      <ChatInterface businessInfo={businessInfo} messages={messages} setMessages={setMessages} />
-    );
+    return null;
   }
 
   return (
