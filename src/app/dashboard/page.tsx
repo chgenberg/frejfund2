@@ -112,6 +112,19 @@ export default function Dashboard() {
     },
   ]);
 
+  // Toast state: show once when profile becomes public
+  const [showPublicToast, setShowPublicToast] = useState(false);
+
+  useEffect(() => {
+    try {
+      const flag = sessionStorage.getItem('ff-public-toast-shown');
+      if (!flag && isProfilePublic) {
+        setShowPublicToast(true);
+        sessionStorage.setItem('ff-public-toast-shown', '1');
+      }
+    } catch {}
+  }, [isProfilePublic]);
+
   const [metrics, setMetrics] = useState({
     investmentReadiness: 0,
     dailyActiveScore: 0,
@@ -342,6 +355,35 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Public profile toast (bottom-right) */}
+      <AnimatePresence>
+        {showPublicToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.25 }}
+            className="fixed bottom-4 right-4 z-50 max-w-xs bg-white border border-gray-200 shadow-xl rounded-xl p-3 sm:p-4"
+          >
+            <div className="flex items-start gap-3">
+              <div className="shrink-0 mt-0.5">
+                <CheckCircle2 className="w-5 h-5 text-green-600" />
+              </div>
+              <div className="text-sm text-gray-800">
+                <div className="font-semibold text-black mb-0.5">Profile is public</div>
+                <div>Your startup is visible to investors. You can change this in Settings.</div>
+              </div>
+              <button
+                onClick={() => setShowPublicToast(false)}
+                className="ml-2 text-gray-400 hover:text-black"
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
