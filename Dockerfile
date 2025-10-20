@@ -45,6 +45,6 @@ COPY --from=builder /app/public ./public
 # Default role is web; set WORKER=1 in the worker service to run the queue worker
 ENV WORKER=0
 EXPOSE 3000
-CMD ["sh", "-c", "if [ \"$WORKER\" = \"1\" ]; then npm run worker; else node server.js; fi"]
+CMD ["sh", "-c", "if [ \"$WORKER\" = \"1\" ]; then npm run worker; else npx prisma migrate deploy && node server.js; fi"]
 
 
