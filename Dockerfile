@@ -11,18 +11,8 @@ COPY . .
 
 # Set environment variables for build optimization
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV NEXT_DISABLE_LIGHTNINGCSS=1
-ENV NODE_OPTIONS="--max-old-space-size=2048"
-
-# Install all dependencies including devDeps to ensure build-time tools are available
-ENV NODE_ENV=development
-RUN npm ci --legacy-peer-deps --include=dev \
-  && (npm install --no-save @next/swc-linux-x64-gnu@15.5.4 @next/swc-linux-x64-musl@15.5.4 lightningcss@latest || true) \
-  && npm rebuild lightningcss || true
-
-# Switch to production for the actual build
 ENV NODE_ENV=production
-ENV NEXT_DISABLE_LIGHTNINGCSS=1
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 
 # Generate Prisma Client before building
 RUN npx prisma generate
