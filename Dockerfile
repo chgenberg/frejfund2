@@ -1,10 +1,10 @@
 # Railway-friendly Dockerfile for Next.js standalone output
-FROM ghcr.io/docker-library/node:20-slim AS deps
+FROM mcr.microsoft.com/devcontainers/javascript-node:20 AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci --legacy-peer-deps
 
-FROM ghcr.io/docker-library/node:20-slim AS builder
+FROM mcr.microsoft.com/devcontainers/javascript-node:20 AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -20,7 +20,7 @@ RUN npx prisma generate
 # Build with memory optimizations
 RUN npm run build
 
-FROM ghcr.io/docker-library/node:20-slim AS runner
+FROM mcr.microsoft.com/devcontainers/javascript-node:20 AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
