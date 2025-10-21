@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, RotateCcw } from 'lucide-react';
+import { Trophy, RotateCcw, Gamepad2, Star } from 'lucide-react';
 
 interface PacmanGameProps {
   onScoreUpdate?: (score: number) => void;
@@ -14,6 +14,7 @@ export default function PacmanGame({ onScoreUpdate }: PacmanGameProps) {
   const [highScore, setHighScore] = useState(0);
   const [weeklyHighScore, setWeeklyHighScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
+  const [lives, setLives] = useState(3);
   const gameStateRef = useRef<any>(null);
 
   useEffect(() => {
@@ -45,29 +46,57 @@ export default function PacmanGame({ onScoreUpdate }: PacmanGameProps) {
 
     // Game state
     const gameState = {
-      pacman: { x: 1, y: 1, direction: 'right', mouthOpen: true },
-      dots: [] as { x: number; y: number }[],
+      pacman: { x: 1, y: 1, direction: 'right', mouthOpen: true, animationFrame: 0 },
+      dots: [] as { x: number; y: number; type: 'normal' | 'power' }[],
       walls: [] as { x: number; y: number }[],
-      ghost: { x: COLS - 2, y: ROWS - 2, direction: 'left' },
+      ghosts: [
+        { x: COLS - 2, y: ROWS - 2, direction: 'left', color: '#ff0000', scared: false },
+        { x: COLS - 2, y: 1, direction: 'down', color: '#00ffff', scared: false },
+      ],
       score: 0,
       running: true,
+      powerMode: false,
+      powerModeTimer: 0,
+      level: 1,
     };
     gameStateRef.current = gameState;
 
-    // Generate simple maze
-    for (let y = 0; y < ROWS; y++) {
-      for (let x = 0; x < COLS; x++) {
-        // Walls around edges
-        if (x === 0 || x === COLS - 1 || y === 0 || y === ROWS - 1) {
-          gameState.walls.push({ x, y });
-        }
-        // Random internal walls
-        else if (Math.random() < 0.1) {
-          gameState.walls.push({ x, y });
-        }
-        // Dots everywhere else
-        else {
-          gameState.dots.push({ x, y });
+    // Generate better maze with corridors
+    const maze = [
+      '########################',
+      '#......#........#......#',
+      '#.####.#.######.#.####.#',
+      '#o#  #.#.#    #.#.#  #o#',
+      '#.####.#.######.#.####.#',
+      '#......................#',
+      '#.####.##.####.##.####.#',
+      '#......##......##......#',
+      '######.##########.######',
+      '     #.##      ##.#     ',
+      '######.##  ##  ##.######',
+      '#......##  ##  ##......#',
+      '#.####.##########.####.#',
+      '#.....o..........o.....#',
+      '#.####################.#',
+      '#......................#',
+      '########################',
+    ];
+
+    // Parse maze
+    const rowScale = Math.floor(ROWS / maze.length);
+    const colScale = Math.floor(COLS / maze[0].length);
+    
+    for (let y = 0; y < maze.length; y++) {
+      for (let x = 0; x < maze[y].length; x++) {
+        const scaledX = Math.floor(x * colScale);
+        const scaledY = Math.floor(y * rowScale);
+        
+        if (maze[y][x] === '#') {
+          gameState.walls.push({ x: scaledX, y: scaledY });
+        } else if (maze[y][x] === '.') {
+          gameState.dots.push({ x: scaledX, y: scaledY, type: 'normal' });
+        } else if (maze[y][x] === 'o') {
+          gameState.dots.push({ x: scaledX, y: scaledY, type: 'power' });
         }
       }
     }
@@ -128,38 +157,79 @@ export default function PacmanGame({ onScoreUpdate }: PacmanGameProps) {
       // Collect dots
       const dotIndex = state.dots.findIndex((d: any) => d.x === pacman.x && d.y === pacman.y);
       if (dotIndex >= 0) {
+        const dot = state.dots[dotIndex];
         state.dots.splice(dotIndex, 1);
-        state.score += 10;
+        
+        if (dot.type === 'power') {
+          state.score += 50;
+          state.powerMode = true;
+          state.powerModeTimer = 80; // ~8 seconds
+          state.ghosts.forEach((g: any) => g.scared = true);
+        } else {
+          state.score += 10;
+        }
+        
         setScore(state.score);
         onScoreUpdate?.(state.score);
       }
 
-      // Simple ghost AI (chase Pac-Man)
-      const { ghost } = state;
-      const dx = pacman.x - ghost.x;
-      const dy = pacman.y - ghost.y;
-      
-      let ghostNewX = ghost.x;
-      let ghostNewY = ghost.y;
-
-      if (Math.abs(dx) > Math.abs(dy)) {
-        ghostNewX += dx > 0 ? 1 : -1;
-      } else {
-        ghostNewY += dy > 0 ? 1 : -1;
+      // Update power mode
+      if (state.powerMode) {
+        state.powerModeTimer--;
+        if (state.powerModeTimer <= 0) {
+          state.powerMode = false;
+          state.ghosts.forEach((g: any) => g.scared = false);
+        }
       }
 
-      const ghostHitWall = walls.some((w: any) => w.x === ghostNewX && w.y === ghostNewY);
-      if (!ghostHitWall) {
-        ghost.x = ghostNewX;
-        ghost.y = ghostNewY;
-      }
+      // Update ghosts
+      state.ghosts.forEach((ghost: any, index: number) => {
+        const dx = pacman.x - ghost.x;
+        const dy = pacman.y - ghost.y;
+        
+        let ghostNewX = ghost.x;
+        let ghostNewY = ghost.y;
 
-      // Check collision with ghost
-      if (pacman.x === ghost.x && pacman.y === ghost.y) {
-        state.running = false;
-        setGameOver(true);
-        saveScore(state.score);
-      }
+        // Different AI for different ghosts
+        if (ghost.scared) {
+          // Run away from Pac-Man
+          ghostNewX += dx > 0 ? -1 : 1;
+          ghostNewY += dy > 0 ? -1 : 1;
+        } else if (index === 0) {
+          // Red ghost: Direct chase
+          if (Math.abs(dx) > Math.abs(dy)) {
+            ghostNewX += dx > 0 ? 1 : -1;
+          } else {
+            ghostNewY += dy > 0 ? 1 : -1;
+          }
+        } else {
+          // Cyan ghost: Try to cut off
+          ghostNewX += dx > 0 ? 1 : -1;
+          ghostNewY += dy > 0 ? 1 : -1;
+        }
+
+        const ghostHitWall = walls.some((w: any) => w.x === ghostNewX && w.y === ghostNewY);
+        if (!ghostHitWall && ghostNewX >= 0 && ghostNewX < COLS && ghostNewY >= 0 && ghostNewY < ROWS) {
+          ghost.x = ghostNewX;
+          ghost.y = ghostNewY;
+        }
+
+        // Check collision with ghost
+        if (pacman.x === ghost.x && pacman.y === ghost.y) {
+          if (ghost.scared) {
+            state.score += 200;
+            setScore(state.score);
+            // Respawn ghost
+            ghost.x = COLS - 2;
+            ghost.y = ROWS - 2;
+            ghost.scared = false;
+          } else {
+            state.running = false;
+            setGameOver(true);
+            saveScore(state.score);
+          }
+        }
+      });
 
       // Win condition
       if (state.dots.length === 0) {
@@ -170,63 +240,150 @@ export default function PacmanGame({ onScoreUpdate }: PacmanGameProps) {
     };
 
     const render = (ctx: CanvasRenderingContext2D, state: any) => {
-      // Clear
-      ctx.fillStyle = '#000';
+      // Clear with dark background
+      ctx.fillStyle = '#0a0a0a';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Walls
-      ctx.fillStyle = '#4a5568';
-      state.walls.forEach((w: any) => {
-        ctx.fillRect(w.x * TILE_SIZE, w.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-      });
-
-      // Dots
-      ctx.fillStyle = '#fbbf24';
-      state.dots.forEach((d: any) => {
+      // Add subtle grid lines
+      ctx.strokeStyle = '#1a1a1a';
+      ctx.lineWidth = 0.5;
+      for (let x = 0; x < COLS; x++) {
         ctx.beginPath();
-        ctx.arc(
-          d.x * TILE_SIZE + TILE_SIZE / 2,
-          d.y * TILE_SIZE + TILE_SIZE / 2,
-          3,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
+        ctx.moveTo(x * TILE_SIZE, 0);
+        ctx.lineTo(x * TILE_SIZE, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < ROWS; y++) {
+        ctx.beginPath();
+        ctx.moveTo(0, y * TILE_SIZE);
+        ctx.lineTo(canvas.width, y * TILE_SIZE);
+        ctx.stroke();
+      }
+
+      // Walls with gradient
+      const wallGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      wallGradient.addColorStop(0, '#2563eb');
+      wallGradient.addColorStop(1, '#1e40af');
+      
+      state.walls.forEach((w: any) => {
+        ctx.fillStyle = wallGradient;
+        ctx.fillRect(w.x * TILE_SIZE + 1, w.y * TILE_SIZE + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+        
+        // Add subtle highlight
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.fillRect(w.x * TILE_SIZE + 1, w.y * TILE_SIZE + 1, TILE_SIZE - 2, 2);
       });
 
-      // Pac-Man
-      ctx.fillStyle = '#fbbf24';
-      ctx.beginPath();
+      // Dots with glow effect
+      state.dots.forEach((d: any) => {
+        const cx = d.x * TILE_SIZE + TILE_SIZE / 2;
+        const cy = d.y * TILE_SIZE + TILE_SIZE / 2;
+        
+        if (d.type === 'power') {
+          // Power pellet with pulsing glow
+          const glowSize = 8 + Math.sin(Date.now() * 0.005) * 2;
+          const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowSize);
+          glow.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+          glow.addColorStop(0.5, 'rgba(255, 215, 0, 0.3)');
+          glow.addColorStop(1, 'rgba(255, 215, 0, 0)');
+          ctx.fillStyle = glow;
+          ctx.fillRect(cx - glowSize, cy - glowSize, glowSize * 2, glowSize * 2);
+          
+          ctx.fillStyle = '#ffd700';
+          ctx.beginPath();
+          ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          // Normal dot with subtle glow
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+          ctx.beginPath();
+          ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+          ctx.fill();
+          
+          ctx.fillStyle = '#fbbf24';
+          ctx.beginPath();
+          ctx.arc(cx, cy, 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      // Pac-Man with smooth animation
       const px = state.pacman.x * TILE_SIZE + TILE_SIZE / 2;
       const py = state.pacman.y * TILE_SIZE + TILE_SIZE / 2;
       
+      // Glow effect
+      const pacGlow = ctx.createRadialGradient(px, py, 0, px, py, TILE_SIZE / 2);
+      pacGlow.addColorStop(0, 'rgba(255, 235, 59, 0.3)');
+      pacGlow.addColorStop(1, 'rgba(255, 235, 59, 0)');
+      ctx.fillStyle = pacGlow;
+      ctx.fillRect(px - TILE_SIZE, py - TILE_SIZE, TILE_SIZE * 2, TILE_SIZE * 2);
+      
+      // Pac-Man body
+      ctx.fillStyle = '#ffeb3b';
+      ctx.beginPath();
+      
       if (state.pacman.mouthOpen) {
         const angle = { up: 1.5, down: 0.5, left: 1, right: 0 }[state.pacman.direction] || 0;
-        ctx.arc(px, py, TILE_SIZE / 2 - 2, angle * Math.PI + 0.2, angle * Math.PI + 1.8 * Math.PI);
+        const mouthAngle = 0.25; // Wider mouth
+        ctx.arc(px, py, TILE_SIZE / 2 - 2, (angle + mouthAngle) * Math.PI, (angle + 2 - mouthAngle) * Math.PI);
         ctx.lineTo(px, py);
       } else {
         ctx.arc(px, py, TILE_SIZE / 2 - 2, 0, Math.PI * 2);
       }
       ctx.fill();
-
-      // Ghost
-      ctx.fillStyle = '#ef4444';
-      ctx.beginPath();
-      ctx.arc(
-        state.ghost.x * TILE_SIZE + TILE_SIZE / 2,
-        state.ghost.y * TILE_SIZE + TILE_SIZE / 2,
-        TILE_SIZE / 2 - 2,
-        0,
-        Math.PI * 2,
-      );
-      ctx.fill();
       
-      // Ghost eyes
-      ctx.fillStyle = '#fff';
+      // Add eye
+      ctx.fillStyle = '#000';
+      const eyeOffset = { up: { x: 3, y: -3 }, down: { x: 3, y: 3 }, left: { x: -3, y: -3 }, right: { x: 3, y: -3 } }[state.pacman.direction] || { x: 3, y: -3 };
       ctx.beginPath();
-      ctx.arc(state.ghost.x * TILE_SIZE + 7, state.ghost.y * TILE_SIZE + 8, 2, 0, Math.PI * 2);
-      ctx.arc(state.ghost.x * TILE_SIZE + 13, state.ghost.y * TILE_SIZE + 8, 2, 0, Math.PI * 2);
+      ctx.arc(px + eyeOffset.x, py + eyeOffset.y, 2, 0, Math.PI * 2);
       ctx.fill();
+
+      // Ghosts with better graphics
+      state.ghosts.forEach((ghost: any) => {
+        const gx = ghost.x * TILE_SIZE + TILE_SIZE / 2;
+        const gy = ghost.y * TILE_SIZE + TILE_SIZE / 2;
+        
+        // Ghost body
+        ctx.fillStyle = ghost.scared ? '#1e40af' : ghost.color;
+        ctx.beginPath();
+        ctx.arc(gx, gy - 2, TILE_SIZE / 2 - 2, Math.PI, 0, false);
+        ctx.lineTo(gx + TILE_SIZE / 2 - 2, gy + TILE_SIZE / 2 - 4);
+        
+        // Wavy bottom
+        for (let i = 3; i >= 0; i--) {
+          const wave = Math.sin((Date.now() * 0.01 + i) * 0.5) * 2;
+          ctx.lineTo(gx + (i - 2) * 3, gy + TILE_SIZE / 2 - 4 + wave);
+        }
+        
+        ctx.closePath();
+        ctx.fill();
+        
+        // Eyes
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(gx - 4, gy - 2, 3, 0, Math.PI * 2);
+        ctx.arc(gx + 4, gy - 2, 3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Pupils
+        ctx.fillStyle = ghost.scared ? '#fff' : '#000';
+        const dx = state.pacman.x - ghost.x;
+        const dy = state.pacman.y - ghost.y;
+        const angle = Math.atan2(dy, dx);
+        const pupilOffset = 1.5;
+        
+        ctx.beginPath();
+        ctx.arc(gx - 4 + Math.cos(angle) * pupilOffset, gy - 2 + Math.sin(angle) * pupilOffset, 1.5, 0, Math.PI * 2);
+        ctx.arc(gx + 4 + Math.cos(angle) * pupilOffset, gy - 2 + Math.sin(angle) * pupilOffset, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Power mode indicator
+      if (state.powerMode) {
+        ctx.fillStyle = `rgba(30, 64, 175, ${0.1 + Math.sin(Date.now() * 0.01) * 0.05})`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
     };
 
     gameLoop();
@@ -255,64 +412,131 @@ export default function PacmanGame({ onScoreUpdate }: PacmanGameProps) {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-lg p-6">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="text-lg font-bold text-black mb-1">Play While You Wait</h3>
-          <p className="text-xs text-gray-600">Use arrow keys or WASD to move</p>
-        </div>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={resetGame}
-          className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-        >
-          <RotateCcw className="w-4 h-4" />
-        </motion.button>
+    <div className="bg-gradient-to-br from-gray-900 to-black rounded-3xl border border-gray-800 shadow-2xl p-6 relative overflow-hidden">
+      {/* Animated background pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute w-96 h-96 bg-blue-500 rounded-full blur-3xl -top-48 -left-48 animate-pulse" />
+        <div className="absolute w-96 h-96 bg-yellow-500 rounded-full blur-3xl -bottom-48 -right-48 animate-pulse delay-1000" />
       </div>
-
-      <div className="flex gap-4 text-sm mb-3">
-        <div className="flex items-center gap-2">
-          <span className="text-gray-600">Score:</span>
-          <span className="font-bold text-black">{score}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Trophy className="w-4 h-4 text-yellow-600" />
-          <span className="text-gray-600">Personal:</span>
-          <span className="font-bold text-black">{highScore}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Trophy className="w-4 h-4 text-orange-600" />
-          <span className="text-gray-600">Weekly:</span>
-          <span className="font-bold text-black">{weeklyHighScore}</span>
-        </div>
-      </div>
-
-      <canvas
-        ref={canvasRef}
-        width={600}
-        height={400}
-        className="w-full border border-gray-300 rounded-lg"
-      />
-
-      {gameOver && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="mt-4 p-4 bg-gray-100 rounded-xl text-center"
-        >
-          <p className="font-bold text-black mb-2">Game Over!</p>
-          <p className="text-sm text-gray-600 mb-3">Final Score: {score}</p>
+      
+      <div className="relative z-10">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <Gamepad2 className="w-6 h-6 text-yellow-400" />
+              <h3 className="text-xl font-bold text-white">FREJA PAC-MAN</h3>
+            </div>
+            <p className="text-xs text-gray-400">Use arrow keys or WASD • Eat dots • Avoid ghosts!</p>
+          </div>
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: 1.05, rotate: -180 }}
+            whileTap={{ scale: 0.95 }}
             onClick={resetGame}
-            className="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
+            className="p-3 bg-gray-800 rounded-xl hover:bg-gray-700 transition-all group"
           >
-            Play Again
+            <RotateCcw className="w-5 h-5 text-white group-hover:text-yellow-400" />
           </motion.button>
-        </motion.div>
-      )}
+        </div>
+
+        <div className="grid grid-cols-3 gap-4 mb-4">
+          <motion.div 
+            className="bg-gray-800/50 backdrop-blur rounded-xl p-3 text-center"
+            whileHover={{ scale: 1.02 }}
+          >
+            <p className="text-xs text-gray-400 mb-1">SCORE</p>
+            <motion.p 
+              key={score}
+              initial={{ scale: 1.5, color: '#fbbf24' }}
+              animate={{ scale: 1, color: '#ffffff' }}
+              className="text-2xl font-bold"
+            >
+              {score}
+            </motion.p>
+          </motion.div>
+          
+          <motion.div 
+            className="bg-gray-800/50 backdrop-blur rounded-xl p-3 text-center"
+            whileHover={{ scale: 1.02 }}
+          >
+            <p className="text-xs text-gray-400 mb-1 flex items-center justify-center gap-1">
+              <Trophy className="w-3 h-3 text-yellow-500" />
+              PERSONAL BEST
+            </p>
+            <p className="text-2xl font-bold text-yellow-400">{highScore}</p>
+          </motion.div>
+          
+          <motion.div 
+            className="bg-gray-800/50 backdrop-blur rounded-xl p-3 text-center"
+            whileHover={{ scale: 1.02 }}
+          >
+            <p className="text-xs text-gray-400 mb-1 flex items-center justify-center gap-1">
+              <Star className="w-3 h-3 text-orange-500" />
+              WEEKLY BEST
+            </p>
+            <p className="text-2xl font-bold text-orange-400">{weeklyHighScore}</p>
+          </motion.div>
+        </div>
+
+        <div className="relative rounded-xl overflow-hidden shadow-inner">
+          <canvas
+            ref={canvasRef}
+            width={600}
+            height={400}
+            className="w-full rounded-xl"
+            style={{ imageRendering: 'pixelated' }}
+          />
+          
+          {/* Lives indicator */}
+          <div className="absolute top-4 right-4 flex gap-1">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className={`w-6 h-6 rounded-full ${
+                  i < lives ? 'bg-yellow-400' : 'bg-gray-700'
+                } transition-colors`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {gameOver && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="mt-4 p-6 bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl text-center relative overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 to-orange-400/10 animate-pulse" />
+            <div className="relative">
+              <motion.h4
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", bounce: 0.5 }}
+                className="text-2xl font-bold text-white mb-2"
+              >
+                GAME OVER!
+              </motion.h4>
+              <p className="text-lg text-gray-300 mb-1">Final Score: <span className="text-yellow-400 font-bold">{score}</span></p>
+              {score > highScore && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-sm text-green-400 mb-4"
+                >
+                  🎉 New Personal Best!
+                </motion.p>
+              )}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={resetGame}
+                className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-orange-400 text-black rounded-xl font-bold hover:from-yellow-300 hover:to-orange-300 transition-all shadow-lg"
+              >
+                PLAY AGAIN
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </div>
     </div>
   );
 }

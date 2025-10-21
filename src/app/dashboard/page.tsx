@@ -508,17 +508,17 @@ export default function Dashboard() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         <AnimatePresence mode="wait">
-          {activeSection === 'overview' && (
+          {/* Show ONLY progress + game during analysis, lock everything else */}
+          {analysisProgress.status === 'running' ? (
             <motion.div
-              key="overview"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="space-y-6"
+              key="analysis-only"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="min-h-[calc(100vh-200px)] flex items-center justify-center"
             >
-              {/* Analysis Progress Circle - Show when analysis is running */}
-              {analysisProgress.status === 'running' && (
+              <div className="w-full max-w-4xl space-y-6">
+                {/* Analysis Progress Circle */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -604,10 +604,8 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </motion.div>
-              )}
 
-              {/* Pac-Man Game - Show during analysis */}
-              {analysisProgress.status === 'running' && (
+                {/* Pac-Man Game */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -615,10 +613,22 @@ export default function Dashboard() {
                 >
                   <PacmanGame />
                 </motion.div>
-              )}
-
-              {/* Metrics Grid - Only show when analysis is complete */}
-              {showMetrics && analysisProgress.status !== 'running' ? (
+              </div>
+            </motion.div>
+          ) : (
+            /* Normal dashboard sections when not analyzing */
+            <>
+              {activeSection === 'overview' && (
+                <motion.div
+                  key="overview"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-6"
+                >
+                  {/* Metrics Grid - Only show when analysis is complete */}
+                  {showMetrics ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                   <motion.div whileHover={{ scale: 1.02 }} className="minimal-box p-4 sm:p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -1496,7 +1506,22 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+                </motion.div>
+              )}
+              {activeSection === 'readiness' && hasDeepAnalysis && (
+                <InvestmentReadiness />
+              )}
+              {activeSection === 'integrations' && (
+                <IntegrationsSection 
+                  integrations={integrations}
+                  onAddIntegration={handleAddIntegration}
+                  onRemoveIntegration={handleRemoveIntegration}
+                />
+              )}
+              {activeSection === 'settings' && (
+                <AccountSettings />
+              )}
+            </>
           )}
         </AnimatePresence>
       </main>
