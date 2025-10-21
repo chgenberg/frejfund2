@@ -668,3 +668,17 @@ model ScoreHistory {
   @@index([recordedAt])
   @@map("score_history")
 }
+
+// Pac-Man game scores
+model PacmanScore {
+  id          String   @id @default(cuid())
+  sessionId   String
+  score       Int
+  playerName  String   @default("Anonymous")
+  createdAt   DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([score])
+  @@index([createdAt])
+  @@map("pacman_scores")
+}

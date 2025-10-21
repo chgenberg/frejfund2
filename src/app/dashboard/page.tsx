@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import NotificationBell from '@/components/NotificationBell';
+import PacmanGame from '@/components/PacmanGame';
 
 export const dynamic = 'force-dynamic';
 
@@ -602,6 +603,17 @@ export default function Dashboard() {
                       </div>
                     </div>
                   </div>
+                </motion.div>
+              )}
+
+              {/* Pac-Man Game - Show during analysis */}
+              {analysisProgress.status === 'running' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <PacmanGame />
                 </motion.div>
               )}
 
