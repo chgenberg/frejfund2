@@ -75,7 +75,7 @@ export default function Home() {
       }
     }
 
-    // For real users, go to goal-setting. For demo, go to chat.
+    // Redirect straight to dashboard to show analysis overlay
     if (info.demoKpiCsv) {
       setCurrentView('chat');
     } else {
@@ -83,9 +83,9 @@ export default function Home() {
       if (typeof window !== 'undefined') {
         // Save to localStorage for persistence
         localStorage.setItem('frejfund-business-info', JSON.stringify(info));
-        // Also save to sessionStorage for goal-setting
         sessionStorage.setItem('businessInfo', JSON.stringify(info));
-        window.location.href = '/goal-setting';
+        sessionStorage.setItem('frejfund-start-analysis', '1');
+        window.location.href = '/dashboard';
       }
     }
   };
