@@ -858,3 +858,106 @@ export async function getCriticalRedFlags(sessionId: string) {
 
   return criticalIssues.slice(0, 5); // Top 5 most critical
 }
+
+export const deepAnalysisRunner = {
+  async reanalyzeDimensions(
+    sessionId: string,
+    dimensionIds: string[]
+  ): Promise<void> {
+    try {
+      const analysis = await prisma.deepAnalysis.findUnique({
+        where: { sessionId },
+        include: { dimensions: true }
+      });
+
+      if (!analysis) {
+        throw new Error('Analysis not found');
+      }
+
+      const businessInfo = analysis.businessInfo as BusinessInfo;
+      
+      // Get scraped content from cache or re-scrape
+      let scrapedContent = '';
+      if (analysis.publicKnowledge) {
+        const knowledge = analysis.publicKnowledge as any;
+        scrapedContent = knowledge.scrapedContent || '';
+      }
+
+      // Re-analyze specific dimensions
+      for (const dimensionId of dimensionIds) {
+        const dimension = deepAnalysisDimensions.find(d => d.id === dimensionId);
+        if (!dimension) continue;
+
+        const existingDim = analysis.dimensions.find(d => d.dimensionId === dimensionId);
+        if (!existingDim) continue;
+
+        // Re-run analysis for this dimension
+        const result = await analyzeDimension(
+          dimension,
+          businessInfo,
+          scrapedContent,
+          [] // uploadedDocuments - could be enhanced to include actual docs
+        );
+
+        // Update the dimension
+        await prisma.analysisDimension.update({
+          where: { id: existingDim.id },
+          data: {
+            score: result.score,
+            confidence: result.confidence,
+            evidence: result.evidence,
+            gaps: result.gaps,
+            recommendations: result.recommendations,
+            redFlags: result.redFlags,
+            analyzed: true,
+            metadata: result.metadata || {}
+          }
+        });
+      }
+
+      // Recalculate overall scores
+      const updatedDimensions = await prisma.analysisDimension.findMany({
+        where: { analysisId: analysis.id, analyzed: true }
+      });
+
+      const overallScore = Math.round(
+        updatedDimensions.reduce((sum, d) => sum + d.score, 0) / updatedDimensions.length
+      );
+
+      const confidenceWeightedScore = Math.round(
+        updatedDimensions.reduce((sum, d) => {
+          const weight = d.confidence === 'high' ? 1 : d.confidence === 'medium' ? 0.7 : 0.4;
+          return sum + (d.score * weight);
+        }, 0) / updatedDimensions.reduce((sum, d) => {
+          const weight = d.confidence === 'high' ? 1 : d.confidence === 'medium' ? 0.7 : 0.4;
+          return sum + weight;
+        }, 0)
+      );
+
+      const highConfidenceDims = updatedDimensions.filter(d => d.confidence === 'high').length;
+      const dataCompleteness = Math.round((highConfidenceDims / updatedDimensions.length) * 100);
+
+      await prisma.deepAnalysis.update({
+        where: { id: analysis.id },
+        data: {
+          overallScore,
+          confidenceWeightedScore,
+          dataCompleteness,
+          investmentReadiness: Math.round(overallScore / 10)
+        }
+      });
+
+    } catch (error) {
+      console.error('Reanalyze dimensions error:', error);
+      throw error;
+    }
+  },
+
+  async analyzeCompany(
+    businessInfo: BusinessInfo,
+    session?: { userId?: string; email?: string } | null,
+    options: RunOptions = {}
+  ): Promise<DeepAnalysis> {
+    return runDeepAnalysis(businessInfo, session, options);
+  }
+};

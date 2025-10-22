@@ -31,6 +31,9 @@ import {
 import { useRouter } from 'next/navigation';
 import NotificationBell from '@/components/NotificationBell';
 import PacmanGame from '@/components/PacmanGame';
+import ActionCardsCarousel from '@/components/ActionCardsCarousel';
+import MiniChatBot from '@/components/MiniChatBot';
+import { mapGapsToActionCards } from '@/lib/action-cards-mapper';
 
 export const dynamic = 'force-dynamic';
 
@@ -138,6 +141,8 @@ export default function Dashboard() {
   const [recentActivity] = useState<any[]>([]);
   const [dataGaps, setDataGaps] = useState<any>(null);
   const [loadingGaps, setLoadingGaps] = useState(false);
+  const [analysisData, setAnalysisData] = useState<any>(null);
+  const [actionCards, setActionCards] = useState<any[]>([]);
 
   // Load data gaps
   const loadDataGaps = async (sessionId: string) => {
@@ -187,6 +192,14 @@ export default function Dashboard() {
   }, []);
 
   // Start analysis if coming from wizard
+  // Generate action cards when we have data
+  useEffect(() => {
+    if (dataGaps || analysisData) {
+      const cards = mapGapsToActionCards(dataGaps?.gaps || null, analysisData);
+      setActionCards(cards);
+    }
+  }, [dataGaps, analysisData]);
+
   useEffect(() => {
     const shouldStartAnalysis = sessionStorage.getItem('frejfund-start-analysis');
     if (shouldStartAnalysis === 'true') {
@@ -250,6 +263,13 @@ export default function Dashboard() {
             setAnalysisProgress({ current: 95, total: 95, status: 'completed' });
             try { localStorage.removeItem('frejfund-analysis-running'); } catch {}
             setShowMetrics(true);
+
+            // Load full analysis data for action cards
+            const analysisRes = await fetch(`/api/deep-analysis?sessionId=${sessionId}`);
+            if (analysisRes.ok) {
+              const fullData = await analysisRes.json();
+              setAnalysisData(fullData);
+            }
 
             // Load data gaps when analysis is complete
             loadDataGaps(sessionId);
@@ -657,176 +677,86 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Recent Activity & Quick Actions */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
-                  <h2 className="text-lg font-semibold text-black mb-4">Key Insights</h2>
-                  {hasDeepAnalysis ? (
-                    <div className="space-y-3">
-                      <p className="text-sm text-gray-600 mb-4">
-                        Your complete business analysis is ready. View detailed insights:
+              {/* Action Cards Section */}
+              {hasDeepAnalysis && actionCards.length > 0 ? (
+                <div className="mb-8">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h2 className="text-2xl font-semibold text-black">Your Action Plan</h2>
+                      <p className="text-gray-600 mt-1">
+                        Personalized steps to improve your investment readiness
                       </p>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => router.push('/analysis')}
-                        className="w-full px-4 py-3 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors inline-flex items-center justify-center gap-2"
-                      >
-                        <Brain className="w-4 h-4" />
-                        View All 95 Dimensions
-                      </motion.button>
                     </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <p className="text-sm text-gray-600">
-                        Welcome! Complete these steps to get the most out of FrejFund:
-                      </p>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <Clock className="w-4 h-4 text-gray-400" />
-                            <span className="text-sm text-gray-800">Complete your business profile</span>
-                          </div>
-                          <button
-                            onClick={() => (window.location.href = 'https://www.frejfund.com/dashboard')}
-                            className="text-xs font-medium text-black hover:underline"
-                          >
-                            Click here!
-                          </button>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <Clock className="w-4 h-4 text-gray-400" />
-                            <span className="text-sm text-gray-800">Upload pitch deck or documents</span>
-                          </div>
-                          <button
-                            onClick={() => router.push('/documents')}
-                            className="text-xs font-medium text-black hover:underline"
-                          >
-                            Click here!
-                          </button>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Clock className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm text-gray-800">Start chatting with Freja</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
-                  {/* Data Gaps Widget (if analysis complete) */}
-                  {hasDeepAnalysis && dataGaps && dataGaps.totalGaps > 0 && (
-                    <div className="mb-6 pb-6 border-b border-gray-200">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-sm font-semibold text-black">Missing Information</h3>
-                        <span className="text-xs text-gray-500">
-                          {dataGaps.totalGaps} {dataGaps.totalGaps === 1 ? 'gap' : 'gaps'}
-                        </span>
-                      </div>
-                      <div className="space-y-2">
-                        {dataGaps.gaps.slice(0, 3).map((gap: any) => (
-                          <div
-                            key={gap.dimensionId}
-                            className="flex items-start justify-between p-3 bg-yellow-50 rounded-lg"
-                          >
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xs font-medium text-black">
-                                  {gap.dimensionName}
-                                </span>
-                                <span
-                                  className={`text-xs px-1.5 py-0.5 rounded ${
-                                    gap.priority === 'critical'
-                                      ? 'bg-red-100 text-red-700'
-                                      : gap.priority === 'high'
-                                        ? 'bg-yellow-100 text-yellow-700'
-                                        : 'bg-gray-100 text-gray-700'
-                                  }`}
-                                >
-                                  {gap.priority}
-                                </span>
-                              </div>
-                              <p className="text-xs text-gray-600">{(Array.isArray(gap.missingInfo) && gap.missingInfo[0]) || 'Additional details needed'}</p>
-                            </div>
-                            <div className="text-xs text-gray-500 ml-2">
-                              +{gap.potentialScoreIncrease}%
-                            </div>
-                          </div>
-                        ))}
-                        {dataGaps.totalGaps > 3 && (
-                          <p className="text-xs text-gray-500 text-center pt-2">
-                            +{dataGaps.totalGaps - 3} more gaps
-                          </p>
-                        )}
-                      </div>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => router.push('/chat')}
-                        className="w-full mt-3 px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800"
-                      >
-                        Complete Missing Info
-                      </motion.button>
-                    </div>
-                  )}
-
-                  <h2 className="text-lg font-semibold text-black mb-4">Quick Actions</h2>
-                  <div className="grid grid-cols-2 gap-3">
-                    <motion.button
-                      whileHover={{ scale: analysisProgress.status === 'running' ? 1 : 1.02 }}
-                      whileTap={{ scale: analysisProgress.status === 'running' ? 1 : 0.98 }}
-                      className={`p-4 rounded-lg transition-colors text-left ${
-                        analysisProgress.status === 'running'
-                          ? 'bg-gray-50 opacity-50 cursor-not-allowed'
-                          : 'bg-gray-50 hover:bg-gray-100'
-                      }`}
-                      onClick={() => analysisProgress.status !== 'running' && router.push('/chat')}
-                      disabled={analysisProgress.status === 'running'}
-                    >
-                      <MessageCircle className="w-5 h-5 text-gray-700 mb-2" />
-                      <h3 className="text-sm font-medium text-black">Chat with Freja</h3>
-                      <p className="text-xs text-gray-500">
-                        {analysisProgress.status === 'running' ? 'Available after analysis' : 'Get instant advice'}
-                      </p>
-                    </motion.button>
-
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
                       onClick={() => router.push('/analysis')}
+                      className="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors inline-flex items-center gap-2"
                     >
-                      <BarChart3 className="w-5 h-5 text-gray-700 mb-2" />
-                      <h3 className="text-sm font-medium text-black">Run Analysis</h3>
-                      <p className="text-xs text-gray-500">Full business review</p>
-                    </motion.button>
-
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
-                      onClick={() => router.push('/pitch')}
-                    >
-                      <FileText className="w-5 h-5 text-gray-700 mb-2" />
-                      <h3 className="text-sm font-medium text-black">Update Pitch</h3>
-                      <p className="text-xs text-gray-500">Optimize your deck</p>
-                    </motion.button>
-
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
-                      onClick={() => router.push('/documents')}
-                    >
-                      <FileText className="w-5 h-5 text-gray-700 mb-2" />
-                      <h3 className="text-sm font-medium text-black">Documents</h3>
-                      <p className="text-xs text-gray-500">All materials</p>
+                      <Brain className="w-4 h-4" />
+                      Full Analysis
                     </motion.button>
                   </div>
+                  
+                  <ActionCardsCarousel 
+                    cards={actionCards}
+                    onCardComplete={(cardId, data) => {
+                      console.log('Card completed:', cardId, data);
+                      // Reload gaps after completion
+                      const sessionId = localStorage.getItem('frejfund-session-id');
+                      if (sessionId) {
+                        loadDataGaps(sessionId);
+                      }
+                    }}
+                  />
                 </div>
-              </div>
+              ) : (
+                /* Original welcome content for users without analysis */
+                <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm mb-8">
+                  <h2 className="text-lg font-semibold text-black mb-4">Welcome to FrejFund</h2>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Complete these steps to get the most out of our platform:
+                  </p>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <Clock className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm text-gray-800">Complete your business profile</span>
+                      </div>
+                      <button
+                        onClick={() => setActiveSection('settings')}
+                        className="text-xs font-medium text-black hover:underline"
+                      >
+                        Go to Settings
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <FileText className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm text-gray-800">Upload pitch deck or documents</span>
+                      </div>
+                      <button
+                        onClick={() => router.push('/documents')}
+                        className="text-xs font-medium text-black hover:underline"
+                      >
+                        Upload Now
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <Brain className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm text-gray-800">Run deep analysis</span>
+                      </div>
+                      <button
+                        onClick={() => router.push('/analysis')}
+                        className="text-xs font-medium text-black hover:underline"
+                      >
+                        Start Analysis
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </motion.div>
           )}
 
@@ -1525,6 +1455,13 @@ export default function Dashboard() {
           </>
         )}
       </AnimatePresence>
+
+      {/* Mini ChatBot - Always visible */}
+      <MiniChatBot 
+        sessionId={localStorage.getItem('frejfund-session-id') || ''}
+        businessInfo={profileForm}
+        currentContext={activeSection}
+      />
     </div>
   );
 }
