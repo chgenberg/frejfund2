@@ -95,6 +95,23 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
     console.warn('External intelligence gathering failed:', e);
   }
 
+  // Gather Google Search intelligence (if API keys configured and user has quota)
+  let googleIntel = null;
+  try {
+    const { searchCompanyIntelligence } = await import('./google-search');
+    const userId = session?.userId || sessionId; // Fallback to sessionId if no user
+    
+    googleIntel = await searchCompanyIntelligence(
+      businessInfo.name || 'Unknown Company',
+      businessInfo.industry || '',
+      userId
+    );
+    
+    console.log(`🔍 Google Search: ${googleIntel.news.length} news, ${googleIntel.competitors.length} competitors, ${googleIntel.marketTrends.length} trends (quota: ${googleIntel.quotaRemaining})`);
+  } catch (e) {
+    console.warn('Google Search intelligence failed (likely quota/config):', e);
+  }
+
   // 3. GPT public knowledge (low-priority source)
   // If provided by orchestrator, use it; otherwise harvest now
     let gptKnowledgeText = options.preHarvestText || '';
@@ -434,6 +451,20 @@ async function analyzeDimension(
   // gpt-5 / gpt-5-mini: temperature not used; response_format unsupported on gpt-5*
 
   // Combine all available content
+  const googleContext = googleIntel ? `
+
+## Google Search Intelligence:
+
+### Recent News & Press:
+${googleIntel.news.map(n => `- **${n.title}**\n  ${n.snippet}\n  Source: ${n.link}`).join('\n\n')}
+
+### Competitors & Market:
+${googleIntel.competitors.map(c => `- ${c.title}: ${c.snippet}`).join('\n')}
+
+### Market Trends (${new Date().getFullYear()}):
+${googleIntel.marketTrends.map(t => `- ${t.title}: ${t.snippet}`).join('\n')}
+` : '';
+
   const fullContent = `
 # Company Intelligence Report
 
@@ -442,7 +473,8 @@ ${scrapedContent}
 
 ## Uploaded Documents:
 ${uploadedDocuments.join('\n\n---\n\n')}
-  `.slice(0, 8000);
+${googleContext}
+  `.slice(0, 12000);
 
   // Build enhanced analysis prompt with better structure
   const analysisPrompt = `${dimension.prompt(businessInfo, fullContent)}
