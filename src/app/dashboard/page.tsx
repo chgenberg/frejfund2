@@ -1435,62 +1435,72 @@ export default function Dashboard() {
               className="fixed inset-0 z-50 flex items-center justify-center p-4"
             >
               <div className="relative w-full max-w-3xl">
-                {/* Progress percentage above game */}
-                <motion.div
-                  key={analysisProgress.current}
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="text-center mb-4"
-                >
-                  <div className="text-6xl font-bold text-white">
-                    {Math.round((analysisProgress.current / analysisProgress.total) * 100)}%
-                  </div>
-                  <div className="text-lg text-gray-300 mt-1">
-                    Analyzing {analysisProgress.current} of {analysisProgress.total} dimensions
-                  </div>
-                  <div className="text-sm text-gray-400">
-                    Estimated time: 15-25 minutes
-                  </div>
-                </motion.div>
-
                 {/* Game container with animated progress border */}
-                <div className="relative p-1 rounded-3xl" style={{
-                  background: `conic-gradient(from -90deg at 50% 50%, 
-                    #ffffff 0deg, 
-                    #ffffff ${(analysisProgress.current / analysisProgress.total) * 360}deg, 
-                    #1f2937 ${(analysisProgress.current / analysisProgress.total) * 360}deg, 
-                    #1f2937 360deg)`,
-                  padding: '6px'
-                }}>
+                <div 
+                  className="relative rounded-3xl p-2"
+                  style={{
+                    background: `conic-gradient(from -90deg at 50% 50%, 
+                      #fbbf24 0deg, 
+                      #fbbf24 ${(analysisProgress.current / analysisProgress.total) * 360}deg, 
+                      #374151 ${(analysisProgress.current / analysisProgress.total) * 360}deg, 
+                      #374151 360deg)`,
+                    boxShadow: '0 0 40px rgba(251, 191, 36, 0.3)'
+                  }}
+                >
                   {/* Inner container */}
-                  <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-1">
+                  <div className="bg-gradient-to-br from-gray-900 to-black rounded-2xl p-6">
+                    {/* Header with title and percentage */}
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-2xl font-bold text-white">FREJA PAC-MAN</h2>
+                      <motion.div
+                        key={analysisProgress.current}
+                        initial={{ scale: 0.8 }}
+                        animate={{ scale: 1 }}
+                        className="flex items-center gap-2"
+                      >
+                        <span className="text-4xl font-bold text-yellow-400">
+                          {Math.round((analysisProgress.current / analysisProgress.total) * 100)}%
+                        </span>
+                      </motion.div>
+                    </div>
+
+                    {/* Progress info */}
+                    <div className="text-center mb-4">
+                      <p className="text-sm text-gray-400">
+                        Analyzing dimension {analysisProgress.current} of {analysisProgress.total}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Estimated time remaining: {Math.max(1, Math.round((analysisProgress.total - analysisProgress.current) * 0.25))} minutes
+                      </p>
+                    </div>
+
                     {/* Pac-Man Game */}
                     <PacmanGame />
-                  </div>
-                </div>
 
-                {/* Bottom text */}
-                <div className="text-center mt-4">
-                  <p className="text-gray-300 text-sm">
-                    Play while Freja analyzes your business
-                  </p>
-                  <div className="flex justify-center mt-2 space-x-2">
-                    {[0, 1, 2].map((i) => (
-                      <motion.div
-                        key={i}
-                        className="w-2 h-2 bg-gray-400 rounded-full"
-                        animate={{
-                          y: [0, -8, 0],
-                          backgroundColor: ["#9ca3af", "#ffffff", "#9ca3af"]
-                        }}
-                        transition={{
-                          duration: 1.5,
-                          repeat: Infinity,
-                          delay: i * 0.2,
-                          ease: "easeInOut"
-                        }}
-                      />
-                    ))}
+                    {/* Bottom text with animated dots */}
+                    <div className="text-center mt-4">
+                      <p className="text-gray-300 text-sm flex items-center justify-center gap-1">
+                        Play while Freja analyzes your business
+                        <span className="flex gap-1">
+                          {[0, 1, 2].map((i) => (
+                            <motion.span
+                              key={i}
+                              animate={{
+                                opacity: [0, 1, 0],
+                              }}
+                              transition={{
+                                duration: 1.5,
+                                repeat: Infinity,
+                                delay: i * 0.3,
+                                ease: "easeInOut"
+                              }}
+                            >
+                              .
+                            </motion.span>
+                          ))}
+                        </span>
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
