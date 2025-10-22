@@ -143,6 +143,14 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
       (businessInfo as any).ocrExtractedText = mergedText.slice(0, 8000);
       (businessInfo as any).ocrMetrics = mergedMetrics;
       console.log('🧾 OCR metrics extracted:', mergedMetrics);
+      try {
+        await prisma.deepAnalysis.update({
+          where: { id: analysis.id },
+          data: { ocrMetrics: mergedMetrics },
+        });
+      } catch (e) {
+        console.warn('Failed to persist ocrMetrics:', e);
+      }
     }
   } catch (e) {
     console.warn('OCR extraction skipped/failed:', e);

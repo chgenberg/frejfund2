@@ -391,6 +391,7 @@ export async function GET(request: NextRequest) {
       dataCompleteness: (analysis as any).dataCompleteness,
       companyStage: (analysis as any).companyStage,
       investmentReadiness: analysis.investmentReadiness,
+      ocrMetrics: (analysis as any).ocrMetrics || null,
       categoryScores,
       insights: analysis.insights,
       completedAt: analysis.completedAt,
