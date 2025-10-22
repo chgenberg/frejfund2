@@ -639,87 +639,71 @@ export default function AnalysisPage() {
 
           {/* Score Display - Confidence Weighted + Data Completeness */}
           <div className="inline-block">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-3xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12 max-w-2xl mx-auto">
               {/* Confidence-Weighted Score (Primary) */}
               <div>
-                <div className="relative w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-3">
-                  <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 160 160">
-                    <circle cx="80" cy="80" r="70" fill="none" stroke="#e5e5e5" strokeWidth="12" />
+                <div className="relative w-40 h-40 sm:w-48 sm:h-48 mx-auto mb-4">
+                  <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 200 200">
+                    <circle cx="100" cy="100" r="85" fill="none" stroke="#e5e5e5" strokeWidth="14" />
                     <motion.circle
-                      cx="80"
-                      cy="80"
-                      r="70"
+                      cx="100"
+                      cy="100"
+                      r="85"
                       fill="none"
                       stroke="#000"
-                      strokeWidth="12"
+                      strokeWidth="14"
                       strokeLinecap="round"
-                      strokeDasharray={440}
-                      initial={{ strokeDashoffset: 440 }}
-                      animate={{ strokeDashoffset: 440 - (confidenceWeightedScore / 100) * 440 }}
+                      strokeDasharray={534}
+                      initial={{ strokeDashoffset: 534 }}
+                      animate={{ strokeDashoffset: 534 - (confidenceWeightedScore / 100) * 534 }}
                       transition={{ duration: 1.5, ease: 'easeOut' }}
                     />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-4xl sm:text-5xl font-bold text-black">{confidenceWeightedScore}</span>
-                    <span className="text-xs text-gray-500">Score</span>
+                    <span className="text-5xl sm:text-6xl font-bold text-black">{confidenceWeightedScore}</span>
+                    <span className="text-sm text-gray-500 mt-1">Score</span>
                   </div>
                 </div>
-                <p className="text-center text-sm font-medium text-black">Investment Score</p>
-                <p className="text-center text-xs text-gray-500">Confidence-weighted</p>
+                <p className="text-center text-base font-semibold text-black">Investment Score</p>
+                <p className="text-center text-sm text-gray-500 mt-1">Confidence-weighted</p>
               </div>
 
               {/* Data Completeness */}
               <div>
-                <div className="relative w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-3">
-                  <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 160 160">
-                    <circle cx="80" cy="80" r="70" fill="none" stroke="#e5e5e5" strokeWidth="12" />
+                <div className="relative w-40 h-40 sm:w-48 sm:h-48 mx-auto mb-4">
+                  <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 200 200">
+                    <circle cx="100" cy="100" r="85" fill="none" stroke="#e5e5e5" strokeWidth="14" />
                     <motion.circle
-                      cx="80"
-                      cy="80"
-                      r="70"
+                      cx="100"
+                      cy="100"
+                      r="85"
                       fill="none"
                       stroke="#6b7280"
-                      strokeWidth="12"
+                      strokeWidth="14"
                       strokeLinecap="round"
-                      strokeDasharray={440}
-                      initial={{ strokeDashoffset: 440 }}
-                      animate={{ strokeDashoffset: 440 - (dataCompleteness / 100) * 440 }}
+                      strokeDasharray={534}
+                      initial={{ strokeDashoffset: 534 }}
+                      animate={{ strokeDashoffset: 534 - (dataCompleteness / 100) * 534 }}
                       transition={{ duration: 1.5, ease: 'easeOut', delay: 0.2 }}
                     />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-4xl sm:text-5xl font-bold text-gray-700">{dataCompleteness}%</span>
-                    <span className="text-xs text-gray-500">Complete</span>
+                    <span className="text-5xl sm:text-6xl font-bold text-gray-700">{dataCompleteness}%</span>
+                    <span className="text-sm text-gray-500 mt-1">Complete</span>
                   </div>
                 </div>
-                <p className="text-center text-sm font-medium text-black">Data Quality</p>
-                <p className="text-center text-xs text-gray-500">High-confidence data</p>
+                <p className="text-center text-base font-semibold text-black">Data Quality</p>
+                <p className="text-center text-sm text-gray-500 mt-1">High-confidence data</p>
                 {dataCompleteness < 70 && (
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setShowUploadModal(true)}
-                    className="mt-2 w-full px-3 py-1.5 bg-black text-white rounded-lg text-xs font-medium hover:bg-gray-800 transition-colors"
+                    className="mt-3 w-full px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
                   >
                     Upload Documents
                   </motion.button>
                 )}
-              </div>
-
-              {/* Company Stage */}
-              <div>
-                <div className="relative w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-3 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-20 h-20 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center">
-                      <span className="text-3xl">
-                        {companyStage === 'enterprise' ? '🏢' : companyStage === 'scaleup' ? '📈' : '🚀'}
-                      </span>
-                    </div>
-                    <span className="text-lg font-bold text-black capitalize">{companyStage}</span>
-                  </div>
-                </div>
-                <p className="text-center text-sm font-medium text-black">Company Stage</p>
-                <p className="text-center text-xs text-gray-500">Auto-detected</p>
               </div>
             </div>
           </div>
