@@ -557,6 +557,9 @@ model DeepAnalysis {
   // Low-priority context harvested from GPT (batched summaries)
   publicKnowledge Json?
 
+  // OCR metrics extracted from uploaded pitch decks
+  ocrMetrics Json?
+
   // Timestamps
   startedAt     DateTime  @default(now())
   completedAt   DateTime?
