@@ -282,11 +282,28 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
       const batch = dimensionsToAnalyze.slice(idx, idx + batchSize);
       for (const dimension of batch) {
         try {
+        // Guard against long-hanging external calls (LLM/network)
+        const withTimeout = async <T,>(promise: Promise<T>, ms: number, label: string): Promise<T> => {
+          return await new Promise<T>((resolve, reject) => {
+            const to = setTimeout(() => reject(new Error(`Timeout after ${ms}ms: ${label}`)), ms);
+            promise
+              .then((v) => {
+                clearTimeout(to);
+                resolve(v);
+              })
+              .catch((e) => {
+                clearTimeout(to);
+                reject(e);
+              });
+          });
+        };
+
           // Analyze with simple retry/backoff
           let result: any | null = null;
           for (let attempt = 1; attempt <= 2; attempt++) {
             try {
-              result = await analyzeDimension(
+            result = await withTimeout(
+              analyzeDimension(
                 dimension,
                 businessInfo,
                 // Truncate context to keep memory small
@@ -299,7 +316,10 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
                   (gptKnowledgeText || '').slice(0, 2000),
                 uploadedDocuments,
                 googleIntel,
-              );
+              ),
+              120000,
+              `dimension ${dimension.id}`,
+            );
               break;
             } catch (e) {
               if (attempt === 2) throw e;
