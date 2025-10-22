@@ -399,6 +399,22 @@ export async function GET(request: NextRequest) {
       };
     });
 
+    // Compute derived unit economics if possible
+    const overrides = (analysis as any).metricOverrides || {};
+    const ocr = (analysis as any).ocrMetrics || {};
+    const src = { ...ocr, ...overrides }; // overrides win
+    const cac = Number(src.cac);
+    const ltv = Number(src.ltv);
+    const churn = Number(src.churn);
+    const mrr = Number(src.mrr);
+    const customers = Number(src.customers);
+    const grossMargin = Number(src.grossMargin); // optional
+    const arpu = Number.isFinite(mrr) && Number.isFinite(customers) && customers > 0 ? mrr / customers : Number(src.arpu);
+    const ltvCac = Number.isFinite(ltv) && Number.isFinite(cac) && cac > 0 ? ltv / cac : undefined;
+    const paybackMonths = Number.isFinite(cac) && Number.isFinite(arpu) && arpu > 0
+      ? (Number.isFinite(grossMargin) && grossMargin > 0 ? cac / (arpu * (grossMargin / 100)) : cac / arpu)
+      : undefined;
+
     return NextResponse.json({
       status: analysis.status,
       progress: analysis.progress,
