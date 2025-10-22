@@ -112,6 +112,42 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
     console.warn('Google Search intelligence failed (likely quota/config):', e);
   }
 
+  // OCR: Extract metrics from uploaded PDF pitch decks and enrich businessInfo
+  try {
+    const pdfUrls = (uploadedDocuments || []).filter((u) => /\.pdf($|\?|#)/i.test(u));
+    if (pdfUrls.length > 0) {
+      const { extractPitchDeckMetrics } = await import('./pdf-ocr');
+      let mergedText = '';
+      let mergedMetrics: any = {};
+
+      // Process first 3 PDFs to cap runtime
+      for (const url of pdfUrls.slice(0, 3)) {
+        try {
+          const res = await fetch(url);
+          const buf = Buffer.from(await res.arrayBuffer());
+          const ocr = await extractPitchDeckMetrics(buf, url.split('/').pop());
+          mergedText += `\n\n--- ${url} ---\n${ocr.fullText}`;
+
+          // Merge metrics (prefer larger non-null values)
+          for (const [k, v] of Object.entries(ocr.metrics)) {
+            if (v === undefined || v === null || Number.isNaN(v as number)) continue;
+            const prev = mergedMetrics[k];
+            mergedMetrics[k] = prev ? Math.max(prev as number, v as number) : v;
+          }
+        } catch (e) {
+          console.warn('PDF OCR failed for', url, e);
+        }
+      }
+
+      // Attach to businessInfo for downstream prompts
+      (businessInfo as any).ocrExtractedText = mergedText.slice(0, 8000);
+      (businessInfo as any).ocrMetrics = mergedMetrics;
+      console.log('🧾 OCR metrics extracted:', mergedMetrics);
+    }
+  } catch (e) {
+    console.warn('OCR extraction skipped/failed:', e);
+  }
+
   // 3. GPT public knowledge (low-priority source)
   // If provided by orchestrator, use it; otherwise harvest now
     let gptKnowledgeText = options.preHarvestText || '';
@@ -465,6 +501,11 @@ ${googleIntel.competitors.map(c => `- ${c.title}: ${c.snippet}`).join('\n')}
 ${googleIntel.marketTrends.map(t => `- ${t.title}: ${t.snippet}`).join('\n')}
 ` : '';
 
+  // Include OCR metrics and text (if any)
+  const ocrContext = (businessInfo as any).ocrMetrics || (businessInfo as any).ocrExtractedText
+    ? `\n## OCR Extracted Metrics:\n${JSON.stringify((businessInfo as any).ocrMetrics || {}, null, 2)}\n\n## OCR Extracted Text (truncated):\n${((businessInfo as any).ocrExtractedText || '').slice(0, 4000)}\n`
+    : '';
+
   const fullContent = `
 # Company Intelligence Report
 
@@ -474,6 +515,7 @@ ${scrapedContent}
 ## Uploaded Documents:
 ${uploadedDocuments.join('\n\n---\n\n')}
 ${googleContext}
+${ocrContext}
   `.slice(0, 12000);
 
   // Build enhanced analysis prompt with better structure
