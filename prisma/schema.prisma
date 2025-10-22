@@ -560,6 +560,9 @@ model DeepAnalysis {
   // OCR metrics extracted from uploaded pitch decks
   ocrMetrics Json?
 
+  // Manual overrides entered by user (takes precedence over OCR)
+  metricOverrides Json?
+
   // Timestamps
   startedAt     DateTime  @default(now())
   completedAt   DateTime?

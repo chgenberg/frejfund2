@@ -302,6 +302,22 @@ export async function POST(request: NextRequest) {
         console.error('❌ Background deep analysis failed:', error);
       });
 
+    // Compute derived unit economics if possible
+    const overrides = (analysis as any).metricOverrides || {};
+    const ocr = (analysis as any).ocrMetrics || {};
+    const src = { ...ocr, ...overrides }; // overrides win
+    const cac = Number(src.cac);
+    const ltv = Number(src.ltv);
+    const churn = Number(src.churn);
+    const mrr = Number(src.mrr);
+    const customers = Number(src.customers);
+    const grossMargin = Number(src.grossMargin); // optional
+    const arpu = Number.isFinite(mrr) && Number.isFinite(customers) && customers > 0 ? mrr / customers : Number(src.arpu);
+    const ltvCac = Number.isFinite(ltv) && Number.isFinite(cac) && cac > 0 ? ltv / cac : undefined;
+    const paybackMonths = Number.isFinite(cac) && Number.isFinite(arpu) && arpu > 0
+      ? (Number.isFinite(grossMargin) && grossMargin > 0 ? cac / (arpu * (grossMargin / 100)) : cac / arpu)
+      : undefined;
+
     return NextResponse.json({
       success: true,
       message: 'Deep analysis orchestration started',
@@ -392,6 +408,13 @@ export async function GET(request: NextRequest) {
       companyStage: (analysis as any).companyStage,
       investmentReadiness: analysis.investmentReadiness,
       ocrMetrics: (analysis as any).ocrMetrics || null,
+      metricOverrides: (analysis as any).metricOverrides || null,
+      derivedUnitEconomics: {
+        ltvCac: Number.isFinite(ltvCac as number) ? Number(ltvCac?.toFixed(2)) : null,
+        paybackMonths: Number.isFinite(paybackMonths as number) ? Number((paybackMonths as number).toFixed(1)) : null,
+        arpu: Number.isFinite(arpu) ? Math.round(arpu) : null,
+        grossMargin: Number.isFinite(grossMargin) ? Number(grossMargin.toFixed(1)) : null,
+      },
       categoryScores,
       insights: analysis.insights,
       completedAt: analysis.completedAt,

@@ -725,21 +725,44 @@ export default function AnalysisPage() {
           </div>
         </div>
 
-        {/* OCR Metrics (if available) */}
-        {analysisProgress.status === 'completed' && (analysisData as any)?.ocrMetrics && (
+        {/* Unit Economics Card (Derived + OCR) */}
+        {analysisProgress.status === 'completed' && (
           <div className="minimal-box mb-8 p-6 sm:p-8">
-            <h2 className="text-lg sm:text-xl font-bold text-black mb-4">Metrics Detected in Pitch Deck</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {Object.entries((analysisData as any).ocrMetrics).map(([key, value]) => (
-                <div key={key} className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-center">
-                  <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">{key}</div>
-                  <div className="text-base font-semibold text-black">
-                    {typeof value === 'number' ? value.toLocaleString() : String(value)}
+            <h2 className="text-lg sm:text-xl font-bold text-black mb-4">Unit Economics (Estimated)</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {(() => {
+                const d = (analysisData as any)?.derivedUnitEconomics || {};
+                const items = [
+                  { k: 'LTV/CAC', v: d.ltvCac != null ? d.ltvCac : '—' },
+                  { k: 'Payback (mo)', v: d.paybackMonths != null ? d.paybackMonths : '—' },
+                  { k: 'ARPU', v: d.arpu != null ? `$${Number(d.arpu).toLocaleString()}` : '—' },
+                  { k: 'Gross Margin', v: d.grossMargin != null ? `${d.grossMargin}%` : '—' },
+                ];
+                return items.map(({ k, v }) => (
+                  <div key={k} className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-center">
+                    <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">{k}</div>
+                    <div className="text-base font-semibold text-black">{v}</div>
                   </div>
-                </div>
-              ))}
+                ));
+              })()}
             </div>
-            <p className="text-xs text-gray-500 mt-3">Extracted automatically from uploaded PDFs</p>
+            {(analysisData as any)?.ocrMetrics && (
+              <>
+                <h3 className="text-sm font-semibold text-black mt-6 mb-2">From Pitch Deck (OCR)</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {Object.entries((analysisData as any).ocrMetrics).map(([key, value]) => (
+                    <div key={key} className="p-3 bg-white rounded-lg border border-gray-200 text-center">
+                      <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">{key}</div>
+                      <div className="text-base font-semibold text-black">
+                        {typeof value === 'number' ? value.toLocaleString() : String(value)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 mt-3">Est. values. Parsed automatically from uploaded PDFs.</p>
+              </>
+            )}
+            {/* Future: Add an Edit button to override metrics manually */}
           </div>
         )}
 
