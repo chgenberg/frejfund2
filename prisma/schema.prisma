@@ -682,3 +682,17 @@ model PacmanScore {
   @@index([createdAt])
   @@map("pacman_scores")
 }
+
+// Google Search API usage tracking
+model GoogleSearchLog {
+  id          String   @id @default(cuid())
+  userId      String
+  query       String
+  resultCount Int      @default(0)
+  cached      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("google_search_logs")
+}
