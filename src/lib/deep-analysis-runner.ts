@@ -659,10 +659,67 @@ Return ONLY valid JSON. No explanatory text outside the JSON structure.`,
       confidence = 'medium';
     }
 
+    // Post-process: adjust scores for relevant dimensions using OCR metrics
+    const ocr = (businessInfo as any).ocrMetrics || {};
+    let adjustedScore = Number.isFinite(result.score) ? Math.max(0, Math.min(100, Number(result.score))) : 0;
+    const extraFindings: string[] = [];
+
+    const dimId = String(dimension.id || dimension.dimensionId || '').toLowerCase();
+    if (dimId.includes('unit') || dimId.includes('economics')) {
+      // Boost if LTV:CAC >= 3 and churn <= 3%
+      const cac = Number(ocr.cac || NaN);
+      const ltv = Number(ocr.ltv || NaN);
+      const churn = Number(ocr.churn || NaN);
+      if (Number.isFinite(cac) && Number.isFinite(ltv) && cac > 0) {
+        const ratio = ltv / cac;
+        if (ratio >= 3) {
+          adjustedScore = Math.min(100, adjustedScore + 8);
+          extraFindings.push(`OCR detected strong unit economics: LTV/CAC≈${ratio.toFixed(1)}`);
+        } else if (ratio < 1.5) {
+          adjustedScore = Math.max(0, adjustedScore - 5);
+          extraFindings.push(`OCR indicates weak LTV/CAC≈${ratio.toFixed(1)}`);
+        }
+      }
+      if (Number.isFinite(churn)) {
+        if (churn <= 3) {
+          adjustedScore = Math.min(100, adjustedScore + 5);
+          extraFindings.push(`OCR churn: ${churn}% (healthy)`);
+        } else if (churn >= 10) {
+          adjustedScore = Math.max(0, adjustedScore - 6);
+          extraFindings.push(`OCR churn: ${churn}% (high)`);
+        }
+      }
+    } else if (dimId.includes('traction') || dimId.includes('growth')) {
+      const mrr = Number(ocr.mrr || NaN);
+      const growth = Number(ocr.growth || NaN);
+      if (Number.isFinite(mrr) && mrr >= 50000) {
+        adjustedScore = Math.min(100, adjustedScore + 6);
+        extraFindings.push(`OCR MRR: $${Math.round(mrr).toLocaleString()}`);
+      }
+      if (Number.isFinite(growth) && growth >= 15) {
+        adjustedScore = Math.min(100, adjustedScore + 4);
+        extraFindings.push(`OCR growth: ${growth}%`);
+      }
+    } else if (dimId.includes('retention')) {
+      const churn = Number(ocr.churn || NaN);
+      if (Number.isFinite(churn)) {
+        if (churn <= 3) {
+          adjustedScore = Math.min(100, adjustedScore + 8);
+          extraFindings.push(`OCR churn: ${churn}% (excellent retention)`);
+        } else if (churn >= 10) {
+          adjustedScore = Math.max(0, adjustedScore - 8);
+          extraFindings.push(`OCR churn: ${churn}% (weak retention)`);
+        }
+      }
+    }
+
     return {
       dimension: dimension.id,
-      score: Number.isFinite(result.score) ? Math.max(0, Math.min(100, Number(result.score))) : 0,
-      findings: Array.isArray(result.findings) ? result.findings.slice(0, 3) : [],
+      score: adjustedScore,
+      findings: [
+        ...(Array.isArray(result.findings) ? result.findings.slice(0, 3) : []),
+        ...extraFindings.slice(0, 2),
+      ],
       redFlags: Array.isArray(result.redFlags) ? result.redFlags.slice(0, 3) : [],
       strengths: Array.isArray(result.strengths) ? result.strengths.slice(0, 3) : [],
       questionsToAsk: Array.isArray(result.questionsToAsk) ? result.questionsToAsk.slice(0, 3) : [],
