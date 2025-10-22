@@ -508,117 +508,8 @@ export default function Dashboard() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         <AnimatePresence mode="wait">
-          {/* Show ONLY progress + game during analysis, lock everything else */}
-          {analysisProgress.status === 'running' ? (
-            <motion.div
-              key="analysis-only"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="min-h-[calc(100vh-200px)] flex items-center justify-center"
-            >
-              <div className="w-full max-w-4xl space-y-6">
-                {/* Analysis Progress Circle */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="bg-white rounded-2xl border border-gray-200 shadow-lg p-8 sm:p-12 mb-6"
-                >
-                  <div className="flex flex-col items-center">
-                    {/* Circular Progress */}
-                    <div className="relative">
-                      <svg className="w-48 h-48 sm:w-64 sm:h-64 transform -rotate-90" viewBox="0 0 100 100">
-                        {/* Background circle */}
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="45"
-                          stroke="#e5e7eb"
-                          strokeWidth="8"
-                          fill="none"
-                        />
-                        {/* Progress circle */}
-                        <motion.circle
-                          cx="50"
-                          cy="50"
-                          r="45"
-                          stroke="#000000"
-                          strokeWidth="8"
-                          fill="none"
-                          strokeLinecap="round"
-                          strokeDasharray={`${2 * Math.PI * 45}`}
-                          initial={{ strokeDashoffset: 2 * Math.PI * 45 }}
-                          animate={{
-                            strokeDashoffset: 2 * Math.PI * 45 * (1 - (analysisProgress.current / analysisProgress.total))
-                          }}
-                          transition={{ duration: 0.5, ease: "easeOut" }}
-                        />
-                      </svg>
-                      
-                      {/* Center content */}
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <motion.div
-                          key={analysisProgress.current}
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{ duration: 0.3 }}
-                          className="text-4xl sm:text-5xl font-bold text-black"
-                        >
-                          {Math.round((analysisProgress.current / analysisProgress.total) * 100)}%
-                        </motion.div>
-                        <div className="text-sm sm:text-base text-gray-600 mt-1">
-                          {analysisProgress.current}/{analysisProgress.total}
-                        </div>
-                        <div className="text-xs text-gray-500 mt-1">dimensions</div>
-                      </div>
-                    </div>
-                    
-                    {/* Text below circle */}
-                    <div className="mt-8 text-center max-w-md">
-                      <h2 className="text-xl sm:text-2xl font-bold text-black mb-2">
-                        Analyzing Your Business
-                      </h2>
-                      <p className="text-gray-600 text-sm sm:text-base">
-                        Freja is conducting a deep analysis across 95 dimensions. This typically takes 15-25 minutes.
-                      </p>
-                      
-                      {/* Animated dots */}
-                      <div className="flex justify-center mt-6 space-x-2">
-                        {[0, 1, 2].map((i) => (
-                          <motion.div
-                            key={i}
-                            className="w-2 h-2 bg-gray-400 rounded-full"
-                            animate={{
-                              y: [0, -8, 0],
-                              backgroundColor: ["#9ca3af", "#000000", "#9ca3af"]
-                            }}
-                            transition={{
-                              duration: 1.5,
-                              repeat: Infinity,
-                              delay: i * 0.2,
-                              ease: "easeInOut"
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-
-                {/* Pac-Man Game */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <PacmanGame />
-                </motion.div>
-              </div>
-            </motion.div>
-          ) : (
-            /* Normal dashboard sections when not analyzing */
-            <>
-              {activeSection === 'overview' && (
+          {/* Normal dashboard sections */}
+          {activeSection === 'overview' && (
                 <motion.div
                   key="overview"
                   initial={{ opacity: 0, y: 20 }}
@@ -1521,10 +1412,95 @@ export default function Dashboard() {
               {activeSection === 'settings' && (
                 <AccountSettings />
               )}
-            </>
-          )}
         </AnimatePresence>
       </main>
+
+      {/* Analysis Modal Overlay */}
+      <AnimatePresence>
+        {analysisProgress.status === 'running' && (
+          <>
+            {/* Dark backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+            />
+            
+            {/* Modal content */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            >
+              <div className="relative w-full max-w-3xl">
+                {/* Progress percentage above game */}
+                <motion.div
+                  key={analysisProgress.current}
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="text-center mb-4"
+                >
+                  <div className="text-6xl font-bold text-white">
+                    {Math.round((analysisProgress.current / analysisProgress.total) * 100)}%
+                  </div>
+                  <div className="text-lg text-gray-300 mt-1">
+                    Analyzing {analysisProgress.current} of {analysisProgress.total} dimensions
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    Estimated time: 15-25 minutes
+                  </div>
+                </motion.div>
+
+                {/* Game container with progress border */}
+                <div className="relative p-2 bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl">
+                  {/* Animated progress border */}
+                  <div className="absolute inset-0 rounded-3xl" style={{
+                    background: `conic-gradient(from 0deg at 50% 50%, 
+                      #ffffff 0deg, 
+                      #9ca3af ${(analysisProgress.current / analysisProgress.total) * 360}deg, 
+                      #374151 ${(analysisProgress.current / analysisProgress.total) * 360}deg, 
+                      #374151 360deg)`
+                  }}>
+                    <div className="absolute inset-1 bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl" />
+                  </div>
+                  
+                  {/* Pac-Man Game */}
+                  <div className="relative z-10">
+                    <PacmanGame />
+                  </div>
+                </div>
+
+                {/* Bottom text */}
+                <div className="text-center mt-4">
+                  <p className="text-gray-300 text-sm">
+                    Play while Freja analyzes your business
+                  </p>
+                  <div className="flex justify-center mt-2 space-x-2">
+                    {[0, 1, 2].map((i) => (
+                      <motion.div
+                        key={i}
+                        className="w-2 h-2 bg-gray-400 rounded-full"
+                        animate={{
+                          y: [0, -8, 0],
+                          backgroundColor: ["#9ca3af", "#ffffff", "#9ca3af"]
+                        }}
+                        transition={{
+                          duration: 1.5,
+                          repeat: Infinity,
+                          delay: i * 0.2,
+                          ease: "easeInOut"
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
