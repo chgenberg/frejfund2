@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { BusinessInfo } from '@/types/business';
 import { normalizeUrl, isValidUrl } from '@/lib/url-utils';
+import MinimalSelect, { SelectOption } from './MinimalSelect';
 
 interface BusinessWizardProps {
   onComplete: (businessInfo: BusinessInfo) => void;
@@ -546,32 +547,25 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
         return (
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-3">Industry *</label>
-            <div className="relative">
-              <select
-                value={businessInfo.industry || ''}
-                onChange={(e) => handleInputChange('industry', e.target.value)}
-                className="minimal-select w-full"
-              >
-                <option value="">Select your industry</option>
-                <option value="SaaS">SaaS / Software</option>
-                <option value="E-commerce">E-commerce</option>
-                <option value="Fintech">Fintech</option>
-                <option value="HealthTech">HealthTech</option>
-                <option value="EdTech">EdTech</option>
-                <option value="AI/ML">AI / Machine Learning</option>
-                <option value="IoT">IoT / Hardware</option>
-                <option value="Marketplace">Marketplace</option>
-                <option value="Gaming">Gaming</option>
-                <option value="Other">Other</option>
-              </select>
-              <motion.div
-                className="absolute right-5 top-1/2 transform -translate-y-1/2 pointer-events-none"
-                animate={{ rotate: businessInfo.industry ? 180 : 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <ChevronDown className="w-5 h-5 text-gray-500" />
-              </motion.div>
-            </div>
+            <MinimalSelect
+              value={businessInfo.industry || ''}
+              onChange={(val) => handleInputChange('industry', val)}
+              options={[
+                { value: '', label: 'Select your industry' },
+                { value: 'SaaS', label: 'SaaS / Software' },
+                { value: 'E-commerce', label: 'E-commerce' },
+                { value: 'Fintech', label: 'Fintech' },
+                { value: 'HealthTech', label: 'HealthTech' },
+                { value: 'EdTech', label: 'EdTech' },
+                { value: 'AI/ML', label: 'AI / Machine Learning' },
+                { value: 'IoT', label: 'IoT / Hardware' },
+                { value: 'Marketplace', label: 'Marketplace' },
+                { value: 'Gaming', label: 'Gaming' },
+                { value: 'Other', label: 'Other' },
+              ]}
+              className="w-full"
+              placeholder="Select your industry"
+            />
           </div>
         );
 
@@ -579,19 +573,21 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
         return (
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-3">Target Market *</label>
-            <select
+            <MinimalSelect
               value={businessInfo.targetMarket || ''}
-              onChange={(e) => handleInputChange('targetMarket', e.target.value)}
-              className="minimal-select w-full"
-            >
-              <option value="">Select your target market</option>
-              <option value="SMBs">Small & Medium Businesses</option>
-              <option value="Enterprises">Enterprise Companies</option>
-              <option value="Consumers">Consumers (B2C)</option>
-              <option value="Startups">Startups</option>
-              <option value="Government">Government</option>
-              <option value="Non-profit">Non-profit</option>
-            </select>
+              onChange={(val) => handleInputChange('targetMarket', val)}
+              options={[
+                { value: '', label: 'Select your target market' },
+                { value: 'SMBs', label: 'Small & Medium Businesses' },
+                { value: 'Enterprises', label: 'Enterprise Companies' },
+                { value: 'Consumers', label: 'Consumers (B2C)' },
+                { value: 'Startups', label: 'Startups' },
+                { value: 'Government', label: 'Government' },
+                { value: 'Non-profit', label: 'Non-profit' },
+              ]}
+              className="w-full"
+              placeholder="Select your target market"
+            />
           </div>
         );
 
@@ -599,22 +595,24 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
         return (
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-3">Business Model *</label>
-            <select
+            <MinimalSelect
               value={businessInfo.businessModel || ''}
-              onChange={(e) => handleInputChange('businessModel', e.target.value)}
-              className="minimal-select w-full"
-            >
-              <option value="">Select your business model</option>
-              <option value="B2B Subscription">B2B Subscription (SaaS)</option>
-              <option value="B2C Subscription">B2C Subscription</option>
-              <option value="Marketplace">Marketplace (Commission)</option>
-              <option value="E-commerce">E-commerce (Product Sales)</option>
-              <option value="Freemium">Freemium</option>
-              <option value="One-time License">One-time License</option>
-              <option value="Services">Professional Services</option>
-              <option value="Advertising">Advertising Revenue</option>
-              <option value="Other">Other</option>
-            </select>
+              onChange={(val) => handleInputChange('businessModel', val)}
+              options={[
+                { value: '', label: 'Select your business model' },
+                { value: 'B2B Subscription', label: 'B2B Subscription (SaaS)' },
+                { value: 'B2C Subscription', label: 'B2C Subscription' },
+                { value: 'Marketplace', label: 'Marketplace (Commission)' },
+                { value: 'E-commerce', label: 'E-commerce (Product Sales)' },
+                { value: 'Freemium', label: 'Freemium' },
+                { value: 'One-time License', label: 'One-time License' },
+                { value: 'Services', label: 'Professional Services' },
+                { value: 'Advertising', label: 'Advertising Revenue' },
+                { value: 'Other', label: 'Other' },
+              ]}
+              className="w-full"
+              placeholder="Select your business model"
+            />
           </div>
         );
 
@@ -624,18 +622,20 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
             <label className="block text-sm font-medium text-gray-700 mb-3">
               Monthly Revenue *
             </label>
-            <select
+            <MinimalSelect
               value={businessInfo.monthlyRevenue || ''}
-              onChange={(e) => handleInputChange('monthlyRevenue', e.target.value)}
-              className="minimal-select w-full"
-            >
-              <option value="">Select revenue range</option>
-              <option value="0">€0 (Pre-revenue)</option>
-              <option value="1-10k">€1k - €10k</option>
-              <option value="10-50k">€10k - €50k</option>
-              <option value="50-100k">€50k - €100k</option>
-              <option value="100k+">€100k+</option>
-            </select>
+              onChange={(val) => handleInputChange('monthlyRevenue', val)}
+              options={[
+                { value: '', label: 'Select revenue range' },
+                { value: '0', label: '€0 (Pre-revenue)' },
+                { value: '1-10k', label: '€1k - €10k' },
+                { value: '10-50k', label: '€10k - €50k' },
+                { value: '50-100k', label: '€50k - €100k' },
+                { value: '100k+', label: '€100k+' },
+              ]}
+              className="w-full"
+              placeholder="Select revenue range"
+            />
           </div>
         );
 
@@ -643,18 +643,20 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
         return (
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-3">Team Size *</label>
-            <select
+            <MinimalSelect
               value={businessInfo.teamSize || ''}
-              onChange={(e) => handleInputChange('teamSize', e.target.value)}
-              className="minimal-select w-full"
-            >
-              <option value="">Select team size</option>
-              <option value="1">Solo founder</option>
-              <option value="2-5">2-5 people</option>
-              <option value="6-10">6-10 people</option>
-              <option value="11-25">11-25 people</option>
-              <option value="25+">25+ people</option>
-            </select>
+              onChange={(val) => handleInputChange('teamSize', val)}
+              options={[
+                { value: '', label: 'Select team size' },
+                { value: '1', label: 'Solo founder' },
+                { value: '2-5', label: '2-5 people' },
+                { value: '6-10', label: '6-10 people' },
+                { value: '11-25', label: '11-25 people' },
+                { value: '25+', label: '25+ people' },
+              ]}
+              className="w-full"
+              placeholder="Select team size"
+            />
           </div>
         );
 
@@ -702,19 +704,21 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
             <label className="block text-sm font-medium text-gray-700 mb-3">
               How much capital are you raising? *
             </label>
-            <select
+            <MinimalSelect
               value={businessInfo.capitalSeeking || ''}
-              onChange={(e) => handleInputChange('capitalSeeking', e.target.value)}
-              className="minimal-select w-full"
-            >
-              <option value="">Select amount</option>
-              <option value="under-500k">Under $500k</option>
-              <option value="500k-1m">$500k - $1M</option>
-              <option value="1m-3m">$1M - $3M</option>
-              <option value="3m-5m">$3M - $5M</option>
-              <option value="5m-10m">$5M - $10M</option>
-              <option value="10m+">$10M+</option>
-            </select>
+              onChange={(val) => handleInputChange('capitalSeeking', val)}
+              options={[
+                { value: '', label: 'Select amount' },
+                { value: 'under-500k', label: 'Under $500k' },
+                { value: '500k-1m', label: '$500k - $1M' },
+                { value: '1m-3m', label: '$1M - $3M' },
+                { value: '3m-5m', label: '$3M - $5M' },
+                { value: '5m-10m', label: '$5M - $10M' },
+                { value: '10m+', label: '$10M+' },
+              ]}
+              className="w-full"
+              placeholder="Select amount"
+            />
           </div>
         );
 
