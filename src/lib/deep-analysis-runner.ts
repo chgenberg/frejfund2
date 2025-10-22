@@ -298,6 +298,7 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
                   '\n\n' +
                   (gptKnowledgeText || '').slice(0, 2000),
                 uploadedDocuments,
+                googleIntel,
               );
               break;
             } catch (e) {
@@ -372,6 +373,15 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
           } catch {}
         } catch (error) {
           console.error(`Error analyzing dimension ${dimension.id}:`, error);
+          // Even on failure, advance coarse progress so UI doesn't stall
+          completed++;
+          const progress = Math.round((completed / totalDimensions) * 100);
+          try {
+            await prisma.deepAnalysis.update({ where: { id: analysis.id }, data: { progress } });
+            if (options.onProgress) {
+              await options.onProgress(completed, totalDimensions, completedCategories);
+            }
+          } catch {}
           // Continue with other dimensions
         }
       }
@@ -489,6 +499,7 @@ async function analyzeDimension(
   businessInfo: BusinessInfo,
   scrapedContent: string,
   uploadedDocuments: string[],
+  googleIntel?: any,
 ): Promise<DeepAnalysisResult> {
   const openai = getOpenAIClient();
 
