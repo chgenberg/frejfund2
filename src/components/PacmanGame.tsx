@@ -52,6 +52,8 @@ export default function PacmanGame({ onScoreUpdate }: PacmanGameProps) {
       ghosts: [
         { x: COLS - 2, y: ROWS - 2, direction: 'left', color: '#ff0000', scared: false },
         { x: COLS - 2, y: 1, direction: 'down', color: '#00ffff', scared: false },
+        { x: 1, y: ROWS - 2, direction: 'right', color: '#ffb8ff', scared: false },
+        { x: Math.floor(COLS / 2), y: Math.floor(ROWS / 2), direction: 'up', color: '#ffb852', scared: false },
       ],
       score: 0,
       running: true,
@@ -202,10 +204,36 @@ export default function PacmanGame({ onScoreUpdate }: PacmanGameProps) {
           } else {
             ghostNewY += dy > 0 ? 1 : -1;
           }
-        } else {
+        } else if (index === 1) {
           // Cyan ghost: Try to cut off
           ghostNewX += dx > 0 ? 1 : -1;
           ghostNewY += dy > 0 ? 1 : -1;
+        } else if (index === 2) {
+          // Pink ghost: Ambush (4 tiles ahead)
+          const ahead = { up: { x: 0, y: -4 }, down: { x: 0, y: 4 }, left: { x: -4, y: 0 }, right: { x: 4, y: 0 } }[pacman.direction] || { x: 0, y: 0 };
+          const targetX = pacman.x + ahead.x;
+          const targetY = pacman.y + ahead.y;
+          const dx2 = targetX - ghost.x;
+          const dy2 = targetY - ghost.y;
+          if (Math.abs(dx2) > Math.abs(dy2)) {
+            ghostNewX += dx2 > 0 ? 1 : -1;
+          } else {
+            ghostNewY += dy2 > 0 ? 1 : -1;
+          }
+        } else {
+          // Orange ghost: Random patrol
+          if (Math.random() < 0.3) {
+            const dirs = [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }];
+            const dir = dirs[Math.floor(Math.random() * dirs.length)];
+            ghostNewX += dir.x;
+            ghostNewY += dir.y;
+          } else {
+            if (Math.abs(dx) > Math.abs(dy)) {
+              ghostNewX += dx > 0 ? 1 : -1;
+            } else {
+              ghostNewY += dy > 0 ? 1 : -1;
+            }
+          }
         }
 
         const ghostHitWall = walls.some((w: any) => w.x === ghostNewX && w.y === ghostNewY);
@@ -481,7 +509,7 @@ export default function PacmanGame({ onScoreUpdate }: PacmanGameProps) {
           <canvas
             ref={canvasRef}
             width={600}
-            height={400}
+            height={300}
             className="w-full rounded-xl"
             style={{ imageRendering: 'pixelated' }}
           />

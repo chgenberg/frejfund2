@@ -1453,21 +1453,18 @@ export default function Dashboard() {
                   </div>
                 </motion.div>
 
-                {/* Game container with progress border */}
-                <div className="relative p-2 bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl">
-                  {/* Animated progress border */}
-                  <div className="absolute inset-0 rounded-3xl" style={{
-                    background: `conic-gradient(from 0deg at 50% 50%, 
-                      #ffffff 0deg, 
-                      #9ca3af ${(analysisProgress.current / analysisProgress.total) * 360}deg, 
-                      #374151 ${(analysisProgress.current / analysisProgress.total) * 360}deg, 
-                      #374151 360deg)`
-                  }}>
-                    <div className="absolute inset-1 bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl" />
-                  </div>
-                  
-                  {/* Pac-Man Game */}
-                  <div className="relative z-10">
+                {/* Game container with animated progress border */}
+                <div className="relative p-1 rounded-3xl" style={{
+                  background: `conic-gradient(from -90deg at 50% 50%, 
+                    #ffffff 0deg, 
+                    #ffffff ${(analysisProgress.current / analysisProgress.total) * 360}deg, 
+                    #1f2937 ${(analysisProgress.current / analysisProgress.total) * 360}deg, 
+                    #1f2937 360deg)`,
+                  padding: '6px'
+                }}>
+                  {/* Inner container */}
+                  <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-1">
+                    {/* Pac-Man Game */}
                     <PacmanGame />
                   </div>
                 </div>
