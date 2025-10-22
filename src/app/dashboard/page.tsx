@@ -198,6 +198,7 @@ export default function Dashboard() {
         if (sessionId && businessInfo) {
           try {
             setAnalysisProgress({ current: 0, total: 95, status: 'running' });
+            try { localStorage.setItem('frejfund-analysis-running', '1'); } catch {}
             const response = await fetch('/api/deep-analysis', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -210,10 +211,12 @@ export default function Dashboard() {
             if (!response.ok) {
               console.error('Failed to start analysis');
               setAnalysisProgress({ current: 0, total: 95, status: 'idle' });
+              try { localStorage.removeItem('frejfund-analysis-running'); } catch {}
             }
           } catch (error) {
             console.error('Error starting analysis:', error);
             setAnalysisProgress({ current: 0, total: 95, status: 'idle' });
+            try { localStorage.removeItem('frejfund-analysis-running'); } catch {}
           }
         }
       };
@@ -229,6 +232,14 @@ export default function Dashboard() {
       if (!sessionId) return;
 
       try {
+        // If a previous start flagged running locally, show overlay immediately
+        try {
+          const localRunning = localStorage.getItem('frejfund-analysis-running') === '1';
+          if (localRunning) {
+            setAnalysisProgress((prev) => ({ current: prev.current || 0, total: prev.total || 95, status: 'running' }));
+          }
+        } catch {}
+
         // Check status
         const res = await fetch(`/api/deep-analysis/status?sessionId=${sessionId}`);
         if (res.ok) {
@@ -237,6 +248,7 @@ export default function Dashboard() {
             setHasDeepAnalysis(true);
             setReadinessScore(data.score);
             setAnalysisProgress({ current: 95, total: 95, status: 'completed' });
+            try { localStorage.removeItem('frejfund-analysis-running'); } catch {}
             setShowMetrics(true);
 
             // Load data gaps when analysis is complete
@@ -269,6 +281,10 @@ export default function Dashboard() {
           eventSource = new EventSource(`/api/deep-analysis/progress?sessionId=${sessionId}`);
           (window as any).__ff_es[sessionId] = eventSource;
 
+          // Optimistic UI: show overlay immediately upon connecting to SSE
+          setAnalysisProgress((prev) => ({ current: prev.current || 0, total: prev.total || 95, status: 'running' }));
+          try { localStorage.setItem('frejfund-analysis-running', '1'); } catch {}
+
           eventSource.onmessage = (event) => {
             const data = JSON.parse(event.data);
             retries = 0; // reset on successful message
@@ -286,6 +302,7 @@ export default function Dashboard() {
                 eventSource && eventSource.close();
               } catch {}
               (window as any).__ff_es[sessionId] = null;
+              try { localStorage.removeItem('frejfund-analysis-running'); } catch {}
               checkAnalysis();
             }
           };
