@@ -143,6 +143,7 @@ export default function Dashboard() {
   const [loadingGaps, setLoadingGaps] = useState(false);
   const [analysisData, setAnalysisData] = useState<any>(null);
   const [actionCards, setActionCards] = useState<any[]>([]);
+  const [clientSessionId, setClientSessionId] = useState('');
 
   // Load data gaps
   const loadDataGaps = async (sessionId: string) => {
@@ -204,38 +205,74 @@ export default function Dashboard() {
     const shouldStartAnalysis = sessionStorage.getItem('frejfund-start-analysis');
     if (shouldStartAnalysis === 'true') {
       sessionStorage.removeItem('frejfund-start-analysis');
-      const triggerAnalysis = async () => {
-        const sessionId = localStorage.getItem('frejfund-session-id');
-        const businessInfo = localStorage.getItem('frejfund-business-info');
-        
-        if (sessionId && businessInfo) {
-          try {
-            setAnalysisProgress({ current: 0, total: 95, status: 'running' });
-            try { localStorage.setItem('frejfund-analysis-running', '1'); } catch {}
-            const response = await fetch('/api/deep-analysis', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                sessionId,
-                businessInfo: JSON.parse(businessInfo),
-              }),
-            });
-            
-            if (!response.ok) {
-              console.error('Failed to start analysis');
-              setAnalysisProgress({ current: 0, total: 95, status: 'idle' });
-              try { localStorage.removeItem('frejfund-analysis-running'); } catch {}
-            }
-          } catch (error) {
-            console.error('Error starting analysis:', error);
+      const ensureStart = async () => {
+        try {
+          const sessionId = localStorage.getItem('frejfund-session-id');
+          if (!sessionId) return;
+
+          // Prefer local businessInfo, otherwise fetch from server, otherwise use current form state
+          let businessInfoStr = localStorage.getItem('frejfund-business-info');
+          if (!businessInfoStr) {
+            try {
+              const res = await fetch(`/api/session/get?sessionId=${sessionId}`);
+              if (res.ok) {
+                const data = await res.json();
+                const info = data.businessInfo || null;
+                if (info) {
+                  businessInfoStr = JSON.stringify(info);
+                  try { localStorage.setItem('frejfund-business-info', businessInfoStr); } catch {}
+                }
+              }
+            } catch {}
+          }
+
+          if (!businessInfoStr) {
+            // Fallback to minimal info from profile form (may be incomplete but starts pipeline)
+            const minimal = {
+              founderName: profileForm.name,
+              name: profileForm.company,
+              industry: profileForm.industry,
+              stage: profileForm.stage,
+              website: profileForm.website,
+              logo: profileForm.logo,
+            };
+            businessInfoStr = JSON.stringify(minimal);
+          }
+
+          setAnalysisProgress({ current: 0, total: 95, status: 'running' });
+          try { localStorage.setItem('frejfund-analysis-running', '1'); } catch {}
+
+          const response = await fetch('/api/deep-analysis', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sessionId,
+              businessInfo: JSON.parse(businessInfoStr),
+            }),
+          });
+
+          if (!response.ok) {
+            console.error('Failed to start analysis');
             setAnalysisProgress({ current: 0, total: 95, status: 'idle' });
             try { localStorage.removeItem('frejfund-analysis-running'); } catch {}
           }
+        } catch (error) {
+          console.error('Error ensuring analysis start:', error);
+          setAnalysisProgress({ current: 0, total: 95, status: 'idle' });
+          try { localStorage.removeItem('frejfund-analysis-running'); } catch {}
         }
       };
-      
-      triggerAnalysis();
+
+      ensureStart();
     }
+  }, []);
+
+  // Read session id on client only for components that need it during render
+  useEffect(() => {
+    try {
+      const sid = localStorage.getItem('frejfund-session-id') || localStorage.getItem('sessionId') || '';
+      setClientSessionId(sid || '');
+    } catch {}
   }, []);
 
   // Check if deep analysis is complete and listen for progress
@@ -250,6 +287,24 @@ export default function Dashboard() {
           const localRunning = localStorage.getItem('frejfund-analysis-running') === '1';
           if (localRunning) {
             setAnalysisProgress((prev) => ({ current: prev.current || 0, total: prev.total || 95, status: 'running' }));
+            // Best-effort: ensure server-side analysis is running
+            try {
+              const sid = localStorage.getItem('frejfund-session-id');
+              if (sid) {
+                const statusRes = await fetch(`/api/deep-analysis/status?sessionId=${sid}`);
+                if (!statusRes.ok) {
+                  // Try to start if status endpoint not ready
+                  const bi = localStorage.getItem('frejfund-business-info');
+                  if (bi) {
+                    await fetch('/api/deep-analysis', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ sessionId: sid, businessInfo: JSON.parse(bi) }),
+                    });
+                  }
+                }
+              }
+            } catch {}
           }
         } catch {}
 
@@ -1458,7 +1513,7 @@ export default function Dashboard() {
 
       {/* Mini ChatBot - Always visible */}
       <MiniChatBot 
-        sessionId={localStorage.getItem('frejfund-session-id') || ''}
+        sessionId={clientSessionId}
         businessInfo={profileForm}
         currentContext={activeSection}
       />
