@@ -367,9 +367,17 @@ export default function Dashboard() {
           eventSource = new EventSource(`/api/deep-analysis/progress?sessionId=${sessionId}`);
           (window as any).__ff_es[sessionId] = eventSource;
 
-          // Optimistic UI: show overlay immediately upon connecting to SSE
-          setAnalysisProgress((prev) => ({ current: prev.current || 0, total: prev.total || 100, status: 'running' }));
-          try { localStorage.setItem('frejfund-analysis-running', '1'); } catch {}
+          // Optimistic UI: show overlay immediately upon connecting to SSE (only if not already completed)
+          setAnalysisProgress((prev) => {
+            // Don't re-open if already completed
+            if (prev.status === 'completed') return prev;
+            return { current: prev.current || 0, total: prev.total || 100, status: 'running' };
+          });
+          try { 
+            const running = localStorage.getItem('frejfund-analysis-running');
+            if (running !== '1') return; // Don't connect if not supposed to be running
+            localStorage.setItem('frejfund-analysis-running', '1'); 
+          } catch {}
 
           eventSource.onmessage = (event) => {
             const data = JSON.parse(event.data);
@@ -398,6 +406,11 @@ export default function Dashboard() {
               eventSource && eventSource.close();
             } catch {}
             (window as any).__ff_es[sessionId] = null;
+            
+            // Don't reconnect if analysis is completed
+            const running = localStorage.getItem('frejfund-analysis-running');
+            if (running !== '1') return;
+            
             if (offline) return; // wait for online event
             if (retries < 5) {
               retries++;
