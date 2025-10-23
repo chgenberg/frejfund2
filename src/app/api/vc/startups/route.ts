@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
         lastActive: analysis?.completedAt || ad.publishedAt,
         website: ad.website || businessInfo.website,
         linkedIn: businessInfo.linkedinProfiles?.[0],
-        pitchDeck: ad.pitchDeck || businessInfo.pitcDeck,
+        pitchDeck: ad.pitchDeck || businessInfo.pitchDeck,
         traction: businessInfo.traction,
         insights: analysis?.insights || [],
       };

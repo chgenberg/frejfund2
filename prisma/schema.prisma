@@ -61,6 +61,7 @@ model User {
   integrations  Integration[]
   insights      Insight[]
   deepAnalyses  DeepAnalysis[]
+  investmentAds InvestmentAd[]
   subscriptions Subscription[]
 
   @@map("users")
@@ -572,6 +573,7 @@ model DeepAnalysis {
   user       User?              @relation(fields: [userId], references: [id])
   dimensions AnalysisDimension[]
   insights   AnalysisInsight[]
+  investmentAds InvestmentAd[]
 
   @@index([sessionId])
   @@index([userId])
