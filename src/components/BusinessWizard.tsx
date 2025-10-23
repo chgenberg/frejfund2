@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronRight,
   ChevronLeft,
   ChevronDown,
   Upload,
+  HelpCircle,
   X,
   FileText,
   Globe,
@@ -15,12 +17,14 @@ import {
 import { BusinessInfo } from '@/types/business';
 import { normalizeUrl, isValidUrl } from '@/lib/url-utils';
 import MinimalSelect, { SelectOption } from './MinimalSelect';
+import UploadGuideModal from '@/components/UploadGuideModal';
 
 interface BusinessWizardProps {
   onComplete: (businessInfo: BusinessInfo) => void;
 }
 
 export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(-1); // Start with welcome screen
   const [businessInfo, setBusinessInfo] = useState<Partial<BusinessInfo>>({});
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
@@ -29,6 +33,7 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [analysisStatus, setAnalysisStatus] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showUploadGuide, setShowUploadGuide] = useState(false);
 
   const steps = [
     {
@@ -289,54 +294,32 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Start analysis
-      setIsAnalyzing(true);
-      setAnalysisProgress(0);
-      setAnalysisStatus('Preparing analysis...');
+      // Start analysis: persist session + business info, trigger dashboard overlay
+      try {
+        const sessionId = localStorage.getItem('frejfund-session-id') || `sess-${Date.now()}`;
+        localStorage.setItem('frejfund-session-id', sessionId);
 
-      // Simulate analysis progress
-      const statuses = [
-        'Analyzing your business model...',
-        'Evaluating market potential...',
-        'Assessing team capabilities...',
-        'Calculating investment readiness...',
-        'Generating insights...',
-      ];
+        const completeInfo: BusinessInfo = {
+          name: businessInfo.name || '',
+          email: businessInfo.email || '',
+          website: businessInfo.website,
+          linkedinProfiles: businessInfo.linkedinProfiles,
+          stage: businessInfo.stage as BusinessInfo['stage'],
+          industry: businessInfo.industry || '',
+          targetMarket: businessInfo.targetMarket || '',
+          businessModel: businessInfo.businessModel || '',
+          monthlyRevenue: businessInfo.monthlyRevenue || '',
+          teamSize: businessInfo.teamSize || '',
+          uploadedFiles,
+          preScrapedText: businessInfo.preScrapedText,
+          preScrapedSources: businessInfo.preScrapedSources,
+        };
+        localStorage.setItem('frejfund-business-info', JSON.stringify(completeInfo));
+        sessionStorage.setItem('frejfund-start-analysis', 'true');
+      } catch {}
 
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 1.67; // 60 seconds = 100%
-        setAnalysisProgress(Math.min(progress, 100));
-
-        const statusIndex = Math.floor(progress / 20);
-        if (statusIndex < statuses.length) {
-          setAnalysisStatus(statuses[statusIndex]);
-        }
-
-        if (progress >= 100) {
-          clearInterval(interval);
-          // Complete wizard
-          const completeInfo: BusinessInfo = {
-            name: businessInfo.name || '',
-            email: businessInfo.email || '',
-            website: businessInfo.website,
-            linkedinProfiles: businessInfo.linkedinProfiles,
-            stage: businessInfo.stage as BusinessInfo['stage'],
-            industry: businessInfo.industry || '',
-            targetMarket: businessInfo.targetMarket || '',
-            businessModel: businessInfo.businessModel || '',
-            monthlyRevenue: businessInfo.monthlyRevenue || '',
-            teamSize: businessInfo.teamSize || '',
-            uploadedFiles,
-            preScrapedText: businessInfo.preScrapedText,
-            preScrapedSources: businessInfo.preScrapedSources,
-          };
-
-          // Note: File extraction continues in background
-          // Backend will handle full extraction during deep analysis
-          onComplete(completeInfo);
-        }
-      }, 1000);
+      // Redirect to dashboard where overlay + SSE kicks in immediately
+      router.push('/dashboard');
     }
   };
 
@@ -768,6 +751,18 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
               Business Documents
             </label>
 
+            {/* Helper button */}
+            <div className="flex justify-end mb-3">
+              <button
+                type="button"
+                onClick={() => setShowUploadGuide(true)}
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100"
+              >
+                <HelpCircle className="w-4 h-4" />
+                What to upload?
+              </button>
+            </div>
+
             <motion.div
               whileHover={{ scale: 1.01 }}
               onDragEnter={handleDragEnter}
@@ -980,6 +975,8 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Upload Guide Modal */}
+      <UploadGuideModal isOpen={showUploadGuide} onClose={() => setShowUploadGuide(false)} />
       {/* Header */}
       <motion.header
         initial={{ opacity: 0 }}
