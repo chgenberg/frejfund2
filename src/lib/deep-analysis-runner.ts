@@ -304,9 +304,9 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
           // Save idempotently (avoid storing full prompt to reduce DB size)
           await saveDimension(analysis.id, dimension, result);
 
-          // Update progress
+          // Update progress: map 0-95 dimensions to 3-100% (scraping was 0-3%)
           completed++;
-          const progress = Math.round((completed / totalDimensions) * 100);
+          const analysisProgress = Math.round(3 + (completed / totalDimensions) * 97);
 
           // Track completed categories
           if (!completedCategories.includes(dimension.priority)) {
@@ -323,16 +323,16 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
 
           await prisma.deepAnalysis.update({
             where: { id: analysis.id },
-            data: { progress },
+            data: { progress: analysisProgress },
           });
 
           console.log(
-            `📊 Progress: ${completed}/${totalDimensions} (${progress}%) - ${dimension.name}`,
+            `📊 Progress: ${completed}/${totalDimensions} (${analysisProgress}%) - ${dimension.name}`,
           );
 
           // Call progress callback if provided
           if (options.onProgress) {
-            await options.onProgress(completed, totalDimensions, completedCategories);
+            await options.onProgress(analysisProgress, 100, completedCategories);
           }
 
           // Progress is automatically tracked via database
@@ -368,11 +368,11 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
           console.error(`Error analyzing dimension ${dimension.id}:`, error);
           // Even on failure, advance coarse progress so UI doesn't stall
           completed++;
-          const progress = Math.round((completed / totalDimensions) * 100);
+          const analysisProgress = Math.round(3 + (completed / totalDimensions) * 97);
           try {
-            await prisma.deepAnalysis.update({ where: { id: analysis.id }, data: { progress } });
+            await prisma.deepAnalysis.update({ where: { id: analysis.id }, data: { progress: analysisProgress } });
             if (options.onProgress) {
-              await options.onProgress(completed, totalDimensions, completedCategories);
+              await options.onProgress(analysisProgress, 100, completedCategories);
             }
           } catch {}
           // Continue with other dimensions

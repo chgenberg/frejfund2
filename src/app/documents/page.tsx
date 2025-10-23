@@ -17,8 +17,10 @@ import {
   Sparkles,
   ArrowLeft,
   ExternalLink,
+  HelpCircle,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import UploadGuideModal from '@/components/UploadGuideModal';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,6 +51,7 @@ export default function DocumentsPage() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedType, setSelectedType] = useState<string>('all');
+  const [showUploadGuide, setShowUploadGuide] = useState(false);
 
   useEffect(() => {
     loadDocuments();
@@ -174,17 +177,32 @@ export default function DocumentsPage() {
               </div>
             </div>
 
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => router.push('/chat')}
-              className="px-3 sm:px-4 py-2 bg-black text-white rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-800 transition-colors"
-            >
-              Ask Freja
-            </motion.button>
+            <div className="flex items-center gap-2">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowUploadGuide(true)}
+                className="px-3 sm:px-4 py-2 bg-blue-50 text-blue-700 rounded-lg text-xs sm:text-sm font-medium hover:bg-blue-100 transition-colors inline-flex items-center gap-2"
+              >
+                <HelpCircle className="w-4 h-4" />
+                <span className="hidden sm:inline">What to upload?</span>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => router.push('/chat')}
+                className="px-3 sm:px-4 py-2 bg-black text-white rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-800 transition-colors"
+              >
+                Ask Freja
+              </motion.button>
+            </div>
           </div>
         </div>
       </header>
+
+      {/* Upload Guide Modal */}
+      <UploadGuideModal isOpen={showUploadGuide} onClose={() => setShowUploadGuide(false)} />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">

@@ -55,7 +55,7 @@ export default function Dashboard() {
   const [readinessScore, setReadinessScore] = useState(0);
   const [analysisProgress, setAnalysisProgress] = useState({
     current: 0,
-    total: 95,
+    total: 100,
     status: 'idle',
   });
   const [deepAnalysisData, setDeepAnalysisData] = useState<any>(null);
@@ -239,7 +239,7 @@ export default function Dashboard() {
             businessInfoStr = JSON.stringify(minimal);
           }
 
-          setAnalysisProgress({ current: 0, total: 95, status: 'running' });
+          setAnalysisProgress({ current: 0, total: 100, status: 'running' });
           try { localStorage.setItem('frejfund-analysis-running', '1'); } catch {}
 
           const response = await fetch('/api/deep-analysis', {
@@ -253,12 +253,12 @@ export default function Dashboard() {
 
           if (!response.ok) {
             console.error('Failed to start analysis');
-            setAnalysisProgress({ current: 0, total: 95, status: 'idle' });
+            setAnalysisProgress({ current: 0, total: 100, status: 'idle' });
             try { localStorage.removeItem('frejfund-analysis-running'); } catch {}
           }
         } catch (error) {
           console.error('Error ensuring analysis start:', error);
-          setAnalysisProgress({ current: 0, total: 95, status: 'idle' });
+          setAnalysisProgress({ current: 0, total: 100, status: 'idle' });
           try { localStorage.removeItem('frejfund-analysis-running'); } catch {}
         }
       };
@@ -286,7 +286,7 @@ export default function Dashboard() {
         try {
           const localRunning = localStorage.getItem('frejfund-analysis-running') === '1';
           if (localRunning) {
-            setAnalysisProgress((prev) => ({ current: prev.current || 0, total: prev.total || 95, status: 'running' }));
+            setAnalysisProgress((prev) => ({ current: prev.current || 0, total: prev.total || 100, status: 'running' }));
             // Best-effort: ensure server-side analysis is running
             try {
               const sid = localStorage.getItem('frejfund-session-id');
@@ -315,7 +315,7 @@ export default function Dashboard() {
           if (data.completed && data.score) {
             setHasDeepAnalysis(true);
             setReadinessScore(data.score);
-            setAnalysisProgress({ current: 95, total: 95, status: 'completed' });
+            setAnalysisProgress({ current: 100, total: 100, status: 'completed' });
             try { localStorage.removeItem('frejfund-analysis-running'); } catch {}
             setShowMetrics(true);
 
@@ -357,7 +357,7 @@ export default function Dashboard() {
           (window as any).__ff_es[sessionId] = eventSource;
 
           // Optimistic UI: show overlay immediately upon connecting to SSE
-          setAnalysisProgress((prev) => ({ current: prev.current || 0, total: prev.total || 95, status: 'running' }));
+          setAnalysisProgress((prev) => ({ current: prev.current || 0, total: prev.total || 100, status: 'running' }));
           try { localStorage.setItem('frejfund-analysis-running', '1'); } catch {}
 
           eventSource.onmessage = (event) => {
@@ -367,12 +367,12 @@ export default function Dashboard() {
               // Clamp so progress never goes backwards
               setAnalysisProgress((prev) => {
                 const clampedCurrent = Math.max(prev.current || 0, data.current || 0);
-                const total = data.total || prev.total || 95;
+                const total = data.total || prev.total || 100;
                 return { current: clampedCurrent, total, status: 'running' };
               });
             } else if (data.type === 'complete') {
               setHasDeepAnalysis(true);
-              setAnalysisProgress({ current: 95, total: 95, status: 'completed' });
+              setAnalysisProgress({ current: 100, total: 100, status: 'completed' });
               try {
                 eventSource && eventSource.close();
               } catch {}
@@ -1466,15 +1466,15 @@ export default function Dashboard() {
                       </motion.div>
                     </div>
 
-                    {/* Progress info */}
-                    <div className="text-center mb-4">
-                      <p className="text-sm text-gray-400">
-                        Analyzing dimension {analysisProgress.current} of {analysisProgress.total}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        Estimated time remaining: {Math.max(1, Math.round((analysisProgress.total - analysisProgress.current) * 0.25))} minutes
-                      </p>
-                    </div>
+                      {/* Progress info */}
+                      <div className="text-center mb-4">
+                        <p className="text-sm text-gray-400">
+                          {analysisProgress.current <= 3 ? 'Gathering website data...' : `Analyzing your business (${analysisProgress.current}%)`}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Estimated time remaining: {analysisProgress.current <= 3 ? '2-3' : Math.max(1, Math.round((100 - analysisProgress.current) * 0.15))} minutes
+                        </p>
+                      </div>
 
                     {/* Pac-Man Game */}
                     <PacmanGame />

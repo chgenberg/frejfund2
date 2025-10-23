@@ -123,37 +123,51 @@ export async function POST(request: NextRequest) {
       console.warn('Auto-publish profile failed (non-fatal):', pubErr);
     }
 
-    // FAST MODE: Start analysis immediately with minimal data
-    const preHarvestText = '';  // Skip GPT harvest for speed
-    const mergedScraped = scrapedContent || '';  // Use provided content or empty
+    // Unified progress: 0-100% including scraping (0-3%) + analysis (3-100%)
+    const { getPub, getProgressChannel } = await import('@/lib/redis');
+    const pub = getPub();
+    const channel = getProgressChannel(sessionId);
     
-    // Background scraping (non-blocking) - will enhance analysis as it completes
-    Promise.resolve().then(async () => {
+    // Immediate 1% so user sees it start
+    await pub.publish(channel, JSON.stringify({ type: 'progress', current: 1, total: 100 })).catch(() => {});
+    
+    // Scraping phase (0-3%)
+    const preHarvestText = '';  // Skip GPT harvest
+    let mergedScraped = scrapedContent || '';
+    
+    if (businessInfo.website) {
       try {
-        if (!businessInfo.website) return;
+        await pub.publish(channel, JSON.stringify({ type: 'progress', current: 2, total: 100 })).catch(() => {});
         
         const { scrapeSiteShallow } = await import('@/lib/web-scraper');
         const websiteData = await Promise.race([
-          scrapeSiteShallow(businessInfo.website, 3),  // Reduced from 6 to 3 pages
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 30000))  // 30s max
+          scrapeSiteShallow(businessInfo.website, 6),  // Get decent content
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 120000))  // 2 min max
         ]).catch(() => null);
         
         if (websiteData && (websiteData as any).combinedText) {
-          // Store scraped content for future re-runs
+          mergedScraped = (scrapedContent || '') + '\n\n' + ((websiteData as any).combinedText || '');
+          
+          // Store for future re-runs
           await prisma.deepAnalysis.update({
             where: { sessionId },
             data: {
               publicKnowledge: {
-                scrapedContent: (websiteData as any).combinedText,
+                scrapedContent: mergedScraped,
                 sources: (websiteData as any).sources || []
               }
             }
           }).catch(console.warn);
         }
+        
+        await pub.publish(channel, JSON.stringify({ type: 'progress', current: 3, total: 100 })).catch(() => {});
       } catch (err) {
-        console.warn('Background scraping failed (non-fatal):', err);
+        console.warn('Scraping failed (continuing with minimal data):', err);
       }
-
+    }
+    
+    // Analysis phase starts at 3%, ends at 100%
+    Promise.resolve().then(async () => {
       // Enqueue deep analysis with merged pre-context (phase 1) via BullMQ if enabled
       const useBull = process.env.USE_BULLMQ === 'true';
       try {
