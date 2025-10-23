@@ -311,6 +311,7 @@ const DEMO_ANALYSIS = {
       confidence: 'high',
       isApplicable: true
     }
+  ]
 };
 
 interface AnalysisDimension {
