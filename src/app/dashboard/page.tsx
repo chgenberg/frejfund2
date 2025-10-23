@@ -1425,19 +1425,6 @@ export default function Dashboard() {
               </div>
                 </motion.div>
               )}
-              {activeSection === 'readiness' && hasDeepAnalysis && (
-                <InvestmentReadiness />
-              )}
-              {activeSection === 'integrations' && (
-                <IntegrationsSection 
-                  integrations={integrations}
-                  onAddIntegration={handleAddIntegration}
-                  onRemoveIntegration={handleRemoveIntegration}
-                />
-              )}
-              {activeSection === 'settings' && (
-                <AccountSettings />
-              )}
         </AnimatePresence>
       </main>
 
