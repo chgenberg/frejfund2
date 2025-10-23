@@ -177,8 +177,9 @@ export async function POST(request: NextRequest) {
     
     // Analysis phase starts at 3%, ends at 100%
     Promise.resolve().then(async () => {
-      // Enqueue deep analysis with merged pre-context (phase 1) via BullMQ if enabled
-      const useBull = process.env.USE_BULLMQ === 'true';
+      // Enqueue deep analysis with merged pre-context (phase 1)
+      // Only use Bull on dedicated worker (WORKER=1). Web should run inline.
+      const useBull = process.env.USE_BULLMQ === 'true' && process.env.WORKER === '1';
       try {
         if (useBull) {
           const { deepAnalysisQueue } = await import('@/lib/queues/deep-analysis');
@@ -201,7 +202,7 @@ export async function POST(request: NextRequest) {
             },
           );
         } else {
-          throw new Error('BullMQ disabled');
+          throw new Error('BullMQ disabled or no worker');
         }
       } catch (e) {
         console.error('Failed to enqueue phase1 deep analysis, falling back to in-process:', e);
