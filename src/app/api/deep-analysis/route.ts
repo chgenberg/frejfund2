@@ -130,6 +130,9 @@ export async function POST(request: NextRequest) {
     
     // Immediate 1% so user sees it start
     await pub.publish(channel, JSON.stringify({ type: 'progress', current: 1, total: 100 })).catch(() => {});
+    try {
+      await prisma.deepAnalysis.update({ where: { sessionId }, data: { progress: 1 } });
+    } catch {}
     
     // Scraping phase (0-3%)
     const preHarvestText = '';  // Skip GPT harvest
@@ -138,6 +141,9 @@ export async function POST(request: NextRequest) {
     if (businessInfo.website) {
       try {
         await pub.publish(channel, JSON.stringify({ type: 'progress', current: 2, total: 100 })).catch(() => {});
+        try {
+          await prisma.deepAnalysis.update({ where: { sessionId }, data: { progress: 2 } });
+        } catch {}
         
         const { scrapeSiteShallow } = await import('@/lib/web-scraper');
         const websiteData = await Promise.race([
@@ -161,6 +167,9 @@ export async function POST(request: NextRequest) {
         }
         
         await pub.publish(channel, JSON.stringify({ type: 'progress', current: 3, total: 100 })).catch(() => {});
+        try {
+          await prisma.deepAnalysis.update({ where: { sessionId }, data: { progress: 3 } });
+        } catch {}
       } catch (err) {
         console.warn('Scraping failed (continuing with minimal data):', err);
       }
