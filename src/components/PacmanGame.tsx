@@ -849,7 +849,7 @@ export default function PacmanGame({ onScoreUpdate }: PacmanGameProps) {
             style={{ 
               imageRendering: 'pixelated',
               touchAction: 'none',
-              maxHeight: '60vh'
+              maxHeight: '50vh'
             }}
           />
 

@@ -1434,9 +1434,9 @@ export default function Dashboard() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-8"
+              className="fixed inset-0 z-50 flex items-center justify-center p-6 py-16"
             >
-              <div className="relative w-full max-w-2xl">
+              <div className="relative w-full max-w-3xl" style={{ maxHeight: 'calc(100vh - 140px)' }}>
                 {/* Game container with animated progress border */}
                 <div 
                   className="relative rounded-3xl p-2"
