@@ -275,6 +275,17 @@ export default function Dashboard() {
     } catch {}
   }, []);
 
+  // Auto-close overlay when analysis reaches 100%
+  useEffect(() => {
+    if (analysisProgress.status === 'running' && analysisProgress.current >= 100) {
+      const timer = setTimeout(() => {
+        setAnalysisProgress({ current: 100, total: 100, status: 'completed' });
+        try { localStorage.removeItem('frejfund-analysis-running'); } catch {}
+      }, 2000); // 2s delay so user sees 100% before close
+      return () => clearTimeout(timer);
+    }
+  }, [analysisProgress.current, analysisProgress.status]);
+
   // Check if deep analysis is complete and listen for progress
   useEffect(() => {
     const checkAnalysis = async () => {
@@ -1453,17 +1464,39 @@ export default function Dashboard() {
                   <div className="bg-gradient-to-br from-gray-900 to-black rounded-2xl p-4">
                     {/* Header with title and percentage */}
                     <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-2xl font-bold text-white">FREJA PAC-MAN</h2>
-                      <motion.div
-                        key={analysisProgress.current}
-                        initial={{ scale: 0.8 }}
-                        animate={{ scale: 1 }}
-                        className="flex items-center gap-2"
-                      >
-                        <span className="text-4xl font-bold text-yellow-400">
-                          {Math.round((analysisProgress.current / analysisProgress.total) * 100)}%
-                        </span>
-                      </motion.div>
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-2xl font-bold text-white">FREJA PAC-MAN</h2>
+                        {analysisProgress.current >= 100 && (
+                          <span className="text-sm text-green-400 font-medium">✓ Complete</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <motion.div
+                          key={analysisProgress.current}
+                          initial={{ scale: 0.8 }}
+                          animate={{ scale: 1 }}
+                          className="flex items-center gap-2"
+                        >
+                          <span className="text-4xl font-bold text-yellow-400">
+                            {Math.round((analysisProgress.current / analysisProgress.total) * 100)}%
+                          </span>
+                        </motion.div>
+                        {analysisProgress.current >= 100 && (
+                          <motion.button
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => {
+                              setAnalysisProgress({ current: 100, total: 100, status: 'completed' });
+                              try { localStorage.removeItem('frejfund-analysis-running'); } catch {}
+                            }}
+                            className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+                          >
+                            <X className="w-5 h-5 text-white" />
+                          </motion.button>
+                        )}
+                      </div>
                     </div>
 
                       {/* Progress info */}
