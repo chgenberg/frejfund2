@@ -438,6 +438,62 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
       },
     });
 
+    // 6a. Auto-create or update Investment Ad for VC discovery
+    try {
+      const aiSummary = `Investment analysis for ${businessInfo.name}: readiness ${investmentReadiness}/10, score ${confidenceWeightedScore}%.`;
+      const topStrengths = allDimensions
+        .filter((d) => (d.score || 0) >= 70)
+        .slice(0, 5)
+        .map((d) => `${d.name}: ${d.score}%`);
+      const topRisks = allDimensions
+        .filter((d) => (d.score || 0) < 40)
+        .slice(0, 5)
+        .map((d) => `${d.name}: ${d.score}%`);
+
+      const existingAd = await prisma.investmentAd.findFirst({
+        where: { analysisId: analysis.id },
+      });
+      const adData = {
+        userId: analysis.userId || undefined,
+        analysisId: analysis.id,
+        title: `${businessInfo.name} — ${businessInfo.industry || 'Company'} (${businessInfo.stage || 'Stage'})`,
+        oneLiner: (businessInfo as any).oneLiner || (analysis as any).businessInfo?.description || 'Raising to accelerate growth',
+        summary: aiSummary,
+        pros: topStrengths,
+        cons: topRisks,
+        highlights: [
+          `Confidence-weighted score: ${confidenceWeightedScore}%`,
+          `Data completeness: ${dataCompleteness}%`,
+          `Investment readiness: ${investmentReadiness}/10`,
+        ],
+        companyName: businessInfo.name || 'Unknown Company',
+        industry: businessInfo.industry || null,
+        stage: businessInfo.stage || null,
+        location: ((analysis.businessInfo as any)?.city as string) || null,
+        website: businessInfo.website || null,
+        pitchDeck: (analysis as any).businessInfo?.pitchDeck || null,
+        seekingUsd: (analysis as any).businessInfo?.seeking || null,
+        valuationUsd: (analysis as any).businessInfo?.valuation || null,
+        metrics: {
+          overallScore: avgScore,
+          confidenceWeightedScore,
+          dataCompleteness,
+          investmentReadiness,
+        } as any,
+        status: 'published',
+        isPublic: true,
+        publishedAt: new Date(),
+      } as any;
+
+      if (existingAd) {
+        await prisma.investmentAd.update({ where: { id: existingAd.id }, data: adData });
+      } else {
+        await prisma.investmentAd.create({ data: { ...adData, title: adData.title || 'Investment Opportunity' } });
+      }
+    } catch (e) {
+      console.warn('Failed to create/update InvestmentAd (non-fatal):', e);
+    }
+
     // 6. Record score history for progress tracking
     if (analysis.userId) {
       try {

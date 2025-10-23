@@ -61,6 +61,11 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
       subtitle: 'Upload pitch deck or business documents (optional)',
       fields: ['uploadedFiles'],
     },
+    {
+      title: 'Investor Docs (by Stage)',
+      subtitle: 'Provide details or upload files for each requirement',
+      fields: ['investorDocs'],
+    },
   ];
 
   const handleInputChange = (field: string, value: string) => {
@@ -427,6 +432,114 @@ export default function BusinessWizard({ onComplete }: BusinessWizardProps) {
 
   const renderField = (field: string) => {
     switch (field) {
+      case 'investorDocs': {
+        const stage = String(businessInfo.stage || '').toLowerCase();
+        const isPreSeed = stage.includes('idea') || stage.includes('pre');
+        const isSeed = stage.includes('mvp') || stage.includes('early') || stage.includes('seed');
+        const isSeriesA = stage.includes('scaling') || stage.includes('series');
+
+        const sections = [
+          {
+            id: 'pitchDeck',
+            title: 'Pitch Deck (must-have)',
+            tip:
+              '10–15 slides covering problem, solution, market, model, competition, team, traction, roadmap, and raise.',
+          },
+          {
+            id: 'businessPlan',
+            title: isPreSeed ? 'Business Plan (recommended)' : 'Business Plan (must-have for Seed/A)',
+            tip:
+              'Detailed plan: strategy, market analysis, competition, model, 3–5 year plan. PDF or link.',
+          },
+          {
+            id: 'onePager',
+            title: 'Executive Summary / One‑pager (nice to have)',
+            tip: '1-page summary: problem, solution, market, team, funding needs. Great for first contact.',
+          },
+          {
+            id: 'capTable',
+            title: 'Cap Table (must-have)',
+            tip: 'Owner list with % and shares. Add options pool if applicable. Excel/Sheets.',
+          },
+          {
+            id: 'financialModel',
+            title: isSeed || isSeriesA ? 'Financial Model (must-have)' : 'Financial Model (recommended)',
+            tip: 'P&L, balance sheet, cash flow. Monthly for 24–36 months. Include scenarios and assumptions.',
+          },
+          {
+            id: 'dataRoom',
+            title: isSeriesA ? 'Data Room (must-have)' : 'Data Room (recommended)',
+            tip: 'Organized folders: legal, financials, team, IP, market, product. Use Drive/Dropbox/Notion.',
+          },
+          {
+            id: 'termSheet',
+            title: 'Term Sheet (optional)',
+            tip: 'Have a draft or key terms ready (valuation, amount, pool, board, preferences).',
+          },
+          {
+            id: 'legal',
+            title: 'Legal Docs (registration, bylaws, SHA)',
+            tip: 'Registration, articles, any SHA; Series A may require board minutes, historic resolutions.',
+          },
+          {
+            id: 'kpi',
+            title: 'Key Metrics & Unit Economics',
+            tip: 'MRR/ARR, growth, churn, NRR, CAC, LTV, payback, gross margin. Upload exports if available.',
+          },
+        ];
+
+        return (
+          <div className="mb-2">
+            <div className="grid grid-cols-1 gap-3">
+              {sections.map((s) => (
+                <div key={s.id} className="minimal-box">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="font-semibold text-black text-sm">{s.title}</div>
+                      <div className="text-xs text-gray-600 mt-1">{s.tip}</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        placeholder="Paste link or short note"
+                        className="minimal-select text-xs w-48"
+                        onChange={(e) =>
+                          setBusinessInfo((prev) => ({
+                            ...prev,
+                            investorDocs: {
+                              ...(prev as any).investorDocs,
+                              [s.id]: { ...(prev as any).investorDocs?.[s.id], note: e.target.value },
+                            },
+                          }))
+                        }
+                      />
+                      <label className="px-3 py-1.5 text-xs bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200">
+                        Upload
+                        <input
+                          type="file"
+                          className="hidden"
+                          onChange={(e) =>
+                            setBusinessInfo((prev) => ({
+                              ...prev,
+                              investorDocs: {
+                                ...(prev as any).investorDocs,
+                                [s.id]: {
+                                  ...(prev as any).investorDocs?.[s.id],
+                                  fileName: e.target.files?.[0]?.name,
+                                },
+                              },
+                            }))
+                          }
+                        />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
       case 'name':
         return (
           <div className="mb-6">

@@ -750,8 +750,8 @@ export default function AnalysisPage() {
           </div>
         )}
 
-        {/* Improvement Recommendations Box */}
-        <div className="minimal-box minimal-box-shadow mb-8 p-4 sm:p-6 md:p-8">
+        {/* Improvement Recommendations Box (pulsing shadow) */}
+        <div className="minimal-box minimal-box-shadow mb-8 p-4 sm:p-6 md:p-8 animate-[pulseShadow_2.5s_ease-in-out_infinite]">
           <h2 className="text-lg sm:text-xl font-bold text-black mb-4 flex items-center gap-2">
             <TrendingUp className="w-4 sm:w-5 h-4 sm:h-5" />
             <span className="hidden sm:inline">How to Improve Your Score</span>

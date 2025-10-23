@@ -702,3 +702,52 @@ model GoogleSearchLog {
   @@index([createdAt])
   @@map("google_search_logs")
 }
+
+// Investment ads auto-published from analysis for VC discovery
+model InvestmentAd {
+  id           String   @id @default(cuid())
+
+  // Relations
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  analysisId   String?
+  analysis     DeepAnalysis? @relation(fields: [analysisId], references: [id], onDelete: SetNull)
+
+  // Display
+  title        String
+  oneLiner     String?
+  summary      String?   @db.Text
+  pros         String[]  // strengths/highlights
+  cons         String[]  // red flags/risks
+  highlights   String[]  // short bullets
+
+  // Company info
+  companyName  String
+  industry     String?
+  stage        String?
+  location     String?
+  website      String?
+  pitchDeck    String?
+
+  // Fundraising
+  seekingUsd   Int?      // amount sought in USD
+  valuationUsd Int?      // optional target valuation
+
+  // Metrics snapshot
+  metrics      Json?
+
+  // Publication
+  status       String   @default("published") // 'draft' | 'published' | 'archived'
+  isPublic     Boolean  @default(true)
+  publishedAt  DateTime @default(now())
+
+  // Timestamps
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([status])
+  @@index([publishedAt])
+  @@index([industry])
+  @@index([stage])
+  @@map("investment_ads")
+}

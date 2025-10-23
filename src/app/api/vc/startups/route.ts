@@ -5,72 +5,42 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    // Get all users with completed deep analysis
-    const startups = await prisma.user.findMany({
-      where: {
-        isProfilePublic: true,
-        deepAnalyses: {
-          some: {
-            status: 'completed',
-          },
-        },
-      },
-      include: {
-        deepAnalyses: {
-          where: {
-            status: 'completed',
-          },
-          orderBy: {
-            completedAt: 'desc',
-          },
-          take: 1,
-          include: {
-            dimensions: true,
-            insights: true,
-          },
-        },
-        sessions: {
-          select: {
-            businessInfo: true,
-          },
-          take: 1,
-        },
-      },
+    // Prefer Investment Ads (auto-published) as source for VC feed
+    const ads = await prisma.investmentAd.findMany({
+      where: { status: 'published', isPublic: true },
+      orderBy: { publishedAt: 'desc' },
+      take: 200,
+      include: { user: true, analysis: { include: { dimensions: true, insights: true } } },
     });
 
-    // Transform to startup format for VC dashboard
-    const transformedStartups = startups.map((user) => {
-      const analysis = user.deepAnalyses[0];
-      const businessInfo =
-        ((analysis?.businessInfo || user.sessions[0]?.businessInfo) as any) || {};
-
-      // Extract key metrics from dimensions
+    const startups = ads.map((ad) => {
+      const analysis = ad.analysis as any;
+      const businessInfo = (analysis?.businessInfo as any) || {};
       const dimensions = analysis?.dimensions || [];
       const getScore = (name: string) => {
-        const dim = dimensions.find((d) => d.name === name);
+        const dim = dimensions.find((d: any) => d.name === name);
         return dim?.score || 0;
       };
-
       return {
-        id: user.id,
-        name: user.name || businessInfo.founderName || 'Unknown',
-        companyName: user.company || businessInfo.name || 'Unknown Company',
-        logo: user.logo || businessInfo.logo,
+        id: ad.userId || ad.id,
+        name: ad.user?.name || businessInfo.founderName || 'Unknown',
+        companyName: ad.companyName,
+        logo: ad.user?.logo || businessInfo.logo,
         location: {
-          city: businessInfo.city || 'Stockholm',
+          city: businessInfo.city || ad.location || 'Stockholm',
           country: businessInfo.country || 'Sweden',
           coordinates: getCoordinates(businessInfo.city || 'Stockholm'),
         },
-        industry: user.industry || businessInfo.industry || 'Tech',
-        stage: user.stage || businessInfo.stage || 'Seed',
+        industry: ad.industry || 'Tech',
+        stage: ad.stage || 'Seed',
         raised: businessInfo.raised || 0,
-        seeking: user.askAmount || businessInfo.seeking || 1000000,
+        seeking: ad.seekingUsd || 1000000,
         monthlyRevenue: businessInfo.monthlyRevenue || 0,
         teamSize: businessInfo.teamSize || 1,
-        foundedYear: businessInfo.foundedYear || new Date().getFullYear(),
+        foundedYear: businessInfo.foundingYear || new Date().getFullYear(),
         readinessScore: analysis?.investmentReadiness || 50,
         overallScore: analysis?.overallScore || 50,
-        oneLiner: user.oneLiner || businessInfo.description || 'Building the future',
+        oneLiner: ad.oneLiner || ad.title,
         metrics: {
           growth: getScore('Revenue Growth') || businessInfo.growthRate || 0,
           retention: getScore('Customer Retention') || 0,
@@ -80,16 +50,16 @@ export async function GET(request: NextRequest) {
           productMarketFit: getScore('Product-Market Fit') || 0,
         },
         tags: extractTags(dimensions),
-        lastActive: analysis?.completedAt || new Date(),
-        website: user.website || businessInfo.website,
+        lastActive: analysis?.completedAt || ad.publishedAt,
+        website: ad.website || businessInfo.website,
         linkedIn: businessInfo.linkedinProfiles?.[0],
-        pitchDeck: user.pitchDeck,
-        traction: user.traction || businessInfo.traction,
+        pitchDeck: ad.pitchDeck || businessInfo.pitcDeck,
+        traction: businessInfo.traction,
         insights: analysis?.insights || [],
       };
     });
 
-    return NextResponse.json({ startups: transformedStartups });
+    return NextResponse.json({ startups });
   } catch (error) {
     console.error('Error fetching startups:', error);
     return NextResponse.json({ error: 'Failed to fetch startups' }, { status: 500 });
