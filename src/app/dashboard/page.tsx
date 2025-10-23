@@ -1434,9 +1434,9 @@ export default function Dashboard() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              className="fixed inset-0 z-50 flex items-center justify-center p-8"
             >
-              <div className="relative w-full max-w-3xl">
+              <div className="relative w-full max-w-2xl">
                 {/* Game container with animated progress border */}
                 <div 
                   className="relative rounded-3xl p-2"
@@ -1450,7 +1450,7 @@ export default function Dashboard() {
                   }}
                 >
                   {/* Inner container */}
-                  <div className="bg-gradient-to-br from-gray-900 to-black rounded-2xl p-6">
+                  <div className="bg-gradient-to-br from-gray-900 to-black rounded-2xl p-4">
                     {/* Header with title and percentage */}
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-2xl font-bold text-white">FREJA PAC-MAN</h2>
@@ -1467,7 +1467,7 @@ export default function Dashboard() {
                     </div>
 
                       {/* Progress info */}
-                      <div className="text-center mb-4">
+                      <div className="text-center mb-3">
                         <p className="text-sm text-gray-400">
                           {analysisProgress.current <= 3 ? 'Gathering website data...' : `Analyzing your business (${analysisProgress.current}%)`}
                         </p>
@@ -1480,7 +1480,7 @@ export default function Dashboard() {
                     <PacmanGame />
 
                     {/* Bottom text with animated dots */}
-                    <div className="text-center mt-4">
+                    <div className="text-center mt-3">
                       <p className="text-gray-300 text-sm flex items-center justify-center gap-1">
                         Play while Freja analyzes your business
                         <span className="flex gap-1">
