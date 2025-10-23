@@ -141,8 +141,8 @@ export async function POST(request: NextRequest) {
         
         const { scrapeSiteShallow } = await import('@/lib/web-scraper');
         const websiteData = await Promise.race([
-          scrapeSiteShallow(businessInfo.website, 6),  // Get decent content
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 120000))  // 2 min max
+          scrapeSiteShallow(businessInfo.website, 6),  // Get decent content (6 pages)
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 180000))  // 3 min max (safe for slower sites)
         ]).catch(() => null);
         
         if (websiteData && (websiteData as any).combinedText) {
