@@ -13,266 +13,304 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-// Static demo data - always available
+// Static demo data - Real analysis from We Are Bryssel
 const DEMO_ANALYSIS = {
-  id: 'demo-001',
-  overallScore: 72,
-  confidenceWeightedScore: 68,
-  dataCompleteness: 85,
-  investmentReadiness: 7,
-  companyStage: 'startup',
+  id: 'cmh3fjhtp0001rz4rhbjcvoxl',
+  overallScore: 22,
+  confidenceWeightedScore: 22,
+  dataCompleteness: 65,
+  investmentReadiness: 2,
+  companyStage: 'mvp',
   businessInfo: {
-    name: 'TechVenture AB',
-    website: 'https://techventure.se',
-    industry: 'SaaS',
-    stage: 'Pre-seed',
-    monthlyRevenue: '25000',
-    teamSize: '5'
+    name: 'We Are Bryssel',
+    website: 'https://wearebryssel.se',
+    industry: 'Event Production & Experiential Marketing',
+    stage: 'MVP',
+    monthlyRevenue: '10-50k',
+    teamSize: '2-5'
   },
-  ocrMetrics: {
-    cac: 1200,
-    ltv: 3600,
-    mrr: 25000,
-    churnRate: 5,
-    grossMargin: 78,
-    runway: 18
-  },
+  ocrMetrics: null,
   dimensions: [
     {
       id: '1',
-      name: 'Problem Clarity',
-      category: 'Product & Technology',
-      score: 85,
-      importance: 'critical',
-      status: 'strong',
+      name: 'Funding Stage Appropriateness',
+      category: 'Fundraising',
+      score: 48,
+      importance: 'high',
+      status: 'weak',
       insights: [
-        'Clear problem definition targeting SME market inefficiencies',
-        'Validated through 50+ customer interviews',
-        'Addresses a €2.5B addressable market in Nordics'
+        "Event production company 'Bryssel' focused on experiences and storytelling",
+        'Stage: MVP with revenue 10-50k per period',
+        'Clear positioning in events, music and media production'
       ],
       recommendations: [
-        'Document specific pain points with quantitative metrics',
-        'Expand validation to enterprise segment'
+        'Provide detailed team information and organizational structure',
+        'Document traction: revenue trends, customer list, repeat business',
+        'Define unit economics, pricing model, margins and runway'
       ],
       confidence: 'high',
       isApplicable: true
     },
     {
       id: '2',
-      name: 'Solution Uniqueness',
-      category: 'Product & Technology',
-      score: 72,
-      importance: 'high',
-      status: 'moderate',
+      name: 'Solution-Problem Fit',
+      category: 'Problem & Solution',
+      score: 45,
+      importance: 'critical',
+      status: 'weak',
       insights: [
-        'AI-powered automation provides competitive edge',
-        'Patent pending on core algorithm',
-        'Limited differentiation in UI/UX compared to competitors'
+        'Offers event production to strengthen brands and drive sales through experiences',
+        'Positions work as creating stories and word-of-mouth',
+        'Serves music and media projects with broad event production spectrum'
       ],
       recommendations: [
-        'Strengthen IP portfolio with additional patents',
-        'Invest in distinctive user experience design',
-        'Develop proprietary data moat'
+        'Document measurable outcomes, KPIs, or case studies',
+        'Define target customer segments and core problem explicitly',
+        'Establish pricing model, repeatability metrics and scalability path'
       ],
       confidence: 'high',
       isApplicable: true
     },
     {
       id: '3',
-      name: 'Market Size & Growth',
+      name: 'Competitive Moat/Defensibility',
       category: 'Market & Competition',
-      score: 78,
-      importance: 'critical',
-      status: 'strong',
+      score: 28,
+      importance: 'high',
+      status: 'critical',
       insights: [
-        'TAM of €12B globally with 22% CAGR',
-        'Strong tailwinds from digital transformation',
-        'Early market with room for multiple winners'
+        'Production company creating brand experiences and stories',
+        'Works across events, music, and media industries',
+        'No proprietary technology, data, patents mentioned'
       ],
       recommendations: [
-        'Develop market entry strategy for UK and DACH',
-        'Create detailed market sizing for each vertical'
+        'Build network effects or platform-based approach',
+        'Develop proprietary data assets or unique IP',
+        'Create high switching costs through long-term contracts'
       ],
-      confidence: 'medium',
+      confidence: 'high',
       isApplicable: true
     },
     {
       id: '4',
-      name: 'Competitive Landscape',
-      category: 'Market & Competition',
-      score: 65,
-      importance: 'high',
-      status: 'moderate',
+      name: 'Unit Economics',
+      category: 'Business Model',
+      score: 25,
+      importance: 'critical',
+      status: 'critical',
       insights: [
-        '3 direct competitors with €10M+ funding',
-        'First mover in Nordic market',
-        'Risk of US competitors entering market'
+        'Revenue band 10-50k with no period specified',
+        'Events/production company focused on experiences',
+        'No data on pricing, costs, marketing spend, or customer metrics'
       ],
       recommendations: [
-        'Build strategic partnerships to create barriers',
-        'Accelerate product development to maintain lead',
-        'Consider defensive IP strategy'
+        'Establish LTV, CAC, LTV:CAC ratio, and CAC payback metrics',
+        'Track per-event profitability and margin structure',
+        'Define marketing/sales costs and customer acquisition efficiency'
       ],
       confidence: 'high',
       isApplicable: true
     },
     {
       id: '5',
-      name: 'Revenue Model',
-      category: 'Business Model',
-      score: 82,
-      importance: 'critical',
-      status: 'strong',
+      name: 'Customer Acquisition Strategy',
+      category: 'Go-to-Market',
+      score: 25,
+      importance: 'high',
+      status: 'critical',
       insights: [
-        'SaaS model with €2k-10k ACV',
-        'Negative churn through upsells',
-        '90% gross margins on software'
+        'Event/production agency for branded experiences',
+        'No explicit acquisition channels mentioned',
+        'No evidence of repeatable/scalable acquisition model'
       ],
       recommendations: [
-        'Test enterprise pricing tiers',
-        'Develop usage-based pricing option'
+        'Define sales motion and channel strategy for repeatability',
+        'Document performance metrics, case studies, pricing',
+        'Establish target customer segments and acquisition funnel'
       ],
       confidence: 'high',
       isApplicable: true
     },
     {
       id: '6',
-      name: 'Unit Economics',
-      category: 'Business Model',
-      score: 74,
-      importance: 'critical',
-      status: 'moderate',
+      name: 'Competitive Landscape',
+      category: 'Market & Competition',
+      score: 25,
+      importance: 'medium',
+      status: 'critical',
       insights: [
-        'LTV/CAC ratio of 3.0x',
-        'Payback period of 12 months',
-        'Improving with scale'
+        'No competitor analysis or references in materials',
+        'Clear service focus on event production and storytelling',
+        'Active in music and media industries'
       ],
       recommendations: [
-        'Reduce CAC through product-led growth',
-        'Increase ACV to improve unit economics'
+        'Develop competitor mapping and market positioning analysis',
+        'Create case studies, client lists and performance metrics',
+        'Establish market context and competitive differentiation'
       ],
       confidence: 'high',
       isApplicable: true
     },
     {
       id: '7',
-      name: 'Team Experience',
+      name: 'Founder-Market Fit',
       category: 'Team & Execution',
-      score: 68,
+      score: 22,
       importance: 'critical',
-      status: 'moderate',
+      status: 'critical',
       insights: [
-        'Strong technical team with AI expertise',
-        'CEO has previous startup experience',
-        'Limited sales and marketing experience'
+        'Events production firm focused on brand experiences',
+        'Claims in music and media with sales-driven approach',
+        'No founder names, bios, or LinkedIn profiles provided'
       ],
       recommendations: [
-        'Hire experienced VP Sales',
-        'Add board advisor with SaaS scaling experience',
-        'Build out marketing team'
+        'Provide founder backgrounds and relevant experience',
+        'Document past clients, case studies and outcomes',
+        'Add LinkedIn profiles and team credentials'
       ],
       confidence: 'high',
       isApplicable: true
     },
     {
       id: '8',
-      name: 'Execution Track Record',
-      category: 'Team & Execution',
-      score: 70,
+      name: 'Revenue Growth Rate',
+      category: 'Traction & Growth',
+      score: 20,
       importance: 'high',
-      status: 'moderate',
+      status: 'critical',
       insights: [
-        'Delivered MVP 2 months ahead of schedule',
-        'Hit 80% of Q3 milestones',
-        'Customer acquisition slower than projected'
+        'MRR range 10-50k with high uncertainty',
+        'No MoM or YoY growth rates available',
+        'No historical revenue data or growth charts'
       ],
       recommendations: [
-        'Implement OKR framework',
-        'Increase sprint velocity by 20%'
+        'Track and report explicit MoM/YoY growth metrics',
+        'Narrow down current MRR with precise figures',
+        'Provide historical revenue series to show trajectory'
       ],
-      confidence: 'medium',
+      confidence: 'high',
       isApplicable: true
     },
     {
       id: '9',
-      name: 'Customer Traction',
-      category: 'Traction & Metrics',
-      score: 62,
-      importance: 'high',
-      status: 'weak',
+      name: 'Revenue Model Clarity',
+      category: 'Business Model',
+      score: 15,
+      importance: 'critical',
+      status: 'critical',
       insights: [
-        '25 paying customers in 6 months',
-        'NPS score of 72',
-        'Strong product-market fit signals in SME segment'
+        'No explicit revenue model disclosed',
+        'Event production company across events, music, media',
+        'Value prop focuses on experiences driving brand and sales'
       ],
       recommendations: [
-        'Accelerate customer acquisition',
-        'Develop case studies from top customers',
-        'Launch referral program'
+        'Define monetization mechanisms (service fees, ticketing, sponsorships)',
+        'Establish pricing structure and payment terms',
+        'Document client structure and revenue predictability'
       ],
       confidence: 'high',
       isApplicable: true
     },
     {
       id: '10',
-      name: 'Growth Metrics',
-      category: 'Traction & Metrics',
-      score: 58,
+      name: 'Product-Market Fit Signals',
+      category: 'Traction & Growth',
+      score: 15,
       importance: 'high',
-      status: 'weak',
+      status: 'critical',
       insights: [
-        '15% MoM revenue growth',
-        'Pipeline growing 25% monthly',
-        'Conversion rate improving'
+        'Event production focused on shareable experiences',
+        'Involvement across events, music and media sectors',
+        'No quantitative customer, growth, or retention data'
       ],
       recommendations: [
-        'Target 20%+ MoM growth',
-        'Implement growth experiments',
-        'Optimize conversion funnel'
+        'Track organic growth, referrals, and word-of-mouth metrics',
+        'Gather customer testimonials and case studies',
+        'Monitor churn, retention and feature-request patterns'
       ],
       confidence: 'medium',
       isApplicable: true
     },
     {
       id: '11',
-      name: 'Regulatory Compliance',
-      category: 'Risk & Compliance',
-      score: 88,
-      importance: 'medium',
-      status: 'strong',
+      name: 'Market Size (TAM/SAM/SOM)',
+      category: 'Market & Competition',
+      score: 12,
+      importance: 'high',
+      status: 'critical',
       insights: [
-        'GDPR compliant with DPA',
-        'ISO 27001 certification in progress',
-        'Clear data governance policies'
+        'Events/production company for experiences and storytelling',
+        'No market size or TAM/SAM/SOM figures provided',
+        'Industry focus on events, music and media'
       ],
       recommendations: [
-        'Complete SOC 2 certification',
-        'Prepare for AI Act compliance'
+        'Research and document TAM/SAM/SOM for event production',
+        'Align market sizing with revenue potential and geography',
+        'Include industry reports and market growth projections'
       ],
       confidence: 'high',
       isApplicable: true
     },
     {
       id: '12',
-      name: 'Financial Risk',
-      category: 'Risk & Compliance',
-      score: 72,
-      importance: 'high',
-      status: 'moderate',
+      name: 'Problem Clarity',
+      category: 'Problem & Solution',
+      score: 12,
+      importance: 'critical',
+      status: 'critical',
       insights: [
-        '18 months runway at current burn',
-        'Revenue growing faster than costs',
-        'Need to raise Series A in 9 months'
+        'Marketing copy describing services, not problem statement',
+        'No customer pain points or urgency mentioned',
+        'No customer quotes or demand validation'
       ],
       recommendations: [
-        'Extend runway to 24 months',
-        'Start Series A conversations early',
-        'Build relationships with target investors'
+        'Articulate explicit problem statement for investors',
+        'Quantify customer pain and market urgency',
+        'Include testimonials and real-world problem validation'
+      ],
+      confidence: 'high',
+      isApplicable: true
+    },
+    {
+      id: '13',
+      name: 'Retention & Churn',
+      category: 'Traction & Growth',
+      score: 10,
+      importance: 'medium',
+      status: 'critical',
+      insights: [
+        'No NRR, GRR, churn or customer lifetime metrics',
+        'Focus on event production and brand experiences',
+        'No retention KPIs or client success data'
+      ],
+      recommendations: [
+        'Implement retention/churn tracking for B2B clients',
+        'Document repeat business rates and client lifetime value',
+        'Build case studies showing long-term client relationships'
+      ],
+      confidence: 'high',
+      isApplicable: true
+    },
+    {
+      id: '14',
+      name: 'Runway & Burn Rate',
+      category: 'Fundraising',
+      score: 10,
+      importance: 'high',
+      status: 'critical',
+      insights: [
+        'Events/production firm building brands through experiences',
+        'No financial data: burn rate, cash, revenue, runway',
+        'Unable to determine financial sustainability'
+      ],
+      recommendations: [
+        'Document monthly burn rate and current cash position',
+        'Calculate runway based on current burn and revenue',
+        'Provide team size, traction, and contract pipeline'
       ],
       confidence: 'high',
       isApplicable: true
     }
-  ]
 };
 
 interface AnalysisDimension {
