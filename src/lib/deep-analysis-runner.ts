@@ -76,45 +76,18 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
       await prisma.analysisInsight.deleteMany({ where: { analysisId: analysis.id } });
     }
 
-  // 2. Detect company stage and gather external intelligence
-  const { detectCompanyStage, gatherExternalIntelligence, getEnterprisNADimensions } = await import('./external-intelligence');
-  const companyStage = detectCompanyStage(businessInfo, scrapedContent);
-  const naDimensionsForStage = companyStage === 'enterprise' ? getEnterprisNADimensions() : [];
+  // 2. Fast mode: Skip external intelligence for demo stability
+  const companyStage = 'startup'; // Default stage for fast processing
+  const naDimensionsForStage: string[] = [];
+  const externalIntel = null;
+  const googleIntel = null;
   
-  console.log(`📊 Detected company stage: ${companyStage}`);
-  if (naDimensionsForStage.length > 0) {
-    console.log(`⏭️  Marking ${naDimensionsForStage.length} dimensions as N/A for ${companyStage}`);
-  }
+  console.log(`⚡ FAST MODE: Skipping external intelligence for immediate start`);
 
-  // Gather external intelligence (Wikipedia, news, Crunchbase)
-  let externalIntel = null;
+  // OCR: Skip for fast mode (can be enabled for re-runs)
+  const skipOCR = true;  // Fast mode for demo
   try {
-    externalIntel = await gatherExternalIntelligence(businessInfo.name, businessInfo.website);
-    console.log(`🌍 External sources gathered: ${externalIntel.sources.join(', ')}`);
-  } catch (e) {
-    console.warn('External intelligence gathering failed:', e);
-  }
-
-  // Gather Google Search intelligence (if API keys configured and user has quota)
-  let googleIntel = null;
-  try {
-    const { searchCompanyIntelligence } = await import('./google-search');
-    const userId = session?.userId || sessionId; // Fallback to sessionId if no user
-    
-    googleIntel = await searchCompanyIntelligence(
-      businessInfo.name || 'Unknown Company',
-      businessInfo.industry || '',
-      userId
-    );
-    
-    console.log(`🔍 Google Search: ${googleIntel.news.length} news, ${googleIntel.competitors.length} competitors, ${googleIntel.marketTrends.length} trends (quota: ${googleIntel.quotaRemaining})`);
-  } catch (e) {
-    console.warn('Google Search intelligence failed (likely quota/config):', e);
-  }
-
-  // OCR: Extract metrics from uploaded PDF pitch decks and enrich businessInfo
-  try {
-    const pdfUrls = (uploadedDocuments || []).filter((u) => /\.pdf($|\?|#)/i.test(u));
+    const pdfUrls = skipOCR ? [] : (uploadedDocuments || []).filter((u) => /\.pdf($|\?|#)/i.test(u));
     if (pdfUrls.length > 0) {
       const { extractPitchDeckMetrics } = await import('./pdf-ocr');
       let mergedText = '';

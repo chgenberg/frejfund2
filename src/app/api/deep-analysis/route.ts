@@ -123,78 +123,36 @@ export async function POST(request: NextRequest) {
       console.warn('Auto-publish profile failed (non-fatal):', pubErr);
     }
 
-    // Orchestrate: harvest (mini) + scrape + docs before analysis
-    (async () => {
-      const { fetchGptKnowledgeForCompany } = await import('@/lib/gpt-knowledge');
-      const { scrapeSiteShallow } = await import('@/lib/web-scraper');
-
-      // Run harvest and shallow scrape in parallel with adaptive gating
-      const abortController = new AbortController();
-      const harvestPromise = fetchGptKnowledgeForCompany(businessInfo, abortController.signal);
-      const scrapePromise = businessInfo.website
-        ? scrapeSiteShallow(businessInfo.website, 6)
-        : Promise.resolve({ combinedText: '', sources: [] });
-
-      const baseGateMs = 120000; // 120s
-      const extraSliceMs = 60000; // 60s slices
-      const hardMaxMs = 240000; // 240s
-
-      const waitWithTimeout = async <T>(p: Promise<T>, ms: number): Promise<T | null> => {
-        return await Promise.race<T | null>([
-          p as any,
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
-        ]);
-      };
-
-      let harvest = await waitWithTimeout(harvestPromise as any, baseGateMs);
-      let websiteData = await waitWithTimeout(scrapePromise as any, baseGateMs);
-
-      let waited = baseGateMs;
-      const isHarvestWeak = () =>
-        !harvest ||
-        !(harvest as any).combinedText ||
-        ((harvest as any).combinedText as string).length < 1200 ||
-        (Array.isArray((harvest as any).chunks) && (harvest as any).chunks.length < 3);
-      const isScrapeWeak = () =>
-        !websiteData ||
-        !(websiteData as any).combinedText ||
-        ((websiteData as any).combinedText as string).length < 20000 ||
-        (Array.isArray((websiteData as any).sources) && (websiteData as any).sources.length < 3);
-
-      // Extend to 180s if harvest+scrape are weak
-      if (isHarvestWeak() && isScrapeWeak() && waited < 180000) {
-        const slice = await Promise.all([
-          harvest ? Promise.resolve(harvest) : waitWithTimeout(harvestPromise as any, extraSliceMs),
-          websiteData
-            ? Promise.resolve(websiteData)
-            : waitWithTimeout(scrapePromise as any, extraSliceMs),
-        ]);
-        harvest = slice[0] ?? harvest;
-        websiteData = slice[1] ?? websiteData;
-        waited += extraSliceMs;
-      }
-
-      // Final chance up to 240s hard max if båda fortfarande svaga
-      if (isHarvestWeak() && isScrapeWeak() && waited < hardMaxMs) {
-        const slice = await Promise.all([
-          harvest ? Promise.resolve(harvest) : waitWithTimeout(harvestPromise as any, extraSliceMs),
-          websiteData
-            ? Promise.resolve(websiteData)
-            : waitWithTimeout(scrapePromise as any, extraSliceMs),
-        ]);
-        harvest = slice[0] ?? harvest;
-        websiteData = slice[1] ?? websiteData;
-        waited += extraSliceMs;
-      }
-
+    // FAST MODE: Start analysis immediately with minimal data
+    const preHarvestText = '';  // Skip GPT harvest for speed
+    const mergedScraped = scrapedContent || '';  // Use provided content or empty
+    
+    // Background scraping (non-blocking) - will enhance analysis as it completes
+    Promise.resolve().then(async () => {
       try {
-        abortController.abort();
-      } catch {}
-
-      const preHarvestText =
-        harvest && (harvest as any).combinedText ? (harvest as any).combinedText : '';
-      const mergedScraped =
-        (scrapedContent || '') + '\n\n' + ((websiteData as any)?.combinedText || '');
+        if (!businessInfo.website) return;
+        
+        const { scrapeSiteShallow } = await import('@/lib/web-scraper');
+        const websiteData = await Promise.race([
+          scrapeSiteShallow(businessInfo.website, 3),  // Reduced from 6 to 3 pages
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 30000))  // 30s max
+        ]).catch(() => null);
+        
+        if (websiteData && (websiteData as any).combinedText) {
+          // Store scraped content for future re-runs
+          await prisma.deepAnalysis.update({
+            where: { sessionId },
+            data: {
+              publicKnowledge: {
+                scrapedContent: (websiteData as any).combinedText,
+                sources: (websiteData as any).sources || []
+              }
+            }
+          }).catch(console.warn);
+        }
+      } catch (err) {
+        console.warn('Background scraping failed (non-fatal):', err);
+      }
 
       // Enqueue deep analysis with merged pre-context (phase 1) via BullMQ if enabled
       const useBull = process.env.USE_BULLMQ === 'true';
@@ -294,29 +252,13 @@ export async function POST(request: NextRequest) {
           console.error('Targeted re-run enqueue failed:', err);
         }
       }
-    })()
+    })
       .then(() => {
         console.log('✅ Deep analysis completed for session:', sessionId);
       })
-      .catch((error) => {
+      .catch((error: any) => {
         console.error('❌ Background deep analysis failed:', error);
       });
-
-    // Compute derived unit economics if possible
-    const overrides = (analysis as any).metricOverrides || {};
-    const ocr = (analysis as any).ocrMetrics || {};
-    const src = { ...ocr, ...overrides }; // overrides win
-    const cac = Number(src.cac);
-    const ltv = Number(src.ltv);
-    const churn = Number(src.churn);
-    const mrr = Number(src.mrr);
-    const customers = Number(src.customers);
-    const grossMargin = Number(src.grossMargin); // optional
-    const arpu = Number.isFinite(mrr) && Number.isFinite(customers) && customers > 0 ? mrr / customers : Number(src.arpu);
-    const ltvCac = Number.isFinite(ltv) && Number.isFinite(cac) && cac > 0 ? ltv / cac : undefined;
-    const paybackMonths = Number.isFinite(cac) && Number.isFinite(arpu) && arpu > 0
-      ? (Number.isFinite(grossMargin) && grossMargin > 0 ? cac / (arpu * (grossMargin / 100)) : cac / arpu)
-      : undefined;
 
     return NextResponse.json({
       success: true,
