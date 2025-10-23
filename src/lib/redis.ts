@@ -38,27 +38,47 @@ export function getRedis(): IORedis | null {
 }
 
 export function getPub(): PubLike {
+  if (!process.env.REDIS_URL) return createNoopPub();
+  
   try {
-    if (!process.env.REDIS_URL) return createNoopPub();
     if (!pub) {
       const url = process.env.REDIS_URL;
-      pub = new IORedis(url, { maxRetriesPerRequest: null, enableReadyCheck: true }) as any;
+      pub = new IORedis(url, { 
+        maxRetriesPerRequest: null, 
+        enableReadyCheck: false,
+        lazyConnect: true,
+        retryStrategy: () => null  // Don't retry on failure
+      }) as any;
+      pub.on('error', (err: any) => {
+        console.warn('Redis pub error (non-fatal):', err.code);
+      });
     }
     return pub as any;
-  } catch {
+  } catch (err) {
+    console.warn('Redis pub init failed, using no-op:', err);
     return createNoopPub();
   }
 }
 
 export function getSub(): SubLike {
+  if (!process.env.REDIS_URL) return createNoopSub();
+  
   try {
-    if (!process.env.REDIS_URL) return createNoopSub();
     if (!sub) {
       const url = process.env.REDIS_URL;
-      sub = new IORedis(url, { maxRetriesPerRequest: null, enableReadyCheck: true }) as any;
+      sub = new IORedis(url, { 
+        maxRetriesPerRequest: null, 
+        enableReadyCheck: false,
+        lazyConnect: true,
+        retryStrategy: () => null
+      }) as any;
+      sub.on('error', (err: any) => {
+        console.warn('Redis sub error (non-fatal):', err.code);
+      });
     }
     return sub as any;
-  } catch {
+  } catch (err) {
+    console.warn('Redis sub init failed, using no-op:', err);
     return createNoopSub();
   }
 }

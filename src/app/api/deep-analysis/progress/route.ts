@@ -76,36 +76,29 @@ export async function GET(request: NextRequest) {
           });
 
           if (analysis) {
-            const completedCount = analysis.dimensions.length;
-            const totalCount = ANALYSIS_DIMENSIONS.length;
-
-            // Compute client-facing progress as max(db.progress, computed)
-            const coarseDbProgress = Math.max(0, Math.min(100, analysis.progress || 0));
-            const computedProgress = Math.round((completedCount / Math.max(1, totalCount)) * 100);
-            const effectiveCount = Math.max(
-              Math.round((coarseDbProgress / 100) * totalCount),
-              completedCount,
-            );
+            // Use DB progress directly (0-100%) instead of counting dimensions
+            const currentProgress = Math.max(0, Math.min(100, analysis.progress || 0));
+            const totalProgress = 100;
             const completedCategories = [...new Set(analysis.dimensions.map((d) => d.category))];
 
             // Only send update if progress changed
-            if (effectiveCount !== lastProgress || effectiveCount === 0) {
-              lastProgress = effectiveCount;
+            if (currentProgress !== lastProgress || currentProgress === 0) {
+              lastProgress = currentProgress;
               const data = {
                 type: 'progress',
-                current: effectiveCount,
-                total: totalCount,
+                current: currentProgress,
+                total: totalProgress,
                 completedCategories,
                 sessionId,
               };
               write(data);
               console.log(
-                `📡 SSE: Sent progress ${effectiveCount}/${totalCount} to client (session ${sessionId})`,
+                `📡 SSE: Sent progress ${currentProgress}/${totalProgress} to client (session ${sessionId})`,
               );
             }
 
-            // Check if complete (require both DB status and count to agree)
-            if (analysis.status === 'completed' && effectiveCount >= totalCount) {
+            // Check if complete
+            if (analysis.status === 'completed' || currentProgress >= 100) {
               write({ type: 'complete' });
               console.log('📡 SSE: Analysis complete, closing connection');
               clearInterval(interval);

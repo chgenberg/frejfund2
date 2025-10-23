@@ -77,16 +77,16 @@ export default function UploadGuideModal({ isOpen, onClose }: UploadGuideModalPr
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
           />
 
           {/* Modal */}
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 pt-20 pb-8">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+              className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-full overflow-hidden"
             >
               {/* Header */}
               <div className="bg-gradient-to-r from-gray-900 to-gray-800 px-6 py-5 flex items-center justify-between">
@@ -105,7 +105,7 @@ export default function UploadGuideModal({ isOpen, onClose }: UploadGuideModalPr
               </div>
 
               {/* Content */}
-              <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              <div className="p-6 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 280px)' }}>
                 <div className="grid gap-4">
                   {documents.map((doc, index) => {
                     const Icon = doc.icon;
