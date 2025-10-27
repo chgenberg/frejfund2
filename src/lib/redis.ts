@@ -7,22 +7,34 @@ let redis: IORedis | null = null;
 let pub: (IORedis & PubLike) | (PubLike & { connected?: boolean }) | null = null;
 let sub: (IORedis & SubLike) | (SubLike & { connected?: boolean }) | null = null;
 
-function createNoopPub(): PubLike {
-  return {
-    async publish() {
-      return 0; // no-op
-    },
-  };
-}
+const createNoopPub = () => ({
+  publish: async (channel: string, message: string) => {
+    // FIX #3: Silently succeed to prevent unhandled rejections
+    // In production, consider logging this for monitoring
+    return 1; // Simulate successful publish
+  },
+  on: (event: string, callback: any) => {
+    // No-op event handler
+  },
+  quit: async () => {
+    // No-op
+  },
+});
 
-function createNoopSub(): SubLike {
-  return {
-    async subscribe() {
-      return 0; // no-op
-    },
-    on() {},
-  };
-}
+const createNoopSub = () => ({
+  subscribe: async (channel: string) => {
+    // No-op subscription
+  },
+  on: (event: string, callback: any) => {
+    // No-op event handler
+  },
+  unsubscribe: async (channel: string) => {
+    // No-op unsubscription
+  },
+  quit: async () => {
+    // No-op
+  },
+});
 
 export function getRedis(): IORedis | null {
   try {
@@ -38,7 +50,10 @@ export function getRedis(): IORedis | null {
 }
 
 export function getPub(): PubLike {
-  if (!process.env.REDIS_URL) return createNoopPub();
+  if (!process.env.REDIS_URL) {
+    console.warn('Redis URL not configured, using no-op pub');
+    return createNoopPub();
+  }
   
   try {
     if (!pub) {
@@ -47,21 +62,41 @@ export function getPub(): PubLike {
         maxRetriesPerRequest: null, 
         enableReadyCheck: false,
         lazyConnect: true,
-        retryStrategy: () => null  // Don't retry on failure
+        retryStrategy: (times) => {
+          // FIX #3: Better retry strategy with exponential backoff
+          const delay = Math.min(1000 * Math.pow(2, times), 10000);
+          console.warn(`[Redis Pub] Retry attempt ${times}, waiting ${delay}ms`);
+          return delay;
+        },
+        reconnectOnError: (err) => {
+          // FIX #3: Gracefully handle connection errors
+          const targetError = 'READONLY';
+          if (err.message.includes(targetError)) {
+            console.warn('[Redis Pub] Read-only error, reconnecting...');
+            return true;
+          }
+          return false;
+        }
       }) as any;
       pub.on('error', (err: any) => {
-        console.warn('Redis pub error (non-fatal):', err.code);
+        console.warn('[Redis Pub Error] Non-fatal Redis error:', err.code || err.message);
+      });
+      pub.on('close', () => {
+        console.warn('[Redis Pub] Connection closed');
       });
     }
     return pub as any;
   } catch (err) {
-    console.warn('Redis pub init failed, using no-op:', err);
+    console.warn('[Redis Pub] Failed to initialize, using no-op:', err);
     return createNoopPub();
   }
 }
 
 export function getSub(): SubLike {
-  if (!process.env.REDIS_URL) return createNoopSub();
+  if (!process.env.REDIS_URL) {
+    console.warn('Redis URL not configured, using no-op sub');
+    return createNoopSub();
+  }
   
   try {
     if (!sub) {
@@ -70,15 +105,23 @@ export function getSub(): SubLike {
         maxRetriesPerRequest: null, 
         enableReadyCheck: false,
         lazyConnect: true,
-        retryStrategy: () => null
+        retryStrategy: (times) => {
+          // FIX #3: Better retry strategy
+          const delay = Math.min(1000 * Math.pow(2, times), 10000);
+          console.warn(`[Redis Sub] Retry attempt ${times}, waiting ${delay}ms`);
+          return delay;
+        }
       }) as any;
       sub.on('error', (err: any) => {
-        console.warn('Redis sub error (non-fatal):', err.code);
+        console.warn('[Redis Sub Error] Non-fatal Redis error:', err.code || err.message);
+      });
+      sub.on('close', () => {
+        console.warn('[Redis Sub] Connection closed');
       });
     }
     return sub as any;
   } catch (err) {
-    console.warn('Redis sub init failed, using no-op:', err);
+    console.warn('[Redis Sub] Failed to initialize, using no-op:', err);
     return createNoopSub();
   }
 }

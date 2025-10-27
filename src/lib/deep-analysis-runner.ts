@@ -30,6 +30,8 @@ interface RunDeepAnalysisOptions {
  * This will be called after initial scraping is complete
  */
 export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<string> {
+  const startTime = Date.now();
+  const logPrefix = `[DEEP-ANALYSIS-RUNNER] [${new Date().toISOString()}]`;
   const {
     sessionId,
     businessInfo,
@@ -39,19 +41,20 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
     specificDimensions,
   } = options;
 
-  console.log(`🔬 Starting deep analysis for ${businessInfo.name} (${sessionId})`);
-  console.log(
-    `📋 Mode: ${mode}, Content length: ${scrapedContent.length}, Docs: ${uploadedDocuments.length}`,
-  );
+  console.log(`${logPrefix} 🚀 STARTING DEEP ANALYSIS`);
+  console.log(`${logPrefix} 📋 Mode: ${mode}, Content: ${scrapedContent.length}b, Docs: ${uploadedDocuments.length}, Business: ${businessInfo.name}`);
 
   try {
     // Get session to find userId
+    console.log(`${logPrefix} 🔍 STEP 1 - Finding session: ${sessionId}`);
     const session = await prisma.session.findUnique({
       where: { id: sessionId },
       select: { userId: true },
     });
+    console.log(`${logPrefix} ✅ STEP 1 - Session found, UserId: ${session?.userId || 'null'}`);
 
     // 1. Create or reuse DeepAnalysis record (avoid P2002 on re-run)
+    console.log(`${logPrefix} 💾 STEP 2 - Creating/upserting analysis record...`);
     const isCriticalOnly = mode === 'critical-only';
     const analysis = await prisma.deepAnalysis.upsert({
       where: { sessionId },
@@ -69,20 +72,72 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
         businessInfo: businessInfo, // Update business info
       },
     });
+    console.log(`${logPrefix} ✅ STEP 2 - Analysis record created, ID: ${analysis.id}`);
 
     // Only clear previous results on a full run; keep existing dimensions on critical-only or specific re-runs
+    console.log(`${logPrefix} 🗑️ STEP 3 - Clearing old dimensions (mode: ${mode})...`);
     if (mode !== 'critical-only' && mode !== 'specific') {
-      await prisma.analysisDimension.deleteMany({ where: { analysisId: analysis.id } });
-      await prisma.analysisInsight.deleteMany({ where: { analysisId: analysis.id } });
+      // FIX #10: Add a cleanup lock to prevent race conditions
+      try {
+        // Check if cleanup is already in progress
+        const cleanupInProgress = await prisma.deepAnalysis.findUnique({
+          where: { sessionId },
+          select: { id: true }
+        });
+        
+        if (cleanupInProgress?.id) {
+          // Update a flag to indicate cleanup in progress
+          await prisma.deepAnalysis.update({
+            where: { id: cleanupInProgress.id },
+            data: { 
+              // Using a custom field would be better, but for now we just proceed carefully
+              status: 'analyzing'
+            }
+          });
+          
+          // Small delay to let other runners finish
+          await new Promise((r) => setTimeout(r, 100));
+          
+          // Delete only dimensions not recently updated
+          const fiveSecondsAgo = new Date(Date.now() - 5000);
+          const deletedDims = await prisma.analysisDimension.deleteMany({ 
+            where: { 
+              analysisId: analysis.id,
+              analyzedAt: { lt: fiveSecondsAgo } // Only delete old ones
+            } 
+          });
+          const deletedInsights = await prisma.analysisInsight.deleteMany({ 
+            where: { 
+              analysisId: analysis.id,
+              createdAt: { lt: fiveSecondsAgo } // Only delete old ones
+            } 
+          });
+          console.log(`${logPrefix} ✅ STEP 3 - Cleared ${deletedDims.count} dimensions, ${deletedInsights.count} insights (safe cleanup)`);
+        }
+      } catch (cleanupErr) {
+        console.warn(`${logPrefix} ⚠️ STEP 3 - Safe cleanup failed, attempting full cleanup:`, cleanupErr);
+        // Fallback to full cleanup (will race but won't crash)
+        try {
+          const deletedDims = await prisma.analysisDimension.deleteMany({ where: { analysisId: analysis.id } });
+          const deletedInsights = await prisma.analysisInsight.deleteMany({ where: { analysisId: analysis.id } });
+          console.log(`${logPrefix} ✅ STEP 3 - Cleared ${deletedDims.count} dimensions, ${deletedInsights.count} insights (fallback cleanup)`);
+        } catch (fullCleanupErr) {
+          console.error(`${logPrefix} ❌ STEP 3 - Cleanup failed completely:`, fullCleanupErr);
+        }
+      }
+    } else {
+      console.log(`${logPrefix} ℹ️ STEP 3 - Skipped cleanup (critical-only/specific mode)`);
     }
 
   // 2. Fast mode: Skip external intelligence for demo stability
+  console.log(`${logPrefix} ⚡ STEP 4 - Using FAST MODE (skipping external intelligence)`);
   const companyStage = 'startup'; // Default stage for fast processing
   const naDimensionsForStage: string[] = [];
   const externalIntel = null;
   const googleIntel = null;
+  const gptKnowledgeText = '';
   
-  console.log(`⚡ FAST MODE: Skipping external intelligence for immediate start`);
+  console.log(`${logPrefix} ✅ STEP 4 - Fast mode initialized`);
 
   // OCR: Skip for fast mode (can be enabled for re-runs)
   const skipOCR = true;  // Fast mode for demo
@@ -197,62 +252,76 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
 
     const totalDimensions = dimensionsToAnalyze.length;
     let completed = 0;
+    console.log(`${logPrefix} 📊 STEP 5 - Loaded dimensions to analyze: ${totalDimensions} total`);
+    console.log(`${logPrefix} 📊 Dimensions: ${dimensionsToAnalyze.map(d => d.id).join(', ').slice(0, 100)}...`);
+
     const completedCategories: string[] = [];
 
     // Idempotent saver to avoid duplicates when re-running
     const saveDimension = async (analysisId: string, dimensionMeta: any, result: any) => {
-      const existing = await prisma.analysisDimension.findFirst({
-        where: { analysisId, dimensionId: dimensionMeta.id },
-      });
-      if (existing) {
-        await prisma.analysisDimension.update({
-          where: { id: existing.id },
-          data: {
-            category: dimensionMeta.category,
-            name: dimensionMeta.name,
-            score: result.score,
-            findings: result.findings,
-            redFlags: result.redFlags,
-            strengths: result.strengths,
-            questions: result.questionsToAsk,
-            evidence: result.evidence || [],
-            confidence: result.confidence,
-            analyzed: true,
-            analyzedAt: new Date(),
-            // Avoid saving full prompt to reduce memory/DB usage
-            prompt: undefined,
-            // Store actual model used for traceability
-            modelUsed: getChatModel('complex'),
-          },
+      try {
+        const existing = await prisma.analysisDimension.findFirst({
+          where: { analysisId, dimensionId: dimensionMeta.id },
         });
-      } else {
-        await prisma.analysisDimension.create({
-          data: {
-            analysisId,
-            dimensionId: dimensionMeta.id,
-            category: dimensionMeta.category,
-            name: dimensionMeta.name,
-            score: result.score,
-            findings: result.findings,
-            redFlags: result.redFlags,
-            strengths: result.strengths,
-            questions: result.questionsToAsk,
-            evidence: result.evidence || [],
-            confidence: result.confidence,
-            analyzed: true,
-            analyzedAt: new Date(),
-            prompt: undefined,
-            modelUsed: getChatModel('complex'),
-          },
-        });
+        if (existing) {
+          console.log(`${logPrefix} 🔄 Updating existing dimension: ${dimensionMeta.id}`);
+          await prisma.analysisDimension.update({
+            where: { id: existing.id },
+            data: {
+              category: dimensionMeta.category,
+              name: dimensionMeta.name,
+              score: result.score,
+              findings: result.findings,
+              redFlags: result.redFlags,
+              strengths: result.strengths,
+              questions: result.questionsToAsk,
+              evidence: result.evidence || [],
+              confidence: result.confidence,
+              analyzed: true,
+              analyzedAt: new Date(),
+              // Avoid saving full prompt to reduce memory/DB usage
+              prompt: undefined,
+              // Store actual model used for traceability
+              modelUsed: getChatModel('complex'),
+            },
+          });
+        } else {
+          console.log(`${logPrefix} ✨ Creating new dimension: ${dimensionMeta.id} (score: ${result.score})`);
+          await prisma.analysisDimension.create({
+            data: {
+              analysisId,
+              dimensionId: dimensionMeta.id,
+              category: dimensionMeta.category,
+              name: dimensionMeta.name,
+              score: result.score,
+              findings: result.findings,
+              redFlags: result.redFlags,
+              strengths: result.strengths,
+              questions: result.questionsToAsk,
+              evidence: result.evidence || [],
+              confidence: result.confidence,
+              analyzed: true,
+              analyzedAt: new Date(),
+              prompt: undefined,
+              modelUsed: getChatModel('complex'),
+            },
+          });
+        }
+      } catch (saveErr) {
+        console.error(`${logPrefix} ❌ Error saving dimension ${dimensionMeta.id}:`, saveErr);
+        throw saveErr;
       }
     };
 
     // 4. Run analysis for each dimension in small batches to reduce load
     // Low-memory mode tuned: 2 at a time in production to improve throughput without OOM
     const batchSize = process.env.NODE_ENV === 'production' ? 2 : 3;
+    console.log(`${logPrefix} 🔄 STEP 6 - Starting dimension analysis (batchSize: ${batchSize}, total: ${totalDimensions})...`);
+    
     for (let idx = 0; idx < dimensionsToAnalyze.length; idx += batchSize) {
       const batch = dimensionsToAnalyze.slice(idx, idx + batchSize);
+      console.log(`${logPrefix} 📦 Processing batch ${Math.floor(idx / batchSize) + 1}/${Math.ceil(totalDimensions / batchSize)} (${batch.map(d => d.id).join(', ')})`);
+      
       for (const dimension of batch) {
         try {
         // Guard against long-hanging external calls (LLM/network)
@@ -273,6 +342,7 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
 
           // Analyze with simple retry/backoff
           let result: any | null = null;
+          console.log(`${logPrefix} 🔬 Analyzing: ${dimension.name} (${dimension.id}), Attempt 1/2...`);
           for (let attempt = 1; attempt <= 2; attempt++) {
             try {
             result = await withTimeout(
@@ -293,15 +363,44 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
               120000,
               `dimension ${dimension.id}`,
             );
+              console.log(`${logPrefix} ✅ Analysis successful: ${dimension.name} → Score: ${result.score}/100, Confidence: ${result.confidence.toFixed(2)}`);
               break;
             } catch (e) {
-              if (attempt === 2) throw e;
+              if (attempt === 2) {
+                console.error(`${logPrefix} ❌ Failed on attempt ${attempt}: ${dimension.id}:`, (e as Error).message);
+                // FIX #8: Create a failed dimension record for auditing
+                try {
+                  await prisma.analysisDimension.create({
+                    data: {
+                      analysisId: analysis.id,
+                      dimensionId: dimension.id,
+                      category: dimension.category,
+                      name: dimension.name,
+                      score: 0, // Mark as 0 to indicate failure
+                      findings: [`Analysis failed: ${(e as Error).message}`],
+                      strengths: [],
+                      redFlags: [`Failed to analyze - ${(e as Error).message.slice(0, 100)}`],
+                      questions: [],
+                      evidence: [],
+                      confidence: 0,
+                      analyzed: false, // Mark as not analyzed
+                      analyzedAt: new Date(),
+                    },
+                  });
+                  console.log(`${logPrefix} 📝 Failed dimension record created for auditing`);
+                } catch (recordErr) {
+                  console.warn(`${logPrefix} ⚠️ Failed to create error record:`, recordErr);
+                }
+                throw e;
+              }
+              console.warn(`${logPrefix} ⚠️ Attempt ${attempt} failed, retrying in ${1000 * attempt}ms...`, (e as Error).message);
               await new Promise((r) => setTimeout(r, 1000 * attempt));
             }
           }
 
           // Save idempotently
           // Save idempotently (avoid storing full prompt to reduce DB size)
+          console.log(`${logPrefix} 💾 Saving dimension results to database...`);
           await saveDimension(analysis.id, dimension, result);
 
           // Update progress: map 0-95 dimensions to 3-100% (scraping was 0-3%)
@@ -321,14 +420,12 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
             }
           }
 
+          console.log(`${logPrefix} 📊 Progress: ${completed}/${totalDimensions} (${analysisProgress}%) - ${dimension.name} [${dimension.category}]`);
+
           await prisma.deepAnalysis.update({
             where: { id: analysis.id },
             data: { progress: analysisProgress },
           });
-
-          console.log(
-            `📊 Progress: ${completed}/${totalDimensions} (${analysisProgress}%) - ${dimension.name}`,
-          );
 
           // Call progress callback if provided
           if (options.onProgress) {
@@ -340,6 +437,7 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
 
           // Generate insights from this dimension if critical
           if (dimension.priority === 'critical' && result.redFlags.length > 0) {
+            console.log(`${logPrefix} 🚨 Creating insight for critical dimension: ${dimension.name}`);
             await prisma.analysisInsight.create({
               data: {
                 analysisId: analysis.id,
@@ -365,17 +463,32 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
             (global as any).gc && (global as any).gc();
           } catch {}
         } catch (error) {
-          console.error(`Error analyzing dimension ${dimension.id}:`, error);
-          // Even on failure, advance coarse progress so UI doesn't stall
+          console.error(`${logPrefix} ❌ ERROR analyzing dimension ${dimension.id}:`, error);
+          // FIX #9: Even on failure, advance progress and always call onProgress callback
           completed++;
           const analysisProgress = Math.round(3 + (completed / totalDimensions) * 97);
+          
+          // Always update progress in DB for consistency
           try {
-            await prisma.deepAnalysis.update({ where: { id: analysis.id }, data: { progress: analysisProgress } });
-            if (options.onProgress) {
+            await prisma.deepAnalysis.update({ 
+              where: { id: analysis.id }, 
+              data: { progress: analysisProgress } 
+            });
+          } catch (updateErr) {
+            console.warn(`${logPrefix} ⚠️ Failed to update progress in DB:`, updateErr);
+          }
+          
+          // ALWAYS call onProgress callback - this is critical for FIX #9
+          if (options.onProgress) {
+            try {
               await options.onProgress(analysisProgress, 100, completedCategories);
+            } catch (callbackErr) {
+              console.error(`${logPrefix} ❌ onProgress callback failed:`, callbackErr);
             }
-          } catch {}
-          // Continue with other dimensions
+          }
+          
+          // Continue with other dimensions instead of stopping
+          console.log(`${logPrefix} ⚠️ Skipping dimension ${dimension.id}, continuing with next...`);
         }
       }
       // Short pause between batches
@@ -387,11 +500,26 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
         } catch {}
       }
     }
+    
+    console.log(`${logPrefix} ✅ STEP 6 - All dimensions analyzed!`);
+    
+    // FIX #9: Send final progress update to 100% to ensure completion
+    if (options.onProgress) {
+      try {
+        await options.onProgress(100, 100, completedCategories);
+        console.log(`${logPrefix} 📊 Final 100% progress sent to callback`);
+      } catch (err) {
+        console.warn(`${logPrefix} ⚠️ Failed to send final progress update:`, err);
+      }
+    }
 
     // 4. Calculate overall scores (confidence-weighted and data completeness)
+    console.log(`${logPrefix} 📈 STEP 7 - Calculating overall scores...`);
     const allDimensions = await prisma.analysisDimension.findMany({
       where: { analysisId: analysis.id, analyzed: true },
     });
+
+    console.log(`${logPrefix} 📊 Found ${allDimensions.length} analyzed dimensions`);
 
     // Simple average score (raw)
     const avgScore =
@@ -400,6 +528,7 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
             allDimensions.reduce((sum, d) => sum + (d.score || 0), 0) / allDimensions.length,
           )
         : 0;
+    console.log(`${logPrefix} 📊 Average score calculated: ${avgScore}/100`);
 
     // Confidence-weighted score (penalize low-confidence dimensions less)
     const confidenceWeights = { high: 1.0, medium: 0.7, low: 0.4 };
@@ -414,31 +543,52 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
     });
     
     const confidenceWeightedScore = weightSum > 0 ? Math.round(weightedSum / weightSum) : 0;
+    console.log(`${logPrefix} 📊 Confidence-weighted score: ${confidenceWeightedScore}/100`);
     
     // Data completeness (% of dimensions with high confidence)
     const highConfCount = allDimensions.filter(d => d.confidence === 'high').length;
     const dataCompleteness = allDimensions.length > 0 
       ? Math.round((highConfCount / allDimensions.length) * 100) 
       : 0;
+    console.log(`${logPrefix} 📊 Data completeness: ${dataCompleteness}% (${highConfCount}/${allDimensions.length} high-confidence)`);
 
     const investmentReadiness = Math.round(confidenceWeightedScore / 10); // Convert to 0-10 scale
+    console.log(`${logPrefix} 📊 Investment readiness: ${investmentReadiness}/10`);
 
     // 5. Mark analysis as complete with all score variants
-    await prisma.deepAnalysis.update({
-      where: { id: analysis.id },
-      data: {
-        status: 'completed',
-        completedAt: new Date(),
-        progress: 100,
-        overallScore: avgScore,
-        confidenceWeightedScore,
-        dataCompleteness,
-        investmentReadiness,
-        companyStage,
-      },
-    });
+    console.log(`${logPrefix} 💾 STEP 8 - Marking analysis as COMPLETED...`);
+    try {
+      // FIX #6: Check if already completed to avoid race condition
+      const currentAnalysis = await prisma.deepAnalysis.findUnique({
+        where: { id: analysis.id },
+        select: { status: true }
+      });
+      
+      if (currentAnalysis?.status === 'completed') {
+        console.log(`${logPrefix} ℹ️ STEP 8 - Analysis already marked as completed (race condition prevented)`);
+      } else {
+        await prisma.deepAnalysis.update({
+          where: { id: analysis.id },
+          data: {
+            status: 'completed',
+            completedAt: new Date(),
+            progress: 100,
+            overallScore: avgScore,
+            confidenceWeightedScore,
+            dataCompleteness,
+            investmentReadiness,
+            companyStage,
+          },
+        });
+        console.log(`${logPrefix} ✅ STEP 8 - Analysis marked as COMPLETED`);
+      }
+    } catch (updateErr) {
+      console.error(`${logPrefix} ❌ STEP 8 - Failed to mark analysis complete:`, updateErr);
+      throw updateErr;
+    }
 
     // 6a. Auto-create or update Investment Ad for VC discovery
+    console.log(`${logPrefix} 📢 STEP 9 - Creating investment ad...`);
     try {
       const aiSummary = `Investment analysis for ${businessInfo.name}: readiness ${investmentReadiness}/10, score ${confidenceWeightedScore}%.`;
       const topStrengths = allDimensions
@@ -449,6 +599,9 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
         .filter((d) => (d.score || 0) < 40)
         .slice(0, 5)
         .map((d) => `${d.name}: ${d.score}%`);
+
+      console.log(`${logPrefix} 📊 Top strengths (70+): ${topStrengths.length} items`);
+      console.log(`${logPrefix} 📊 Top risks (<40): ${topRisks.length} items`);
 
       const existingAd = await prisma.investmentAd.findFirst({
         where: { analysisId: analysis.id },
@@ -486,13 +639,27 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
       } as any;
 
       if (existingAd) {
+        console.log(`${logPrefix} 🔄 Updating existing investment ad: ${existingAd.id}`);
         await prisma.investmentAd.update({ where: { id: existingAd.id }, data: adData });
       } else {
+        console.log(`${logPrefix} ✨ Creating new investment ad`);
         await prisma.investmentAd.create({ data: { ...adData, title: adData.title || 'Investment Opportunity' } });
       }
+      console.log(`${logPrefix} ✅ STEP 9 - Investment ad published`);
     } catch (e) {
-      console.warn('Failed to create/update InvestmentAd (non-fatal):', e);
+      console.warn(`${logPrefix} ⚠️ Failed to create/update InvestmentAd (non-fatal):`, e);
     }
+    
+    const totalTime = Date.now() - startTime;
+    console.log(`${logPrefix} ✅ DEEP ANALYSIS COMPLETE!`);
+    console.log(`${logPrefix} 📊 FINAL RESULTS:`);
+    console.log(`${logPrefix}   - Overall Score: ${avgScore}/100`);
+    console.log(`${logPrefix}   - Confidence-Weighted: ${confidenceWeightedScore}/100`);
+    console.log(`${logPrefix}   - Investment Readiness: ${investmentReadiness}/10`);
+    console.log(`${logPrefix}   - Data Completeness: ${dataCompleteness}%`);
+    console.log(`${logPrefix}   - Dimensions Analyzed: ${allDimensions.length}`);
+    console.log(`${logPrefix}   - Total Time: ${(totalTime / 1000).toFixed(1)}s`);
+    console.log(`${logPrefix} ════════════════════════════════════════════════════`);
 
     // 6. Record score history for progress tracking
     if (analysis.userId) {

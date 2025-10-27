@@ -6,18 +6,26 @@ import { runDeepAnalysis, getDeepAnalysis } from '@/lib/deep-analysis-runner';
  * Trigger deep background analysis for a session
  */
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  const logPrefix = `[DEEP-ANALYSIS-API] [${new Date().toISOString()}]`;
+  
   try {
+    console.log(`${logPrefix} 🚀 REQUEST RECEIVED`);
     const { sessionId, businessInfo, scrapedContent, uploadedDocuments } = await request.json();
+    console.log(`${logPrefix} 📝 Payload - SessionID: ${sessionId}, Business: ${businessInfo?.name}, Content: ${scrapedContent?.length || 0}b, Docs: ${uploadedDocuments?.length || 0}`);
 
     if (!sessionId || !businessInfo) {
+      console.warn(`${logPrefix} ❌ CHECKPOINT 1 FAILED - Missing required fields`);
       return NextResponse.json(
         { error: 'sessionId and businessInfo are required' },
         { status: 400 },
       );
     }
+    console.log(`${logPrefix} ✅ CHECKPOINT 1 - Validation passed`);
 
     // Single-run guard: Check if already running BEFORE starting
     const { prisma } = await import('@/lib/prisma');
+    console.log(`${logPrefix} 🔍 CHECKPOINT 2 - Checking if analysis already running...`);
     const existing = await prisma.deepAnalysis.findUnique({
       where: { sessionId },
       select: { status: true, progress: true, userId: true },
@@ -25,9 +33,7 @@ export async function POST(request: NextRequest) {
 
     if (existing && existing.status === 'analyzing') {
       console.log(
-        '⚠️ Analysis already running for session:',
-        sessionId,
-        `(${existing.progress}% complete)`,
+        `${logPrefix} ⚠️ CHECKPOINT 2 GUARD - Analysis already running for session: ${sessionId} (${existing.progress}% complete)`,
       );
       return NextResponse.json({
         success: true,
@@ -37,10 +43,12 @@ export async function POST(request: NextRequest) {
         sessionId,
       });
     }
+    console.log(`${logPrefix} ✅ CHECKPOINT 2 - No existing analysis running`);
 
-    console.log('🚀 Starting deep analysis for session:', sessionId);
+    console.log(`${logPrefix} 🚀 Starting deep analysis for session: ${sessionId}`);
 
     // Soft daily quota (disabled by default). Enable with SOFT_QUOTA_ENABLED=true and set ANALYSIS_DAILY_LIMIT.
+    console.log(`${logPrefix} 🔍 CHECKPOINT 3 - Checking daily quota...`);
     try {
       if (process.env.SOFT_QUOTA_ENABLED === 'true' && existing?.userId) {
         const limit = Number(process.env.ANALYSIS_DAILY_LIMIT || '5');
@@ -49,7 +57,9 @@ export async function POST(request: NextRequest) {
         const used = await prisma.deepAnalysis.count({
           where: { userId: existing.userId, startedAt: { gte: startOfDay } },
         });
+        console.log(`${logPrefix} 📊 Quota check - Used: ${used}/${limit} today`);
         if (used >= limit) {
+          console.warn(`${logPrefix} ❌ CHECKPOINT 3 FAILED - Daily limit exceeded (${used}/${limit})`);
           return NextResponse.json(
             {
               error: 'Daily analysis limit reached',
@@ -58,12 +68,16 @@ export async function POST(request: NextRequest) {
             { status: 429 },
           );
         }
+        console.log(`${logPrefix} ✅ CHECKPOINT 3 - Quota OK`);
+      } else {
+        console.log(`${logPrefix} ℹ️ CHECKPOINT 3 - Quota check skipped (SOFT_QUOTA_ENABLED=${process.env.SOFT_QUOTA_ENABLED})`);
       }
     } catch (qErr) {
-      console.warn('Quota check failed, proceeding:', qErr);
+      console.warn(`${logPrefix} ⚠️ Quota check failed, proceeding:`, qErr);
     }
 
     // Immediately reset status to analyzing so SSE won't emit 'complete' from a previous run
+    console.log(`${logPrefix} 💾 CHECKPOINT 4 - Upserting analysis record...`);
     try {
       await prisma.deepAnalysis.upsert({
         where: { sessionId },
@@ -77,11 +91,13 @@ export async function POST(request: NextRequest) {
         },
         update: { status: 'analyzing', progress: 0, startedAt: new Date(), businessInfo },
       });
+      console.log(`${logPrefix} ✅ CHECKPOINT 4 - Analysis record created/updated`);
     } catch (e) {
-      console.warn('Could not reset analysis row at start:', e);
+      console.warn(`${logPrefix} ⚠️ Could not reset analysis row at start:`, e);
     }
 
     // Auto-publish founder profile by default (opt-out later in dashboard)
+    console.log(`${logPrefix} 👤 CHECKPOINT 5 - Auto-publishing founder profile...`);
     try {
       const sessionRow = await prisma.session.findUnique({
         where: { id: sessionId },
@@ -90,6 +106,7 @@ export async function POST(request: NextRequest) {
       const bi: any = (sessionRow?.businessInfo as any) || (businessInfo as any) || {};
 
       if (sessionRow?.userId) {
+        console.log(`${logPrefix} 👤 Updating existing user: ${sessionRow.userId}`);
         await prisma.user.update({
           where: { id: sessionRow.userId },
           data: {
@@ -104,6 +121,7 @@ export async function POST(request: NextRequest) {
           },
         });
       } else {
+        console.log(`${logPrefix} 👤 Creating new user with email: ${bi.email}`);
         const user = await prisma.user.create({
           data: {
             email: bi.email || `${sessionId}@frejfund.com`,
@@ -117,10 +135,12 @@ export async function POST(request: NextRequest) {
             isProfilePublic: true,
           },
         });
+        console.log(`${logPrefix} 👤 New user created: ${user.id}`);
         await prisma.session.update({ where: { id: sessionId }, data: { userId: user.id } });
       }
+      console.log(`${logPrefix} ✅ CHECKPOINT 5 - Profile published`);
     } catch (pubErr) {
-      console.warn('Auto-publish profile failed (non-fatal):', pubErr);
+      console.warn(`${logPrefix} ⚠️ Auto-publish profile failed (non-fatal):`, pubErr);
     }
 
     // Unified progress: 0-100% including scraping (0-3%) + analysis (3-100%)
@@ -128,18 +148,24 @@ export async function POST(request: NextRequest) {
     const pub = getPub();
     const channel = getProgressChannel(sessionId);
     
+    console.log(`${logPrefix} 📡 CHECKPOINT 6 - Setting up Redis SSE channel: ${channel}`);
     // Immediate 1% so user sees it start
-    await pub.publish(channel, JSON.stringify({ type: 'progress', current: 1, total: 100 })).catch(() => {});
+    await pub.publish(channel, JSON.stringify({ type: 'progress', current: 1, total: 100 })).catch(() => {
+      console.warn(`${logPrefix} ⚠️ Failed to publish 1% progress`);
+    });
     try {
       await prisma.deepAnalysis.update({ where: { sessionId }, data: { progress: 1 } });
     } catch {}
+    console.log(`${logPrefix} ✅ CHECKPOINT 6 - Redis SSE channel ready`);
     
     // Scraping phase (0-3%)
+    console.log(`${logPrefix} 🌐 CHECKPOINT 7 - Scraping phase starting...`);
     const preHarvestText = '';  // Skip GPT harvest
     let mergedScraped = scrapedContent || '';
     
     if (businessInfo.website) {
       try {
+        console.log(`${logPrefix} 🌐 Scraping website: ${businessInfo.website}`);
         await pub.publish(channel, JSON.stringify({ type: 'progress', current: 2, total: 100 })).catch(() => {});
         try {
           await prisma.deepAnalysis.update({ where: { sessionId }, data: { progress: 2 } });
@@ -149,9 +175,14 @@ export async function POST(request: NextRequest) {
         const websiteData = await Promise.race([
           scrapeSiteShallow(businessInfo.website, 6),  // Get decent content (6 pages)
           new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 240000))  // 4 min max (extra safe for demo)
-        ]).catch(() => null);
+        ]).catch((err) => {
+          console.warn(`${logPrefix} ⚠️ Website scraping failed:`, err.message);
+          return null;
+        });
         
         if (websiteData && (websiteData as any).combinedText) {
+          const scrapedLength = ((websiteData as any).combinedText || '').length;
+          console.log(`${logPrefix} ✅ Website scraped successfully - ${scrapedLength}b of content`);
           mergedScraped = (scrapedContent || '') + '\n\n' + ((websiteData as any).combinedText || '');
           
           // Store for future re-runs
@@ -164,27 +195,37 @@ export async function POST(request: NextRequest) {
               }
             }
           }).catch(console.warn);
+        } else {
+          console.log(`${logPrefix} ℹ️ No website data scraped`);
         }
         
         await pub.publish(channel, JSON.stringify({ type: 'progress', current: 3, total: 100 })).catch(() => {});
         try {
           await prisma.deepAnalysis.update({ where: { sessionId }, data: { progress: 3 } });
         } catch {}
+        console.log(`${logPrefix} ✅ CHECKPOINT 7 - Scraping phase complete`);
       } catch (err) {
-        console.warn('Scraping failed (continuing with minimal data):', err);
+        console.warn(`${logPrefix} ⚠️ Scraping failed (continuing with minimal data):`, err);
       }
+    } else {
+      console.log(`${logPrefix} ℹ️ No website provided, skipping scraping`);
     }
     
     // Analysis phase starts at 3%, ends at 100%
+    console.log(`${logPrefix} 🔍 CHECKPOINT 8 - Starting background analysis phase...`);
     Promise.resolve().then(async () => {
+      console.log(`${logPrefix} 📋 Analysis phase initializing...`);
       // Enqueue deep analysis with merged pre-context (phase 1)
       // Only use Bull on dedicated worker (WORKER=1). Web should run inline.
       const useBull = process.env.USE_BULLMQ === 'true' && process.env.WORKER === '1';
+      console.log(`${logPrefix} 🔧 Configuration - USE_BULLMQ: ${useBull}, WORKER: ${process.env.WORKER}`);
+      
       try {
         if (useBull) {
+          console.log(`${logPrefix} 📦 Enqueueing to BullMQ...`);
           const { deepAnalysisQueue } = await import('@/lib/queues/deep-analysis');
           await deepAnalysisQueue.add(
-            'run',
+            'run' as any,
             {
               sessionId,
               businessInfo,
@@ -192,7 +233,7 @@ export async function POST(request: NextRequest) {
               uploadedDocuments: uploadedDocuments || [],
               mode: 'progressive',
               preHarvestText,
-            },
+            } as any,
             {
               jobId: `deep:${sessionId}:phase1`,
               removeOnComplete: { age: 3600, count: 1000 },
@@ -201,44 +242,62 @@ export async function POST(request: NextRequest) {
               backoff: { type: 'exponential', delay: 2000 },
             },
           );
+          console.log(`${logPrefix} ✅ CHECKPOINT 8A - Job enqueued to BullMQ`);
         } else {
           throw new Error('BullMQ disabled or no worker');
         }
       } catch (e) {
-        console.error('Failed to enqueue phase1 deep analysis, falling back to in-process:', e);
-        // Fallback: run inline and publish progress via Redis so SSE updates live
-        const { getPub, getProgressChannel } = await import('@/lib/redis');
-        const pub = getPub();
-        const channel = getProgressChannel(sessionId);
-        // Emit immediate 0% so UI shows running state
-        try {
-          await pub.publish(channel, JSON.stringify({ type: 'progress', current: 0, total: 95 }));
-        } catch {}
-        runDeepAnalysis({
-          sessionId,
-          businessInfo,
-          scrapedContent: mergedScraped,
-          uploadedDocuments: uploadedDocuments || [],
-          mode: 'progressive',
-          preHarvestText,
-          onProgress: async (current, total, completedCategories) => {
+        console.error(`${logPrefix} ❌ CHECKPOINT 8A FAILED - Falling back to inline:`, e);
+        // FIX #7: Fire-and-forget inline execution (don't await, don't block request)
+        // Wrap in try-catch to prevent unhandled promise rejection
+        (async () => {
+          try {
+            const { getPub, getProgressChannel } = await import('@/lib/redis');
+            const pub = getPub();
+            const channel = getProgressChannel(sessionId);
+            console.log(`${logPrefix} 🔄 Fallback to inline execution (fire-and-forget)`);
+            // Emit immediate 0% so UI shows running state
             try {
-              await pub.publish(
-                channel,
-                JSON.stringify({ type: 'progress', current, total, completedCategories }),
-              );
+              await pub.publish(channel, JSON.stringify({ type: 'progress', current: 0, total: 95 }));
             } catch {}
-          },
-        });
+            console.log(`${logPrefix} 🔬 Starting inline deep analysis...`);
+            await runDeepAnalysis({
+              sessionId,
+              businessInfo,
+              scrapedContent: mergedScraped,
+              uploadedDocuments: uploadedDocuments || [],
+              mode: 'progressive',
+              preHarvestText,
+              onProgress: async (current, total, completedCategories) => {
+                console.log(`${logPrefix} 📊 Progress: ${current}/${total}% - Categories: ${completedCategories?.join(', ') || 'processing'}`);
+                // FIX #2: Improved error handling for progress callback
+                try {
+                  await pub.publish(
+                    channel,
+                    JSON.stringify({ type: 'progress', current, total, completedCategories }),
+                  );
+                } catch (pubErr) {
+                  console.warn(`${logPrefix} ⚠️ Failed to publish progress update via Redis (will use SSE polling):`, pubErr);
+                  // Silently fail - SSE polling will catch up anyway
+                }
+              },
+            });
+          } catch (inlineErr) {
+            console.error(`${logPrefix} ❌ Inline analysis failed:`, inlineErr);
+          }
+        })();
       }
 
       // Kick off deep scrape in background while phase 1 runs
+      console.log(`${logPrefix} 🌐 CHECKPOINT 8B - Starting background deep scrape...`);
       const deepResultPromise = businessInfo.website
         ? (async () => {
             const { scrapeSiteDeep } = await import('@/lib/web-scraper');
             try {
+              console.log(`${logPrefix} 🌐 Deep scraping in background: ${businessInfo.website}`);
               return await scrapeSiteDeep(businessInfo.website, 20, 2);
-            } catch {
+            } catch (err) {
+              console.warn(`${logPrefix} ⚠️ Deep scrape failed:`, err);
               return { combinedText: '', sources: [] };
             }
           })()
@@ -247,11 +306,14 @@ export async function POST(request: NextRequest) {
       // After deep scrape, optionally enqueue a targeted re-run with deeper context
       const deepResult = await deepResultPromise;
       const hasDeeper = (deepResult?.combinedText || '').length > 0;
+      console.log(`${logPrefix} 🌐 Deep scrape result: ${(deepResult?.combinedText || '').length}b`);
+      
       if (hasDeeper) {
         try {
+          console.log(`${logPrefix} 📦 CHECKPOINT 8C - Enqueueing phase 2 with deeper context...`);
           const { deepAnalysisQueue } = await import('@/lib/queues/deep-analysis');
           await deepAnalysisQueue.add(
-            'run',
+            'run' as any,
             {
               sessionId,
               businessInfo,
@@ -263,7 +325,7 @@ export async function POST(request: NextRequest) {
               mode: 'critical-only',
               specificDimensions: [] as any,
               preHarvestText,
-            },
+            } as any,
             {
               jobId: `deep:${sessionId}:phase2`,
               removeOnComplete: { age: 3600, count: 1000 },
@@ -272,25 +334,31 @@ export async function POST(request: NextRequest) {
               backoff: { type: 'exponential', delay: 2000 },
             },
           );
+          console.log(`${logPrefix} ✅ CHECKPOINT 8C - Phase 2 enqueued`);
         } catch (err) {
-          console.error('Targeted re-run enqueue failed:', err);
+          console.error(`${logPrefix} ⚠️ Phase 2 enqueue failed (non-fatal):`, err);
         }
       }
     })
       .then(() => {
-        console.log('✅ Deep analysis completed for session:', sessionId);
+        console.log(`${logPrefix} ✅ DEEP ANALYSIS ORCHESTRATION COMPLETE - Total time: ${Date.now() - startTime}ms`);
       })
       .catch((error: any) => {
-        console.error('❌ Background deep analysis failed:', error);
+        console.error(`${logPrefix} ❌ BACKGROUND DEEP ANALYSIS ORCHESTRATION FAILED:`, error);
       });
 
+    console.log(`${logPrefix} ✅ ORCHESTRATION COMPLETE - API returning immediately (total: ${Date.now() - startTime}ms)`);
     return NextResponse.json({
       success: true,
       message: 'Deep analysis orchestration started',
       sessionId,
+      _debug: {
+        checkpointsReached: 8,
+        totalTime: Date.now() - startTime
+      }
     });
   } catch (error) {
-    console.error('Deep analysis API error:', error);
+    console.error(`[DEEP-ANALYSIS-API] ❌ FATAL ERROR:`, error);
     return NextResponse.json({ error: 'Failed to start deep analysis' }, { status: 500 });
   }
 }

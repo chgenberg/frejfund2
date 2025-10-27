@@ -18,167 +18,126 @@ const progressStore = new Map<
 >();
 
 export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-  const sessionId = searchParams.get('sessionId');
+  const sessionId = request.nextUrl.searchParams.get('sessionId');
+  const logPrefix = `[PROGRESS-SSE] [${new Date().toISOString()}]`;
+  const startTime = Date.now();  // FIX #1, #5: MOVE TO HERE before stream creation
 
   if (!sessionId) {
-    return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
+    return new NextResponse('sessionId is required', { status: 400 });
   }
 
-  // Import prisma dynamically
-  const { prisma } = await import('@/lib/prisma');
+  console.log(`${logPrefix} 🔌 SSE connection opened for session: ${sessionId}`);
 
-  // Create a stream
+  // Create SSE response
   const stream = new ReadableStream({
-    start(controller) {
-      const encoder = new TextEncoder();
-      let closed = false;
-
-      const safeEnqueue = (chunk: string) => {
-        if (closed) return; // guard double-writes after close
-        try {
-          controller.enqueue(encoder.encode(chunk));
-        } catch {
-          closed = true;
-        }
-      };
-
-      const write = (payload: any) => {
-        safeEnqueue(`data: ${JSON.stringify(payload)}\n\n`);
-      };
-
-      // Send initial connection message
-      write({ type: 'connected' });
-
-      let lastProgress = -1;
-
-      // Optionally subscribe to Redis progress channel (only if worker mode enabled)
-      const useBull = process.env.USE_BULLMQ === 'true';
-      const sub = useBull ? getSub() : null;
-      const channel = getProgressChannel(sessionId);
-      if (useBull && sub) {
-        sub.subscribe(channel).catch(() => {});
-      }
-
-      // Poll DB as a fallback (every few seconds)
-      const interval = setInterval(async () => {
-        if (closed) return;
-        try {
-          // Check database for progress
-          const analysis = await prisma.deepAnalysis.findUnique({
-            where: { sessionId },
-            include: {
-              dimensions: {
-                where: { analyzed: true },
-                select: { category: true },
-              },
-            },
-          });
-
-          if (analysis) {
-            // Use DB progress directly (0-100%) instead of counting dimensions
-            const currentProgress = Math.max(0, Math.min(100, analysis.progress || 0));
-            const totalProgress = 100;
-            const completedCategories = [...new Set(analysis.dimensions.map((d) => d.category))];
-
-            // Only send update if progress changed
-            if (currentProgress !== lastProgress || currentProgress === 0) {
-              lastProgress = currentProgress;
-              const data = {
-                type: 'progress',
-                current: currentProgress,
-                total: totalProgress,
-                completedCategories,
-                sessionId,
-              };
-              write(data);
-              console.log(
-                `📡 SSE: Sent progress ${currentProgress}/${totalProgress} to client (session ${sessionId})`,
-              );
-            }
-
-            // Check if complete
-            if (analysis.status === 'completed' || currentProgress >= 100) {
-              write({ type: 'complete' });
-              console.log('📡 SSE: Analysis complete, closing connection');
-              clearInterval(interval);
-              clearInterval(keepAlive);
-              if (!closed) {
-                closed = true;
-                try {
-                  controller.close();
-                } catch {}
-              }
-            }
-          }
-        } catch (error) {
-          console.error('SSE poll error:', error);
-        }
-      }, 2500); // Check every 2.5 seconds to reduce churn
-
-      // Heartbeat to keep Safari/Proxies alive
-      const keepAlive = setInterval(() => {
-        if (closed) return;
-        safeEnqueue(':keepalive\n\n');
-      }, 15000); // Slightly more frequent to survive strict proxies
-
-      // Clean up on disconnect
-      request.signal.addEventListener('abort', () => {
-        console.log('📡 SSE: Client disconnected');
-        clearInterval(interval);
-        clearInterval(keepAlive);
-        try {
-          useBull && sub && sub.unsubscribe(channel);
-        } catch {}
-        if (!closed) {
-          closed = true;
-          try {
-            controller.close();
-          } catch {}
-        }
-      });
-
-      // Handle Redis messages
-      if (useBull && sub) {
-        sub.on('message', (_chan, payload) => {
-          if (_chan !== channel) return;
-          try {
-            const data = JSON.parse(payload);
-            if (data?.type === 'progress') {
-              lastProgress = data.current;
-              write(data);
-            } else if (data?.type === 'complete') {
-              write({ type: 'complete' });
-              clearInterval(interval);
-              clearInterval(keepAlive);
-              try {
-                sub.unsubscribe(channel);
-              } catch {}
-              if (!closed) {
-                closed = true;
-                try {
-                  controller.close();
-                } catch {}
-              }
-            }
-          } catch {}
-        });
-      }
-    },
-    cancel() {
-      // Stream consumer cancelled; ensure we stop timers and stop writing
+    async start(controller) {
+      console.log(`${logPrefix} 📡 Controller ready for ${sessionId}`);
+      
       try {
-        /* no-op */
-      } catch {}
+        // Get initial status
+        const { prisma } = await import('@/lib/prisma');
+        let lastProgress = -1;
+        let completionSent = false;  // FIX #4: Track if we sent completion already
+        
+        // Send initial status
+        const analysis = await prisma.deepAnalysis.findUnique({
+          where: { sessionId },
+          select: { status: true, progress: true }
+        });
+        
+        if (analysis) {
+          console.log(`${logPrefix} 📊 Initial status: ${analysis.status}, progress: ${analysis.progress}%`);
+          controller.enqueue(`data: ${JSON.stringify({
+            type: 'progress',
+            current: analysis.progress,
+            total: 100,
+            status: analysis.status
+          })}\n\n`);
+          lastProgress = analysis.progress;
+          
+          // FIX #4: If already completed on initial read, send complete event immediately
+          if (analysis.status === 'completed' && !completionSent) {
+            console.log(`${logPrefix} ✅ Analysis already completed, sending complete event`);
+            controller.enqueue(`data: ${JSON.stringify({
+              type: 'complete'
+            })}\n\n`);
+            completionSent = true;
+            clearInterval(pollInterval);
+            controller.close();
+            return;
+          }
+        }
+
+        // Poll for updates
+        const pollInterval = setInterval(async () => {
+          try {
+            const latest = await prisma.deepAnalysis.findUnique({
+              where: { sessionId },
+              select: { status: true, progress: true }
+            });
+
+            if (!latest) {
+              console.warn(`${logPrefix} ⚠️ Analysis not found, closing connection`);
+              clearInterval(pollInterval);
+              controller.close();
+              return;
+            }
+
+            // Send progress update if changed
+            if (latest.progress !== lastProgress) {
+              console.log(`${logPrefix} 📊 Progress update: ${latest.progress}%`);
+              controller.enqueue(`data: ${JSON.stringify({
+                type: 'progress',
+                current: latest.progress,
+                total: 100
+              })}\n\n`);
+              lastProgress = latest.progress;
+            }
+
+            // FIX #4: Send completion only once, regardless of progress value
+            if (latest.status === 'completed' && !completionSent) {
+              console.log(`${logPrefix} ✅ Analysis completed!`);
+              controller.enqueue(`data: ${JSON.stringify({
+                type: 'complete'
+              })}\n\n`);
+              completionSent = true;
+              clearInterval(pollInterval);
+              controller.close();
+              return;
+            }
+
+            // FIX #1, #5: Use startTime which is now defined
+            if (Date.now() - startTime > 30 * 60 * 1000) {
+              console.warn(`${logPrefix} ⚠️ Timeout - closing connection after 30 minutes`);
+              clearInterval(pollInterval);
+              controller.close();
+              return;
+            }
+          } catch (error) {
+            console.error(`${logPrefix} ❌ Error in poll loop:`, error);
+            clearInterval(pollInterval);
+            controller.close();
+          }
+        }, 1000); // Poll every second
+
+        // Cleanup on close
+        request.signal.addEventListener('abort', () => {
+          console.log(`${logPrefix} 🔌 Client disconnected`);
+          clearInterval(pollInterval);
+          controller.close();
+        });
+      } catch (error) {
+        console.error(`${logPrefix} ❌ Error setting up SSE:`, error);
+        controller.close();
+      }
     },
   });
 
-  return new Response(stream, {
+  return new NextResponse(stream, {
     headers: {
-      'Content-Type': 'text/event-stream; charset=utf-8',
-      'Cache-Control': 'no-cache, no-transform',
-      Connection: 'keep-alive',
-      'X-Accel-Buffering': 'no',
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
     },
   });
 }
