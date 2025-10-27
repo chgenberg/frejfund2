@@ -97,10 +97,8 @@ export interface BusinessAnalysisResult {
 }
 
 export interface AnalysisStep {
-  id: string;
-  label: string;
-  duration: number;
-  completed: boolean;
+  status: 'pending' | 'running' | 'completed';
+  data?: any;
 }
 
 export enum AnalysisState {
@@ -118,4 +116,54 @@ export interface UserProfile {
     analysisDepth: 'quick' | 'standard' | 'comprehensive';
     focusAreas: string[];
   };
+}
+
+// ========== INVESTOR READINESS TREE TYPES ==========
+
+export interface ReadinessItemData {
+  id: string;
+  itemType: string; // 'pitch_deck', 'financial_model', 'revenue', etc.
+  displayName: string;
+  importance: 'critical' | 'high' | 'medium' | 'low';
+  status: 'missing' | 'partial' | 'complete';
+  completionPercent: number; // 0-100
+  score?: number; // 0-100 quality score
+  feedback?: string;
+  guidancePrompt?: string;
+  exampleAnswer?: string;
+}
+
+export interface ReadinessBranchData {
+  id: string;
+  branchType: string; // 'documents', 'traction', 'team', 'market', 'execution'
+  displayName: string;
+  description?: string;
+  sequence: number;
+  isRequired: boolean;
+  score?: number; // 0-100
+  completionPercent: number; // 0-100
+  confidence: 'high' | 'medium' | 'low';
+  items: ReadinessItemData[];
+  summary?: string; // What's good
+  gaps?: string; // What's missing
+  nextSteps?: string; // What to do
+  recommendations: string[]; // Concrete actions
+}
+
+export interface ReadinessTreeData {
+  id: string;
+  sessionId: string;
+  branches: ReadinessBranchData[];
+  totalScore?: number; // 0-100 aggregate
+  completionScore: number; // 0-100
+  overallReadiness: 'investor_ready' | 'needs_work' | 'early_stage' | 'incomplete';
+  lastEvaluatedAt?: Date;
+}
+
+export interface ReadinessGuidance {
+  branch: ReadinessBranchData;
+  topPriorities: string[]; // What should founder focus on first
+  quickWins: string[]; // What can be done quickly
+  timeline: string; // Estimated timeline to "investor ready"
+  resources?: string[]; // Helpful links/templates
 }

@@ -574,6 +574,7 @@ model DeepAnalysis {
   dimensions AnalysisDimension[]
   insights   AnalysisInsight[]
   investmentAds InvestmentAd[]
+  readinessTree ReadinessTree?
 
   @@index([sessionId])
   @@index([userId])
@@ -752,4 +753,104 @@ model InvestmentAd {
   @@index([industry])
   @@index([stage])
   @@map("investment_ads")
+}
+
+// Investor Readiness Tree - main model for structured guidance
+model ReadinessTree {
+  id           String   @id @default(cuid())
+  analysisId   String   @unique
+  userId       String?
+
+  // Tree structure (hierarchical)
+  // Stored as nested branches with scores
+  branches     ReadinessBranch[]
+
+  // Overall metrics
+  totalScore        Int? // 0-100 (aggregate of all branches)
+  completionScore   Int? // 0-100 (how much data is filled in)
+  overallReadiness  String? // 'investor_ready' | 'needs_work' | 'early_stage' | 'incomplete'
+
+  // Status tracking
+  lastEvaluatedAt   DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  analysis  DeepAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+
+  @@index([analysisId])
+  @@index([userId])
+  @@map("readiness_trees")
+}
+
+// Individual branch in the readiness tree
+model ReadinessBranch {
+  id                String   @id @default(cuid())
+  treeId            String
+  tree              ReadinessTree @relation(fields: [treeId], references: [id], onDelete: Cascade)
+
+  // Branch metadata
+  branchType        String   // e.g., 'documents', 'traction', 'team', 'market', 'execution'
+  displayName       String   // e.g., "📋 Documents & Materials"
+  description       String?  @db.Text
+  sequence          Int      // Display order (1-5)
+  isRequired        Boolean  @default(true)
+
+  // Branch scoring
+  score             Int?     // 0-100 (quality of this branch's data)
+  completionPercent Int      @default(0) // 0-100 (how much data provided)
+  confidence        String   @default("low") // 'high' | 'medium' | 'low'
+
+  // Sub-items (requirements within branch)
+  items             ReadinessItem[]
+
+  // GPT insights for this branch
+  summary           String?  @db.Text // "What's good here"
+  gaps              String?  @db.Text // "What's missing"
+  nextSteps         String?  @db.Text // "What to do next"
+  recommendations   String[] // Array of concrete actions
+
+  // Timestamps
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([treeId])
+  @@index([branchType])
+  @@map("readiness_branches")
+}
+
+// Individual item/requirement within a branch
+model ReadinessItem {
+  id              String   @id @default(cuid())
+  branchId        String
+  branch          ReadinessBranch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  // Item metadata
+  itemType        String   // e.g., 'pitch_deck', 'financial_model', 'revenue', 'founder_background'
+  displayName     String   // e.g., "Pitch Deck"
+  description     String?  @db.Text
+  importance      String   @default("high") // 'critical' | 'high' | 'medium' | 'low'
+
+  // Status
+  status          String   @default("missing") // 'missing' | 'partial' | 'complete'
+  completionPercent Int    @default(0) // 0-100
+
+  // Quality scoring
+  score           Int?     // 0-100 (how good is this item)
+  feedback        String?  @db.Text // "Why this score?"
+
+  // Data provided
+  providedData    Json?    // What the founder filled in
+  metadata        Json?    // Additional context
+
+  // Generated guidance
+  guidancePrompt  String?  @db.Text // What we should ask the founder
+  exampleAnswer   String?  @db.Text // Example of good answer
+
+  // Timestamps
+  updatedAt       DateTime @updatedAt
+
+  @@index([branchId])
+  @@index([itemType])
+  @@map("readiness_items")
 }
