@@ -135,7 +135,6 @@ export async function runDeepAnalysis(options: RunDeepAnalysisOptions): Promise<
   const naDimensionsForStage: string[] = [];
   const externalIntel = null;
   const googleIntel = null;
-  const gptKnowledgeText = '';
   
   console.log(`${logPrefix} ✅ STEP 4 - Fast mode initialized`);
 
